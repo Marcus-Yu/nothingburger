@@ -248,9 +248,7 @@ namespace Pathfinder.Capture
                 }
             }
             LastResult = ok ? $"saved {recording.id}: {summary}, {recording.samples.Count} samples" : $"upload failed ({error}): {summary}";
-            Say(ok ? $"<b>Saved.</b> {summary} recorded.
-You can take the headset off." : "Couldn't upload the demonstration.
-Is the laptop reachable?", 6f);
+            Say(ok ? $"<b>Saved.</b> {summary} recorded.\nYou can take the headset off." : "Couldn't upload the demonstration.\nIs the laptop reachable?", 6f);
             Log.Info($"DemoRecorder: {LastResult}");
             Restore();
             m_Recording = null;
