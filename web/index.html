@@ -16,7 +16,13 @@
 
 <main>
   <section id="viewer">
+    <div class="tabs" role="tablist">
+      <button id="tab-inside" class="tab on" role="tab">Inside (Matterport)</button>
+      <button id="tab-outside" class="tab" role="tab">Outside (Vexcel)</button>
+    </div>
     <iframe id="tour" title="3D tour of the space" allow="fullscreen; xr-spatial-tracking" allowfullscreen></iframe>
+    <model-viewer id="outside" class="hidden" camera-controls touch-action="pan-y" shadow-intensity="0"
+                  camera-orbit="30deg 50deg 55%" min-camera-orbit="auto auto 10%" alt="The outside of the building from Vexcel aerial imagery"></model-viewer>
     <p id="world-note" class="note"></p>
   </section>
 
@@ -69,6 +75,8 @@
     </div>
   </section>
 </main>
+<script src="https://static.matterport.com/showcase-sdk/latest.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

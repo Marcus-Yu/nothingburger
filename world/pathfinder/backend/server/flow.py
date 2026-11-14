@@ -34,6 +34,32 @@ class PlanRequest(BaseModel):
 # What a demonstration is needed for, per kind of job. `match` words are looked for in the job.
 _JOBS = [
     {
+        "id": "carry-out",
+        "match": ["container", "outside", "carry", "crate", "move a bin", "move the bin"],
+        "title": "Carry a container outside",
+        "steps": [
+            "Find the container and measure it",
+            "Grip it on both sides without crushing it",
+            "Lift it and carry it to the door (inside: Matterport)",
+            "Check the door is wide enough for robot and container",
+            "Cross to the drop-off point outside (outside: Vexcel)",
+            "Set it down and let go",
+        ],
+        "demos": [
+            {
+                "chore": "lift container",
+                "kind": "path",
+                "why": "where to hold it, how far apart the hands are and how high to lift",
+            },
+            {
+                "chore": "hold container",
+                "kind": "squeeze",
+                "why": "the grip that carries it without crushing it",
+            },
+        ],
+        "outside": True,
+    },
+    {
         "id": "light-bulb",
         "match": ["bulb", "lamp", "light"],
         "title": "Change a light bulb",
@@ -126,6 +152,7 @@ def make_plan(world: str, job: str) -> dict:
         "steps": best["steps"] if matched else ["The stand-in planner has no entry for this job."],
         "demos": best["demos"] if matched else [],
         "parts": bool(matched and best.get("parts")),
+        "outside": bool(matched and best.get("outside")),
     }
 
 
@@ -146,4 +173,22 @@ def worlds() -> list[dict]:
     for world in listed:
         site = world.get("site")
         world["in_headset"] = bool(site and (scenes / site / "scene.json").is_file())
+        # the outside: a Vexcel scene package on this server, shown on the site as a 3D model
+        world["outside_mesh"] = None
+        try:
+            outside = json.loads(
+                (scenes / world["outside"] / "scene.json").read_text(encoding="utf8")
+            )
+            world["outside_mesh"] = f"/scenes/{world['outside']}/{outside['mesh']['file']}"
+        except (OSError, KeyError, TypeError, json.JSONDecodeError):
+            pass
     return listed
+
+
+@router.get("/web-config")
+def web_config() -> dict:
+    """What the page needs from the server's environment. The Showcase SDK key is a browser
+    key (it is sent to Matterport from the page), kept in .env so it is not committed."""
+    settings = get_settings()
+    extra = {k.upper(): v for k, v in (settings.model_extra or {}).items()}
+    return {"matterport_sdk_key": extra.get("MATTERPORT_SDK_KEY") or None}

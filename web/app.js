@@ -20,7 +20,7 @@ const el = (tag, text, cls) => {
 // Jobs a building's staff repeat. The last group are ones where the knack lives with the
 // person who looks after the building, which is what a demonstration captures.
 const TASKS = [
-  ["Everyday", ["Take out a trash bag", "Change a light bulb", "Wipe a surface", "Move a bin", "Open a box"]],
+  ["Everyday", ["Carry a container outside", "Take out a trash bag", "Change a light bulb", "Wipe a surface", "Open a box"]],
   ["Needs the caretaker's touch", [
     "Relight the water heater pilot",
     "Free a jammed garbage disposal with the hex key",
@@ -35,16 +35,48 @@ const TASKS = [
 let worlds = [];
 
 async function loadWorlds() {
+  try { config = await api("/web-config"); } catch { config = {}; }
   worlds = await api("/worlds");
   for (const w of worlds) $("world").append(new Option(w.name, w.id));
   showWorld();
 }
 
-function showWorld() {
-  const w = worlds.find((x) => x.id === $("world").value) || worlds[0];
+let config = {};
+
+function currentWorld() {
+  return worlds.find((x) => x.id === $("world").value) || worlds[0];
+}
+
+async function showWorld() {
+  const w = currentWorld();
   if (!w) return;
-  $("tour").src = `https://my.matterport.com/show/?m=${encodeURIComponent(w.matterport)}&play=1&qs=1&brand=0`;
+  const key = config.matterport_sdk_key;
+  const tour = $("tour");
+  tour.src = `https://my.matterport.com/show/?m=${encodeURIComponent(w.matterport)}&play=1&qs=1&brand=0` +
+    (key ? `&applicationKey=${encodeURIComponent(key)}` : "");
   $("world-note").textContent = (w.note || "") + (w.in_headset ? " In the headset: yes." : " In the headset: not yet.");
+  $("tab-outside").disabled = !w.outside_mesh;
+  if (w.outside_mesh) $("outside").src = w.outside_mesh;
+  showSide("inside");
+  // Start on the floor plan. That needs the Showcase SDK and its key (localhost only); without
+  // them the tour opens at its own start position.
+  if (key && window.MP_SDK) {
+    try {
+      const sdk = await window.MP_SDK.connect(tour, key, "");
+      await new Promise((done) => sdk.App.state.subscribe((s) => { if (s.phase === sdk.App.Phase.PLAYING) done(); }));
+      if (currentWorld() === w) await sdk.Mode.moveTo(sdk.Mode.Mode.FLOORPLAN);
+    } catch (e) {
+      console.warn("Showcase SDK: could not switch to the floor plan", e);
+    }
+  }
+}
+
+function showSide(side) {
+  const out = side === "outside";
+  $("tour").classList.toggle("hidden", out);
+  $("outside").classList.toggle("hidden", !out);
+  $("tab-inside").classList.toggle("on", !out);
+  $("tab-outside").classList.toggle("on", out);
 }
 
 function fillTasks() {
@@ -70,6 +102,7 @@ async function createPlan() {
     $("plan-card").classList.remove("hidden");
     $("demo-card").classList.toggle("hidden", plan.demos.length === 0);
     $("demos").replaceChildren(...plan.demos.map(demoRow));
+    if (plan.outside && !$("tab-outside").disabled) showSide("outside");
     $("parts-card").classList.toggle("hidden", !plan.parts);
     if (plan.parts) $("part-query").value = job.replace(/^replace (the )?/i, "");
     $("robot-card").classList.toggle("hidden", plan.parts);
@@ -158,6 +191,8 @@ async function searchParts() {
 
 fillTasks();
 $("world").onchange = showWorld;
+$("tab-inside").onclick = () => showSide("inside");
+$("tab-outside").onclick = () => showSide("outside");
 $("create-plan").onclick = createPlan;
 $("part-search").onclick = searchParts;
 loadWorlds().catch((e) => { $("world-note").textContent = `Could not load the spaces: ${e.message}`; });

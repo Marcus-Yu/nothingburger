@@ -28,6 +28,7 @@ import numpy as np
 RATE_HZ = 30.0
 UP = np.array([0.0, 1.0, 0.0])
 ENGAGE_GRIP = 0.5  # a hand is holding something above this
+CLOSED_HAND = 0.55  # mean finger curl above this is a closed hand
 ENGAGE_NEAR_M = 0.05  # or working on the anchor surface within this distance of its plane
 DEFAULT_N_PER_UNIT = 12.0  # trigger or pinch travel 0..1 to newtons, until a glove measures it
 
@@ -133,7 +134,15 @@ def hand_track(recording: dict, hand: str, rate_hz: float = RATE_HZ) -> dict | N
             grip[:end] = 0.0
             force = force.copy()
             force[:end] = np.where(np.isfinite(force[:end]), 0.0, np.nan)
-    return {"t": t - t[0], "t0": float(t[0]), "p": p, "q": q, "grip": grip, "force_n": force}
+    # With finger joints the hand's closure is known: a fist or a hand round a cloth holds
+    # something whether or not a fingertip touches the thumb.
+    from capture import body  # noqa: PLC0415 -- body imports this module's quaternion helpers
+
+    closure = body.closure_series(recording, hand)
+    held = grip >= ENGAGE_GRIP
+    if closure is not None:
+        held = held | (np.interp(t, *closure) >= CLOSED_HAND)
+    return {"t": t - t[0], "t0": float(t[0]), "p": p, "q": q, "grip": grip, "force_n": force, "held": held}
 
 
 # ------------------------------------------------------------------------------- anchor frame
@@ -161,7 +170,7 @@ def anchor_frame(anchor: dict) -> tuple[np.ndarray, np.ndarray]:
 
 def engaged_mask(track: dict, origin: np.ndarray, normal: np.ndarray | None) -> np.ndarray:
     """Where the hand is doing the work: holding (grip) or on the anchor's surface."""
-    held = track["grip"] >= ENGAGE_GRIP
+    held = track["held"]
     if normal is None:
         return held
     rel = track["p"] - origin
@@ -319,7 +328,7 @@ def build_demo(recording: dict, rate_hz: float = RATE_HZ) -> dict:
     if work.sum() < 3:  # nothing marked the work: the whole recording is the motion
         work[:] = True
         labels = ["work"] * len(labels)
-    held = track["grip"][work] >= ENGAGE_GRIP
+    held = track["held"][work]
     motion = classify(track["p"][work], track["q"][work], held, normal)
 
     # both hands on it at once, the same distance apart throughout: a two-handed hold
@@ -327,7 +336,7 @@ def build_demo(recording: dict, rate_hz: float = RATE_HZ) -> dict:
     two_handed = None
     if other is not None:
         n = min(len(track["p"]), len(tracks[other]["p"]))
-        both = (track["grip"][:n] >= ENGAGE_GRIP) & (tracks[other]["grip"][:n] >= ENGAGE_GRIP)
+        both = track["held"][:n] & tracks[other]["held"][:n]
         if both.sum() >= rate_hz * 0.5:
             gap = np.linalg.norm(track["p"][:n][both] - tracks[other]["p"][:n][both], axis=1)
             if gap.std() < 0.06:
@@ -355,6 +364,24 @@ def build_demo(recording: dict, rate_hz: float = RATE_HZ) -> dict:
         out = track["p"][work] - head_at
         reach["max_from_body_m"] = round(float(np.linalg.norm(out[:, [0, 2]], axis=1).max()), 3)
 
+    # the hand's shape while it worked, and the arm behind it
+    from capture import body  # noqa: PLC0415
+
+    t_work = track["t"][work] + track["t0"]
+    shape = body.hand_shape(recording, hand, float(t_work[0]), float(t_work[-1]))
+    arm = None
+    head_rows = [s for s in recording["samples"] if s.get("head")]
+    if len(head_rows) >= 2:
+        head_t = np.array([s["t"] for s in head_rows], dtype=float)
+        at = np.clip(np.searchsorted(head_t, track["t"] + track["t0"]), 0, len(head_rows) - 1)
+        head_p = np.array([head_rows[i]["head"]["p"] for i in at], dtype=float)
+        head_q = np.array([head_rows[i]["head"]["q"] for i in at], dtype=float)
+        height = recording.get("wearer_height_m")
+        if height is None and floor_y is not None:
+            # eyes are about 0.93 of standing height; a seated wearer makes this an underestimate
+            height = float(np.clip((np.percentile(head_p[:, 1], 95) - floor_y) / 0.93, 1.45, 2.0))
+        arm = body.arm_summary(body.estimate_arm(head_p, head_q, track["p"], hand, height or 1.72), work)
+
     return {
         "schema": "capture.demo/1",
         "recording": recording.get("id"),
@@ -376,6 +403,8 @@ def build_demo(recording: dict, rate_hz: float = RATE_HZ) -> dict:
         "two_handed": two_handed,
         "approach_direction": None if approach is None else [round(float(v), 4) for v in approach @ R],
         "reach": reach,
+        "hand_shape": shape,
+        "arm": arm,
     }
 
 

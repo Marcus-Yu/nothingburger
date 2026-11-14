@@ -6,6 +6,8 @@ using Pathfinder.Input;
 using Pathfinder.Scene;
 using Pathfinder.Tools;
 using Pathfinder.UI;
+using IsdkHand = Oculus.Interaction.Input.Hand;
+using IsdkJoint = Oculus.Interaction.Input.HandJointId;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -41,6 +43,8 @@ namespace Pathfinder.Capture
         DemoRecording m_Recording;
         ToolInputHub m_Hub;
         OvrToolInputSource m_Source;
+        IsdkHand[] m_Skeletons = Array.Empty<IsdkHand>();
+        static readonly int JointCount = Oculus.Interaction.Input.Constants.NUM_HAND_JOINTS;
         ToolKind m_ToolBefore = ToolKind.None;
         float m_Started, m_NextSample, m_NextPoll;
         bool m_StopAsked, m_Polling;
@@ -166,6 +170,10 @@ namespace Pathfinder.Capture
                 m_Recording.anchorP = ToFrame(content, handAt);
             }
             m_Recording.hasAnchor = true;
+            // Finger joints come from the Interaction SDK's hand skeletons (hands only: a controller has none).
+            m_Skeletons = FindObjectsByType<IsdkHand>(FindObjectsSortMode.None);
+            m_Recording.jointNames = new string[JointCount];
+            for (int j = 0; j < JointCount; j++) m_Recording.jointNames[j] = ((IsdkJoint)j).ToString();
             // The floor the wearer stands on: the tracking origin is at floor level, so the rig's own height is it.
             var rig = FindFirstObjectByType<OVRCameraRig>();
             if (rig != null && rig.trackingSpace != null) m_Recording.floorY = ToFrame(content, rig.trackingSpace.position).y;
@@ -258,8 +266,27 @@ namespace Pathfinder.Capture
                 float g = 0f;
                 for (var f = OVRHand.HandFinger.Index; f <= OVRHand.HandFinger.Pinky; f++) g = Mathf.Max(g, ovrHand.GetFingerPinchStrength(f));
                 h.grip = g;
+                h.joints = Joints(content, hand);
             }
             return h;
+        }
+
+        /// The tracked skeleton of that hand, joint by joint, in the recording's frame; null when none is tracked.
+        Vector3[] Joints(Transform content, ToolHand hand)
+        {
+            var side = hand == ToolHand.Left ? Oculus.Interaction.Input.Handedness.Left : Oculus.Interaction.Input.Handedness.Right;
+            foreach (var skeleton in m_Skeletons)
+            {
+                if (skeleton == null || !skeleton.isActiveAndEnabled || skeleton.Handedness != side || !skeleton.IsTrackedDataValid) continue;
+                var joints = new Vector3[JointCount];
+                for (int j = 0; j < JointCount; j++)
+                {
+                    if (!skeleton.GetJointPose((IsdkJoint)j, out var pose)) return null;
+                    joints[j] = ToFrame(content, pose.position);
+                }
+                return joints;
+            }
+            return null;
         }
     }
 }

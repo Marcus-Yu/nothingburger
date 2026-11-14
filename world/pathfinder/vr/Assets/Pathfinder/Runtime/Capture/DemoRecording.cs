@@ -15,6 +15,9 @@ namespace Pathfinder.Capture
         /// Newtons from a force glove; negative when no glove measured it.
         public float forceN;
         public bool tracked;
+        /// Every hand joint's position in the recording's frame, in the order of DemoRecording.jointNames; null when
+        /// the hand is a controller or its skeleton was not tracked this sample.
+        public Vector3[] joints;
     }
 
     public struct DemoSample
@@ -39,6 +42,8 @@ namespace Pathfinder.Capture
         public bool hasAnchor, anchorHasNormal;
         public Vector3 anchorP, anchorNormal;
         public string anchorLabel;
+        /// The hand skeleton's joint names, once per recording (the SDK's own: HandWristRoot, HandThumbTip, ...).
+        public string[] jointNames;
         public readonly List<DemoSample> samples = new List<DemoSample>(1024);
 
         public float Duration => samples.Count < 2 ? 0f : samples[samples.Count - 1].t - samples[0].t;
@@ -65,6 +70,14 @@ namespace Pathfinder.Capture
                 sb.Append("{\"p\":").Append(Vec(anchorP)).Append(",\"normal\":").Append(anchorHasNormal ? Vec(anchorNormal) : "null")
                   .Append(",\"label\":").Append(anchorLabel == null ? "null" : Str(anchorLabel)).Append('}');
             }
+            sb.Append(",\"joint_names\":");
+            if (jointNames == null) sb.Append("null");
+            else
+            {
+                sb.Append('[');
+                for (int i = 0; i < jointNames.Length; i++) sb.Append(i > 0 ? "," : "").Append(Str(jointNames[i]));
+                sb.Append(']');
+            }
             sb.Append(",\"samples\":[");
             for (int i = 0; i < samples.Count; i++)
             {
@@ -84,7 +97,15 @@ namespace Pathfinder.Capture
         {
             sb.Append("{\"p\":").Append(Vec(h.p)).Append(",\"q\":").Append(Quat(h.q)).Append(",\"grip\":").Append(Num(h.grip))
               .Append(",\"force_n\":").Append(h.forceN >= 0f ? Num(h.forceN) : "null")
-              .Append(",\"tracked\":").Append(h.tracked ? "true" : "false").Append('}');
+              .Append(",\"tracked\":").Append(h.tracked ? "true" : "false").Append(",\"joints\":");
+            if (h.joints == null) sb.Append("null");
+            else
+            {
+                sb.Append('[');
+                for (int i = 0; i < h.joints.Length; i++) sb.Append(i > 0 ? "," : "").Append(Vec(h.joints[i]));
+                sb.Append(']');
+            }
+            sb.Append('}');
         }
 
         static string Num(float v) => (float.IsNaN(v) || float.IsInfinity(v) ? 0f : v).ToString("0.####", CultureInfo.InvariantCulture);

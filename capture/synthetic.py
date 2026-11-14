@@ -19,12 +19,33 @@ TABLE_Y = 0.75
 IDENT = [0.0, 0.0, 0.0, 1.0]
 
 
+JOINT_NAMES = ["HandPalm", "HandWristRoot", "HandThumbTip"] + [
+    f"Hand{f}{k}" for f in ("Index", "Middle", "Ring", "Pinky") for k in ("1", "Tip")
+]
+
+
+def hand_joints(p, closed: float) -> list[list[float]]:
+    """A schematic hand at wrist `p`, fingers pointing along -z: knuckles 9 cm out, each finger
+    8 cm long and folding back toward the wrist as `closed` goes from 0 to 1; the thumb tip
+    comes in to meet the index tip."""
+    p = np.asarray(p, dtype=float)
+    closed = min(max(closed, 0.0), 1.0)
+    angle = np.pi * closed
+    fingers = []
+    for k in range(4):
+        knuckle = p + [0.03 - 0.02 * k, 0.0, -0.09]
+        fingers += [knuckle, knuckle + 0.08 * np.array([0.0, -np.sin(angle), -np.cos(angle)])]
+    open_thumb = p + [0.07, 0.0, -0.05]
+    thumb = open_thumb + (fingers[1] - open_thumb) * closed * 0.9
+    return [[round(float(v), 4) for v in j] for j in [p + [0, 0, -0.05], p, thumb] + fingers]
+
+
 def _quat_about(axis, angle) -> list[float]:
     axis = np.asarray(axis, dtype=float) / np.linalg.norm(axis)
     return [*(axis * np.sin(angle / 2)), float(np.cos(angle / 2))]
 
 
-def _recording(chore, kind, anchor, frames, hand="right", noise=0.002, seed=0) -> dict:
+def _recording(chore, kind, anchor, frames, hand="right", noise=0.002, seed=0, joints=True) -> dict:
     """`frames`: list of dicts {"right": (p, q, grip), "left": (p, q, grip)}; a missing hand is
     untracked for that frame."""
     rng = np.random.default_rng(seed)
@@ -36,9 +57,11 @@ def _recording(chore, kind, anchor, frames, hand="right", noise=0.002, seed=0) -
                 p, q, grip = frame[side]
                 p = np.asarray(p, dtype=float) + rng.normal(0, noise, 3)
                 sample[side] = {"p": p.round(4).tolist(), "q": list(q), "grip": round(float(grip), 3),
-                                "force_n": None, "tracked": True}  # fmt: skip
+                                "force_n": None, "tracked": True,
+                                "joints": hand_joints(p, 0.85 if grip >= 0.5 else 0.1) if joints else None}  # fmt: skip
             else:
-                sample[side] = {"p": [0, 0, 0], "q": IDENT, "grip": 0.0, "force_n": None, "tracked": False}
+                sample[side] = {"p": [0, 0, 0], "q": IDENT, "grip": 0.0, "force_n": None, "tracked": False,
+                                "joints": None}  # fmt: skip
         samples.append(sample)
     return {
         "schema": "capture.recording/1",
@@ -52,6 +75,7 @@ def _recording(chore, kind, anchor, frames, hand="right", noise=0.002, seed=0) -
         "hand": hand,
         "device": {"headset": "synthetic", "input": "hands", "glove": None},
         "anchor": anchor,
+        "joint_names": JOINT_NAMES if joints else None,
         "samples": samples,
     }
 

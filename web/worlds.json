@@ -4,13 +4,15 @@
     "name": "Rabinowitz Hall foyer, Princeton",
     "matterport": "2K7G7cdukZV",
     "site": null,
-    "note": "Captured Friday by the CoStar team. Web tour only: our API key cannot read this model, so there is no mesh for the headset yet."
+    "outside": "rabinowitz-aerial",
+    "note": "Inside: Matterport tour captured Friday by the CoStar team (web only: our API key cannot read this model). Outside: Vexcel aerial photo over extruded footprints, centred on Scudder Plaza."
   },
   {
     "id": "la-mirada",
     "name": "5836 La Mirada Ave, Los Angeles",
     "matterport": "zvKHR9DHNjJ",
     "site": "la-mirada",
-    "note": "House from the hackathon set. Also loads in the headset, with a Vexcel exterior (la-mirada-aerial)."
+    "outside": "la-mirada-aerial",
+    "note": "House from the hackathon set: Matterport mesh inside, Vexcel outside. Both load in the headset."
   }
 ]

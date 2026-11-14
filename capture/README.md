@@ -42,6 +42,13 @@ coordinates as the home it was filmed in.
 | `two_handed` | `width_m` between the hands when both held the thing, else null |
 | `approach_direction` | unit vector, object frame, of the last half second before the work |
 | `reach` | `max_height_m`, `min_height_m` above the floor, `max_from_body_m`, `work_extent_m` |
+| `hand_shape` | from the tracked finger joints while working: `aperture_m` (thumb to nearest fingertip), `span_m`, per-finger `curl`, `closure`; null with controllers |
+| `arm` | **estimated**, not tracked: `shoulder_to_wrist_m`, `elbow_deg` ranges and `leaned_pct`, from the head pose, the wrist and body proportions |
+
+Each sample of a recording carries every hand joint's position (`joints`, in the order of the
+recording's `joint_names`), so a closed hand counts as holding even when no fingertip touches the
+thumb. The shoulder and elbow are worked out in `body.py`: the shoulder from the head, the elbow
+by two-bone inverse kinematics. The headset's body tracking would replace that estimate.
 
 The object frame has its origin at the anchor, z out of the anchored surface and x horizontal.
 
@@ -74,9 +81,9 @@ the ground truth the tests check the processing against.
 
 - **Field names are a proposal.** `demo.json` and `grip.json` follow the plan's one-line
   descriptions; the schemas in `contracts/` are Stream A's to freeze.
-- **No real recording has been processed.** The headset recorder compiles and the intake is
-  tested, but everything here has only seen synthetic data.
-- **Gloves.** There is a `force_n` slot per hand and nothing fills it. Which glove, and how it
-  reaches the headset, is open.
-- **Fingers.** Only the wrist pose and one grip value per hand are kept, not finger joints.
-- **Video.** The headset's passthrough camera is not recorded.
+- **One real recording has been processed** (a short wipe). The tests use synthetic data.
+- **Gloves.** There is a `force_n` slot per hand and nothing fills it. The gloves are two ESP32s
+  over Bluetooth with a raw 0 to 4095 reading per fingertip; a laptop bridge that reads them and
+  merges by timestamp, and a per-fingertip calibration to newtons, are still to build.
+- **The arm is an estimate.** Body tracking is not switched on in the app.
+- **Depth and video.** The headset's depth and passthrough camera are not recorded.
