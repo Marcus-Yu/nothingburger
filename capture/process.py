@@ -28,6 +28,7 @@ import numpy as np
 RATE_HZ = 30.0
 UP = np.array([0.0, 1.0, 0.0])
 ENGAGE_GRIP = 0.5  # a hand is holding something above this
+GLOVE_CONTACT_RAW = 82  # 2 % of the glove's 4095
 CLOSED_HAND = 0.55  # mean finger curl above this is a closed hand
 ENGAGE_NEAR_M = 0.05  # or working on the anchor surface within this distance of its plane
 DEFAULT_N_PER_UNIT = 12.0  # trigger or pinch travel 0..1 to newtons, until a glove measures it
@@ -142,7 +143,15 @@ def hand_track(recording: dict, hand: str, rate_hz: float = RATE_HZ) -> dict | N
     held = grip >= ENGAGE_GRIP
     if closure is not None:
         held = held | (np.interp(t, *closure) >= CLOSED_HAND)
-    return {"t": t - t[0], "t0": float(t[0]), "p": p, "q": q, "grip": grip, "force_n": force, "held": held}
+    # A glove feels contact directly: any fingertip pressed past 2 % of full scale is touching
+    # something, whatever shape the hand tracking thinks the hand is in.
+    pressed = [(r[0], max(r[1]["glove_raw"])) for r in rows if r[1].get("glove_raw")]
+    contact = None
+    if len(pressed) >= 2:
+        contact = np.interp(t, [a for a, _ in pressed], [b for _, b in pressed]) > GLOVE_CONTACT_RAW
+        held = held | contact
+    return {"t": t - t[0], "t0": float(t[0]), "p": p, "q": q, "grip": grip, "force_n": force, "held": held,
+            "contact_s": 0.0 if contact is None else float(contact.sum() / rate_hz)}
 
 
 # ------------------------------------------------------------------------------- anchor frame
@@ -308,6 +317,10 @@ def pick_hand(recording: dict, tracks: dict) -> str:
     named = recording.get("hand")
     if named in tracks:
         return named
+    # a gloved hand that felt contact did the work
+    touched = {h: tr["contact_s"] for h, tr in tracks.items() if tr["contact_s"] >= 0.5}
+    if touched:
+        return max(touched, key=touched.get)
     return max(tracks, key=lambda h: float(np.linalg.norm(np.diff(tracks[h]["p"], axis=0), axis=1).sum()))
 
 
@@ -440,6 +453,8 @@ def build_grip(recording: dict, n_per_unit: float = DEFAULT_N_PER_UNIT, rate_hz:
             "scale_n_per_unit": None, "held_s": None,
         }  # fmt: skip
     count, hand, measured, values, travel = best
+    if raw is not None and not measured:
+        hand = raw["hand"]  # the band that counts is the glove's, so name the gloved hand
     lo, hi = np.percentile(values, [10, 90])
     return {
         "schema": "capture.grip/1",
