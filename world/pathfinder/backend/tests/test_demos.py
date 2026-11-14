@@ -51,3 +51,23 @@ def test_bad_recordings_and_ids_are_refused(client):
     assert client.get("/demos/missing").status_code == 404
     assert client.post("/demos/request", json={"chore": "x", "kind": "dance"}).status_code == 422
     assert client.post("/demos", json=good).json()["read_as"]["grip"]["force_n"]["max"] > 0
+
+
+def test_a_take_can_be_thrown_away_and_done_again(client, tmp_path):
+    asked = client.post("/demos/request", json={"chore": "hold container", "kind": "squeeze"}).json()
+    recording = synthetic.squeeze() | {"id": asked["id"]}
+    for sample in recording["samples"]:
+        sample["left"]["glove_raw"] = [0, 900, 40, 0, 0]
+    client.post("/demos", json=recording)
+    read = client.get(f"/demos/{asked['id']}/read").json()
+    assert read["glove_peaks"] == {"left": {"thumb": 0, "index": 900, "middle": 40, "ring": 0, "pinky": 0}}
+    assert read["samples"] == len(recording["samples"])
+
+    assert client.post(f"/demos/{asked['id']}/discard").json()["discarded"] is True
+    assert client.get("/demos").json() == []  # out of the inbox
+    assert client.get(f"/demos/{asked['id']}/read").status_code == 404
+    assert (tmp_path / "demos" / "_discarded" / f"{asked['id']}.json").is_file()  # but not destroyed
+    assert client.post(f"/demos/{asked['id']}/discard").status_code == 404
+
+    again = client.post("/demos/request", json={"chore": "hold container", "kind": "squeeze"}).json()
+    assert again["id"] != asked["id"] and client.get("/demos/control").json()["request"]["id"] == again["id"]

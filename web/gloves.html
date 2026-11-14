@@ -26,6 +26,11 @@
 <div class="wrap">
   <div class="row">
     <button id="ask">Ask the headset for the squeeze</button>
+    <label style="margin:0">for
+      <select id="length" style="display:inline-block;width:auto;margin:0 0 0 6px">
+        <option value="8">8 s</option><option value="12" selected>12 s</option><option value="20">20 s</option>
+      </select>
+    </label>
     <button id="stop" class="tab">Stop recording</button>
     <label style="margin:0">Window
       <select id="window" style="display:inline-block;width:auto;margin:0 0 0 6px">
@@ -33,6 +38,15 @@
       </select>
     </label>
     <span id="note" class="note" style="margin:0"></span>
+  </div>
+  <div id="take" class="glove" hidden>
+    <h2><span id="take-title"></span><span class="note" id="take-state"></span></h2>
+    <div class="legend" id="take-peaks"></div>
+    <p class="note" id="take-read" style="margin:8px 0"></p>
+    <div class="row" style="margin:0">
+      <button id="redo">Redo this take</button>
+      <button id="keep" class="tab">Keep it</button>
+    </div>
   </div>
   <div id="gloves"></div>
   <p class="note">Raw fingertip readings, 0 to 4095. Not newtons: each sensor has its own curve until it is calibrated.
@@ -117,13 +131,72 @@ async function tick() {
   setTimeout(tick, 100);
 }
 
-document.getElementById("ask").onclick = async () => {
-  const note = document.getElementById("note");
+// One take at a time: ask, wait for the headset to upload it, show what it holds, then either
+// keep it or throw it away and ask again. Nothing is kept until "Keep it" (or the next take is left alone).
+const $ = (id) => document.getElementById(id);
+let take = null, takes = 0;
+
+async function ask() {
+  const note = $("note"), seconds = +$("length").value;
   try {
     const r = await fetch("/demos/request", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ chore: "hold container", kind: "squeeze", max_seconds: 30 }) });
-    note.textContent = r.ok ? "Sent. The headset shows the task and counts down from 8." : `Could not send: HTTP ${r.status}`;
+      body: JSON.stringify({ chore: "hold container", kind: "squeeze", max_seconds: seconds }) });
+    if (!r.ok) { note.textContent = `Could not send: HTTP ${r.status}`; return; }
+    take = { id: (await r.json()).id, asked: Date.now(), seconds, done: false };
+    takes += 1;
+    note.textContent = "";
+    $("take").hidden = false;
+    $("take-title").textContent = `Take ${takes}`;
+    $("take-peaks").innerHTML = ""; $("take-read").textContent = "";
+    $("redo").disabled = $("keep").disabled = true;
+    $("take-state").textContent = `sent: the headset shows the task, counts down from 8, then records ${seconds} s`;
+    watch(take);
   } catch (e) { note.textContent = `Could not send: ${e.message}`; }
+}
+
+async function watch(mine) {
+  while (take === mine && !mine.done) {
+    await new Promise((ok) => setTimeout(ok, 700));
+    if (take !== mine) return;
+    const waited = (Date.now() - mine.asked) / 1000;
+    try {
+      const r = await fetch(`/demos/${mine.id}/read`);
+      if (r.ok) { mine.done = true; show(await r.json()); return; }
+    } catch (e) { /* the server is restarting: keep waiting */ }
+    if (waited > mine.seconds + 40) {
+      $("take-state").textContent = "nothing came back. Is the headset on, awake and in the app? Redo to ask again.";
+      $("redo").disabled = false;
+      return;
+    }
+  }
+}
+
+function show(d) {
+  const short = d.duration_s < take.seconds - 1.5;
+  $("take-state").textContent = `recorded ${d.duration_s.toFixed(1)} s of ${take.seconds} s` + (short ? " (ended early)" : "");
+  const hands = Object.entries(d.glove_peaks || {});
+  $("take-peaks").innerHTML = hands.length ? hands.map(([hand, peaks]) =>
+    `<span class="note">${hand} peaks</span>` + FINGERS.map((f, k) =>
+      `<span><i style="background:${COLOURS[k]}"></i>${f} <b>${peaks[f]}</b></span>`).join("")).join("") :
+    `<span class="note">No glove readings in this take.</span>`;
+  const flat = hands.flatMap(([, peaks]) => FINGERS.filter((f) => peaks[f] < 82));
+  const grip = d.read_as && d.read_as.grip, band = grip && grip.glove_raw;
+  $("take-read").textContent =
+    (band ? `Grip read: ${band.raw.min} to ${band.raw.max} raw on the ${band.hand} hand, peak ${band.raw.peak}` +
+            (band.near_ceiling ? " (near the sensor's ceiling). " : ". ") : "No grip could be read from this take. ") +
+    (hands.length && flat.length ? `No pressure on: ${flat.join(", ")}.` : "");
+  $("redo").disabled = $("keep").disabled = false;
+}
+
+$("ask").onclick = ask;
+$("redo").onclick = async () => {
+  if (take && take.done) await fetch(`/demos/${take.id}/discard`, { method: "POST" });
+  ask();
+};
+$("keep").onclick = () => {
+  $("take-state").textContent += " · kept";
+  $("redo").disabled = $("keep").disabled = true;
+  take = null;
 };
 document.getElementById("stop").onclick = () => fetch("/demos/stop", { method: "POST" });
 tick();

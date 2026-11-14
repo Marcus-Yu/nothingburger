@@ -104,7 +104,7 @@ namespace Pathfinder.Capture
                 }
                 int t = (int)(now - m_Started), max = (int)m_Request.max_seconds;
                 Say($"<color=#FF5A4E>●</color> Recording: {What()}   {t / 60}:{t % 60:00} / {max / 60}:{max % 60:00}\n" +
-                    "Thumb and middle finger pinch when you're done");
+                    (Squeeze ? "It stops by itself when the time is up" : "Thumb and middle finger pinch when you're done"));
                 if (m_StopAsked || now - m_Started >= m_Request.max_seconds) Finish();
             }
             else if (m_Hud != null && m_Hud.gameObject.activeSelf && now >= m_HudUntil) m_Hud.gameObject.SetActive(false);
@@ -177,9 +177,13 @@ namespace Pathfinder.Capture
             Log.Info($"DemoRecorder: recording {m_Request.id} in passthrough, up to {m_Request.max_seconds:0} s");
         }
 
+        bool Squeeze => m_Request != null && m_Request.kind == "squeeze";
+
         void OnButton(ToolHand hand, ToolButton button)
         {
-            // Give the chore two seconds before the done gesture counts.
+            // Give the chore two seconds before the done gesture counts. A squeeze has no done gesture: gripping
+            // something brings the thumb and middle finger together, which read as "done" three seconds in.
+            if (Squeeze) return;
             if (Current == State.Recording && button == ToolButton.Finish && Time.unscaledTime - m_Started > 2f) m_StopAsked = true;
         }
 
