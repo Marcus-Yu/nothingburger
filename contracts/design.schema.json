@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.robots.invalid/design.schema.json",
+  "title": "design.json: the chosen parts",
+  "description": "The design workflow's choice: which catalog card fills each slot, its size parameters, and the result of every hard check against requirements.json. The reasons and the options it beat go to decisions.jsonl. Written by A (agent.design) after composer.api.check passes. Read by B (composer.compose) and C (build view).",
+  "type": "object",
+  "required": ["header", "design_id", "iteration", "requirements", "slots", "checks", "constraints_applied"],
+  "properties": {
+    "header": { "$ref": "common.schema.json#/$defs/header" },
+    "design_id": { "$ref": "common.schema.json#/$defs/id" },
+    "iteration": { "type": "integer", "minimum": 1, "description": "1 on the first pass; +1 each time constraints.json sends it back." },
+    "requirements": { "$ref": "common.schema.json#/$defs/ref" },
+    "slots": {
+      "type": "object",
+      "required": ["base", "reach", "wrist", "gripper"],
+      "properties": {
+        "base": { "$ref": "#/$defs/slot" },
+        "reach": { "$ref": "#/$defs/slot" },
+        "wrist": { "$ref": "#/$defs/slot" },
+        "gripper": { "$ref": "#/$defs/slot" },
+        "sensors": { "type": "array", "items": { "$ref": "#/$defs/slot" } }
+      },
+      "additionalProperties": false
+    },
+    "wrist": {
+      "type": "object",
+      "properties": { "roll_turns": { "type": "number", "minimum": 0 } },
+      "additionalProperties": false
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Output of composer.api.check. Every requirement in design_spec has one. The model may not overrule a failed check.",
+      "items": {
+        "type": "object",
+        "required": ["check_id", "requirement", "value", "op", "limit", "pass"],
+        "properties": {
+          "check_id": { "$ref": "common.schema.json#/$defs/id" },
+          "requirement": { "$ref": "common.schema.json#/$defs/ref" },
+          "value": { "type": "number" },
+          "op": { "enum": ["<", "<=", ">=", ">", "covers"] },
+          "limit": { "type": ["number", "array"] },
+          "margin": { "type": "number" },
+          "pass": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "constraints_applied": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/id" },
+      "description": "constraint_ids from constraints.json this iteration had to meet."
+    },
+    "decisions": { "$ref": "common.schema.json#/$defs/ref", "description": "The decisions.jsonl lines for this design." }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "slot": {
+      "type": "object",
+      "required": ["card_id", "params"],
+      "properties": {
+        "card_id": { "type": "string", "description": "catalog/<slot>/<card_id>." },
+        "card_version": { "type": "string" },
+        "params": { "type": "object", "description": "The card's size parameters, e.g. {\"stroke_m\": 1.2}. Names and ranges come from the card." },
+        "mount": { "type": "string", "description": "The named mount point it attaches to on its parent." }
+      },
+      "additionalProperties": false
+    }
+  }
+}

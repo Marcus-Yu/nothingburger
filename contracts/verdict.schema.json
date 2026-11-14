@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.robots.invalid/verdict.schema.json",
+  "title": "verdict.json: did the simulated run pass",
+  "description": "The program's sim tests, step postconditions and the requirements' success criteria, each scored from signals.json. Every value here can be recomputed from signals.json with the aggregate the program names; the validator does that. status is pass only if every sim test, postcondition and criterion passed. Simulated only: a pass here is not a pass on hardware. Written by B (sim). Read by A (constraints, report) and C (views).",
+  "type": "object",
+  "required": [
+    "header",
+    "verdict_id",
+    "program_id",
+    "build_id",
+    "route_id",
+    "trajectory_id",
+    "provenance",
+    "status",
+    "steps",
+    "tests",
+    "criteria",
+    "failures"
+  ],
+  "properties": {
+    "header": {
+      "$ref": "common.schema.json#/$defs/header"
+    },
+    "verdict_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "program_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "build_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "route_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "trajectory_id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "provenance": {
+      "const": "simulated"
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "fail",
+        "error"
+      ],
+      "description": "error = the sim did not finish; see failures."
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "task_id",
+          "step_id",
+          "status",
+          "t_start_s",
+          "t_end_s",
+          "retries",
+          "preconditions",
+          "postconditions"
+        ],
+        "properties": {
+          "task_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "step_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "status": {
+            "enum": [
+              "done",
+              "failed",
+              "timeout",
+              "skipped"
+            ]
+          },
+          "t_start_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "t_end_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "retries": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "postconditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/score",
+              "required": [
+                "kind",
+                "metric",
+                "aggregate",
+                "value",
+                "pass"
+              ]
+            }
+          },
+          "preconditions": {
+            "type": "array",
+            "description": "Scored over the step window; they use aggregate initial, so they describe the state when the step started.",
+            "items": {
+              "$ref": "#/$defs/score",
+              "required": [
+                "kind",
+                "metric",
+                "aggregate",
+                "value",
+                "pass"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "tests": {
+      "type": "array",
+      "description": "One entry per program test of kind sim.",
+      "items": {
+        "$ref": "#/$defs/score",
+        "required": [
+          "test_id",
+          "metric",
+          "aggregate",
+          "value",
+          "pass"
+        ]
+      }
+    },
+    "criteria": {
+      "type": "array",
+      "description": "One entry per requirements success criterion, scored through the sim test that checks it.",
+      "items": {
+        "type": "object",
+        "required": [
+          "task_id",
+          "criterion_id",
+          "test_id",
+          "pass"
+        ],
+        "properties": {
+          "task_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "criterion_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "test_id": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "pass": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "what",
+          "reason"
+        ],
+        "properties": {
+          "what": {
+            "type": "string",
+            "description": "test_id, task_id/step_id, or sim."
+          },
+          "reason": {
+            "type": "string"
+          },
+          "suggested_bound": {
+            "type": "object",
+            "description": "Only when the failure is the design's fault. The agent turns it into constraints.json. Bad gains or a bad trajectory are not design constraints.",
+            "required": [
+              "field",
+              "op",
+              "value"
+            ],
+            "properties": {
+              "field": {
+                "type": "string",
+                "pattern": "^/design_spec/"
+              },
+              "op": {
+                "enum": [
+                  "<=",
+                  ">="
+                ]
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "score": {
+      "type": "object",
+      "properties": {
+        "test_id": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "action_done",
+            "outcome_confirmed"
+          ]
+        },
+        "metric": {
+          "type": "string"
+        },
+        "aggregate": {
+          "$ref": "common.schema.json#/$defs/aggregate"
+        },
+        "op": {
+          "enum": [
+            "<",
+            "<=",
+            "==",
+            ">=",
+            ">",
+            "within"
+          ]
+        },
+        "threshold": {
+          "type": [
+            "number",
+            "array"
+          ]
+        },
+        "value": {
+          "type": "number"
+        },
+        "pass": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,574 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "B",
+      "module": "composer.api"
+    }
+  },
+  "build_id": "build-2",
+  "design_id": "design-2",
+  "robot_name": "Bulb changer, unit A",
+  "revision": "A",
+  "source_of_truth": "mjcf",
+  "artifacts": [
+    {
+      "kind": "mjcf",
+      "file": {
+        "path": "robot.xml",
+        "sha256": "33486b5a202a3da03eee08822c2ac090101c6008255c548354a24b395405d1c8",
+        "format": "mjcf"
+      },
+      "generated_from": null
+    },
+    {
+      "kind": "urdf",
+      "file": {
+        "path": "export/robot.urdf",
+        "sha256": "cb4ae6da0035d61f2908b1f64d806aef2ca084f16d23f348c7b661cad023d96c",
+        "format": "urdf"
+      },
+      "generated_from": "mjcf"
+    },
+    {
+      "kind": "step_assembly",
+      "file": {
+        "path": "export/robot_assembly.step",
+        "sha256": "10fd4da4f5ad80e857b600b0d58087b9f7f3523f91dfb78fa4809c5fc538ad7e",
+        "format": "step"
+      },
+      "generated_from": "mjcf"
+    },
+    {
+      "kind": "bom_csv",
+      "file": {
+        "path": "export/bom.csv",
+        "sha256": "a46bb8fe452cff7db0e4419ae22fdee6322497e32bbe1740f2fe8ec154dd8609",
+        "format": "csv"
+      },
+      "generated_from": "mjcf"
+    }
+  ],
+  "envelope": {
+    "stowed_width_m": 0.52,
+    "stowed_length_m": 0.6,
+    "stowed_height_m": 1.35,
+    "turning_width_m": 0.8,
+    "mass_kg": 29.6,
+    "max_reach_height_m": 2.55,
+    "min_reach_height_m": 0.3,
+    "max_horizontal_reach_m": 0.3,
+    "payload_kg": 1.0,
+    "max_grip_force_N": 15.0,
+    "max_step_m": 0.02,
+    "battery_runtime_min": 90
+  },
+  "bom": [
+    {
+      "line": 1,
+      "part_id": "base.diff_drive_compact",
+      "description": "Differential-drive base, 0.52 x 0.60 m, two hub motors, casters",
+      "category": "base",
+      "quantity": 1,
+      "make_or_buy": "buy",
+      "sourcing_status": "placeholder",
+      "manufacturer": "PLACEHOLDER",
+      "mpn": "PLACEHOLDER-001",
+      "mass_kg": 18.0,
+      "cad": {
+        "file": {
+          "path": "cad/base.step",
+          "sha256": "e9ddd5220a2e640135d3971a69ff1825c9d64aea411d667cb70670bd90892824",
+          "format": "step"
+        },
+        "format": "step",
+        "units": "mm"
+      }
+    },
+    {
+      "line": 2,
+      "part_id": "reach.telescoping_mast",
+      "description": "Telescoping mast, 1.40 m stroke, lead-screw drive",
+      "category": "reach",
+      "quantity": 1,
+      "make_or_buy": "buy",
+      "sourcing_status": "placeholder",
+      "manufacturer": "PLACEHOLDER",
+      "mpn": "PLACEHOLDER-002",
+      "mass_kg": 6.5,
+      "cad": {
+        "file": {
+          "path": "cad/mast.step",
+          "sha256": "47d172b6eeafabe4e93c8df2e5f8c904815b41f8238325317d89c054d1832fab",
+          "format": "step"
+        },
+        "format": "step",
+        "units": "mm"
+      }
+    },
+    {
+      "line": 3,
+      "part_id": "wrist.continuous_roll",
+      "description": "Continuous-roll wrist with slip ring",
+      "category": "wrist",
+      "quantity": 1,
+      "make_or_buy": "buy",
+      "sourcing_status": "placeholder",
+      "manufacturer": "PLACEHOLDER",
+      "mpn": "PLACEHOLDER-003",
+      "mass_kg": 0.6,
+      "cad": {
+        "file": {
+          "path": "cad/wrist.step",
+          "sha256": "850d4c6812aea08661ae8c3b505191361ba6b5d3b54995ea26767c3df8a3da0b",
+          "format": "step"
+        },
+        "format": "step",
+        "units": "mm"
+      }
+    },
+    {
+      "line": 4,
+      "part_id": "gripper.three_finger_soft",
+      "description": "Three-finger soft gripper, 0.09 m aperture",
+      "category": "gripper",
+      "quantity": 1,
+      "make_or_buy": "buy",
+      "sourcing_status": "placeholder",
+      "manufacturer": "PLACEHOLDER",
+      "mpn": "PLACEHOLDER-004",
+      "mass_kg": 0.45,
+      "cad": {
+        "file": {
+          "path": "cad/gripper.step",
+          "sha256": "a2813d9af67361cdd85d95b7bbe9a43b821c8c381176a3acbd50f4241dc44b3d",
+          "format": "step"
+        },
+        "format": "step",
+        "units": "mm"
+      }
+    },
+    {
+      "line": 5,
+      "part_id": "sensor.fingertip_force",
+      "description": "Fingertip force sensor, 0-20 N",
+      "category": "sensor",
+      "quantity": 3,
+      "make_or_buy": "buy",
+      "sourcing_status": "placeholder",
+      "manufacturer": "PLACEHOLDER",
+      "mpn": "PLACEHOLDER-005",
+      "mass_kg": 0.01,
+      "cad": {
+        "file": {
+          "path": "cad/fingertip_sensor.step",
+          "sha256": "172aa0da5181abb24fbc30335d454865394ba3d5275c24c9e3a454f2934ff2d0",
+          "format": "step"
+        },
+        "format": "step",
+        "units": "mm"
+      }
+    },
+    {
+      "line": 6,
+      "part_id": "compute.sbc",
+      "description": "Single-board computer for the controllers",
+      "category": "compute",
+      "quantity": 1,
+      "make_or_buy": "buy",
+      "sourcing_status": "placeholder",
+      "manufacturer": "PLACEHOLDER",
+      "mpn": "PLACEHOLDER-006",
+      "mass_kg": 0.2,
+      "cad": {
+        "file": {
+          "path": "cad/sbc.step",
+          "sha256": "82e85fb8eb7d239299eb54ff76f8598087d82f244fbcaeb96ef391f0e5b75fb3",
+          "format": "step"
+        },
+        "format": "step",
+        "units": "mm"
+      }
+    },
+    {
+      "line": 7,
+      "part_id": "power.battery_24v",
+      "description": "24 V battery pack",
+      "category": "power",
+      "quantity": 1,
+      "make_or_buy": "buy",
+      "sourcing_status": "placeholder",
+      "manufacturer": "PLACEHOLDER",
+      "mpn": "PLACEHOLDER-007",
+      "mass_kg": 3.2,
+      "cad": {
+        "file": {
+          "path": "cad/battery.step",
+          "sha256": "a7e7c376a64b1e139e5dc48aa19376c61549bc5a8f6eeb7f0d95c4d29e9dcce2",
+          "format": "step"
+        },
+        "format": "step",
+        "units": "mm"
+      }
+    },
+    {
+      "line": 9,
+      "part_id": "sensor.wrist_camera",
+      "description": "RGB camera on the wrist, for inspection",
+      "category": "sensor",
+      "quantity": 1,
+      "make_or_buy": "buy",
+      "sourcing_status": "placeholder",
+      "manufacturer": "PLACEHOLDER",
+      "mpn": "PLACEHOLDER-009",
+      "mass_kg": 0.05,
+      "cad": {
+        "file": {
+          "path": "cad/wrist_camera.step",
+          "sha256": "e7b3b8ebfc4c514c9e381aa0af8868c458582c86477fae5f48e9da47696d758b",
+          "format": "step"
+        },
+        "format": "step",
+        "units": "mm"
+      }
+    },
+    {
+      "line": 8,
+      "part_id": "base.diff_drive_compact/mast_adapter",
+      "description": "Adapter plate, base top plate to mast foot",
+      "category": "structure",
+      "quantity": 1,
+      "make_or_buy": "make",
+      "sourcing_status": "placeholder",
+      "mass_kg": 0.35,
+      "cad": {
+        "file": {
+          "path": "cad/mast_adapter.step",
+          "sha256": "1dd2ebbefc2787852d3a7b6d5bbfd4c61dd06dacf67face05a70973eefe461b4",
+          "format": "step"
+        },
+        "format": "step",
+        "units": "mm"
+      },
+      "fabrication": {
+        "process": "cnc",
+        "material": "6061-T6 aluminium",
+        "drawing": {
+          "path": "drawings/mast_adapter.pdf",
+          "sha256": "31a7bd6dc8161274f244cf084dfbee64773ecfc214742ded3d1e8de755a7d572",
+          "format": "pdf"
+        },
+        "tolerance_mm": 0.1
+      }
+    }
+  ],
+  "cost_summary": {
+    "placeholder_lines": 9
+  },
+  "joints": [
+    {
+      "name": "wheel_left",
+      "type": "continuous",
+      "parent_link": "base",
+      "child_link": "wheel_left",
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "limits": {
+        "lower": null,
+        "upper": null,
+        "velocity": 10.0,
+        "effort": 20.0
+      },
+      "actuator": {
+        "bom_line": 1,
+        "gear_ratio": 1,
+        "encoder": "hall, 90 counts/rev",
+        "torque_sensing": "current"
+      }
+    },
+    {
+      "name": "wheel_right",
+      "type": "continuous",
+      "parent_link": "base",
+      "child_link": "wheel_right",
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "limits": {
+        "lower": null,
+        "upper": null,
+        "velocity": 10.0,
+        "effort": 20.0
+      },
+      "actuator": {
+        "bom_line": 1,
+        "gear_ratio": 1,
+        "encoder": "hall, 90 counts/rev",
+        "torque_sensing": "current"
+      }
+    },
+    {
+      "name": "mast_lift",
+      "type": "prismatic",
+      "parent_link": "base",
+      "child_link": "carriage",
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "limits": {
+        "lower": 0.0,
+        "upper": 1.4,
+        "velocity": 0.15,
+        "effort": 200.0
+      },
+      "actuator": {
+        "bom_line": 2,
+        "gear_ratio": 1,
+        "encoder": "absolute linear, 0.1 mm",
+        "torque_sensing": "current"
+      }
+    },
+    {
+      "name": "wrist_roll",
+      "type": "continuous",
+      "parent_link": "carriage",
+      "child_link": "wrist",
+      "axis": [
+        0,
+        0,
+        1
+      ],
+      "limits": {
+        "lower": null,
+        "upper": null,
+        "velocity": 3.0,
+        "effort": 2.0
+      },
+      "actuator": {
+        "bom_line": 3,
+        "gear_ratio": 50,
+        "encoder": "14-bit absolute",
+        "torque_sensing": "current"
+      }
+    },
+    {
+      "name": "finger_close",
+      "type": "prismatic",
+      "parent_link": "wrist",
+      "child_link": "fingers",
+      "axis": [
+        1,
+        0,
+        0
+      ],
+      "limits": {
+        "lower": 0.0,
+        "upper": 0.045,
+        "velocity": 0.05,
+        "effort": 15.0
+      },
+      "actuator": {
+        "bom_line": 4,
+        "gear_ratio": 1,
+        "encoder": "12-bit absolute",
+        "torque_sensing": "none"
+      }
+    }
+  ],
+  "sensors": [
+    {
+      "name": "tip_1",
+      "kind": "fingertip_force",
+      "link": "fingers",
+      "bom_line": 5,
+      "rate_hz": 200,
+      "range": "0-20 N"
+    },
+    {
+      "name": "tip_2",
+      "kind": "fingertip_force",
+      "link": "fingers",
+      "bom_line": 5,
+      "rate_hz": 200,
+      "range": "0-20 N"
+    },
+    {
+      "name": "tip_3",
+      "kind": "fingertip_force",
+      "link": "fingers",
+      "bom_line": 5,
+      "rate_hz": 200,
+      "range": "0-20 N"
+    },
+    {
+      "name": "wrist_cam",
+      "kind": "rgb_camera",
+      "link": "wrist",
+      "bom_line": 9,
+      "rate_hz": 30,
+      "range": "0.1-2 m, 0.3 mm/px at 0.15 m"
+    }
+  ],
+  "mount_points": [
+    {
+      "name": "base.top_plate",
+      "parent_bom_line": 1,
+      "child_bom_line": 8,
+      "transform": {
+        "frame": "robot:base",
+        "position_m": [
+          0,
+          0,
+          0.32
+        ],
+        "orientation_wxyz": [
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "interface": "4x M6 on 120 mm square"
+    },
+    {
+      "name": "adapter.mast_foot",
+      "parent_bom_line": 8,
+      "child_bom_line": 2,
+      "transform": {
+        "frame": "robot:base",
+        "position_m": [
+          0,
+          0,
+          0.012
+        ],
+        "orientation_wxyz": [
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "interface": "4x M5 on 80 mm square"
+    },
+    {
+      "name": "reach.carriage",
+      "parent_bom_line": 2,
+      "child_bom_line": 3,
+      "transform": {
+        "frame": "robot:carriage",
+        "position_m": [
+          0,
+          0,
+          0.05
+        ],
+        "orientation_wxyz": [
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "interface": "ISO 9409-1-50-4-M6"
+    },
+    {
+      "name": "wrist.flange",
+      "parent_bom_line": 3,
+      "child_bom_line": 4,
+      "transform": {
+        "frame": "robot:wrist",
+        "position_m": [
+          0,
+          0,
+          0.06
+        ],
+        "orientation_wxyz": [
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "interface": "ISO 9409-1-31.5-4-M5"
+    }
+  ],
+  "assembly": [
+    {
+      "step": 1,
+      "title": "Base",
+      "bom_lines": [
+        1,
+        7
+      ],
+      "instructions": "Fit the battery into the base bay.",
+      "verify": "Base powers on and both wheels turn."
+    },
+    {
+      "step": 2,
+      "title": "Mast adapter",
+      "bom_lines": [
+        8
+      ],
+      "mount_point": "base.top_plate",
+      "instructions": "Bolt the adapter plate to the base top plate.",
+      "tools": [
+        "torque wrench"
+      ]
+    },
+    {
+      "step": 3,
+      "title": "Mast",
+      "bom_lines": [
+        2
+      ],
+      "mount_point": "adapter.mast_foot",
+      "instructions": "Stand the mast on the adapter and bolt it.",
+      "verify": "Mast runs its full 1.40 m stroke without binding."
+    },
+    {
+      "step": 4,
+      "title": "Wrist",
+      "bom_lines": [
+        3
+      ],
+      "mount_point": "reach.carriage",
+      "instructions": "Mount the wrist on the mast carriage.",
+      "verify": "Wrist turns three full turns each way."
+    },
+    {
+      "step": 5,
+      "title": "Gripper and sensors",
+      "bom_lines": [
+        4,
+        5,
+        9
+      ],
+      "mount_point": "wrist.flange",
+      "instructions": "Mount the gripper, a force sensor on each fingertip, and the camera on the wrist.",
+      "verify": "Each force sensor reads 0 N open and rises when pressed; the camera image is in focus at 0.15 m."
+    },
+    {
+      "step": 6,
+      "title": "Compute",
+      "bom_lines": [
+        6
+      ],
+      "instructions": "Mount the computer in the base.",
+      "verify": "All joints and sensors enumerate."
+    }
+  ],
+  "out_of_scope": [
+    "wiring",
+    "fasteners",
+    "firmware",
+    "power_electronics"
+  ]
+}

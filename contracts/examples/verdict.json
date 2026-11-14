@@ -1,0 +1,236 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "B",
+      "module": "sim.api"
+    }
+  },
+  "verdict_id": "verdict-2",
+  "program_id": "prog-2",
+  "build_id": "build-2",
+  "route_id": "route-2",
+  "trajectory_id": "traj-2",
+  "provenance": "simulated",
+  "status": "pass",
+  "steps": [
+    {
+      "task_id": "bulb",
+      "step_id": "go",
+      "status": "done",
+      "t_start_s": 0,
+      "t_end_s": 14,
+      "retries": 0,
+      "preconditions": [],
+      "postconditions": [
+        {
+          "kind": "action_done",
+          "metric": "base_pose_error_m",
+          "aggregate": "final",
+          "op": "<=",
+          "threshold": 0.03,
+          "value": 0.012,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "task_id": "bulb",
+      "step_id": "reach",
+      "status": "done",
+      "t_start_s": 14,
+      "t_end_s": 22,
+      "retries": 0,
+      "preconditions": [],
+      "postconditions": [
+        {
+          "kind": "action_done",
+          "metric": "ee_pose_error_m",
+          "aggregate": "final",
+          "op": "<=",
+          "threshold": 0.005,
+          "value": 0.002,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "task_id": "bulb",
+      "step_id": "grasp",
+      "status": "done",
+      "t_start_s": 22,
+      "t_end_s": 23,
+      "retries": 0,
+      "preconditions": [],
+      "postconditions": [
+        {
+          "kind": "action_done",
+          "metric": "grip_force_N",
+          "aggregate": "final",
+          "op": "within",
+          "threshold": [
+            1.5,
+            3.5
+          ],
+          "value": 2.6,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "status": "done",
+      "t_start_s": 23,
+      "t_end_s": 29,
+      "retries": 0,
+      "preconditions": [
+        {
+          "kind": "outcome_confirmed",
+          "metric": "bulb_in_grip",
+          "aggregate": "initial",
+          "op": "==",
+          "threshold": 1,
+          "value": 1,
+          "pass": true
+        }
+      ],
+      "postconditions": [
+        {
+          "kind": "action_done",
+          "metric": "wrist_roll_turns",
+          "aggregate": "final",
+          "op": ">=",
+          "threshold": 3,
+          "value": 3.02,
+          "pass": true
+        },
+        {
+          "kind": "outcome_confirmed",
+          "metric": "bulb_in_socket",
+          "aggregate": "final",
+          "op": "==",
+          "threshold": 0,
+          "value": 0,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "task_id": "bulb",
+      "step_id": "lower",
+      "status": "done",
+      "t_start_s": 29,
+      "t_end_s": 37,
+      "retries": 0,
+      "preconditions": [],
+      "postconditions": [
+        {
+          "kind": "outcome_confirmed",
+          "metric": "bulb_in_tray",
+          "aggregate": "final",
+          "op": "==",
+          "threshold": 1,
+          "value": 1,
+          "pass": true
+        }
+      ]
+    },
+    {
+      "task_id": "bulb",
+      "step_id": "inspect",
+      "status": "done",
+      "t_start_s": 37,
+      "t_end_s": 45,
+      "retries": 0,
+      "preconditions": [],
+      "postconditions": [
+        {
+          "kind": "action_done",
+          "metric": "socket_views_captured",
+          "aggregate": "final",
+          "op": ">=",
+          "threshold": 2,
+          "value": 2,
+          "pass": true
+        },
+        {
+          "kind": "outcome_confirmed",
+          "metric": "socket_findings_count",
+          "aggregate": "count",
+          "op": "==",
+          "threshold": 0,
+          "value": 0,
+          "pass": true
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "test_id": "t-sim-no-slip",
+      "metric": "bulb_slip_rad",
+      "aggregate": "max",
+      "op": "<=",
+      "threshold": 0.2,
+      "value": 0.08,
+      "pass": true
+    },
+    {
+      "test_id": "t-sim-no-crush",
+      "metric": "grip_force_N",
+      "aggregate": "max",
+      "op": "<=",
+      "threshold": 8.0,
+      "value": 5.4,
+      "pass": true
+    },
+    {
+      "test_id": "t-sim-inspect",
+      "metric": "socket_views_captured",
+      "aggregate": "final",
+      "op": ">=",
+      "threshold": 2,
+      "value": 2,
+      "pass": true
+    },
+    {
+      "test_id": "t-sim-free",
+      "metric": "bulb_in_socket",
+      "aggregate": "final",
+      "op": "==",
+      "threshold": 0,
+      "value": 0,
+      "pass": true
+    }
+  ],
+  "criteria": [
+    {
+      "task_id": "bulb",
+      "criterion_id": "no-slip",
+      "test_id": "t-sim-no-slip",
+      "pass": true
+    },
+    {
+      "task_id": "bulb",
+      "criterion_id": "no-crush",
+      "test_id": "t-sim-no-crush",
+      "pass": true
+    },
+    {
+      "task_id": "bulb",
+      "criterion_id": "inspected",
+      "test_id": "t-sim-inspect",
+      "pass": true
+    },
+    {
+      "task_id": "bulb",
+      "criterion_id": "free",
+      "test_id": "t-sim-free",
+      "pass": true
+    }
+  ],
+  "failures": []
+}

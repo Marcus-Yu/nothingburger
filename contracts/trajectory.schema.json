@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.robots.invalid/trajectory.schema.json",
+  "title": "trajectory.json: the arm and gripper motion",
+  "description": "Joint-space motion for each task step, retargeted from the demo onto this robot at each standoff. One segment per demo phase. Written by B (motion.retarget). Read by B (sim) and C (views).",
+  "type": "object",
+  "required": ["header", "trajectory_id", "build_id", "route_id", "joint_names", "segments"],
+  "properties": {
+    "header": { "$ref": "common.schema.json#/$defs/header" },
+    "trajectory_id": { "$ref": "common.schema.json#/$defs/id" },
+    "build_id": { "$ref": "common.schema.json#/$defs/id" },
+    "route_id": { "$ref": "common.schema.json#/$defs/id" },
+    "joint_names": { "type": "array", "items": { "type": "string" }, "minItems": 1, "description": "Order of every q row. Names match build.json joints." },
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["segment_id", "task_id", "step_id", "control_mode", "t_s", "q"],
+        "properties": {
+          "segment_id": { "$ref": "common.schema.json#/$defs/id" },
+          "task_id": { "$ref": "common.schema.json#/$defs/id" },
+          "step_id": { "$ref": "common.schema.json#/$defs/id" },
+          "demo_phase_id": { "$ref": "common.schema.json#/$defs/id" },
+          "standoff_waypoint_id": { "$ref": "common.schema.json#/$defs/id" },
+          "control_mode": { "enum": ["position", "impedance", "force"] },
+          "t_s": { "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2 },
+          "q": { "type": "array", "items": { "type": "array", "items": { "type": "number" } }, "description": "One row per t_s, one column per joint_names." },
+          "qd": { "type": "array", "items": { "type": "array", "items": { "type": "number" } } },
+          "ee_target": { "$ref": "common.schema.json#/$defs/pose", "description": "End-effector goal at the segment's end, world frame." },
+          "force_target": { "$ref": "common.schema.json#/$defs/force_band", "description": "For impedance or force segments." },
+          "retarget": {
+            "type": "object",
+            "properties": {
+              "method": { "enum": ["ik_mink", "keyframe", "scripted"] },
+              "scale": { "type": "number", "exclusiveMinimum": 0 },
+              "max_residual_m": { "type": "number", "minimum": 0, "description": "Worst gap between the demo's fingertip path and the robot's." }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

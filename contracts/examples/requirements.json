@@ -1,0 +1,287 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "A",
+      "module": "agent.requirements"
+    }
+  },
+  "scenario": {
+    "building_model_id": "PLACEHOLDER-MATTERPORT-ID",
+    "label": "Unit A, 2BR 2BA",
+    "world": {
+      "file": "world.json",
+      "pointer": ""
+    }
+  },
+  "conversation": {
+    "summary": "Landlord wants the hallway ceiling bulb changed when it fails. Agent asked one follow-up: demonstrate the twist at home."
+  },
+  "tasks": [
+    {
+      "task_id": "bulb",
+      "request_text": "Can it swap the bulb in the hallway ceiling light when it burns out?",
+      "job": "change_light_bulb",
+      "priority": 1,
+      "frequency": "on request",
+      "target": {
+        "object_class": "a19_bulb",
+        "object_id": "fixture-hall-ceiling-1",
+        "room_id": "hallway-1",
+        "world": {
+          "file": "world.json",
+          "pointer": "/fixtures/0"
+        }
+      },
+      "steps": [
+        {
+          "step_id": "go",
+          "text": "Drive to below the hallway ceiling light.",
+          "skill": "navigate"
+        },
+        {
+          "step_id": "reach",
+          "text": "Raise the gripper to the bulb.",
+          "skill": "reach"
+        },
+        {
+          "step_id": "grasp",
+          "text": "Grip the old bulb firmly enough not to slip, gently enough not to crack it.",
+          "skill": "grasp",
+          "needs_demo": true
+        },
+        {
+          "step_id": "unscrew",
+          "text": "Turn the bulb counter-clockwise about three turns until it is free.",
+          "skill": "twist",
+          "needs_demo": true,
+          "params": {
+            "turns": 3,
+            "direction": "ccw"
+          }
+        },
+        {
+          "step_id": "lower",
+          "text": "Lower the old bulb and put it in the tray.",
+          "skill": "place"
+        },
+        {
+          "step_id": "inspect",
+          "text": "Look into the empty socket for scorch marks, broken glass or a bent contact; if there are any, stop and tell the landlord.",
+          "skill": "inspect",
+          "inspection": {
+            "target": "empty E26 socket and fixture cup",
+            "sensor": "rgb_camera",
+            "look_for": [
+              "scorch_mark",
+              "broken_glass_in_socket",
+              "bent_contact",
+              "loose_fixture"
+            ],
+            "standoff_m": 0.15,
+            "min_resolution_mm": 0.5,
+            "views": 2,
+            "on_finding": "ask_human",
+            "report": "socket_findings"
+          }
+        }
+      ],
+      "success_criteria": [
+        {
+          "criterion_id": "no-slip",
+          "text": "The bulb does not slip in the grip while turning.",
+          "metric": "bulb_slip_rad",
+          "op": "<=",
+          "value": 0.2
+        },
+        {
+          "criterion_id": "no-crush",
+          "text": "Grip force stays under the glass's safe limit.",
+          "metric": "grip_force_N",
+          "op": "<=",
+          "value": 8.0
+        },
+        {
+          "criterion_id": "inspected",
+          "text": "Both views of the socket are captured and every defect class is scored.",
+          "metric": "socket_views_captured",
+          "op": ">=",
+          "value": 2,
+          "kind": "action_done"
+        },
+        {
+          "criterion_id": "free",
+          "text": "The bulb is out of the socket.",
+          "metric": "bulb_in_socket",
+          "op": "==",
+          "value": 0,
+          "kind": "outcome_confirmed"
+        }
+      ],
+      "demo": {
+        "required": true,
+        "reason": "Grip force decides between slipping and breaking the glass.",
+        "demo_id": "demo-bulb-1",
+        "grip_id": "grip-bulb-1"
+      }
+    }
+  ],
+  "design_spec": {
+    "base": {
+      "max_width_m": {
+        "value": 0.61,
+        "source": {
+          "provenance": "building_scan",
+          "ref": {
+            "file": "world.json",
+            "pointer": "/passages/narrowest/width_m"
+          },
+          "note": "0.71 m doorway minus 0.05 m each side"
+        }
+      },
+      "max_length_m": {
+        "value": 0.8,
+        "source": {
+          "provenance": "default",
+          "note": "Turn in a 1.02 m hallway."
+        }
+      },
+      "max_height_stowed_m": {
+        "value": 1.9,
+        "source": {
+          "provenance": "building_scan",
+          "ref": {
+            "file": "world.json",
+            "pointer": "/passages/narrowest/height_m"
+          },
+          "note": "2.03 m door head minus margin"
+        }
+      },
+      "min_turn_width_m": {
+        "value": 1.02,
+        "source": {
+          "provenance": "building_scan",
+          "ref": {
+            "file": "world.json",
+            "pointer": "/rooms/hallway-1/width_m"
+          }
+        }
+      },
+      "mobility": "wheeled",
+      "max_step_m": {
+        "value": 0.02,
+        "source": {
+          "provenance": "building_scan",
+          "ref": {
+            "file": "world.json",
+            "pointer": "/floors/0/max_step_m"
+          }
+        }
+      }
+    },
+    "reach": {
+      "min_height_m": {
+        "value": 0.3,
+        "source": {
+          "provenance": "default",
+          "note": "Tray height."
+        }
+      },
+      "max_height_m": {
+        "value": 2.47,
+        "source": {
+          "provenance": "building_scan",
+          "ref": {
+            "file": "world.json",
+            "pointer": "/fixtures/0/position_m/2"
+          }
+        }
+      },
+      "max_horizontal_m": {
+        "value": 0.25,
+        "source": {
+          "provenance": "default",
+          "note": "Base can park directly below."
+        }
+      }
+    },
+    "payload_kg": {
+      "value": 0.5,
+      "source": {
+        "provenance": "default",
+        "note": "Bulb is 0.03 kg; margin for a glass shade."
+      }
+    },
+    "gripper": {
+      "min_aperture_m": {
+        "value": 0.04,
+        "source": {
+          "provenance": "measured_at_home",
+          "ref": {
+            "file": "demo.json",
+            "pointer": "/object/dimensions_m/0"
+          }
+        }
+      },
+      "max_aperture_m": {
+        "value": 0.08,
+        "source": {
+          "provenance": "measured_at_home",
+          "ref": {
+            "file": "demo.json",
+            "pointer": "/object/dimensions_m/0"
+          },
+          "note": "Bulb is 0.06 m across."
+        }
+      },
+      "wrist_roll_turns": 3,
+      "force_bands": [
+        {
+          "task_id": "bulb",
+          "step_id": "unscrew",
+          "band": {
+            "units": "N",
+            "min": 2.0,
+            "max": 6.0,
+            "provenance": "measured_at_home",
+            "calibration_id": "glove-r1-cal-20261114"
+          },
+          "ref": {
+            "file": "grip.json",
+            "pointer": "/bands/1/hold"
+          }
+        }
+      ]
+    },
+    "environment": {
+      "floors": "single",
+      "ceiling_height_m": {
+        "value": 2.62,
+        "source": {
+          "provenance": "building_scan",
+          "ref": {
+            "file": "world.json",
+            "pointer": "/rooms/hallway-1/height_m"
+          }
+        }
+      }
+    }
+  },
+  "open_questions": [
+    {
+      "question_id": "q-glass-limit",
+      "text": "What force breaks this bulb? The 8 N limit is a guess until tested.",
+      "blocking": false,
+      "task_id": "bulb",
+      "answer": null,
+      "answered_by": null
+    }
+  ],
+  "approval": {
+    "status": "approved",
+    "approved_by": "lead",
+    "approved_at": "2026-11-14T15:00:00Z"
+  }
+}

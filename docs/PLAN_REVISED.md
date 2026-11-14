@@ -1,6 +1,6 @@
 # Revised plan
 
-Status: draft, 2026-11-14. The flow and outputs are the lead's. The rest was drafted by stream A's agent from the sponsor's quickstart, for the lead to confirm. No contract has changed yet.
+Status: draft, 2026-11-14. The flow and outputs are the lead's. The rest was drafted by stream A's agent from the sponsor's quickstart, for the lead to confirm. The run-file contracts for this plan are drafted in [`contracts/`](../contracts/README.md) (draft 0.1).
 
 This replaces the flow, demo, outputs and build order in the [full plan](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf). Streams, the board and the rules are unchanged. [PLAN_SHORT.md](PLAN_SHORT.md) is the one-page version.
 
@@ -15,7 +15,7 @@ The demo shows three jobs:
 | Job | Why the grip matters | Where the numbers come from |
 | :-- | :-- | :-- |
 | **Take out a trash bag** | a poor grip rips the bag | doorway and hallway widths on the route out, from the sponsor data; grip force from the home demonstration |
-| **Change a light bulb** | too soft and the bulb slips when twisted; too hard and the glass breaks | ceiling and fixture height from the sponsor data; the force band from the home demonstration |
+| **Change a light bulb** | too soft and the bulb slips when twisted; too hard and the glass breaks. Once the bulb is out, the robot inspects the empty socket with a wrist camera for scorch marks, broken glass or a bent contact, and asks a person if it finds any | ceiling and fixture height from the sponsor data; the force band from the home demonstration |
 | **Wipe a surface** | a steady press force along a path | counter and room dimensions from the sponsor data; press force from the home demonstration |
 
 These three were chosen because we can demonstrate them ourselves within the hackathon. The method is not specific to them: a scan plus one demonstration with measured forces. It carries over to other maintenance jobs such as changing filters or plumbing fixtures, which we do not show.
@@ -176,9 +176,11 @@ The contact run is in MuJoCo, on the MatterPak mesh. The Quest does not run the 
 
 - **CAD:** each part card carries a real CAD file. The robot's CAD is those files assembled at the mount points.
 - **Build instructions:** the parts list and the assembly order. Wiring and fasteners are out of scope, so this is a starting point for a quote.
-- **Software instructions:** the task program and route, the controllers that need tuning on the real robot, and a test suite made of the run's own checks.
+- **Software instructions:** the task program and route, the controllers that need tuning on the real robot, safety limits and when the robot refuses, and a test suite made of the run's own checks plus bench and site versions of them.
 
-URDF is the source. CAD assembly and OpenUSD are generated from the same part list and mount points.
+The file formats are in [`contracts/`](../contracts/README.md): `build.json` is the manufacturing package and `program.json` the deployment one. `tools/report/deploy_report.py` turns a run into `export/DEPLOY.md`, the readable deployment report with the simulated results.
+
+`robot.xml` (MuJoCo MJCF) is the source. URDF, the CAD assembly and OpenUSD are generated from it, using the same part list and mount points.
 
 ## Schedule
 
