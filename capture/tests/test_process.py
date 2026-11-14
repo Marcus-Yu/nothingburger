@@ -114,3 +114,16 @@ def test_the_pinch_that_starts_a_recording_is_not_a_grip():
         process.build_grip(rec)
     held = synthetic.move_bin()  # a hold that starts later is kept
     assert process.build_grip(held)["held_s"] > 2
+
+
+def test_a_box_lifted_with_two_hands_and_put_back_is_a_carry_not_a_wipe():
+    """The first real glove recording: only one hand gloved, the other never read as gripping,
+    the box lifted 35 cm and set down near where it started."""
+    rec = synthetic.move_bin(distance=0.05, width=0.28)
+    for s in rec["samples"]:
+        s["left"]["grip"] = 0.0
+        s["left"]["joints"] = synthetic.hand_joints(s["left"]["p"], 0.1)  # an open hand on the side
+    demo = process.build_demo(rec)
+    assert demo["motion"]["kind"] == "carry" and demo["motion"]["put_back"] is True
+    assert demo["motion"]["lift_m"] == pytest.approx(0.2, abs=0.03)
+    assert demo["two_handed"]["width_m"] == pytest.approx(0.28, abs=0.02)

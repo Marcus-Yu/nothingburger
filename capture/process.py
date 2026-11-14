@@ -268,8 +268,9 @@ def _passes(along: np.ndarray) -> int:
     return turns + 1
 
 
-def classify(work_p: np.ndarray, work_q: np.ndarray, held: np.ndarray, normal: np.ndarray | None) -> dict:
-    """What the work was. `work_p` in the scan frame."""
+def classify(work_p: np.ndarray, work_q: np.ndarray, held: np.ndarray, normal: np.ndarray | None,
+             two_handed: bool = False) -> dict:  # fmt: skip
+    """What the work was. `work_p` in the scan frame. `two_handed`: both hands held one thing."""
     net = float(np.linalg.norm(work_p[-1] - work_p[0]))
     length = float(np.linalg.norm(np.diff(work_p, axis=0), axis=1).sum())
     axis, turn = _twist(work_q)
@@ -286,10 +287,14 @@ def classify(work_p: np.ndarray, work_q: np.ndarray, held: np.ndarray, normal: n
         return {"kind": "hinge", **arc}
 
     if held_p is not None:
+        # Picked up and moved: it ends somewhere else, or it was lifted clear and put back, or two
+        # hands had hold of it (nobody wipes with a thing held rigidly between two hands).
         moved = float(np.linalg.norm(held_p[-1] - held_p[0]))
-        if moved >= 0.25:
-            return {"kind": "carry", "distance_m": round(moved, 3),
-                    "lift_m": round(float(held_p[:, 1].max() - held_p[0, 1]), 3)}  # fmt: skip
+        travel = float(np.linalg.norm(held_p - held_p[0], axis=1).max())
+        lift = float(held_p[:, 1].max() - held_p[0, 1])
+        if moved >= 0.25 or (two_handed and travel >= 0.1) or (lift >= 0.15 and _passes(held_p[:, 1]) <= 2):
+            return {"kind": "carry", "distance_m": round(moved, 3), "travel_m": round(travel, 3),
+                    "lift_m": round(lift, 3), "put_back": moved < 0.2}  # fmt: skip
 
     centre, vt, spread = _plane_fit(work_p)
     flat = spread[2] <= max(0.02, 0.25 * spread[1])
@@ -342,18 +347,19 @@ def build_demo(recording: dict, rate_hz: float = RATE_HZ) -> dict:
         work[:] = True
         labels = ["work"] * len(labels)
     held = track["held"][work]
-    motion = classify(track["p"][work], track["q"][work], held, normal)
 
-    # both hands on it at once, the same distance apart throughout: a two-handed hold
+    # Two hands on one rigid thing stay the same distance apart while it is held, whether or not
+    # the second hand reads as gripping (it may be bare, or flat against a side).
     other = next((h for h in tracks if h != hand), None)
     two_handed = None
     if other is not None:
         n = min(len(track["p"]), len(tracks[other]["p"]))
-        both = track["held"][:n] & tracks[other]["held"][:n]
+        both = track["held"][:n] & work[:n]
         if both.sum() >= rate_hz * 0.5:
             gap = np.linalg.norm(track["p"][:n][both] - tracks[other]["p"][:n][both], axis=1)
-            if gap.std() < 0.06:
+            if gap.std() < 0.03 and float(np.linalg.norm(np.ptp(tracks[other]["p"][:n][both], axis=0))) > 0.1:
                 two_handed = {"width_m": round(float(np.median(gap)), 3), "seconds": round(float(both.sum() / rate_hz), 2)}
+    motion = classify(track["p"][work], track["q"][work], held, normal, two_handed is not None)
 
     # object-relative path: p_obj = R^T (p - origin), q_obj = q_R^-1 * q
     rel_p = (track["p"] - origin) @ R

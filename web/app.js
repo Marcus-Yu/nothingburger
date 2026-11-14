@@ -166,7 +166,7 @@ function describe(read) {
   const m = read.motion || {};
   const bits = {
     wipe: () => `a wipe over ${m.size_m?.[0]} x ${m.size_m?.[1]} m in ${m.passes} passes`,
-    carry: () => `a carry of ${m.distance_m} m, lifted ${m.lift_m} m`,
+    carry: () => m.put_back ? `a lift of ${m.lift_m} m, set back down` : `a carry of ${m.distance_m} m, lifted ${m.lift_m} m`,
     hinge: () => `a swing of ${m.angle_deg} degrees on a ${m.radius_m} m radius`,
     twist: () => `a twist of ${m.turns} turns`,
     reach: () => `a reach of ${m.distance_m} m`,
