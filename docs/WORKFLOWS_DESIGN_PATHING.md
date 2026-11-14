@@ -6,7 +6,7 @@ Status: draft, 2026-11-14, by stream A's agent for the lead. It covers step 3 of
 
 | # | Assumption | Why |
 | :-- | :-- | :-- |
-| A1 | **One robot per building, covering every job the user picked there.** Its requirements are the union of the jobs' requirements. | A landlord buys one robot per property, not one per chore. With one job picked, this is the same as one robot per job. |
+| A1 | **One robot per building, covering every job the user picked there.** Its requirements are the union of the jobs' requirements. The run folder holds one `demo.json`, `grip.json` and `trajectory.json`, so until request R7 lands, it is **one run per job**, and the design step reads the ledgers of all that building's job runs. | A landlord buys one robot per property, not one per chore. With one job picked, this is the same as one robot per job. |
 | A2 | **The world frame is Matterport's: metres, Z up.** Capture and the Pathfinder scene package are +Y up. Each converts at its own boundary: `world.api.load` and `capture.api.latest` hand out Z-up data. | One frame in every run file. The only conversion is in stream C's code, which already knows both frames. |
 | A3 | **Keep the 18-combination method:** enumerate, check, rank, then size. | Continuous part search was reviewed and [not adopted](PLAN_REVISED.md#suggestions-from-the-review-not-adopted). Sizing still tunes continuous values inside the chosen parts. |
 | A4 | **Fixtures are anchors, found by the panorama agent or entered by hand and tagged `manual`.** Both workflows run the same way on either. | The API found 0 objects on 24 models. Without an anchor nothing can be reached. |
@@ -93,9 +93,10 @@ The rule that matters: **a demonstration is filmed at home, so only what is rela
 | :-- | :-- | :-- |
 | path relative to the object, phases | **yes** | re-anchored on the building's fixture pose (below) |
 | approach direction | **yes** | rotated into the building by the fixture pose |
-| twist axis, turns, angle | **yes** | the wrist must roll that many turns, or regrasp |
-| hinge axis, radius, angle | **yes** | the arm must follow that arc |
-| wipe stroke axis, passes | **yes** | the stroke and pass count |
+| twist turns, angle | **yes** | the wrist must roll that many turns, or regrasp |
+| twist axis; hinge axis and point; wipe stroke axis, surface normal, centre | **yes, after a rotation** | these are in the home scan's frame, not the object's: `classify` runs on scan-frame points. Apply `demo.anchor.rotation` first (or stream C emits them in the object frame; request R6) |
+| hinge radius, angle | **yes** | the arm must follow that arc |
+| wipe passes | **yes** | the pass count |
 | wipe patch size | no | the building's surface extent (counter or table in the scan); strokes are regenerated over it |
 | carry distance | no | the route out, from the pre-pass |
 | carry lift, two-hand width | **yes** | lift clearance over the bin rim; the gripper's opening |
@@ -103,6 +104,8 @@ The rule that matters: **a demonstration is filmed at home, so only what is rela
 | grip band | **yes, labelled `demo:home`** | the force check, gated on `grip.source` (below) |
 
 **Re-anchoring.** The demo frame has its origin at the anchor, z out of the surface and x horizontal (`capture/process.py`, `anchor_frame`). The building's fixture gets the same frame by the same rule from its point and normal, with Z up. Then every demo pose maps into the building as `T_world_fixture · T_fixture_hand`. This is why an anchor needs a normal, and a bulb also needs an axis: a point alone gives no frame. When the panorama agent has only a point, the frame takes the room's ceiling or wall normal and is labelled `assumed-normal`.
+
+**Yaw is free on horizontal anchors.** On a ceiling, counter or floor, `anchor_frame` takes x from the scan's own axes, so the demo's heading about the normal is arbitrary. All three jobs act on horizontal anchors. Every requirement is therefore stated up to a rotation about the anchor's normal, and step 5a picks that rotation together with the base pose. For a bulb this costs nothing; for a wipe, the stroke direction is chosen to suit the base.
 
 Requirements that come out:
 
@@ -116,10 +119,13 @@ Requirements that come out:
 | gripper opening | object width plus margin; the two-hand width for the bag | demo, or the object card |
 | payload | object mass from the object card (bulb 0.05 kg, bag up to 5 kg by default; the user can say) | user / card |
 | force band | low end: the most of the demo's minimum and the physics minimum (hold the mass with friction μ = 0.5 and a safety factor of 1.5; for the bulb, pass the unscrew torque); high end: the demo's peak | demo:home + calculator |
-| press force (wipe) | the grip or glove force during the work phase, or the user's number | demo:home |
+| press force (wipe) | the user's number, or a default of 10 N labelled `assumed`. Today's `grip` value is how closed the hand is, not force into the surface, so it cannot give this. A fingertip glove reading during the work phase replaces it when there is one | user / assumed; later demo:home |
 | wrist roll | twist turns | demo |
+| nearest free floor to each anchor | from the pre-pass: how close a base can get to the anchor's floor projection, and from which side | scan |
 
 The high end of the band is the person's peak, not the breaking force. A person's peak is a force that did not break the bulb; the breaking force is unknown. That is conservative.
+
+**When the physics minimum is above the demo's peak,** the band is empty. That is not a design failure. The ledger records the conflict, and the model asks the user for the object's mass or a new squeeze demo. A real mass, or a person who squeezed harder without damage, resolves it.
 
 ## Step 3. Design: enumerate, check, rank, size
 
@@ -133,11 +139,15 @@ The high end of the band is the person's peak, not the breaking force. A person'
 | Doorway | base width ceiling | the base's smallest width plus margin does not fit |
 | Steps | step limit | the tallest step is above the base's limit |
 | Floors | floors | the corridor changes floor and the base cannot climb |
-| Reach | reach targets, the reach part's range | inverse kinematics finds no pose at some target from any base pose the base's footprint allows near it |
-| Tip-over | payload, reach out from the base, base width | the arm and payload's moment about the support edge, times a safety factor of 1.5, exceeds the base's restoring moment |
+| Reach | reach targets, the nearest free floor to each anchor, the reach part's range | inverse kinematics finds no pose at some target with the base no closer than the free floor allows |
+| Tip-over | payload, reach out from the base, base width, gripper height | the arm and payload's moment about the support edge, times a safety factor of 1.5, exceeds the base's restoring moment (static, plus braking at 0.5 m/s² acting at the centre of mass height) |
+| Payload | payload, reach out from the base | the lift or arm cannot hold the payload at that reach (the bag: 5 kg at the carry pose) |
+| Press | press force, surface normal | the arm cannot push that hard along the normal at the wipe targets, or cannot sense it (`not_assessable` while the press force is `assumed`) |
 | Opening | gripper opening | the gripper does not open that wide |
 | Force | force band, `grip.source` | the gripper cannot hold a force inside the band, or cannot sense it finer than a quarter of the band's width |
 | Twist | wrist roll | the wrist cannot roll that far and no regrasp is planned |
+
+   Checks run before sizing use each part's most favourable size inside its catalog range (the narrowest base the card allows for Doorway, the widest for Tip-over). A candidate that cannot pass even then is out. Sizing then finds one size that passes both.
 
    **The Force check is `not_assessable` while `grip.source` is `travel`.** An uncalibrated band can be replayed on the same glove but cannot size a gripper. A `not_assessable` check does not reject a candidate. It is shown as such in the decision record and the verdict, and the design is labelled "force not verified".
 
@@ -164,6 +174,8 @@ Illustrative numbers for the trash bag: `M` = 20 kg, `m_p` = 5 kg at `r` = 0.6 m
 - doorway ceiling in a 0.54 m doorway: 0.54 − 2 × 0.05 = **0.44 m**
 - window: 0.36 to 0.44 m. Size to the floor plus margin.
 
+This static form ignores lift height. Height enters through braking: decelerating at `a` adds a moment of `(M + m_p + m_a) · a · h_cg`, so a bulb at full lift on a narrow base is limited by how hard the base brakes. The check includes that term; the example leaves it out to stay readable.
+
 If the bag is carried at `r` = 0.25 m (arm retracted) instead, the floor drops to about 0.19 m. That is a **program fix**: the pathing step can carry the bag tucked in, and the robot does not change. The loop below tries program fixes before robot fixes.
 
 ## Step 4. Compose
@@ -176,13 +188,11 @@ This is the second pathing pass, now with a robot.
 
 ### 5a. Standoff poses
 
-For each task, where the base parks so the arm can do the work.
+For each task, where the base parks so the arm can do the work. Stream C's code cannot call stream B's, so the agent node runs this as three calls:
 
-1. **Sample** base poses (x, y, heading) on rings around the anchor's floor projection: radii from 0.2 m to the reach envelope's maximum, every 0.05 m and every 15°.
-2. **Reject** poses where the footprint hits the occupancy grid, or that are not connected to the dock.
-3. **Check reach:** inverse kinematics on every reach target of that task's re-anchored path (`motion` stream, with mink).
-4. **Check tip-over** at that pose with the arm at its farthest target.
-5. **Score** the rest: manipulability at the targets (higher is better), clearance to obstacles, and distance along the route. Keep the best and two spares.
+1. **Nav proposes** (stream C): sample base poses (x, y, heading) on rings around the anchor's floor projection, radii from 0.2 m to the reach envelope's maximum, every 0.05 m and every 15°. Reject poses where the footprint hits the occupancy grid or that are not connected to the dock. Return the survivors ranked by clearance and distance along the route.
+2. **Motion checks** (stream B): for the top proposals, and for each yaw of the task about the anchor's normal (every 15°; see "Yaw is free"), inverse kinematics on every reach target of the re-anchored path, with mink. Then tip-over at that pose with the arm at its farthest target.
+3. **The agent node picks** the pose and yaw with the best manipulability at the targets among those that pass, and keeps two spares for the loop.
 
 ### 5b. Base route
 
@@ -224,7 +234,7 @@ A failure becomes a **new constraint** that cites the check that produced it. Co
 | pad force left the band in sim | slower approach; a lower force setpoint | finer force sensing, or another gripper |
 | object slipped in sim | a higher setpoint inside the band | the force band's low end goes up |
 
-**It stops.** Each pass adds at least one constraint, so the candidates that pass can only shrink. The loop also stops after 5 robot fixes. On stopping without a pass, it reports the binding checks, as in step 3.
+**It stops.** Each robot fix adds at least one constraint, so the candidates that pass can only shrink, and the loop stops after 5 robot fixes. Each program fix also narrows a bound and never widens one: a force setpoint moves inside an interval that shrinks with every change ("lower" sets the new top, "raise" sets the new bottom), and a spare standoff once used is gone. At most 3 program fixes are tried per robot before the failure is treated as a robot fix. On stopping without a pass, it reports the binding checks, as in step 3.
 
 A decision's `revisit_if` is tested on every pass. When a new constraint matches it, that decision is reopened and shown as a backtrack in the trace.
 
@@ -255,7 +265,10 @@ These follow from the steps above. None is a contract change yet; each is posted
 | R3 | each anchor in `world.json` has a point, a normal, an axis where it turns, the surface extent where it is wiped, and a source label (`panorama-agent` or `manual`) | re-anchoring needs a frame, not a point |
 | R4 | `build.json` carries the footprint polygon, its inscribed and circumscribed radii, the step limit and the reach envelope as a table | pathing plans for the real footprint and reach |
 | R5 | each check result in `composer.api.check` is `pass`, `fail` or `not_assessable`, with its number and the requirement ids it read | the Force gate; the binding-check report |
-| R6 | `demo.json` and `grip.json` are Z up, or say their frame | A2 |
+| R6 | `demo.json` and `grip.json` are Z up, or say their frame; and `motion`'s axes, points and normals are given in the object frame, like `path` | A2; today they are in the home scan's frame |
+| R7 | the run folder holds one demo, grip, trajectory and standoff **per task**, or the design step formally reads several job runs | A1 |
+| R8 | `motion.api.retarget(demo, robot)` also needs the fixture pose, the chosen standoff and yaw, and the surface extent for a wipe. It reads them from the run folder (`world.json`, `route.json`) or gains arguments | step 5c |
+| R9 | the Reach check needs the nearest free floor to each anchor, which `check(candidate, requirements)` only gets if the pre-pass puts it in the ledger | step 3; this doc does that, so it needs no new argument |
 
 ## Still open
 
