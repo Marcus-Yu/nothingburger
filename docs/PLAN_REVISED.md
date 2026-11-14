@@ -1,8 +1,8 @@
 # Revised plan
 
-Status: draft, 2026-11-14. The flow and outputs are the lead's. The rest was drafted by stream A's agent from the sponsor's quickstart, for the lead to confirm. No contract has changed yet.
+Status: draft, 2026-11-14. No contract has changed yet.
 
-This replaces the flow, demo, outputs and build order in the [full plan](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf). Streams, the board and the rules are unchanged. [PLAN_SHORT.md](PLAN_SHORT.md) is the one-page version.
+This replaces the flow, demo, outputs and build order in the [full plan](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf). [PLAN_SHORT.md](PLAN_SHORT.md) is the one-page version.
 
 ## Task and who it is for
 
@@ -201,7 +201,6 @@ About 36 hours.
 - Which two buildings.
 - Calibrating the gloves against a kitchen scale, one curve per fingertip.
 - Whether a bulb's breaking force is inside the range the glove sensors can read.
-- Stream C has four jobs (data extraction, the outside route, Quest recording and replay, the web view). The lead needs to rebalance.
 - A cost comparison against a person doing the same job.
 
 ## Carried over
