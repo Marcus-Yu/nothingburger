@@ -1,0 +1,6 @@
+# Copy to .board.local (git-ignored) and edit.
+BOARD_HANDLE=your-github-username
+BOARD_PREFIX=P1's Claude Code
+# BOARD_ISSUE=1
+# BOARD_REPO=Marcus-Yu/robots
+# BOARD_POLL=20

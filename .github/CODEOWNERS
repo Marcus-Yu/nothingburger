@@ -1,0 +1,16 @@
+# Replace HANDLE_1..3 with the real GitHub usernames (see AGENTS.md).
+*                @HANDLE_1
+/agent/          @HANDLE_1
+/contracts/      @HANDLE_1
+/evals/          @HANDLE_1
+/docs/           @HANDLE_1
+/tools/board/    @HANDLE_1
+/runs/golden/    @HANDLE_1
+/catalog/        @HANDLE_2
+/composer/       @HANDLE_2
+/motion/         @HANDLE_2
+/sim/            @HANDLE_2
+/world/          @HANDLE_3
+/capture/        @HANDLE_3
+/nav/            @HANDLE_3
+/web/            @HANDLE_3

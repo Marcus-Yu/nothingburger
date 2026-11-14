@@ -1,0 +1,13 @@
+[project]
+name = "robots"
+version = "0.0.0"
+description = "Agents that build and deploy robots"
+requires-python = ">=3.11"
+# Pin exact versions in hour 1, after confirming Menagerie models and mink load together.
+# MuJoCo 4.0.0 shipped 2026-11-06, 4.0.1 on 2026-11-11 (see docs/ plan, "Risks").
+dependencies = [
+  "mujoco",    # TODO pin
+  "mink",      # TODO pin
+  "langgraph", # TODO pin
+  "langsmith", # TODO pin
+]

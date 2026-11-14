@@ -1,0 +1,4 @@
+.board.local
+__pycache__/
+*.pyc
+.venv/
