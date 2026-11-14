@@ -83,7 +83,8 @@ the ground truth the tests check the processing against.
   descriptions; the schemas in `contracts/` are Stream A's to freeze.
 - **One real recording has been processed** (a short wipe). The tests use synthetic data.
 - **Gloves are read but not calibrated.** `glove.py` reads both ESP32s on the laptop (start the
-  backend with `GLOVE_PORTS=left=COM8,right=COM9`) and lays their readings on each recording by
+  backend with `GLOVE_PORTS=left=ble,right=ble` for Bluetooth, where the gloves advertise as
+  `Glove-L` and `Glove-R`, or `GLOVE_PORTS=left=COM8,right=COM9` for USB) and lays their readings on each recording by
   time, as `glove_raw` per hand per sample. `grip.json` then has `source: "glove_raw"` and a
   band in the glove's own 0 to 4095 units, with `force_n` null. Newtons need a calibration:
   `python -m capture.glove point right index 200` with 200 g on that fingertip, a few weights

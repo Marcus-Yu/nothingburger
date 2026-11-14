@@ -71,3 +71,18 @@ def test_a_lump_of_lines_is_spread_back_over_the_time_it_covers():
     times = glove.spread_times(100.0, 5, period=0.01)
     assert times[-1] == 100.0 and times[0] == pytest.approx(99.96)
     assert np.allclose(np.diff(times), 0.01)
+
+
+def test_bluetooth_value_is_five_little_endian_readings():
+    value = b"".join(v.to_bytes(2, "little") for v in (1, 2, 3, 4, 4095))
+    assert glove.parse_ble(value) == [1, 2, 3, 4, 4095]
+    assert glove.parse_ble(value[:8]) is None
+    assert glove.parse_ble(b"\xff" * 10) is None  # out of range: not readings
+    assert glove.remap("left", glove.parse_ble(value)) == [1, 4095, 4, 3, 2]
+
+
+def test_reader_choice_by_port():
+    assert isinstance(glove.make_reader("left", "ble"), glove.BleGloveReader)
+    assert glove.make_reader("left", "ble").port == "ble:Glove-L"
+    assert glove.make_reader("right", "ble:MyGlove").port == "ble:MyGlove"
+    assert type(glove.make_reader("left", "COM8")) is glove.GloveReader

@@ -7,6 +7,7 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "bleak>=3.1.0",
     "edge-tts>=7.2.8",
     "fast-simplification>=0.2.0",
     "fastapi>=0.141.1",
@@ -30,11 +31,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Reconstruction pipeline only (pipeline/) -- the parts server (server/) never needs these, kept
-# optional so `uv sync` for server-only work stays light (no SfM/mesh-decimation deps).
+# Scene import only (pipeline/: Matterport and Vexcel to a scene package) -- the parts server
+# (server/) never needs these, kept optional so `uv sync` for server-only work stays light.
 pipeline = [
-    "opencv-python-headless>=4.7.0",
-    "pycolmap>=4.2.0",
     "pymeshlab>=2025.7.post1",
     "scipy>=1.18.1",
 ]
@@ -50,14 +49,12 @@ module-root = ""
 [tool.pytest.ini_options]
 markers = [
     "live: hits real external APIs, costs money, skipped by default",
-    "slow: end-to-end reconstruction run on real footage, skipped by default",
+    "slow: long-running end-to-end test, skipped by default",
 ]
 addopts = "-m 'not live and not slow'"
 
 [tool.ruff]
 line-length = 100
-# one-off ROCm build and smoke scripts run inside the hfbox container
-extend-exclude = ["pipeline/tools/rocm"]
 
 [dependency-groups]
 dev = [

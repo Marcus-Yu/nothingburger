@@ -9,13 +9,21 @@ Each value is a fingertip pressure sensor's raw reading, 0 to 4095. It is not a 
 sensors are not linear and differ from each other, so a raw reading only compares with other
 readings of the same sensor until that sensor is calibrated (`Calibration`).
 
+Over Bluetooth Low Energy a glove advertises as `Glove-L` or `Glove-R`. Its one characteristic
+holds the same five readings as ten bytes (five little-endian 16-bit numbers, in the order the
+serial line prints them). The firmware gives that characteristic no descriptor, so a computer
+cannot switch its notifications on; the reader polls it instead, which gives about 30 readings
+a second. A glove on Bluetooth only needs power, so it can run from a battery.
+
 `GloveHub` reads the ports in background threads and keeps the last ten minutes, stamped with
 the laptop's clock. `merge` puts the readings onto a recording's samples: the backend notes the
 laptop time when the headset says a recording started, so sample time t is laptop time
 start + t. Each hand's sample gains `glove_raw` (five numbers, thumb to pinky) and, when that
 glove is calibrated, `force_n` (the hardest-pressed fingertip, in newtons).
 
-    GLOVE_PORTS=left=COM8,right=COM9          # which port is which hand
+    GLOVE_PORTS=left=COM8,right=COM9          # which port is which hand (USB)
+    GLOVE_PORTS=left=ble,right=ble            # over Bluetooth: the gloves named Glove-L and Glove-R
+    GLOVE_PORTS=left=ble:Glove-L              # or a Bluetooth name of your choosing
     python -m capture.glove watch              # live readings, to find out which is which
     python -m capture.glove point right index 200    # calibrate: 200 g on the right index tip
 """
@@ -40,6 +48,17 @@ KEEP_SECONDS = 600
 G = 9.80665
 CALIBRATION_FILE = Path(__file__).resolve().parent / "glove_calibration.json"
 PERIOD_S = 0.01  # the gloves print 100 lines a second
+BLE_CHARACTERISTIC = "a7c4e000-5c1a-4f2e-9d6b-1f0a9e0c0002"
+BLE_NAMES = {"left": "Glove-L", "right": "Glove-R"}
+
+
+def parse_ble(value: bytes) -> list[int] | None:
+    """The characteristic's ten bytes -> five ints in printed order. None when it is not ten
+    bytes of readings in range."""
+    if len(value) < 10:
+        return None
+    values = [int.from_bytes(value[k : k + 2], "little") for k in range(0, 10, 2)]
+    return values if max(values) <= FULL_SCALE else None
 
 # Which printed name is which real finger, per glove. The left glove's sensors are wired in the
 # opposite order across the hand from what its firmware prints (checked finger by finger on the
@@ -193,6 +212,52 @@ class GloveReader:
                 "last_reset_s_ago": None if self.last_reset is None else round(now - self.last_reset, 1)}  # fmt: skip
 
 
+class BleGloveReader(GloveReader):
+    """One glove over Bluetooth Low Energy: found by name, then its characteristic read in a
+    loop. `port` is shown as `ble:<name>`."""
+
+    def __init__(self, hand: str, name: str | None = None):
+        self.name = name or BLE_NAMES[hand]
+        super().__init__(hand, f"ble:{self.name}")
+
+    def _run(self) -> None:
+        import asyncio
+
+        asyncio.run(self._loop())
+
+    async def _loop(self) -> None:
+        import asyncio
+
+        from bleak import BleakClient, BleakScanner  # imported here: only this reader needs it
+
+        while not self._stop.is_set():
+            try:
+                device = await BleakScanner.find_device_by_filter(
+                    lambda d, adv: (d.name or adv.local_name or "") == self.name, timeout=15.0
+                )
+                if device is None:
+                    raise OSError(f"{self.name} is not advertising (is the glove powered?)")
+                async with BleakClient(device, timeout=20.0) as client:
+                    if self.times:  # a reconnect: the glove went away, most likely a restart
+                        self.resets += 1
+                        self.last_reset = time.time()
+                    self.error = None
+                    while not self._stop.is_set():
+                        values = parse_ble(bytes(await client.read_gatt_char(BLE_CHARACTERISTIC, use_cached=False)))
+                        if values is not None:
+                            self.feed(time.time(), remap(self.hand, values))
+            except Exception as exc:  # noqa: BLE001 -- out of range, restarted, radio busy: retry
+                self.error = (str(exc) or type(exc).__name__)[:200]
+                await asyncio.sleep(1.0)
+
+
+def make_reader(hand: str, port: str) -> GloveReader:
+    """`COM8` -> the serial reader; `ble` or `ble:<name>` -> the Bluetooth one."""
+    if port.lower().startswith("ble"):
+        return BleGloveReader(hand, port.partition(":")[2].strip() or None)
+    return GloveReader(hand, port)
+
+
 class GloveHub:
     def __init__(self, calibration: Calibration | None = None):
         self.readers: dict[str, GloveReader] = {}
@@ -206,7 +271,7 @@ class GloveHub:
         for item in filter(None, (os.environ.get("GLOVE_PORTS") or "").split(",")):
             hand, sep, port = item.partition("=")
             if sep and hand.strip() in ("left", "right"):
-                hub.readers[hand.strip()] = GloveReader(hand.strip(), port.strip()).start()
+                hub.readers[hand.strip()] = make_reader(hand.strip(), port.strip()).start()
         return hub
 
     def status(self) -> list[dict]:
@@ -240,6 +305,7 @@ class GloveHub:
         if any(r.get("merged") for r in report.values()):
             device = recording.setdefault("device", {})
             device["glove"] = "ESP32 fingertip pressure, raw 0-4095, thumb to pinky"
+            device["glove_link"] = {h: r.port for h, r in self.readers.items()}
         return report
 
 
