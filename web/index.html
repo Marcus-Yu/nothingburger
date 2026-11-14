@@ -22,7 +22,11 @@
     </div>
     <iframe id="tour" title="3D tour of the space" allow="fullscreen; xr-spatial-tracking" allowfullscreen></iframe>
     <model-viewer id="outside" class="hidden" camera-controls touch-action="pan-y" shadow-intensity="0"
-                  camera-orbit="30deg 50deg 55%" min-camera-orbit="auto auto 10%" alt="The outside of the building from Vexcel aerial imagery"></model-viewer>
+                  camera-orbit="25deg 42deg 34%" min-camera-orbit="auto 0deg 5%" max-camera-orbit="auto 85deg 120%"
+                  field-of-view="30deg" interaction-prompt="none" camera-target="0m 0m 0m"
+                  alt="The outside of the building from Vexcel aerial imagery">
+      <div slot="hotspot-target" class="pin" data-position="0m 22m 0m" data-normal="0m 1m 0m" id="outside-pin">This building</div>
+    </model-viewer>
     <p id="world-note" class="note"></p>
   </section>
 
@@ -46,8 +50,9 @@
 
     <div class="card hidden" id="demo-card">
       <h2><span class="n">3</span> Show it once</h2>
-      <p>Put on the Quest and do the task for real, in the room you are in, wearing the gloves.
-         Pinch at the thing you will work on to start; pinch thumb and middle finger when you are done.</p>
+      <p>Press <b>Ask the headset</b>, then put on the Quest. It switches to passthrough so you see the room you
+         are in, shows the task and counts down from 8. Do the task for real, wearing the gloves. To finish, pinch
+         thumb and middle finger together, or press Stop here.</p>
       <p class="note" id="glove-note"></p>
       <div id="demos"></div>
     </div>

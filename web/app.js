@@ -57,6 +57,7 @@ async function showWorld() {
   $("world-note").textContent = (w.note || "") + (w.in_headset ? " In the headset: yes." : " In the headset: not yet.");
   $("tab-outside").disabled = !w.outside_mesh;
   if (w.outside_mesh) $("outside").src = w.outside_mesh;
+  $("outside-pin").textContent = w.outside_label || "This building";
   showSide("inside");
   // Start on the floor plan. That needs the Showcase SDK and its key (localhost only); without
   // them the tour opens at its own start position.
@@ -121,18 +122,24 @@ function demoRow(demo) {
   row.append(el("strong", demo.kind === "squeeze" ? `Squeeze: ${demo.chore}` : `Motion: ${demo.chore}`));
   row.append(el("div", `For ${demo.why}.`, "note"));
   const button = el("button", "Ask the headset");
+  const stop = el("button", "Stop", "tab");
+  stop.disabled = true;
+  stop.onclick = () => post("/demos/stop", {}).catch(() => {});
   const state = el("div", "", "state");
-  button.onclick = () => filmDemo(demo, button, state);
-  row.append(button, state);
+  button.onclick = () => filmDemo(demo, button, state, stop);
+  const buttons = el("div", null, "row");
+  buttons.append(button, stop);
+  row.append(buttons, state);
   return row;
 }
 
-async function filmDemo(demo, button, state) {
+async function filmDemo(demo, button, state, stop) {
   button.disabled = true;
+  stop.disabled = false;
   state.className = "state";
   try {
     const asked = await post("/demos/request", { chore: demo.chore, kind: demo.kind, max_seconds: 45 });
-    state.textContent = "Sent. Put on the headset: it is showing the request.";
+    state.textContent = "Sent. Put on the headset: it shows the task and counts down before recording.";
     for (let waited = 0; waited < 180; waited += 2) {
       await new Promise((r) => setTimeout(r, 2000));
       let read;
@@ -148,6 +155,7 @@ async function filmDemo(demo, button, state) {
     state.textContent = `Could not ask the headset: ${e.message}`;
   } finally {
     button.disabled = false;
+    stop.disabled = true;
   }
 }
 

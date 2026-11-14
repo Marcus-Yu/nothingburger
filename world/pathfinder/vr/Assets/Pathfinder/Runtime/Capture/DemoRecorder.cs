@@ -3,38 +3,39 @@ using System.Collections;
 using System.Text;
 using Pathfinder.Core;
 using Pathfinder.Input;
-using Pathfinder.Scene;
 using Pathfinder.Tools;
 using Pathfinder.UI;
-using IsdkHand = Oculus.Interaction.Input.Hand;
-using IsdkJoint = Oculus.Interaction.Input.HandJointId;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using IsdkHand = Oculus.Interaction.Input.Hand;
+using IsdkJoint = Oculus.Interaction.Input.HandJointId;
 
 namespace Pathfinder.Capture
 {
-    /// Films a demonstration of a chore: the wearer's head and both hands, 30 times a second, with how tightly each
-    /// hand is closed, in the loaded scan's frame.
+    /// Films a demonstration of a chore done for real: the wearer's head and both hands, 30 times a second, with every
+    /// finger joint and how tightly each hand is closed.
     ///
-    /// Someone asks for a demonstration through the backend (`POST /demos/request`, the agent or a person at the
-    /// laptop). This polls `GET /demos/control`, shows the request, and waits for the wearer to mark the thing they
-    /// will work on with one pinch or trigger pull: where that ray lands on the scan is the anchor, or the hand's own
-    /// position when there is no scan under it. Recording runs until the done gesture (B / Y, or a thumb and middle
-    /// finger pinch), the request's time limit, or `POST /demos/stop`, then the recording is uploaded.
+    /// Someone asks for a demonstration through the backend (`POST /demos/request`, from the website or the agent).
+    /// This polls `GET /demos/control`. When a request arrives it switches the headset to passthrough, so the wearer
+    /// sees the room they are in, and shows the task in front of them with a countdown. Recording starts when the
+    /// countdown ends: no gesture is needed to begin, so nothing starts by accident and the hands are free for the
+    /// task. It ends on the done gesture (B / Y, or a thumb and middle finger pinch), at the request's time limit, or
+    /// on `POST /demos/stop` (the website's Stop button). The recording is uploaded and the headset goes back to where
+    /// it was.
     ///
-    /// While armed or recording no tool is equipped, so the hands' pinches do the chore instead of measuring or moving.
-    /// Creates itself after the scene loads: nothing to wire.
+    /// While a demonstration is under way no tool is equipped. Creates itself after the scene loads: nothing to wire.
     public class DemoRecorder : MonoBehaviour
     {
-        public enum State { Idle, Armed, Recording, Uploading }
+        public enum State { Idle, Briefing, Recording, Uploading }
 
         [Serializable] class Request { public string id, chore, kind, prompt; public float max_seconds; }
         [Serializable] class Control { public Request request; public bool stop; }
 
         public const float RateHz = 30f;
         public float pollSeconds = 1f;
-        [Tooltip("Scan metres. A marking ray that lands farther than this from the marking hand is not the target.")]
-        public float anchorReach = 1.2f;
+        [Tooltip("Seconds the task is shown before recording starts.")]
+        public float briefingSeconds = 8f;
 
         public State Current { get; private set; } = State.Idle;
         public string LastResult { get; private set; } = "";
@@ -46,8 +47,10 @@ namespace Pathfinder.Capture
         IsdkHand[] m_Skeletons = Array.Empty<IsdkHand>();
         static readonly int JointCount = Oculus.Interaction.Input.Constants.NUM_HAND_JOINTS;
         ToolKind m_ToolBefore = ToolKind.None;
-        float m_Started, m_NextSample, m_NextPoll;
-        bool m_StopAsked, m_Polling;
+        AppMode m_ModeBefore = AppMode.Passthrough;
+        TextMeshPro m_Hud;
+        float m_Started, m_BriefingEnds, m_NextSample, m_NextPoll, m_HudUntil;
+        bool m_StopAsked, m_Polling, m_HudPlaced;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Bootstrap()
@@ -62,7 +65,8 @@ namespace Pathfinder.Capture
 
         void OnDisable()
         {
-            Unhook();
+            if (m_Hub != null) m_Hub.ButtonDown -= OnButton;
+            m_Hub = null;
             Services.Unregister(this);
         }
 
@@ -71,42 +75,48 @@ namespace Pathfinder.Capture
             if (m_Hub != null) return;
             m_Hub = Services.Get<ToolInputHub>();
             m_Source = FindFirstObjectByType<OvrToolInputSource>();
-            if (m_Hub == null) return;
-            m_Hub.PressStart += OnPressStart;
-            m_Hub.ButtonDown += OnButton;
-        }
-
-        void Unhook()
-        {
-            if (m_Hub == null) return;
-            m_Hub.PressStart -= OnPressStart;
-            m_Hub.ButtonDown -= OnButton;
-            m_Hub = null;
+            if (m_Hub != null) m_Hub.ButtonDown += OnButton;
         }
 
         void Update()
         {
             Hook();
             float now = Time.unscaledTime;
-            if (!m_Polling && now >= m_NextPoll && (Current == State.Idle || Current == State.Recording))
+            if (!m_Polling && now >= m_NextPoll && Current != State.Uploading)
             {
                 m_NextPoll = now + pollSeconds;
                 StartCoroutine(Poll());
             }
-            if (Current != State.Recording) return;
-            if (now >= m_NextSample)
+            FollowHead();
+            if (Current == State.Briefing)
             {
-                m_NextSample = Mathf.Max(m_NextSample + 1f / RateHz, now - 1f / RateHz);
-                m_Recording.samples.Add(Sample(now - m_Started));
+                if (m_StopAsked) { Cancel(); return; }
+                int left = Mathf.CeilToInt(m_BriefingEnds - now);
+                if (left <= 0) Begin();
+                else Say($"<b>Show me: {What()}</b>\nDo it for real, on the thing in front of you.\nRecording starts in {left}");
             }
-            if (m_StopAsked || now - m_Started >= m_Request.max_seconds) Finish();
+            else if (Current == State.Recording)
+            {
+                if (now >= m_NextSample)
+                {
+                    m_NextSample = Mathf.Max(m_NextSample + 1f / RateHz, now - 1f / RateHz);
+                    m_Recording.samples.Add(Sample(now - m_Started));
+                }
+                int t = (int)(now - m_Started), max = (int)m_Request.max_seconds;
+                Say($"<color=#FF5A4E>●</color> Recording: {What()}   {t / 60}:{t % 60:00} / {max / 60}:{max % 60:00}\n" +
+                    "Thumb and middle finger pinch when you're done");
+                if (m_StopAsked || now - m_Started >= m_Request.max_seconds) Finish();
+            }
+            else if (m_Hud != null && m_Hud.gameObject.activeSelf && now >= m_HudUntil) m_Hud.gameObject.SetActive(false);
         }
+
+        string What() => m_Request == null ? "" : string.IsNullOrEmpty(m_Request.prompt) ? m_Request.chore : m_Request.prompt;
 
         IEnumerator Poll()
         {
             m_Polling = true;
             string url = ServerConfig.Current.TrimEnd('/') + "/demos/control";
-            if (Current == State.Recording) url += "?active=" + UnityWebRequest.EscapeURL(m_Request.id);
+            if (Current != State.Idle && m_Request != null) url += "?active=" + UnityWebRequest.EscapeURL(m_Request.id);
             using (var req = UnityWebRequest.Get(url))
             {
                 req.timeout = 4;
@@ -117,87 +127,82 @@ namespace Pathfinder.Capture
                     try { c = JsonUtility.FromJson<Control>(req.downloadHandler.text); } catch (Exception) { }
                     if (c != null)
                     {
-                        if (Current == State.Recording && c.stop) m_StopAsked = true;
-                        if (Current == State.Idle && c.request != null && !string.IsNullOrEmpty(c.request.id)) Arm(c.request);
+                        if (Current != State.Idle && c.stop) m_StopAsked = true;
+                        if (Current == State.Idle && c.request != null && !string.IsNullOrEmpty(c.request.id)) Brief(c.request);
                     }
                 }
             }
             m_Polling = false;
         }
 
-        void Arm(Request request)
+        // ---------------- the flow ----------------
+
+        /// A request arrived: passthrough, hands free, the task and a countdown in front of the wearer.
+        void Brief(Request request)
         {
             m_Request = request;
             if (m_Request.max_seconds <= 0f) m_Request.max_seconds = 30f;
+            m_ModeBefore = AppState.Mode;
+            AppState.Set(AppMode.Passthrough);
             if (Services.TryGet<ToolManager>(out var tools))
             {
                 m_ToolBefore = tools.Active;
                 tools.Equip(ToolKind.None);
             }
-            Current = State.Armed;
-            string what = string.IsNullOrEmpty(request.prompt) ? request.chore : request.prompt;
-            UiToast.Show($"Show me: {what}. Pinch at the thing you'll work on to start.", ColorRole.Info);
-            Log.Info($"DemoRecorder: armed {request.id} ({request.kind}) \"{request.chore}\"");
+            m_StopAsked = false;
+            m_BriefingEnds = Time.unscaledTime + briefingSeconds;
+            Current = State.Briefing;
+            Log.Info($"DemoRecorder: briefing {request.id} ({request.kind}) \"{request.chore}\"");
         }
 
-        void OnPressStart(ToolHand hand, Pose pointer)
+        void Begin()
         {
-            if (Current != State.Armed) return;
-            var content = Content();
+            bool controllers = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch) || OVRInput.IsControllerConnected(OVRInput.Controller.LTouch);
             m_Recording = new DemoRecording
             {
                 id = m_Request.id, kind = string.IsNullOrEmpty(m_Request.kind) ? "path" : m_Request.kind, chore = m_Request.chore,
-                site = Services.TryGet<SceneStreamer>(out var streamer) && content != null ? streamer.Site ?? "" : "",
-                frame = content != null ? "scene" : "room", rateHz = RateHz,
-                hand = hand == ToolHand.Left ? "left" : "right",
-                input = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch) || OVRInput.IsControllerConnected(OVRInput.Controller.LTouch)
-                    ? "controllers" : "hands",
+                // Passthrough: the wearer is in their own room, so positions are the room's (the headset's tracking
+                // space), not the scan's. No anchor is marked: the processing takes the target from where the work happened.
+                site = "", frame = "room", rateHz = RateHz, hand = "", input = controllers ? "controllers" : "hands",
             };
-            // The anchor: where the marking ray lands on the scan, when that is within arm's reach of the marking hand
-            // (the wearer is working on something in the scan). A hit across the room means they are marking a real
-            // thing in front of them that the scan does not have there: then the anchor is the hand itself.
-            Vector3 handAt = m_Hub != null && m_Hub.TryGetGrip(hand, out var marking) ? marking.position : pointer.position;
-            if (content != null && AppState.Mode == AppMode.World &&
-                SnapService.TryRaySnap(new Ray(pointer.position, pointer.forward), out var hit, 20f, features: false) &&
-                Vector3.Distance(hit.point, handAt) <= anchorReach * Mathf.Max(content.lossyScale.x, 1e-6f))
-            {
-                m_Recording.anchorP = ToFrame(content, hit.point);
-                m_Recording.anchorNormal = DemoRecording.ToGltf(content.InverseTransformDirection(hit.normal)).normalized;
-                m_Recording.anchorHasNormal = true;
-            }
-            else
-            {
-                m_Recording.anchorP = ToFrame(content, handAt);
-            }
-            m_Recording.hasAnchor = true;
-            // Finger joints come from the Interaction SDK's hand skeletons (hands only: a controller has none).
+            var rig = FindFirstObjectByType<OVRCameraRig>();
+            if (rig != null && rig.trackingSpace != null) m_Recording.floorY = ToFrame(rig.trackingSpace.position).y;
             m_Skeletons = FindObjectsByType<IsdkHand>(FindObjectsSortMode.None);
             m_Recording.jointNames = new string[JointCount];
             for (int j = 0; j < JointCount; j++) m_Recording.jointNames[j] = ((IsdkJoint)j).ToString();
-            // The floor the wearer stands on: the tracking origin is at floor level, so the rig's own height is it.
-            var rig = FindFirstObjectByType<OVRCameraRig>();
-            if (rig != null && rig.trackingSpace != null) m_Recording.floorY = ToFrame(content, rig.trackingSpace.position).y;
             m_Started = Time.unscaledTime;
-            StartCoroutine(TellStarted(m_Request.id));   // the laptop's clock at this moment lines the gloves up
             m_NextSample = m_Started;
-            m_StopAsked = false;
+            StartCoroutine(TellStarted(m_Request.id));   // the laptop's clock at this moment lines the gloves up
             Current = State.Recording;
-            UiToast.Show((m_Recording.anchorHasNormal ? "Target marked on the scan. " : "Target marked at your hand. ") +
-                "Recording: thumb and middle finger pinch (or B / Y) when you're done.", ColorRole.Info);
-            Log.Info($"DemoRecorder: recording {m_Request.id} in the {m_Recording.frame} frame, anchor {m_Recording.anchorP:F2}");
+            Log.Info($"DemoRecorder: recording {m_Request.id} in passthrough, up to {m_Request.max_seconds:0} s");
         }
 
         void OnButton(ToolHand hand, ToolButton button)
         {
-            // Give the chore a second before the done gesture counts: the pinch that started it is still closing.
-            if (Current == State.Recording && button == ToolButton.Finish && Time.unscaledTime - m_Started > 1f) m_StopAsked = true;
+            // Give the chore two seconds before the done gesture counts.
+            if (Current == State.Recording && button == ToolButton.Finish && Time.unscaledTime - m_Started > 2f) m_StopAsked = true;
+        }
+
+        void Cancel()
+        {
+            Log.Info($"DemoRecorder: {m_Request.id} cancelled before recording");
+            Say("Demonstration cancelled.", 3f);
+            Restore();
+            m_Request = null;
+            Current = State.Idle;
         }
 
         void Finish()
         {
             Current = State.Uploading;
-            if (Services.TryGet<ToolManager>(out var tools)) tools.Equip(m_ToolBefore == ToolKind.None ? ToolManager.Default : m_ToolBefore);
+            Say("Saving the demonstration...", 30f);
             StartCoroutine(Upload(m_Recording));
+        }
+
+        void Restore()
+        {
+            AppState.Set(m_ModeBefore);
+            if (Services.TryGet<ToolManager>(out var tools)) tools.Equip(m_ToolBefore == ToolKind.None ? ToolManager.Default : m_ToolBefore);
         }
 
         static IEnumerator TellStarted(string id)
@@ -209,7 +214,7 @@ namespace Pathfinder.Capture
 
         IEnumerator Upload(DemoRecording recording)
         {
-            string summary = $"{recording.Duration:0.0} s, {recording.samples.Count} samples";
+            string summary = $"{recording.Duration:0.0} s";
             using (var req = new UnityWebRequest(ServerConfig.Current.TrimEnd('/') + "/demos", UnityWebRequest.kHttpVerbPOST)
             {
                 uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(recording.ToJson())) { contentType = "application/json" },
@@ -219,50 +224,75 @@ namespace Pathfinder.Capture
             {
                 yield return req.SendWebRequest();
                 bool ok = req.result == UnityWebRequest.Result.Success;
-                LastResult = ok ? $"saved {recording.id}: {summary}" : $"upload failed ({req.responseCode} {req.error}): {summary}";
-                UiToast.Show(ok ? $"Demonstration saved ({summary})." : "Couldn't upload the demonstration: is the server reachable?",
-                    ok ? ColorRole.Info : ColorRole.Danger);
+                LastResult = ok ? $"saved {recording.id}: {summary}, {recording.samples.Count} samples" : $"upload failed ({req.responseCode} {req.error}): {summary}";
+                Say(ok ? $"<b>Saved.</b> {summary} recorded.\nYou can take the headset off." : "Couldn't upload the demonstration.\nIs the laptop reachable?", 6f);
                 Log.Info($"DemoRecorder: {LastResult}");
             }
+            Restore();
             m_Recording = null;
             m_Request = null;
             Current = State.Idle;
         }
 
+        // ---------------- the text in front of the wearer ----------------
+
+        void Say(string text, float seconds = 1f)
+        {
+            if (m_Hud == null)
+            {
+                m_Hud = UiText.Create(transform, "DemoHud", text, TypeRole.Title, 1.1f, ColorRole.TextPrimary,
+                    TextAlignmentOptions.Center, width: 0.9f, weight: Weight.Medium);
+                m_Hud.outlineWidth = 0.2f;   // readable over a bright room
+                m_Hud.outlineColor = new Color32(0, 0, 0, 220);
+                m_HudPlaced = false;
+            }
+            if (!m_Hud.gameObject.activeSelf) { m_Hud.gameObject.SetActive(true); m_HudPlaced = false; }
+            if (m_Hud.text != text) m_Hud.text = text;
+            m_HudUntil = Time.unscaledTime + seconds;
+        }
+
+        /// The text floats ahead of the wearer, a little above eye level so the hands and the task stay in view, and
+        /// drifts after the head instead of being glued to it.
+        void FollowHead()
+        {
+            if (m_Hud == null || !m_Hud.gameObject.activeSelf || Camera.main == null) return;
+            var head = Camera.main.transform;
+            Vector3 flat = Vector3.ProjectOnPlane(head.forward, Vector3.up);
+            if (flat.sqrMagnitude < 1e-4f) flat = Vector3.ProjectOnPlane(head.up, Vector3.up);
+            Vector3 target = head.position + flat.normalized * 1.1f + Vector3.up * 0.22f;
+            var t = m_Hud.transform;
+            t.position = m_HudPlaced ? Vector3.Lerp(t.position, target, 1f - Mathf.Exp(-6f * Time.unscaledDeltaTime)) : target;
+            m_HudPlaced = true;
+            t.rotation = Quaternion.LookRotation(t.position - head.position, Vector3.up);
+        }
+
         // ---------------- sampling ----------------
 
-        static Transform Content() =>
-            Services.TryGet<SceneRoot>(out var root) && root.IsRuntimePackage && root.StructureSpace != null ? root.StructureSpace : null;
-
-        /// World → the recording's frame: the scan's (when one is loaded) or the room's, right-handed either way.
-        static Vector3 ToFrame(Transform content, Vector3 world) =>
-            DemoRecording.ToGltf(content != null ? content.InverseTransformPoint(world) : world);
-
-        static Quaternion ToFrame(Transform content, Quaternion world) =>
-            DemoRecording.ToGltf(content != null ? Quaternion.Inverse(content.rotation) * world : world);
+        /// Tracking space → the recording's right-handed frame.
+        static Vector3 ToFrame(Vector3 world) => DemoRecording.ToGltf(world);
+        static Quaternion ToFrame(Quaternion world) => DemoRecording.ToGltf(world);
 
         DemoSample Sample(float t)
         {
-            var content = Content();
             var s = new DemoSample { t = t, headQ = Quaternion.identity };
             var head = Camera.main != null ? Camera.main.transform : null;
             if (head != null)
             {
-                s.headP = ToFrame(content, head.position);
-                s.headQ = ToFrame(content, head.rotation);
+                s.headP = ToFrame(head.position);
+                s.headQ = ToFrame(head.rotation);
             }
-            s.left = Hand(content, ToolHand.Left, OVRInput.Controller.LTouch, m_Source != null ? m_Source.leftHand : null);
-            s.right = Hand(content, ToolHand.Right, OVRInput.Controller.RTouch, m_Source != null ? m_Source.rightHand : null);
+            s.left = Hand(ToolHand.Left, OVRInput.Controller.LTouch, m_Source != null ? m_Source.leftHand : null);
+            s.right = Hand(ToolHand.Right, OVRInput.Controller.RTouch, m_Source != null ? m_Source.rightHand : null);
             return s;
         }
 
-        DemoHand Hand(Transform content, ToolHand hand, OVRInput.Controller controller, OVRHand ovrHand)
+        DemoHand Hand(ToolHand hand, OVRInput.Controller controller, OVRHand ovrHand)
         {
             var h = new DemoHand { q = Quaternion.identity, forceN = -1f };
             if (m_Hub == null || !m_Hub.TryGetGrip(hand, out var grip)) return h;
             h.tracked = true;
-            h.p = ToFrame(content, grip.position);
-            h.q = ToFrame(content, grip.rotation);
+            h.p = ToFrame(grip.position);
+            h.q = ToFrame(grip.rotation);
             if (OVRInput.IsControllerConnected(controller))
             {
                 h.grip = Mathf.Max(OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, controller),
@@ -274,13 +304,13 @@ namespace Pathfinder.Capture
                 float g = 0f;
                 for (var f = OVRHand.HandFinger.Index; f <= OVRHand.HandFinger.Pinky; f++) g = Mathf.Max(g, ovrHand.GetFingerPinchStrength(f));
                 h.grip = g;
-                h.joints = Joints(content, hand);
+                h.joints = Joints(hand);
             }
             return h;
         }
 
         /// The tracked skeleton of that hand, joint by joint, in the recording's frame; null when none is tracked.
-        Vector3[] Joints(Transform content, ToolHand hand)
+        Vector3[] Joints(ToolHand hand)
         {
             var side = hand == ToolHand.Left ? Oculus.Interaction.Input.Handedness.Left : Oculus.Interaction.Input.Handedness.Right;
             foreach (var skeleton in m_Skeletons)
@@ -290,7 +320,7 @@ namespace Pathfinder.Capture
                 for (int j = 0; j < JointCount; j++)
                 {
                     if (!skeleton.GetJointPose((IsdkJoint)j, out var pose)) return null;
-                    joints[j] = ToFrame(content, pose.position);
+                    joints[j] = ToFrame(pose.position);
                 }
                 return joints;
             }
