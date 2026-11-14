@@ -84,6 +84,10 @@ async def _lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="pathfinder parts server", version=__version__, lifespan=_lifespan)
+
+from server import demos as _demos  # noqa: E402 -- the demonstration intake has its own router
+
+app.include_router(_demos.router)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 _PART_ID_RE = re.compile(r"^[a-z0-9-]+$")

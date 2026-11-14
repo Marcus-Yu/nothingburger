@@ -63,7 +63,7 @@ def _block_real_network(request, monkeypatch):
     real_connect = socket.socket.connect
 
     def guarded(sock, address):
-        if sock.family == socket.AF_UNIX or (
+        if sock.family == getattr(socket, "AF_UNIX", None) or (  # no AF_UNIX on Windows
             isinstance(address, tuple) and address[0] in ("127.0.0.1", "::1", "localhost")
         ):
             return real_connect(sock, address)
