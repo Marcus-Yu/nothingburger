@@ -163,7 +163,17 @@ async function watch(mine) {
       const r = await fetch(`/demos/${mine.id}/read`);
       if (r.ok) { mine.done = true; show(await r.json()); return; }
     } catch (e) { /* the server is restarting: keep waiting */ }
-    if (waited > mine.seconds + 40) {
+    try {
+      const st = await (await fetch("/demos/state")).json();
+      if (st.active === mine.id) mine.collected = true;
+      if (!mine.collected && st.waiting !== mine.id) {
+        $("take-state").textContent = "the headset never collected it: it is asleep, or Pathfinder is not open. Wake it, open the app, then Redo.";
+        $("redo").disabled = false;
+        return;
+      }
+      if (mine.collected) $("take-state").textContent = waited < 10 ? "the headset has it: counting down" : "recording, then uploading";
+    } catch (e) { /* keep waiting */ }
+    if (waited > mine.seconds + 80) {
       $("take-state").textContent = "nothing came back. Is the headset on, awake and in the app? Redo to ask again.";
       $("redo").disabled = false;
       return;

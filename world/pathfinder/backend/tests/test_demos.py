@@ -71,3 +71,17 @@ def test_a_take_can_be_thrown_away_and_done_again(client, tmp_path):
 
     again = client.post("/demos/request", json={"chore": "hold container", "kind": "squeeze"}).json()
     assert again["id"] != asked["id"] and client.get("/demos/control").json()["request"]["id"] == again["id"]
+
+
+def test_a_request_nobody_collected_is_not_sprung_on_the_next_wearer(client, monkeypatch):
+    asked = client.post("/demos/request", json={"chore": "hold container", "kind": "squeeze"}).json()
+    assert asked["expires_s"] == demos.PICKUP_S
+    demos._asked[asked["id"]] -= demos.PICKUP_S + 1  # the headset was asleep for longer than that
+    assert client.get("/demos/control").json()["request"] is None
+
+
+def test_state_says_whether_the_headset_has_the_request(client):
+    asked = client.post("/demos/request", json={"chore": "wipe table"}).json()
+    assert client.get("/demos/state").json() == {"waiting": asked["id"], "active": None}
+    client.get("/demos/control")
+    assert client.get("/demos/state").json() == {"waiting": None, "active": asked["id"]}

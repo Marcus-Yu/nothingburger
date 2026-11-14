@@ -53,7 +53,9 @@ def gloves():
     return _hub or None
 
 
+PICKUP_S = 20.0  # a request the headset has not collected by then is dropped (it polls about once a second)
 _pending: dict[str, Any] | None = None
+_asked: dict[str, float] = {}  # request id -> when it was asked
 _active: str | None = None
 _stop: set[str] = set()
 
@@ -117,7 +119,8 @@ def request_demo(req: DemoRequest) -> dict:
         "id": f"demo-{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:4]}",
         **req.model_dump(),
     }
-    return _pending
+    _asked[_pending["id"]] = time.time()
+    return {**_pending, "expires_s": PICKUP_S}
 
 
 @router.get("/demos/control")
@@ -126,9 +129,19 @@ def control(active: str | None = None) -> dict:
     the recording named by `active` to end."""
     global _pending, _active
     request, _pending = _pending, None
+    if request is not None and time.time() - _asked.pop(request["id"], 0.0) > PICKUP_S:
+        request = None  # asked while the headset was off or asleep: not sprung on whoever puts it on next
     if request is not None:
         _active = request["id"]
     return {"request": request, "stop": bool(active and active in _stop)}
+
+
+@router.get("/demos/state")
+def state() -> dict:
+    """Where the one request stands, for the page that asked: `waiting` is the id not yet
+    collected by the headset, `active` the id the headset has collected and not yet uploaded."""
+    waiting = _pending["id"] if _pending and time.time() - _asked.get(_pending["id"], 0.0) <= PICKUP_S else None
+    return {"waiting": waiting, "active": _active}
 
 
 @router.post("/demos/stop")
