@@ -121,10 +121,16 @@ class GloveReader:
                 with serial.Serial(self.port, BAUD, timeout=1) as link:
                     self.error = None
                     link.reset_input_buffer()
+                    heard = time.time()
                     while not self._stop.is_set():
                         values = parse_line(link.readline().decode("ascii", "replace"))
                         if values is not None:
-                            self.feed(time.time(), values)
+                            heard = time.time()
+                            self.feed(heard, values)
+                        elif time.time() - heard > 3.0:
+                            # A glove that was unplugged and plugged back leaves this handle open
+                            # and silent on Windows: reopen the port.
+                            raise OSError("no readings for 3 s: reopening the port")
             except Exception as exc:  # noqa: BLE001 -- unplugged, busy, wrong port: say so and retry
                 self.error = str(exc)[:200]
                 self._stop.wait(2.0)

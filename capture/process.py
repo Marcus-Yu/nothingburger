@@ -379,7 +379,9 @@ def build_demo(recording: dict, rate_hz: float = RATE_HZ) -> dict:
         height = recording.get("wearer_height_m")
         if height is None and floor_y is not None:
             # eyes are about 0.93 of standing height; a seated wearer makes this an underestimate
-            height = float(np.clip((np.percentile(head_p[:, 1], 95) - floor_y) / 0.93, 1.45, 2.0))
+            eyes = float(np.percentile(head_p[:, 1], 95) - floor_y)
+            # under about 1.35 m the wearer is sitting, and eye height says nothing of their size
+            height = float(np.clip(eyes / 0.93, 1.5, 2.0)) if eyes >= 1.35 else None
         arm = body.arm_summary(body.estimate_arm(head_p, head_q, track["p"], hand, height or 1.72), work)
 
     return {
