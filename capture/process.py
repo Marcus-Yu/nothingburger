@@ -123,6 +123,16 @@ def hand_track(recording: dict, hand: str, rate_hz: float = RATE_HZ) -> dict | N
     if len(p) >= 5:
         padded = np.pad(p, ((2, 2), (0, 0)), mode="edge")
         p = sum(kernel[i] * padded[i : i + len(p)] for i in range(5))
+    # The recording starts on the pinch that marked the target. That pinch is not part of the
+    # chore: until the hand first opens again, it is not holding anything.
+    if grip[0] >= ENGAGE_GRIP * 0.5:
+        opened = np.flatnonzero(grip < 0.3)
+        end = int(opened[0]) if len(opened) else len(grip)
+        if end <= rate_hz * 1.5:
+            grip = grip.copy()
+            grip[:end] = 0.0
+            force = force.copy()
+            force[:end] = np.where(np.isfinite(force[:end]), 0.0, np.nan)
     return {"t": t - t[0], "t0": float(t[0]), "p": p, "q": q, "grip": grip, "force_n": force}
 
 

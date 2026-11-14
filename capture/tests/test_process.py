@@ -103,3 +103,14 @@ def test_latest_prefers_the_newest_and_the_right_kind(tmp_path):
     written = api.ingest(synthetic.open_box(), tmp_path / "run")
     assert set(written) == {"demo", "grip"}
     assert json.loads((tmp_path / "run" / "demo.json").read_text())["motion"]["kind"] == "hinge"
+
+
+def test_the_pinch_that_starts_a_recording_is_not_a_grip():
+    rec = synthetic.wipe_table()
+    for s in rec["samples"][:12]:  # the marking pinch, released after 0.4 s
+        s["right"]["grip"] = 1.0
+    assert process.build_demo(rec)["phases"]["approach"] > 10  # the work still starts at the table
+    with pytest.raises(ValueError):
+        process.build_grip(rec)
+    held = synthetic.move_bin()  # a hold that starts later is kept
+    assert process.build_grip(held)["held_s"] > 2

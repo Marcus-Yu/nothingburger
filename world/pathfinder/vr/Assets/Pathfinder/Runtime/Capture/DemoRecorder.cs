@@ -31,6 +31,8 @@ namespace Pathfinder.Capture
 
         public const float RateHz = 30f;
         public float pollSeconds = 1f;
+        [Tooltip("Scan metres. A marking ray that lands farther than this from the marking hand is not the target.")]
+        public float anchorReach = 1.2f;
 
         public State Current { get; private set; } = State.Idle;
         public string LastResult { get; private set; } = "";
@@ -147,9 +149,13 @@ namespace Pathfinder.Capture
                 input = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch) || OVRInput.IsControllerConnected(OVRInput.Controller.LTouch)
                     ? "controllers" : "hands",
             };
-            // The anchor: where the marking ray lands on the scan; else where the marking hand is.
+            // The anchor: where the marking ray lands on the scan, when that is within arm's reach of the marking hand
+            // (the wearer is working on something in the scan). A hit across the room means they are marking a real
+            // thing in front of them that the scan does not have there: then the anchor is the hand itself.
+            Vector3 handAt = m_Hub != null && m_Hub.TryGetGrip(hand, out var marking) ? marking.position : pointer.position;
             if (content != null && AppState.Mode == AppMode.World &&
-                SnapService.TryRaySnap(new Ray(pointer.position, pointer.forward), out var hit, 20f, features: false))
+                SnapService.TryRaySnap(new Ray(pointer.position, pointer.forward), out var hit, 20f, features: false) &&
+                Vector3.Distance(hit.point, handAt) <= anchorReach * Mathf.Max(content.lossyScale.x, 1e-6f))
             {
                 m_Recording.anchorP = ToFrame(content, hit.point);
                 m_Recording.anchorNormal = DemoRecording.ToGltf(content.InverseTransformDirection(hit.normal)).normalized;
@@ -157,20 +163,18 @@ namespace Pathfinder.Capture
             }
             else
             {
-                Vector3 at = m_Hub != null && m_Hub.TryGetGrip(hand, out var grip) ? grip.position : pointer.position;
-                m_Recording.anchorP = ToFrame(content, at);
+                m_Recording.anchorP = ToFrame(content, handAt);
             }
             m_Recording.hasAnchor = true;
-            if (content != null && Services.TryGet<SceneRoot>(out var root))
-            {
-                float floor = Pathfinder.Parts.SurfaceNames.FloorY(root);
-                if (!float.IsNaN(floor)) m_Recording.floorY = floor;
-            }
+            // The floor the wearer stands on: the tracking origin is at floor level, so the rig's own height is it.
+            var rig = FindFirstObjectByType<OVRCameraRig>();
+            if (rig != null && rig.trackingSpace != null) m_Recording.floorY = ToFrame(content, rig.trackingSpace.position).y;
             m_Started = Time.unscaledTime;
             m_NextSample = m_Started;
             m_StopAsked = false;
             Current = State.Recording;
-            UiToast.Show("Recording. Thumb and middle finger pinch (or B / Y) when you're done.", ColorRole.Info);
+            UiToast.Show((m_Recording.anchorHasNormal ? "Target marked on the scan. " : "Target marked at your hand. ") +
+                "Recording: thumb and middle finger pinch (or B / Y) when you're done.", ColorRole.Info);
             Log.Info($"DemoRecorder: recording {m_Request.id} in the {m_Recording.frame} frame, anchor {m_Recording.anchorP:F2}");
         }
 
