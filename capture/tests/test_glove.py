@@ -59,3 +59,15 @@ def test_no_readings_in_the_window_merges_nothing(tmp_path):
     assert _hub(tmp_path, start=1000.0).merge(rec, started=5000.0)["right"]["merged"] is False
     assert rec["samples"][0]["right"].get("glove_raw") is None
     assert process.build_grip(rec)["source"] == "travel"
+
+
+def test_left_glove_fingers_are_put_in_their_real_order():
+    printed = glove.parse_line("thumb:1,index:2,middle:3,ring:4,pinky:5")
+    assert glove.remap("left", printed) == [1, 5, 4, 3, 2]  # its pinky is the index finger, and so on
+    assert glove.remap("right", printed) == [1, 2, 3, 4, 5]
+
+
+def test_a_lump_of_lines_is_spread_back_over_the_time_it_covers():
+    times = glove.spread_times(100.0, 5, period=0.01)
+    assert times[-1] == 100.0 and times[0] == pytest.approx(99.96)
+    assert np.allclose(np.diff(times), 0.01)

@@ -36,7 +36,8 @@
   </div>
   <div id="gloves"></div>
   <p class="note">Raw fingertip readings, 0 to 4095. Not newtons: each sensor has its own curve until it is calibrated.
-     Above about 3500 a sensor barely moves. A line that never leaves 0 while you press is a sensor or wire that is not connected.</p>
+     Above about 3500 a sensor barely moves. A line that never leaves 0 while you press is a sensor or wire that is not connected.
+     A gap in the lines is the glove itself going quiet: "restarted" counts the times its ESP32 rebooted, which takes 2 to 3 seconds each.</p>
 </div>
 <script>
 // one colour per finger, fixed, with the name always written next to it
@@ -99,8 +100,9 @@ async function tick() {
       const p = panel(g.hand);
       p.box.querySelector("[data-port]").textContent = g.port;
       const recent = g.t.filter((t) => t > -1).length;
-      p.box.querySelector("[data-rate]").textContent = g.error ? `not reading: ${g.error}` :
-        g.t.length ? `${recent ? "streaming" : "silent for " + (-g.t[g.t.length - 1]).toFixed(0) + " s"}` : "no readings yet";
+      const restarts = g.resets ? ` · restarted ${g.resets}x` + (g.last_reset_s_ago != null ? ` (last ${g.last_reset_s_ago.toFixed(0)} s ago)` : "") : "";
+      p.box.querySelector("[data-rate]").textContent = (g.error ? `not reading: ${g.error}` :
+        g.t.length ? `${recent ? "streaming" : "silent for " + (-g.t[g.t.length - 1]).toFixed(0) + " s"}` : "no readings yet") + restarts;
       g.raw.forEach((series, k) => {
         const now = series.length ? series[series.length - 1] : 0, peak = series.length ? Math.max(...series) : 0;
         p.box.querySelector(`[data-now="${k}"]`).textContent = now;

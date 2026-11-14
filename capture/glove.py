@@ -39,6 +39,29 @@ FULL_SCALE = 4095
 KEEP_SECONDS = 600
 G = 9.80665
 CALIBRATION_FILE = Path(__file__).resolve().parent / "glove_calibration.json"
+PERIOD_S = 0.01  # the gloves print 100 lines a second
+
+# Which printed name is which real finger, per glove. The left glove's sensors are wired in the
+# opposite order across the hand from what its firmware prints (checked finger by finger on the
+# live graph): its "pinky" is the index finger, and so on. Thumb is right. The right glove has
+# not been checked.
+FINGER_MAP = {
+    "left": {"thumb": "thumb", "index": "pinky", "middle": "ring", "ring": "middle", "pinky": "index"},
+    "right": {f: f for f in FINGERS},
+}
+
+
+def remap(hand: str, printed: list[int]) -> list[int]:
+    """Readings in the order the glove printed them -> real thumb, index, middle, ring, pinky."""
+    wiring = FINGER_MAP.get(hand) or {}
+    return [printed[FINGERS.index(wiring.get(finger, finger))] for finger in FINGERS]
+
+
+def spread_times(arrived: float, count: int, period: float = PERIOD_S) -> list[float]:
+    """When `count` lines that arrived together were really sent. The USB serial driver hands
+    the stream over in lumps of about a second, so a lump's lines did not happen at once: the
+    last is put at the arrival time and the rest one period apart before it."""
+    return [arrived - (count - 1 - i) * period for i in range(count)]
 
 
 def parse_line(line: str) -> list[int] | None:
@@ -97,6 +120,8 @@ class GloveReader:
         self.times: deque[float] = deque(maxlen=KEEP_SECONDS * 120)
         self.values: deque[list[int]] = deque(maxlen=KEEP_SECONDS * 120)
         self.error: str | None = None
+        self.resets = 0  # times the glove's ESP32 restarted while we listened
+        self.last_reset: float | None = None
         self._stop = threading.Event()
         self._lock = threading.Lock()
         self._thread = threading.Thread(target=self._run, name=f"glove-{hand}", daemon=True)
@@ -118,25 +143,32 @@ class GloveReader:
 
         while not self._stop.is_set():
             try:
-                # Opening the port with DTR and RTS raised resets an ESP32. Keep them low so a
-                # glove that is already streaming carries on.
-                link = serial.Serial()
-                link.port, link.baudrate, link.timeout = self.port, BAUD, 1
-                link.dtr = link.rts = False
-                link.open()
-                with link:
+                with serial.Serial(self.port, BAUD, timeout=0.05) as link:
                     self.error = None
-                    link.reset_input_buffer()
                     heard = time.time()
+                    pending = b""
                     while not self._stop.is_set():
-                        values = parse_line(link.readline().decode("ascii", "replace"))
-                        if values is not None:
-                            heard = time.time()
-                            self.feed(heard, values)
-                        elif time.time() - heard > 10.0:
+                        chunk = link.read(max(1, link.in_waiting))
+                        now = time.time()
+                        if chunk:
+                            *lines, pending = (pending + chunk).split(b"\n")
+                            readings = []
+                            for line in lines:
+                                text = line.decode("ascii", "replace")
+                                if "rst:" in text:  # the ESP32's boot banner: it restarted
+                                    self.resets += 1
+                                    self.last_reset = now
+                                values = parse_line(text)
+                                if values is not None:
+                                    readings.append(remap(self.hand, values))
+                            if readings:
+                                heard = now
+                                for when, values in zip(spread_times(now, len(readings)), readings):
+                                    self.feed(when, values)
+                        elif now - heard > 10.0:
                             # A glove that was unplugged and plugged back leaves this handle open
                             # and silent on Windows: reopen the port. Ten seconds, because a
-                            # glove that did reset needs a few to boot before it streams.
+                            # glove that restarted needs a few to boot before it streams.
                             raise OSError("no readings for 10 s: reopening the port")
             except Exception as exc:  # noqa: BLE001 -- unplugged, busy, wrong port: say so and retry
                 self.error = str(exc)[:200]
@@ -156,7 +188,9 @@ class GloveReader:
             last = self.values[-1] if self.values else None
             age = now - self.times[-1] if self.times else None
         return {"hand": self.hand, "port": self.port, "rate_hz": round(recent / 2.0, 1), "last": last,
-                "last_age_s": None if age is None else round(age, 2), "error": self.error}  # fmt: skip
+                "last_age_s": None if age is None else round(age, 2), "error": self.error,
+                "resets": self.resets,
+                "last_reset_s_ago": None if self.last_reset is None else round(now - self.last_reset, 1)}  # fmt: skip
 
 
 class GloveHub:

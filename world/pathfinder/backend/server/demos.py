@@ -154,7 +154,8 @@ def glove_recent(seconds: float = 10.0) -> dict:
         times, raw = reader.window(now - seconds, now)
         step = max(1, len(times) // int(seconds * 50))
         out.append({
-            "hand": hand, "port": reader.port, "error": reader.error,
+            "hand": hand, "port": reader.port, "error": reader.error, "resets": reader.resets,
+            "last_reset_s_ago": None if reader.last_reset is None else round(now - reader.last_reset, 1),
             "t": [round(float(v - now), 3) for v in times[::step]],
             "raw": [[int(v) for v in raw[::step, k]] for k in range(5)] if len(times) else [[] for _ in range(5)],
         })  # fmt: skip
