@@ -1,13 +1,13 @@
 # The design and pathing workflows
 
-Status: draft, 2026-11-14, by stream A's agent for the lead. It covers step 3 of the [flow](PLAN_REVISED.md#flow): how the robot is designed and how its route and motion are planned. File shapes belong to the schema work running in parallel. This doc lists the **fields each step needs**, not their schemas. Field names below are placeholders until then.
+Status: draft, 2026-11-14. It covers step 3 of the [flow](PLAN_REVISED.md#flow): how the robot is designed and how its route and motion are planned. File shapes belong to the schema work running in parallel. This doc lists the **fields each step needs**, not their schemas. Field names below are placeholders until then.
 
-## Assumptions the lead can overrule
+## Assumptions, to overrule if wrong
 
 | # | Assumption | Why |
 | :-- | :-- | :-- |
-| A1 | **One robot per building, covering every job the user picked there.** Its requirements are the union of the jobs' requirements. The run folder holds one `demo.json`, `grip.json` and `trajectory.json`, so until request R7 lands, it is **one run per job**, and the design step reads the ledgers of all that building's job runs. | A landlord buys one robot per property, not one per chore. With one job picked, this is the same as one robot per job. |
-| A2 | **The world frame is Matterport's: metres, Z up.** Capture and the Pathfinder scene package are +Y up. Each converts at its own boundary: `world.api.load` and `capture.api.latest` hand out Z-up data. | One frame in every run file. The only conversion is in stream C's code, which already knows both frames. |
+| A1 | **One robot per building, covering every job the user picked there.** Its requirements are the union of the jobs' requirements. The run folder holds one `demo.json`, `grip.json` and `trajectory.json`, so until gap G7 lands, it is **one run per job**, and the design step reads the ledgers of all that building's job runs. | A landlord buys one robot per property, not one per chore. With one job picked, this is the same as one robot per job. |
+| A2 | **The world frame is Matterport's: metres, Z up.** Capture and the Pathfinder scene package are +Y up. Each converts at its own boundary: `world.api.load` and `capture.api.latest` hand out Z-up data. | One frame in every run file. The only conversion is in the loader and the capture code, which already know both frames. |
 | A3 | **Keep the 18-combination method:** enumerate, check, rank, then size. | Continuous part search was reviewed and [not adopted](PLAN_REVISED.md#suggestions-from-the-review-not-adopted). Sizing still tunes continuous values inside the chosen parts. |
 | A4 | **Fixtures are anchors, found by the panorama agent or entered by hand and tagged `manual`.** Both workflows run the same way on either. | The API found 0 objects on 24 models. Without an anchor nothing can be reached. |
 
@@ -59,7 +59,7 @@ Capture today keeps one wrist pose and one grip value per hand (`capture/README.
 | `pick`, `carry`, `place` (trash bag) | the bin anchor, the route out, the demo's lift and hold | a path (`lift trash bag`) and a squeeze (`hold trash bag`) |
 | `navigate` | the route | none |
 
-Intake keeps producing the shape of the website's stand-in planner (`world/pathfinder/backend/server/flow.py` on the stream C branch): `understood_as`, `steps[]` and `demos[{chore, kind, why}]`, so the site keeps working when the agent replaces the lookup table. It adds the task list for the steps after it.
+Intake keeps producing the shape of the website's stand-in planner (`world/pathfinder/backend/server/flow.py` on the `stream-c/pathfinder-quest` branch): `understood_as`, `steps[]` and `demos[{chore, kind, why}]`, so the site keeps working when the agent replaces the lookup table. It adds the task list for the steps after it.
 
 Each demonstration request is a LangGraph `interrupt()`. The run resumes when `capture.api.latest(kind, chore=...)` has a recording. Recorded demonstrations stay on disk, so a resumed run never needs the headset.
 
@@ -94,7 +94,7 @@ The rule that matters: **a demonstration is filmed at home, so only what is rela
 | path relative to the object, phases | **yes** | re-anchored on the building's fixture pose (below) |
 | approach direction | **yes** | rotated into the building by the fixture pose |
 | twist turns, angle | **yes** | the wrist must roll that many turns, or regrasp |
-| twist axis; hinge axis and point; wipe stroke axis, surface normal, centre | **yes, after a rotation** | these are in the home scan's frame, not the object's: `classify` runs on scan-frame points. Apply `demo.anchor.rotation` first (or stream C emits them in the object frame; request R6) |
+| twist axis; hinge axis and point; wipe stroke axis, surface normal, centre | **yes, after a rotation** | these are in the home scan's frame, not the object's: `classify` runs on scan-frame points. Apply `demo.anchor.rotation` first (or the capture code emits them in the object frame; gap G6) |
 | hinge radius, angle | **yes** | the arm must follow that arc |
 | wipe passes | **yes** | the pass count |
 | wipe patch size | no | the building's surface extent (counter or table in the scan); strokes are regenerated over it |
@@ -188,11 +188,11 @@ This is the second pathing pass, now with a robot.
 
 ### 5a. Standoff poses
 
-For each task, where the base parks so the arm can do the work. Stream C's code cannot call stream B's, so the agent node runs this as three calls:
+For each task, where the base parks so the arm can do the work. The cheap geometric filter runs first, so the costly IK runs only on poses that can be reached:
 
-1. **Nav proposes** (stream C): sample base poses (x, y, heading) on rings around the anchor's floor projection, radii from 0.2 m to the reach envelope's maximum, every 0.05 m and every 15°. Reject poses where the footprint hits the occupancy grid or that are not connected to the dock. Return the survivors ranked by clearance and distance along the route.
-2. **Motion checks** (stream B): for the top proposals, and for each yaw of the task about the anchor's normal (every 15°; see "Yaw is free"), inverse kinematics on every reach target of the re-anchored path, with mink. Then tip-over at that pose with the arm at its farthest target.
-3. **The agent node picks** the pose and yaw with the best manipulability at the targets among those that pass, and keeps two spares for the loop.
+1. **Propose:** sample base poses (x, y, heading) on rings around the anchor's floor projection, radii from 0.2 m to the reach envelope's maximum, every 0.05 m and every 15°. Reject poses where the footprint hits the occupancy grid or that are not connected to the dock. Return the survivors ranked by clearance and distance along the route.
+2. **Check reach:** for the top proposals, and for each yaw of the task about the anchor's normal (every 15°; see "Yaw is free"), inverse kinematics on every reach target of the re-anchored path, with mink. Then tip-over at that pose with the arm at its farthest target.
+3. **Pick** the pose and yaw with the best manipulability at the targets among those that pass, and keeps two spares for the loop.
 
 ### 5b. Base route
 
@@ -238,37 +238,37 @@ A failure becomes a **new constraint** that cites the check that produced it. Co
 
 A decision's `revisit_if` is tested on every pass. When a new constraint matches it, that decision is reopened and shown as a backtrack in the trace.
 
-## Who does each step
+## What is code and what is the model
 
-| Step | Code or model | Stream | Entry point |
-| :-- | :-- | :-- | :-- |
-| 0 Intake | model | A | agent node |
-| 1 Building pre-pass | code | A (reads `world.json`) | agent node; see request R1 |
-| 2 Requirements | code; model picks the rules | A | agent node |
-| 3 Design | code | B | `composer.api.check` |
-| 4 Compose | code | B | `composer.api.compose` |
-| 5a Standoff | code | C proposes poses, B checks IK | see request R2 |
-| 5b Route | code | C | `nav.api.plan(world, build)` |
-| 5c Arm path | code | B | `motion.api.retarget(demo, robot)` |
-| 5d Program | model | A | agent node |
-| 6 Simulate | code | B | `sim.api.run(run_dir)` |
-| Loop: diagnose and choose the fix | model; the fix is checked by code | A | agent node |
-
-## Requests for the schema chat and the board
-
-These follow from the steps above. None is a contract change yet; each is posted on the board with B and C tagged before it becomes one.
-
-| # | Request | Why |
+| Step | Code or model | Function |
 | :-- | :-- | :-- |
-| R1 | `world.json` carries the room graph: which doorway joins which two rooms, its clear width and how it was measured (`api`, `mesh`, `dropped`), the step height at each doorway, the floor of each room, and the dock and the way out | the pre-pass runs on `world.json` alone, before any robot, so nothing needs a new entry point |
-| R2 | `nav.api.plan` needs the tasks (which anchors, in which order, and which legs carry something), which `(world, build)` does not hold. Either it reads them from `program.json`'s draft or `requirements.json` in the run folder, or the signature becomes `plan(world, build, tasks)` | the route visits standoffs, and the standoffs depend on the tasks |
-| R3 | each anchor in `world.json` has a point, a normal, an axis where it turns, the surface extent where it is wiped, and a source label (`panorama-agent` or `manual`) | re-anchoring needs a frame, not a point |
-| R4 | `build.json` carries the footprint polygon, its inscribed and circumscribed radii, the step limit and the reach envelope as a table | pathing plans for the real footprint and reach |
-| R5 | each check result in `composer.api.check` is `pass`, `fail` or `not_assessable`, with its number and the requirement ids it read | the Force gate; the binding-check report |
-| R6 | `demo.json` and `grip.json` are Z up, or say their frame; and `motion`'s axes, points and normals are given in the object frame, like `path` | A2; today they are in the home scan's frame |
-| R7 | the run folder holds one demo, grip, trajectory and standoff **per task**, or the design step formally reads several job runs | A1 |
-| R8 | `motion.api.retarget(demo, robot)` also needs the fixture pose, the chosen standoff and yaw, and the surface extent for a wipe. It reads them from the run folder (`world.json`, `route.json`) or gains arguments | step 5c |
-| R9 | the Reach check needs the nearest free floor to each anchor, which `check(candidate, requirements)` only gets if the pre-pass puts it in the ledger | step 3; this doc does that, so it needs no new argument |
+| 0 Intake | model | agent node |
+| 1 Building pre-pass | code | agent node, reads `world.json` |
+| 2 Requirements | code; model picks the rules | agent node |
+| 3 Design | code | `composer.api.check` |
+| 4 Compose | code | `composer.api.compose` |
+| 5a Standoff | code | propose in `nav`, check IK in `motion` |
+| 5b Route | code | `nav.api.plan(world, build)` |
+| 5c Arm path | code | `motion.api.retarget(demo, robot)` |
+| 5d Program | model | agent node |
+| 6 Simulate | code | `sim.api.run(run_dir)` |
+| Loop: diagnose and choose the fix | model; the fix is checked by code | agent node |
+
+## Gaps in the planned files and functions, for the schema work
+
+These follow from the steps above.
+
+| # | Gap | Why |
+| :-- | :-- | :-- |
+| G1 | `world.json` carries the room graph: which doorway joins which two rooms, its clear width and how it was measured (`api`, `mesh`, `dropped`), the step height at each doorway, the floor of each room, and the dock and the way out | the pre-pass runs on `world.json` alone, before any robot, so nothing needs a new entry point |
+| G2 | `nav.api.plan` needs the tasks (which anchors, in which order, and which legs carry something), which `(world, build)` does not hold. Either it reads them from `program.json`'s draft or `requirements.json` in the run folder, or the signature becomes `plan(world, build, tasks)` | the route visits standoffs, and the standoffs depend on the tasks |
+| G3 | each anchor in `world.json` has a point, a normal, an axis where it turns, the surface extent where it is wiped, and a source label (`panorama-agent` or `manual`) | re-anchoring needs a frame, not a point |
+| G4 | `build.json` carries the footprint polygon, its inscribed and circumscribed radii, the step limit and the reach envelope as a table | pathing plans for the real footprint and reach |
+| G5 | each check result in `composer.api.check` is `pass`, `fail` or `not_assessable`, with its number and the requirement ids it read | the Force gate; the binding-check report |
+| G6 | `demo.json` and `grip.json` are Z up, or say their frame; and `motion`'s axes, points and normals are given in the object frame, like `path` | A2; today they are in the home scan's frame |
+| G7 | the run folder holds one demo, grip, trajectory and standoff **per task**, or the design step formally reads several job runs | A1 |
+| G8 | `motion.api.retarget(demo, robot)` also needs the fixture pose, the chosen standoff and yaw, and the surface extent for a wipe. It reads them from the run folder (`world.json`, `route.json`) or gains arguments | step 5c |
+| G9 | the Reach check needs the nearest free floor to each anchor, which `check(candidate, requirements)` only gets if the pre-pass puts it in the ledger | step 3; this doc does that, so it needs no new argument |
 
 ## Still open
 
