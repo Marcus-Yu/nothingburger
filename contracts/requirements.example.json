@@ -1,0 +1,30 @@
+{
+  "schema": "requirements/1",
+  "world": "example-flat",
+  "tasks": [
+    {"id": "t1", "skill": "twist_out", "anchor": "living_bulb", "object": "bulb_e26", "demo": "unscrew bulb", "carries": false},
+    {"id": "t2", "skill": "wipe", "anchor": "kitchen_counter", "object": "cloth", "demo": "wipe table", "carries": false},
+    {"id": "t3", "skill": "pick", "anchor": "kitchen_bin", "object": "trash_bag", "demo": "lift trash bag", "carries": true, "deliver_to": "way_out"}
+  ],
+  "corridors": [
+    {"trip": "dock->t1", "rooms": ["hall", "living"], "doorways": ["d_living"], "bottleneck": {"doorway": "d_living", "width_m": 0.76}},
+    {"trip": "dock->t2", "rooms": ["hall", "kitchen"], "doorways": ["d_kitchen"], "bottleneck": {"doorway": "d_kitchen", "width_m": 0.71}},
+    {"trip": "t3->way_out", "rooms": ["kitchen", "hall", "outside"], "doorways": ["d_kitchen", "d_entry"], "bottleneck": {"doorway": "d_kitchen", "width_m": 0.71}}
+  ],
+  "requirements": [
+    {"id": "r_width", "task": null, "quantity": "base_width_max", "value": 0.61, "unit": "m", "tolerance": 0.0, "source": "scan:mesh", "from": "d_kitchen 0.71 m less 0.05 m a side"},
+    {"id": "r_length", "task": null, "quantity": "base_length_max", "value": 0.90, "unit": "m", "tolerance": 0.0, "source": "scan", "from": "hall 1.0 m wide at the turn into d_kitchen, less margin"},
+    {"id": "r_header", "task": null, "quantity": "stowed_height_max", "value": 1.98, "unit": "m", "tolerance": 0.0, "source": "scan", "from": "lowest header 2.03 m less 0.05 m"},
+    {"id": "r_step", "task": null, "quantity": "step_max", "value": 0.0, "unit": "m", "tolerance": 0.0, "source": "assumed", "from": "no step measured; corridor assumed flat"},
+    {"id": "r_t1_reach", "task": "t1", "quantity": "reach_targets", "unit": "pose",
+     "value": [{"point": [2.0, 3.0, 2.24], "tool_axis": [0, 0, 1], "held_axes": ["position", "tool_axis"], "edge_distance_m": 0.0, "side": [0, 0]}],
+     "tolerance": 0.01, "source": "demo:home+scan"},
+    {"id": "r_t1_floor", "task": "t1", "quantity": "free_floor", "value": {"edge_distance_m": 0.0, "side": [0, 0]}, "unit": "m", "tolerance": 0.05, "source": "scan"},
+    {"id": "r_t1_opening", "task": "t1", "quantity": "gripper_opening_min", "value": 0.07, "unit": "m", "tolerance": 0.0, "source": "card"},
+    {"id": "r_t1_payload", "task": "t1", "quantity": "payload", "value": 0.05, "unit": "kg", "tolerance": 0.0, "source": "card"},
+    {"id": "r_t1_force", "task": "t1", "quantity": "force_band", "value": [4.0, 18.0], "unit": "N", "tolerance": 0.0, "source": "demo:home", "grip_source": "glove"},
+    {"id": "r_t1_roll", "task": "t1", "quantity": "wrist_roll_turns", "value": 3.0, "unit": "turn", "tolerance": 0.0, "source": "card"},
+    {"id": "r_t2_press", "task": "t2", "quantity": "press_force", "value": 10.0, "unit": "N", "tolerance": 2.0, "source": "assumed"}
+  ],
+  "conflicts": []
+}

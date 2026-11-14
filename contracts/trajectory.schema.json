@@ -1,0 +1,50 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "trajectory",
+ "type": "object",
+ "required": [
+  "schema",
+  "robot",
+  "joints",
+  "tasks",
+  "failures"
+ ],
+ "properties": {
+  "schema": {
+   "const": "trajectory/1"
+  },
+  "tasks": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "task",
+     "standoff",
+     "segments"
+    ],
+    "properties": {
+     "segments": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "phase",
+        "kind",
+        "samples"
+       ],
+       "properties": {
+        "phase": {
+         "enum": [
+          "approach",
+          "work",
+          "retreat"
+         ]
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

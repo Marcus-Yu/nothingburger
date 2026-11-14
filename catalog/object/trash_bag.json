@@ -1,0 +1,17 @@
+{
+  "id": "trash_bag",
+  "slot": "object",
+  "name": "Kitchen trash bag, tied",
+  "mass_kg": 4.0,
+  "mass_max_kg": 5.0,
+  "width_m": 0.06,
+  "hold": "hook",
+  "anchor_point": "centre of the tied neck",
+  "src": "default mass and neck width assumed; the user can state the mass",
+  "confidence": {
+    "mass_kg": "assumed default",
+    "mass_max_kg": "assumed",
+    "width_m": "assumed"
+  },
+  "notes": "width_m is the gathered neck the fingers close around. Hooked, not pinched: the fingers carry the weight by shape, so the force band's low end is zero and the Payload check covers the weight. No simulator model yet (gap G12)."
+}

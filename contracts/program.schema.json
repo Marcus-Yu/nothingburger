@@ -1,0 +1,114 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "program",
+ "type": "object",
+ "required": [
+  "schema",
+  "source",
+  "steps"
+ ],
+ "properties": {
+  "schema": {
+   "const": "program/1"
+  },
+  "source": {
+   "enum": [
+    "model",
+    "rule"
+   ]
+  },
+  "model": {
+   "type": "string"
+  },
+  "model_rejected": {
+   "type": "object",
+   "required": [
+    "problems"
+   ]
+  },
+  "steps": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "n",
+     "primitive",
+     "task",
+     "leg",
+     "standoff",
+     "force_n",
+     "press_n",
+     "turns",
+     "requirements",
+     "note"
+    ],
+    "properties": {
+     "n": {
+      "type": "integer"
+     },
+     "primitive": {
+      "enum": [
+       "approach",
+       "grasp",
+       "lift",
+       "move_base",
+       "place",
+       "release",
+       "retreat",
+       "twist",
+       "wipe"
+      ]
+     },
+     "task": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "leg": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "standoff": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "force_n": {
+      "type": [
+       "array",
+       "null"
+      ],
+      "items": {
+       "type": "number"
+      }
+     },
+     "press_n": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "turns": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "requirements": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "note": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ }
+}

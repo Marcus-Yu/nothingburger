@@ -1,0 +1,30 @@
+{
+  "schema": "world/1",
+  "id": "example-flat",
+  "frame": "metres, Z up, right handed",
+  "source": "hand-written example, not a scan",
+  "mesh": null,
+  "floors": [{"id": "f0", "z": 0.0}],
+  "rooms": [
+    {"id": "hall", "type": "hallway", "floor": "f0", "polygon": [[0, 0], [4, 0], [4, 1.0], [0, 1.0]], "ceiling_m": 2.44, "width_m": 1.0, "source": "scan"},
+    {"id": "living", "type": "living_room", "floor": "f0", "polygon": [[0, 1.0], [4, 1.0], [4, 5.0], [0, 5.0]], "ceiling_m": 2.44, "source": "scan"},
+    {"id": "kitchen", "type": "kitchen", "floor": "f0", "polygon": [[4, 0], [7, 0], [7, 3.0], [4, 3.0]], "ceiling_m": 2.44, "source": "scan"}
+  ],
+  "doorways": [
+    {"id": "d_entry", "rooms": ["outside", "hall"], "position": [0, 0.5], "along": [0, 1], "width_m": 0.86, "header_m": 2.03, "step_m": 0.0, "source": "api"},
+    {"id": "d_living", "rooms": ["hall", "living"], "position": [2.0, 1.0], "along": [1, 0], "width_m": 0.76, "header_m": 2.03, "step_m": 0.0, "source": "api"},
+    {"id": "d_kitchen", "rooms": ["hall", "kitchen"], "position": [4.0, 0.5], "along": [0, 1], "width_m": 0.71, "header_m": 2.03, "step_m": 0.0, "source": "mesh"}
+  ],
+  "obstacles": [
+    {"id": "counter", "room": "kitchen", "box": {"min": [6.4, 0.5, 0.0], "max": [7.0, 2.5, 0.92]}},
+    {"id": "sofa", "room": "living", "box": {"min": [0.2, 3.9, 0.0], "max": [2.2, 4.8, 0.8]}}
+  ],
+  "dock": {"room": "hall", "pose": [0.6, 0.5, 0.0]},
+  "way_out": {"doorway": "d_entry"},
+  "anchors": [
+    {"id": "living_bulb", "room": "living", "kind": "bulb_socket", "point": [2.0, 3.0, 2.30], "normal": [0, 0, -1], "axis": [0, 0, -1], "source": "manual"},
+    {"id": "kitchen_counter", "room": "kitchen", "kind": "surface", "point": [6.7, 1.5, 0.92], "normal": [0, 0, 1],
+     "extent": [[6.4, 0.5], [7.0, 0.5], [7.0, 2.5], [6.4, 2.5]], "source": "manual"},
+    {"id": "kitchen_bin", "room": "kitchen", "kind": "bin", "point": [4.5, 2.6, 0.55], "normal": [0, 0, 1], "source": "manual"}
+  ]
+}

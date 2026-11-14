@@ -1,0 +1,8 @@
+{
+  "note": "The same three jobs with the trash bag at its card mass (4 kg). Shows the infeasible path: the design step names the binding checks and pathing is skipped.",
+  "tasks": [
+    {"id": "t1", "skill": "twist_out", "anchor": "living_bulb", "object": "bulb_e26", "demo": "unscrew bulb", "carries": false},
+    {"id": "t2", "skill": "wipe", "anchor": "kitchen_counter", "object": "cloth", "demo": "wipe table", "carries": false},
+    {"id": "t3", "skill": "pick", "anchor": "kitchen_bin", "object": "trash_bag", "demo": "lift trash bag", "carries": true, "deliver_to": "way_out"}
+  ]
+}

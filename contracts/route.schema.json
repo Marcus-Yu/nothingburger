@@ -1,0 +1,54 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "route",
+ "type": "object",
+ "required": [
+  "schema",
+  "world",
+  "standoffs",
+  "legs",
+  "door_clearances",
+  "failures"
+ ],
+ "properties": {
+  "schema": {
+   "const": "route/1"
+  },
+  "standoffs": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "task",
+     "pose",
+     "task_yaw_rad",
+     "reach_ok",
+     "spares"
+    ],
+    "properties": {
+     "pose": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+     }
+    }
+   }
+  },
+  "legs": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "from",
+     "to",
+     "carrying",
+     "waypoints"
+    ],
+    "properties": {}
+   }
+  }
+ }
+}

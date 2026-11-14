@@ -1,0 +1,13 @@
+{
+  "id": "pill_organiser",
+  "slot": "object",
+  "name": "Weekly pill organiser",
+  "mass_kg": 0.25,
+  "width_m": 0.06,
+  "hold": "pinch",
+  "src": "typical 7-day organiser, from memory",
+  "confidence": {
+    "mass_kg": "assumed",
+    "width_m": "assumed"
+  }
+}

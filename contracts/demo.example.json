@@ -1,0 +1,145 @@
+{
+ "schema": "capture.demo/1",
+ "recording": "synthetic-unscrew-bulb",
+ "chore": "unscrew bulb",
+ "site": "synthetic",
+ "frame": "object: origin at the anchor, z out of its surface, x horizontal; metres",
+ "anchor": {
+  "p": [
+   0.0,
+   1.6,
+   0.0
+  ],
+  "rotation": [
+   [
+    -1.0,
+    -0.0,
+    0.0
+   ],
+   [
+    0.0,
+    -0.0,
+    -1.0
+   ],
+   [
+    0.0,
+    -1.0,
+    0.0
+   ]
+  ],
+  "label": "bulb"
+ },
+ "hand": "right",
+ "input": "hands",
+ "rate_hz": 30.0,
+ "duration_s": 3.767,
+ "path": [
+  {
+   "t": 0.0,
+   "p": [
+    -0.1978,
+    -0.3958,
+    0.3952
+   ],
+   "q": [
+    0.0,
+    -0.70711,
+    0.70711,
+    0.0
+   ],
+   "phase": "approach"
+  },
+  {
+   "t": 0.9333,
+   "p": [
+    -0.0067,
+    -0.0154,
+    0.0143
+   ],
+   "q": [
+    0.0,
+    -0.70711,
+    0.70711,
+    0.0
+   ],
+   "phase": "work"
+  },
+  {
+   "t": 1.9,
+   "p": [
+    -0.0013,
+    0.0002,
+    -0.0008
+   ],
+   "q": [
+    -0.58924,
+    0.39089,
+    -0.39089,
+    0.58924
+   ],
+   "phase": "work"
+  },
+  {
+   "t": 2.8333,
+   "p": [
+    -0.0005,
+    -0.0001,
+    -0.0001
+   ],
+   "q": [
+    0.67134,
+    0.22203,
+    -0.22203,
+    -0.67134
+   ],
+   "phase": "work"
+  },
+  {
+   "t": 3.7667,
+   "p": [
+    -0.1945,
+    -0.3944,
+    0.3954
+   ],
+   "q": [
+    0.70711,
+    0.0,
+    -0.0,
+    -0.70711
+   ],
+   "phase": "retreat"
+  }
+ ],
+ "phases": {
+  "approach": 26,
+  "work": 67,
+  "retreat": 21
+ },
+ "motion": {
+  "kind": "twist",
+  "axis": [
+   0.0,
+   1.0,
+   0.0
+  ],
+  "angle_deg": 539.4,
+  "turns": 1.5
+ },
+ "two_handed": null,
+ "approach_direction": [
+  0.3339,
+  0.6653,
+  -0.6677
+ ],
+ "reach": {
+  "max_height_m": 1.603,
+  "min_height_m": 1.56,
+  "work_extent_m": [
+   0.022,
+   0.043,
+   0.044
+  ],
+  "max_from_body_m": 0.552
+ },
+ "note": "example: capture.process.build_demo on the synthetic unscrew-bulb sample; path cut to 5 of 114 samples. Scan-frame fields are still +Y up (gap G6)."
+}

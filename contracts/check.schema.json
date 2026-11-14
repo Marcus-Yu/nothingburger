@@ -1,0 +1,70 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "check",
+ "type": "object",
+ "required": [
+  "check",
+  "status",
+  "requirements"
+ ],
+ "properties": {
+  "check": {
+   "type": "string"
+  },
+  "task": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "status": {
+   "enum": [
+    "pass",
+    "fail",
+    "not_assessable",
+    "not_run"
+   ]
+  },
+  "requirements": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "target": {
+   "type": "integer",
+   "description": "reach only: index of the reach target this result is stated for (the worst one)"
+  },
+  "targets": {
+   "type": "array",
+   "description": "reach only: one entry per reach target",
+   "items": {
+    "type": "object",
+    "required": [
+     "target",
+     "status"
+    ],
+    "properties": {
+     "target": {
+      "type": "integer"
+     },
+     "status": {
+      "enum": [
+       "pass",
+       "fail",
+       "not_assessable"
+      ]
+     },
+     "needed_m": {
+      "type": "number",
+      "description": "nearest the base centre can stand to this target"
+     },
+     "reach_m": {
+      "type": "number",
+      "description": "farthest the tool gets from the base centre at this target's height"
+     }
+    }
+   }
+  }
+ }
+}

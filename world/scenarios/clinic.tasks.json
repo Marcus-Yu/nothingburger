@@ -1,0 +1,19 @@
+{
+ "note": "the same job as clinic.job.txt, for runs without a model",
+ "tasks": [
+  {
+   "id": "t1",
+   "skill": "wipe",
+   "anchor": "sill_top",
+   "object": "cloth",
+   "carries": false
+  },
+  {
+   "id": "t2",
+   "skill": "wipe",
+   "anchor": "ledge_top",
+   "object": "cloth",
+   "carries": false
+  }
+ ]
+}

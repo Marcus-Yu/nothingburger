@@ -1,0 +1,18 @@
+{
+  "id": "xarm7",
+  "slot": "arm",
+  "name": "UFACTORY xArm 7",
+  "model": "menagerie/ufactory_xarm7/xarm7_nohand.xml",
+  "flange_site": "attachment_site",
+  "payload_kg": 3.5,
+  "reach_m": 0.7,
+  "price_usd": 10000,
+  "src": "UFACTORY: 3.5 kg, 700 mm; price assumed",
+  "confidence": {
+    "payload_kg": "vendor",
+    "reach_m": "vendor",
+    "price_usd": "assumed",
+    "mass_kg": "model"
+  },
+  "notes": "Geometry, joint limits and mass: the MuJoCo Menagerie model (meshes derived from vendor CAD). reach_m and payload_kg are the rated figures; the composer measures the real envelope from the composed model."
+}

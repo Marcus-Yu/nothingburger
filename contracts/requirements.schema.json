@@ -1,0 +1,80 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "requirements",
+ "type": "object",
+ "required": [
+  "schema",
+  "world",
+  "tasks",
+  "corridors",
+  "requirements",
+  "conflicts"
+ ],
+ "properties": {
+  "schema": {
+   "const": "requirements/1"
+  },
+  "tasks": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "skill",
+     "anchor",
+     "object",
+     "carries"
+    ],
+    "properties": {
+     "skill": {
+      "enum": [
+       "twist_out",
+       "twist_in",
+       "wipe",
+       "pick",
+       "carry",
+       "place",
+       "navigate"
+      ]
+     }
+    }
+   }
+  },
+  "corridors": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "trip",
+     "rooms",
+     "doorways",
+     "bottleneck"
+    ],
+    "properties": {}
+   }
+  },
+  "requirements": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "task",
+     "quantity",
+     "value",
+     "unit",
+     "tolerance",
+     "source"
+    ],
+    "properties": {
+     "task": {
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    }
+   }
+  }
+ }
+}

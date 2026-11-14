@@ -1,0 +1,30 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "grip",
+ "type": "object",
+ "required": [
+  "schema",
+  "source",
+  "force_n"
+ ],
+ "properties": {
+  "schema": {
+   "const": "capture.grip/1"
+  },
+  "source": {
+   "enum": [
+    "glove",
+    "travel"
+   ]
+  },
+  "force_n": {
+   "type": "object",
+   "required": [
+    "min",
+    "max",
+    "peak"
+   ],
+   "properties": {}
+  }
+ }
+}

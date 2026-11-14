@@ -1,0 +1,97 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "build",
+ "type": "object",
+ "required": [
+  "schema",
+  "parts",
+  "robot_xml",
+  "mass_kg",
+  "price_usd",
+  "base",
+  "stowed",
+  "reach_envelope",
+  "joints",
+  "arm_joints",
+  "tool_site",
+  "sensors",
+  "assembly"
+ ],
+ "properties": {
+  "schema": {
+   "const": "build/1"
+  },
+  "parts": {
+   "type": "object",
+   "required": [
+    "base",
+    "lift",
+    "arm",
+    "gripper",
+    "lidar",
+    "lidar_mount",
+    "wrist_cam",
+    "ego_cam"
+   ],
+   "properties": {
+    "wrist_cam": {
+     "type": "boolean"
+    }
+   }
+  },
+  "base": {
+   "type": "object",
+   "required": [
+    "kind",
+    "holonomic",
+    "step_max_m",
+    "footprint",
+    "inscribed_radius_m",
+    "circumscribed_radius_m",
+    "support"
+   ],
+   "properties": {
+    "kind": {
+     "enum": [
+      "wheeled",
+      "legged"
+     ]
+    }
+   }
+  },
+  "stowed": {
+   "type": "object",
+   "required": [
+    "width_m",
+    "length_m",
+    "height_m",
+    "qpos"
+   ],
+   "properties": {}
+  },
+  "reach_envelope": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "height_m",
+     "min_distance_m",
+     "max_distance_m"
+    ],
+    "properties": {}
+   }
+  },
+  "joints": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "type",
+     "range"
+    ],
+    "properties": {}
+   }
+  }
+ }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "machined_part",
+  "slot": "object",
+  "name": "Machined aluminium housing",
+  "mass_kg": 3.5,
+  "width_m": 0.07,
+  "hold": "pinch",
+  "src": "made-up part for the factory scenario; the user states the mass",
+  "confidence": {
+    "mass_kg": "assumed",
+    "width_m": "assumed"
+  }
+}

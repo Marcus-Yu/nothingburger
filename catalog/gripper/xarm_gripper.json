@@ -1,0 +1,35 @@
+{
+  "id": "xarm_gripper",
+  "slot": "gripper",
+  "name": "UFACTORY xArm Gripper",
+  "model": "menagerie/ufactory_xarm7/hand.xml",
+  "tool_offset_m": 0.172,
+  "mass_kg": 0.8,
+  "stroke_m": 0.086,
+  "force_n": [
+    5.0,
+    30.0
+  ],
+  "force_control": true,
+  "payload_kg": 1.5,
+  "hold": [
+    "pinch",
+    "hook"
+  ],
+  "fits_arms": [
+    "xarm7",
+    "ur5e"
+  ],
+  "price_usd": 1900,
+  "src": "all assumed",
+  "confidence": {
+    "mass_kg": "assumed",
+    "stroke_m": "assumed",
+    "force_n": "assumed",
+    "payload_kg": "assumed",
+    "price_usd": "assumed",
+    "tool_offset_m": "assumed",
+    "hold": "assumed"
+  },
+  "notes": "mass_kg is the figure the Payload check charges against the arm; the composed model uses the simulator model's own mass. force_n is the range of grip force it can hold. hold says how it carries an object. The tool point is tool_offset_m out from the arm's flange along its z axis."
+}

@@ -1,0 +1,30 @@
+{
+  "id": "lite6_gripper",
+  "slot": "gripper",
+  "name": "UFACTORY Lite 6 gripper (integrated)",
+  "integrated_in": "lite6",
+  "tool_site": "end_effector",
+  "mass_kg": 0.0,
+  "stroke_m": 0.016,
+  "force_n": [
+    0.0,
+    0.0
+  ],
+  "force_control": false,
+  "payload_kg": 0.6,
+  "hold": [
+    "pinch"
+  ],
+  "fits_arms": [
+    "lite6"
+  ],
+  "price_usd": 0,
+  "src": "integrated in the lite6 model; stroke assumed; open/close only",
+  "confidence": {
+    "stroke_m": "assumed",
+    "payload_kg": "the arm's rating",
+    "mass_kg": "counted in the arm",
+    "hold": "assumed"
+  },
+  "notes": "mass_kg is the figure the Payload check charges against the arm; the composed model uses the simulator model's own mass. force_n is the range of grip force it can hold. hold says how it carries an object. It comes inside the lite6 arm model, so it has no model, mass or price of its own."
+}

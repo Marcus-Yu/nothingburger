@@ -4,3 +4,7 @@ __pycache__/
 .env
 docs/probe/out/
 docs/probe/models_index.csv
+catalog/_assets/
+runs/scratch/
+MUJOCO_LOG.TXT
+.claude/launch.json

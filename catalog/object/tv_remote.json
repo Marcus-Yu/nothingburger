@@ -1,0 +1,13 @@
+{
+  "id": "tv_remote",
+  "slot": "object",
+  "name": "TV remote control",
+  "mass_kg": 0.15,
+  "width_m": 0.045,
+  "hold": "pinch",
+  "src": "typical remote, from memory",
+  "confidence": {
+    "mass_kg": "assumed",
+    "width_m": "assumed"
+  }
+}

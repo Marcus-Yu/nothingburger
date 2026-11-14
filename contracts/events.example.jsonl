@@ -1,0 +1,17 @@
+{"t": 0.0, "kind": "run_start", "job": "swap the living room bulb", "tasks_file": null, "world": {"id": "example-flat", "note": "the whole world.json"}, "model_steps": true}
+{"t": 0.1, "kind": "step_start", "step": "0 intake"}
+{"t": 0.1, "kind": "llm_start", "name": "intake: words to tasks", "model": "claude-opus-5-5"}
+{"t": 12.9, "kind": "llm", "name": "intake: words to tasks", "model": "claude-opus-5-5", "seconds": 12.8, "usage": {"input_tokens": 2159, "output_tokens": 1357}, "output": {"understood_as": "Replace the living room bulb.", "steps": [], "tasks": [], "demos": [], "questions": []}}
+{"t": 13.0, "kind": "step_end", "step": "0 intake", "seconds": 12.9, "wrote": ["intake", "tasks"]}
+{"t": 13.0, "kind": "tasks", "tasks": [{"id": "t1", "skill": "twist_out", "anchor": "living_bulb", "object": "bulb_e26", "carries": false}], "intake": {"source": "model"}}
+{"t": 13.1, "kind": "tool", "name": "nav.corridors", "seconds": 0.001, "summary": "4 corridors; narrowest 0.71 m at d_kitchen"}
+{"t": 13.2, "kind": "building", "demands": {"narrowest_m": 0.71, "narrowest_doorway": "d_kitchen", "lowest_header_m": 2.03, "tallest_step_m": 0.0, "tightest_turn_m": 1.0}, "corridors": []}
+{"t": 13.4, "kind": "requirements", "rows": [{"id": "r_width", "task": null, "quantity": "base_width_max", "unit": "m", "source": "scan:mesh", "value": 0.61}], "conflicts": []}
+{"t": 15.0, "kind": "candidates", "considered": 2550, "passed_arithmetic": 288, "eliminated_by": {"wrist camera": 1275}}
+{"t": 17.4, "kind": "candidate", "parts": {"base": "tidybot_arx5", "lift": "liftkit_500", "arm": "xarm7", "gripper": "xarm_gripper", "lidar": "rplidar_s2", "lidar_mount": "base_front", "wrist_cam": true, "ego_cam": "base_front"}, "price_usd": 23800, "mass_kg": 80.1, "feasible": false, "failed": [{"check": "reach", "task": "t3", "value": 0.7, "limit": 0.779, "unit": "m", "why": null}], "frame": "frames/001-candidate.png"}
+{"t": 40.0, "kind": "design", "parts": {"base": "tidybot_arx5", "lift": "liftkit_500", "arm": "ur5e", "gripper": "xarm_gripper", "lidar": "rplidar_s2", "lidar_mount": "stage_rear", "wrist_cam": true, "ego_cam": "base_front"}, "price_usd": 48800, "mass_kg": 89.78, "stowed": {"width_m": 0.456, "length_m": 0.62, "height_m": 1.561, "qpos": null}, "labels": [], "checks": [], "frame": "frames/013-design-stowed.png"}
+{"t": 44.0, "kind": "standoff", "task": "t1", "skill": "twist_out", "anchor": "living_bulb", "pose": [2.141, 3.141, -2.3562], "tip_ratio": 50.45, "covers": null, "why": "all 1 targets reached", "frame": "frames/014-reach-t1.png"}
+{"t": 46.0, "kind": "route", "legs": [{"from": "dock", "to": "t1", "carrying": false, "length_m": 3.88, "waypoints": [[0.6, 0.5, 0.0], [2.141, 3.141, -2.3562]]}], "door_clearances": []}
+{"t": 47.0, "kind": "arm_path", "task": "t1", "skill": "twist_out", "pose": [2.141, 3.141, -2.3562], "ok": true, "why": null, "rejected": 0, "segments": [{"phase": "approach", "kind": "follow_path", "samples": 359, "seconds": 17.9}]}
+{"t": 88.0, "kind": "program", "source": "model", "model": "claude-opus-5-5", "rejected": null, "steps": []}
+{"t": 88.2, "kind": "run_end", "ok": true, "summary": ["design: ..."], "seconds": 88.2}

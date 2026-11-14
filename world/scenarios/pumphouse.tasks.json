@@ -1,0 +1,13 @@
+{
+ "note": "the same job as pumphouse.job.txt, for runs without a model",
+ "tasks": [
+  {
+   "id": "t1",
+   "skill": "pick",
+   "anchor": "sample_bottle",
+   "object": "sample_bottle",
+   "carries": true,
+   "deliver_to": "way_out"
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "lite6",
+  "slot": "arm",
+  "name": "UFACTORY Lite 6 (with its integrated gripper)",
+  "model": "menagerie/ufactory_lite6/lite6_gripper_wide.xml",
+  "payload_kg": 0.6,
+  "reach_m": 0.44,
+  "price_usd": 2999,
+  "integrated_gripper": "lite6_gripper",
+  "tool_site": "end_effector",
+  "src": "UFACTORY: 600 g, 440 mm, $2,999",
+  "confidence": {
+    "payload_kg": "vendor",
+    "reach_m": "vendor",
+    "price_usd": "vendor",
+    "mass_kg": "model"
+  },
+  "notes": "Geometry, joint limits and mass: the MuJoCo Menagerie model (meshes derived from vendor CAD). reach_m and payload_kg are the rated figures; the composer measures the real envelope from the composed model."
+}

@@ -1,0 +1,18 @@
+{
+ "schema": "capture.grip/1",
+ "recording": "synthetic-squeeze-glove",
+ "object": "bulb",
+ "hand": "right",
+ "source": "glove",
+ "force_n": {
+  "min": 4.2,
+  "max": 9.0,
+  "peak": 9.6
+ },
+ "travel": {
+  "min": 0.35,
+  "max": 0.75
+ },
+ "held_s": 3.0,
+ "note": "contracts/grip.example.json with source set to glove (newtons), so the Force check runs. Used with tasks.heavy_bag.json to show the infeasible path."
+}

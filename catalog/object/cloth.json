@@ -1,0 +1,13 @@
+{
+  "id": "cloth",
+  "slot": "object",
+  "name": "Wiping cloth",
+  "mass_kg": 0.1,
+  "hold": "pinch",
+  "anchor_point": "centre of the wiped surface",
+  "src": "mass assumed",
+  "confidence": {
+    "mass_kg": "assumed"
+  },
+  "notes": "The press force for a wipe is a requirement in the ledger (default 10 N, assumed), not a property of the cloth."
+}

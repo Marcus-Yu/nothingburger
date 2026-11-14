@@ -1,0 +1,13 @@
+{
+  "id": "drive_sled",
+  "slot": "object",
+  "name": "Hot-swap drive in its sled, held by the handle",
+  "mass_kg": 0.75,
+  "width_m": 0.03,
+  "hold": "pinch",
+  "src": "3.5-inch drive plus caddy, typical figures from memory; the grip is on the 3 cm handle",
+  "confidence": {
+    "mass_kg": "assumed",
+    "width_m": "assumed"
+  }
+}

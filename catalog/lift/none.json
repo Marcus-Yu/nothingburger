@@ -1,0 +1,11 @@
+{
+  "id": "none",
+  "slot": "lift",
+  "name": "no lift",
+  "stroke_m": 0.0,
+  "retracted_m": 0.0,
+  "mass_kg": 0.0,
+  "price_usd": 0,
+  "src": "-",
+  "confidence": {}
+}

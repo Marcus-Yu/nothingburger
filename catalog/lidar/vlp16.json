@@ -1,0 +1,20 @@
+{
+  "id": "vlp16",
+  "slot": "lidar",
+  "name": "Velodyne VLP-16",
+  "dim": "3d",
+  "radius_m": 0.0515,
+  "height_m": 0.072,
+  "mass_kg": 0.83,
+  "price_usd": 4000,
+  "geometry": "stand-in",
+  "src": "Velodyne VLP-16: spinning 3D, 16 beams; size, mass, price from memory",
+  "confidence": {
+    "radius_m": "unverified",
+    "height_m": "unverified",
+    "mass_kg": "unverified",
+    "price_usd": "unverified",
+    "geometry": "stand-in cylinder"
+  },
+  "notes": "STAND-IN geometry (a cylinder) from datasheet sizes. Figures from memory, unverified. Mounts: base_front, or stage_rear when there is a lift."
+}
