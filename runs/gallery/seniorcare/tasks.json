@@ -1,0 +1,42 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "wipe",
+      "anchor": "bedside_top",
+      "object": "cloth",
+      "demo": "wipe bedside table",
+      "carries": false,
+      "why": "She asked for the bedside table to be wiped; doing it first leaves a clean surface for her things."
+    },
+    {
+      "id": "t2",
+      "skill": "pick",
+      "anchor": "remote_on_footstool",
+      "object": "tv_remote",
+      "demo": "pick up remote",
+      "carries": true,
+      "why": "The remote is on a low footstool she can no longer reach; it should end up somewhere she can reach.",
+      "deliver_to": "way_out"
+    },
+    {
+      "id": "t3",
+      "skill": "pick",
+      "anchor": "towel_on_bath_edge",
+      "object": "hand_towel",
+      "demo": "pick up towel",
+      "carries": false,
+      "why": "The towel is on the low bath edge and she cannot bend down to get it."
+    },
+    {
+      "id": "t4",
+      "skill": "pick",
+      "anchor": "pill_organiser",
+      "object": "pill_organiser",
+      "demo": "pick up pill organiser",
+      "carries": true,
+      "why": "She asked for the pill organiser to be fetched from the kitchen counter and brought to her.",
+      "deliver_to": "way_out"
+    }
+  ]
+}

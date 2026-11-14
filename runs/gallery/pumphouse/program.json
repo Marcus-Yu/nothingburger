@@ -1,0 +1,141 @@
+{
+  "schema": "program/1",
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Drive dock to the t1 standoff (7.4 m); the 0.15 m step limit is assumed, not scanned, so watch for thresholds.",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "The bottle pose is assumed and only 0.126 m of free floor is past the edge, so confirm the bottle position before descending.",
+      "n": 1
+    },
+    {
+      "primitive": "grasp",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_opening"
+      ],
+      "note": "Grip force is not established because the ledger has no force band; the 0.08 m opening is from the card.",
+      "n": 2
+    },
+    {
+      "primitive": "lift",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "note": "The 0.15 m lift assumes the card's 0.55 kg because no weight was stated, so check for slip if the bottle is heavier.",
+      "n": 3
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Retreat while holding the bottle; keep clear of the shelf edge 0.126 m away.",
+      "n": 4
+    },
+    {
+      "primitive": "move_base",
+      "task": "t1",
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step",
+        "r_t1_payload"
+      ],
+      "note": "Carry the bottle 9.0 m to the way out; an ungauged grip could drop it over the assumed step limit.",
+      "n": 5
+    },
+    {
+      "primitive": "place",
+      "task": "t1",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "note": "Set the bottle down at the way out on a flat, clear surface.",
+      "n": 6
+    },
+    {
+      "primitive": "release",
+      "task": "t1",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_opening"
+      ],
+      "note": "Open the gripper only after the bottle is confirmed resting upright.",
+      "n": 7
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Return 1.6 m to the dock with an empty gripper.",
+      "n": 8
+    }
+  ]
+}

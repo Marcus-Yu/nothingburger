@@ -11,7 +11,7 @@
   {
    "id": "t2",
    "skill": "pick",
-   "anchor": "bay_b_u03",
+   "anchor": "bay_b_u10",
    "object": "drive_sled",
    "carries": true,
    "deliver_to": "way_out"

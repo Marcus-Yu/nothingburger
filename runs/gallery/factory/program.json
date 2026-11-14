@@ -1,0 +1,206 @@
+{
+  "schema": "program/1",
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Drive 4.8 m from dock to the fixture table; the zero step height is assumed, not scanned, so watch for thresholds or cable covers.",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor",
+        "r_t1_reach"
+      ],
+      "note": "Base edge is only about 0.25 m from the table, and the 16 wipe reach targets are assumed, so check clearance on the joint-space approach.",
+      "n": 1
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_reach",
+        "r_t1_payload"
+      ],
+      "note": "The 10 N press force is assumed rather than measured; the plan lists 15 strokes but says it covers strokes 0-7 of 8, so confirm the whole table is wiped.",
+      "n": 2
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "The cloth may drip coolant during the 97 s retreat, so check the floor near the table stays dry.",
+      "n": 3
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Short 0.22 m reposition beside the table; the base passes close to the table edge.",
+      "n": 4
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor",
+        "r_t2_reach",
+        "r_t2_opening"
+      ],
+      "note": "The gripper opens at the start of the approach, and the base edge is only 0.176 m from the table, the tightest clearance on this route.",
+      "n": 5
+    },
+    {
+      "primitive": "grasp",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_opening",
+        "r_t2_payload"
+      ],
+      "note": "The ledger has no force band for the housing, so the grip force is not established; verify the grip holds 3.5 kg on the freshly wiped surface.",
+      "n": 6
+    },
+    {
+      "primitive": "lift",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_payload",
+        "r_t2_reach"
+      ],
+      "note": "Lift 0.15 m with the user-given 3.5 kg; watch for slip, since the grip force is unverified.",
+      "n": 7
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor",
+        "r_t2_payload"
+      ],
+      "note": "The retreat is made while holding the housing, so check the swept path clears the table.",
+      "n": 8
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step",
+        "r_t2_payload"
+      ],
+      "note": "Carry the housing 5.1 m to the roller door; any unscanned step could jolt the load, because step height is assumed.",
+      "n": 9
+    },
+    {
+      "primitive": "place",
+      "task": "t2",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_payload"
+      ],
+      "note": "No placement surface or pose is planned at the way out, so confirm where the housing is set down.",
+      "n": 10
+    },
+    {
+      "primitive": "release",
+      "task": "t2",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_opening"
+      ],
+      "note": "Confirm the housing is resting stably before the gripper opens.",
+      "n": 11
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 3,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Return 1.9 m to the dock with nothing held.",
+      "n": 12
+    }
+  ]
+}

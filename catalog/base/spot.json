@@ -3,7 +3,7 @@
   "slot": "base",
   "name": "Boston Dynamics Spot",
   "kind": "legged",
-  "holonomic": false,
+  "holonomic": true,
   "model": "menagerie/boston_dynamics_spot/spot.xml",
   "keyframe": "home",
   "payload_kg": 14.0,
@@ -20,5 +20,5 @@
     "mass_kg": "model",
     "support": "model"
   },
-  "notes": "MuJoCo Menagerie simulator model (no open CAD). Outline, mass, standing height, the support rectangle (the feet) and the mounts ('top' on the trunk, 'front' front_inset_m behind the trunk's nose) are read from the model in its 'home' keyframe when the composer loads the card. Treated as non-holonomic: it must turn to go through a doorway, so the Turn check uses its length."
+  "notes": "MuJoCo Menagerie simulator model (no open CAD). Outline, mass, standing height, the support rectangle (the feet) and the mounts ('top' on the trunk, 'front' front_inset_m behind the trunk's nose) are read from the model in its 'home' keyframe when the composer loads the card. Treated as holonomic (assumed): a quadruped can sidestep and turn in place, so it need not swing its length through a turn."
 }

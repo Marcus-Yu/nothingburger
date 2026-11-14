@@ -1,0 +1,619 @@
+{
+  "schema": "requirements/1",
+  "world": "seniorcare",
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "wipe",
+      "anchor": "bedside_top",
+      "object": "cloth",
+      "demo": "wipe bedside table",
+      "carries": false,
+      "why": "She asked for the bedside table to be wiped; doing it first leaves a clean surface for her things."
+    },
+    {
+      "id": "t2",
+      "skill": "pick",
+      "anchor": "remote_on_footstool",
+      "object": "tv_remote",
+      "demo": "pick up remote",
+      "carries": true,
+      "why": "The remote is on a low footstool she can no longer reach; it should end up somewhere she can reach.",
+      "deliver_to": "way_out"
+    },
+    {
+      "id": "t3",
+      "skill": "pick",
+      "anchor": "towel_on_bath_edge",
+      "object": "hand_towel",
+      "demo": "pick up towel",
+      "carries": false,
+      "why": "The towel is on the low bath edge and she cannot bend down to get it."
+    },
+    {
+      "id": "t4",
+      "skill": "pick",
+      "anchor": "pill_organiser",
+      "object": "pill_organiser",
+      "demo": "pick up pill organiser",
+      "carries": true,
+      "why": "She asked for the pill organiser to be fetched from the kitchen counter and brought to her.",
+      "deliver_to": "way_out"
+    }
+  ],
+  "corridors": [
+    {
+      "trip": "dock->t1",
+      "rooms": [
+        "hall",
+        "bedroom"
+      ],
+      "doorways": [
+        "d_bed"
+      ],
+      "bottleneck": {
+        "doorway": "d_bed",
+        "width_m": 0.76
+      },
+      "header_m": 2.03,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": [
+        {
+          "hallway": "hall",
+          "doorway": "d_bed",
+          "width_m": 1.0
+        }
+      ]
+    },
+    {
+      "trip": "dock->t2",
+      "rooms": [
+        "hall",
+        "bedroom"
+      ],
+      "doorways": [
+        "d_bed"
+      ],
+      "bottleneck": {
+        "doorway": "d_bed",
+        "width_m": 0.76
+      },
+      "header_m": 2.03,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": [
+        {
+          "hallway": "hall",
+          "doorway": "d_bed",
+          "width_m": 1.0
+        }
+      ]
+    },
+    {
+      "trip": "t2->way_out",
+      "rooms": [
+        "bedroom",
+        "hall",
+        "outside"
+      ],
+      "doorways": [
+        "d_bed",
+        "d_entry"
+      ],
+      "bottleneck": {
+        "doorway": "d_bed",
+        "width_m": 0.76
+      },
+      "header_m": 2.03,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": [
+        {
+          "hallway": "hall",
+          "doorway": "d_bed",
+          "width_m": 1.0
+        }
+      ]
+    },
+    {
+      "trip": "dock->t3",
+      "rooms": [
+        "hall",
+        "bathroom"
+      ],
+      "doorways": [
+        "d_bath"
+      ],
+      "bottleneck": {
+        "doorway": "d_bath",
+        "width_m": 0.61
+      },
+      "header_m": 2.03,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": [
+        {
+          "hallway": "hall",
+          "doorway": "d_bath",
+          "width_m": 1.0
+        }
+      ]
+    },
+    {
+      "trip": "dock->t4",
+      "rooms": [
+        "hall",
+        "kitchen"
+      ],
+      "doorways": [
+        "d_kitchen"
+      ],
+      "bottleneck": {
+        "doorway": "d_kitchen",
+        "width_m": 0.71
+      },
+      "header_m": 2.03,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": [
+        {
+          "hallway": "hall",
+          "doorway": "d_kitchen",
+          "width_m": 1.0
+        }
+      ]
+    },
+    {
+      "trip": "t4->way_out",
+      "rooms": [
+        "kitchen",
+        "hall",
+        "outside"
+      ],
+      "doorways": [
+        "d_kitchen",
+        "d_entry"
+      ],
+      "bottleneck": {
+        "doorway": "d_kitchen",
+        "width_m": 0.71
+      },
+      "header_m": 2.03,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": [
+        {
+          "hallway": "hall",
+          "doorway": "d_kitchen",
+          "width_m": 1.0
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "r_width",
+      "task": null,
+      "quantity": "base_width_max",
+      "value": 0.51,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "d_bath 0.61 m less 0.05 m a side"
+    },
+    {
+      "id": "r_length",
+      "task": null,
+      "quantity": "base_length_max",
+      "value": 0.9,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "hallway 1.0 m wide at the tightest turn into a doorway, less 0.05 m at each end"
+    },
+    {
+      "id": "r_header",
+      "task": null,
+      "quantity": "stowed_height_max",
+      "value": 1.98,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "lowest header 2.03 m less 0.05 m"
+    },
+    {
+      "id": "r_step",
+      "task": null,
+      "quantity": "step_max",
+      "value": 0.0,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "assumed",
+      "from": "doorway records give 0.0 m; steps are not measured from a mesh, corridor assumed flat"
+    },
+    {
+      "id": "r_t1_reach",
+      "task": "t1",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            1.85,
+            4.0,
+            0.6
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.134,
+          "side": [
+            0.2249,
+            -0.9744
+          ]
+        },
+        {
+          "point": [
+            2.25,
+            4.0,
+            0.6
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.076,
+          "side": [
+            0.9959,
+            -0.0905
+          ]
+        },
+        {
+          "point": [
+            2.25,
+            4.15,
+            0.6
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.076,
+          "side": [
+            0.9959,
+            -0.0905
+          ]
+        },
+        {
+          "point": [
+            1.85,
+            4.15,
+            0.6
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.281,
+          "side": [
+            0.156,
+            -0.9878
+          ]
+        },
+        {
+          "point": [
+            1.85,
+            4.3,
+            0.6
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.429,
+          "side": [
+            0.1191,
+            -0.9929
+          ]
+        },
+        {
+          "point": [
+            2.25,
+            4.3,
+            0.6
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.076,
+          "side": [
+            0.9959,
+            -0.0905
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "bedside_top",
+      "yaw_free": true,
+      "strokes": 3,
+      "from": "strokes regenerated over bedside_top's extent inset 0.05 m, lanes 0.15 m apart; targets 2k and 2k+1 are the ends of stroke k"
+    },
+    {
+      "id": "r_t1_floor",
+      "task": "t1",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.276,
+        "side": [
+          -0.0526,
+          -0.9986
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t1_payload",
+      "task": "t1",
+      "quantity": "payload",
+      "value": 0.1,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "cloth card"
+    },
+    {
+      "id": "r_t1_press",
+      "task": "t1",
+      "quantity": "press_force",
+      "value": 10.0,
+      "unit": "N",
+      "tolerance": 2.0,
+      "source": "assumed"
+    },
+    {
+      "id": "r_t2_reach",
+      "task": "t2",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            2.4,
+            2.5,
+            0.34
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.126,
+          "side": [
+            -0.0767,
+            -0.9971
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "remote_on_footstool",
+      "yaw_free": true
+    },
+    {
+      "id": "r_t2_floor",
+      "task": "t2",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.126,
+        "side": [
+          -0.0767,
+          -0.9971
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t2_opening",
+      "task": "t2",
+      "quantity": "gripper_opening_min",
+      "value": 0.055,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "tv_remote width 0.045 m plus 0.01 m"
+    },
+    {
+      "id": "r_t2_payload",
+      "task": "t2",
+      "quantity": "payload",
+      "value": 0.15,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "tv_remote card"
+    },
+    {
+      "id": "r_t3_reach",
+      "task": "t3",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            6.6,
+            2.7,
+            0.54
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.126,
+          "side": [
+            -0.0767,
+            -0.9971
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "towel_on_bath_edge",
+      "yaw_free": true
+    },
+    {
+      "id": "r_t3_floor",
+      "task": "t3",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.126,
+        "side": [
+          -0.0767,
+          -0.9971
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t3_opening",
+      "task": "t3",
+      "quantity": "gripper_opening_min",
+      "value": 0.07,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "hand_towel width 0.06 m plus 0.01 m"
+    },
+    {
+      "id": "r_t3_payload",
+      "task": "t3",
+      "quantity": "payload",
+      "value": 0.3,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "hand_towel card"
+    },
+    {
+      "id": "r_t4_reach",
+      "task": "t4",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            5.5,
+            2.4,
+            0.95
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.126,
+          "side": [
+            -0.9971,
+            -0.0767
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "pill_organiser",
+      "yaw_free": true
+    },
+    {
+      "id": "r_t4_floor",
+      "task": "t4",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.126,
+        "side": [
+          -0.9971,
+          -0.0767
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t4_opening",
+      "task": "t4",
+      "quantity": "gripper_opening_min",
+      "value": 0.07,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "pill_organiser width 0.06 m plus 0.01 m"
+    },
+    {
+      "id": "r_t4_payload",
+      "task": "t4",
+      "quantity": "payload",
+      "value": 0.25,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "pill_organiser card"
+    }
+  ],
+  "conflicts": []
+}

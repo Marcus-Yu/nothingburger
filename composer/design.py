@@ -7,7 +7,7 @@ from . import parts as P
 MAX_BINDING_SEARCH = 40
 
 
-def design(requirements: dict, exhaustive: bool = False, on_candidate=None) -> dict:
+def design(requirements: dict, exhaustive: bool = False, on_candidate=None, exclude=None) -> dict:
     """The cheapest candidate that passes every check (price, then mass), as a design.json dict.
 
     Candidates are first tested with the card arithmetic alone; only those with no failure there are
@@ -16,9 +16,10 @@ def design(requirements: dict, exhaustive: bool = False, on_candidate=None) -> d
     sensors is skipped without composing. With `exhaustive`, every survivor is composed and the
     design also carries `feasible`, the number that pass. `on_candidate`, when given, is called with a
     progress dict: once with {"stage": "arithmetic", ...counts} and then {"stage": "checked", ...check result}
-    for every candidate composed."""
+    for every candidate composed. `exclude` is a list of part patterns, e.g. [{"lift": "none", "arm": "xarm7"}]:
+    a candidate matching every key of any pattern is left out (constraints added by the pathing loop)."""
     L = C.Ledger(requirements)
-    cands = P.candidates()
+    cands = [c for c in P.candidates() if not any(all(P.full(c).get(k) == v for k, v in pat.items()) for pat in (exclude or []))]
     cheap = [(c, C.cheap_failures(c, L)) for c in cands]
     survivors = sorted((c for c, f in cheap if not f), key=lambda c: (P.price(c), P.part_mass(c)))
     if on_candidate:

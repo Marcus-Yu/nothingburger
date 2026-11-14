@@ -20,6 +20,7 @@ from .nodes import design, intake, ledger, pathing, prepass, program
 from .tools import trace
 
 REPO = Path(__file__).resolve().parents[1]
+MAX_ROBOT_FIXES = 5  # the loop stops after this many redesigns
 OUTPUTS = ["world.json", "tasks.json", "demo.json", "grip.json", "requirements.json", "design.json", "decisions.jsonl",
            "robot.xml", "build.json", "route.json", "trajectory.json", "program.json", "intake.json", "trace.json"]
 
@@ -44,7 +45,7 @@ def pipeline(state: dict) -> dict:
     for key in ("demo", "grip"):  # the demonstration files belong to one task
         if state.get(key) is not None:
             state[key + "s"] = {tid: state[key]}
-    for name, node in (("1 building pre-pass", prepass), ("2 requirements ledger", ledger), ("3-4 design and compose", design)):
+    for name, node in (("1 building pre-pass", prepass), ("2 requirements ledger", ledger)):
         state = observe.node(name, node.step)(state)
         if node is prepass:
             observe.emit("building", demands=state["building"]["demands"], corridors=state["building"]["corridors"])
@@ -54,8 +55,27 @@ def pipeline(state: dict) -> dict:
                                                   else f"{len(r['value'])} entries"}
                                                for r in state["requirements"]["requirements"]],
                          conflicts=state["requirements"]["conflicts"])
-    if not state["infeasible"]:
+    # The loop: a design that pathing cannot use becomes a new constraint, and the design step runs again.
+    # A task with no standoff means the arm on that lift does not reach, so that lift-and-arm pair is ruled out.
+    state = {**state, "excluded": [], "robot_fixes": []}
+    for attempt in range(MAX_ROBOT_FIXES + 1):
+        state = observe.node("3-4 design and compose", design.step)(state)
+        if state["infeasible"]:
+            break
         state = observe.node("5 pathing", pathing.step)(state)
+        stuck = sorted({f["task"] for f in state["route"]["failures"] if f.get("task") and f.get("kind") in ("standoff", "no_standoff", None)}
+                       | {t["id"] for t in state["tasks"] if not any(s["task"] == t["id"] for s in state["route"]["standoffs"])})
+        if not stuck or attempt == MAX_ROBOT_FIXES:
+            break
+        p = state["design"]["parts"]
+        fix = {"n": attempt + 1, "tasks": stuck, "ruled_out": {"lift": p["lift"], "arm": p["arm"]},
+               "why": f"no standoff reaches {', '.join(stuck)} with {p['arm']} on lift {p['lift']}",
+               "was": {"parts": p, "price_usd": state["design"]["price_usd"]}}
+        state = {**state, "excluded": state["excluded"] + [fix["ruled_out"]], "robot_fixes": state["robot_fixes"] + [fix]}
+        observe.emit("robot_fix", **fix)
+    if state["robot_fixes"]:
+        state["decisions"] = state["decisions"] + [{"slot": "loop", "robot_fix": f} for f in state["robot_fixes"]]
+    if not state["infeasible"]:
         state = observe.node("5d program", program.step)(state)
         pr = state["program"]
         observe.emit("program", source=pr["source"], model=pr.get("model"), rejected=pr.get("model_rejected"), steps=pr["steps"])
@@ -141,6 +161,8 @@ def summary(state: dict) -> list:
         legs = route["legs"]
         lines.append(f"route: {len(legs)} legs, {round(sum(l.get('length_m') or 0 for l in legs), 2)} m: "
                      + " > ".join([legs[0]["from"]] + [l["to"] for l in legs] if legs else []))
+    for f in state.get("robot_fixes", []):
+        lines.append(f"robot fix {f['n']}: {f['why']}; was ${f['was']['price_usd']}")
     if not state["infeasible"] and state.get("program"):
         pr = state["program"]
         lines.append(f"program: {len(pr['steps'])} steps, written by " + (f"the model ({pr['model']})" if pr["source"] == "model" else "rule")

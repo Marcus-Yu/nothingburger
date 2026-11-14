@@ -1,0 +1,214 @@
+{
+  "schema": "program/1",
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Dock to row A (5.56 m); the step limit of 0.0 m is assumed, not scanned, so stop if any threshold or cable ramp appears.",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "The 86 s joint approach to the U40 bay at 1.85 m runs with the base only 7 mm from the floor edge, and the reach pose is assumed, so verify clearance before it starts.",
+      "n": 1
+    },
+    {
+      "primitive": "grasp",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_opening"
+      ],
+      "note": "Grip force is not established because the ledger has no force band for t1, so watch that the sled is neither crushed nor slipping.",
+      "n": 2
+    },
+    {
+      "primitive": "lift",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "note": "Pull and lift 0.15 m with a 0.75 kg card payload at full height; a stuck sled latch will show as a stall here.",
+      "n": 3
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "The 88 s retreat keeps the 7 mm floor edge margin, and the plan gives no place step for this sled, so confirm where it ends up.",
+      "n": 4
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Short 1.75 m move from row A to row B within the 0.81 m width limit.",
+      "n": 5
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "The U10 reach pose is assumed, and the floor row has a zero side vector, so the floor-edge data looks unpopulated and should be checked.",
+      "n": 6
+    },
+    {
+      "primitive": "grasp",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_opening"
+      ],
+      "note": "Grip force is not established because the ledger has no force band for t2, and this sled must stay held across an 8.4 m drive.",
+      "n": 7
+    },
+    {
+      "primitive": "lift",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_payload"
+      ],
+      "note": "Lift 0.15 m with a 0.75 kg card payload; confirm the sled has fully cleared the bay rails.",
+      "n": 8
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "Retreat to the stow pose while still holding the sled, ready for transport.",
+      "n": 9
+    },
+    {
+      "primitive": "move_base",
+      "task": "t2",
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step",
+        "r_t2_payload"
+      ],
+      "note": "Carry the sled 8.45 m to the way out; with an unknown grip force, a bump could drop it.",
+      "n": 10
+    },
+    {
+      "primitive": "place",
+      "task": "t2",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_payload"
+      ],
+      "note": "Set the failed drive down at the way out, where no place surface is surveyed, so confirm the surface first.",
+      "n": 11
+    },
+    {
+      "primitive": "release",
+      "task": "t2",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_opening"
+      ],
+      "note": "Open the gripper and confirm the sled sits stable before backing away.",
+      "n": 12
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 3,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Return 1.6 m to the dock empty-handed.",
+      "n": 13
+    }
+  ]
+}

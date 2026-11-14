@@ -67,7 +67,7 @@ def step(state: dict) -> dict:
         observe.emit("candidate", parts=parts, price_usd=p["price_usd"], mass_kg=p["mass_kg"], feasible=p["feasible"],
                      failed=fails, frame=frame)
 
-    design = composer.design(requirements, on_candidate=progress)
+    design = composer.design(requirements, on_candidate=progress, exclude=state.get("excluded") or None)
     out = {**state, "design": design, "infeasible": design.get("parts") is None}
     out["decisions"] = decisions(design, [] if out["infeasible"] else composer.candidates())
     if not out["infeasible"]:

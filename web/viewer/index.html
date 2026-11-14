@@ -234,6 +234,8 @@ function reduce(upto) {
       case "design": S.design = e; S.last = {type: "design"};
         add({cls: "good", t: e.t, html: `<b>Chosen:</b> ${esc(partsLine(e.parts))} at ${money(e.price_usd)}, ${e.mass_kg} kg. Folded it is ${e.stowed.width_m} m wide and ${e.stowed.height_m} m tall.`}); break;
       case "infeasible": S.infeasible = e; add({cls: "bad", t: e.t, html: `<b>No robot in the catalog passes.</b> Binding: ${esc((e.binding_checks || []).map(failLine).join("; "))}.`}); break;
+      case "robot_fix": S.fixes = (S.fixes || 0) + 1; S.standoffs = []; S.route = null; S.arm = []; S.design = null;
+        group("5 pathing").items.push({cls: "bad", t: e.t, html: `<b>Redesign ${e.n}:</b> ${esc(e.why)}. That arm-and-lift pair is ruled out and the design step runs again.`}); break;
       case "standoff": S.standoffs.push(e); S.last = {type: "so", i: S.standoffs.length - 1};
         add({cls: "good", t: e.t, html: `${esc(e.task)} ${esc(e.skill.replace("_"," "))}: parks at (${e.pose[0].toFixed(2)}, ${e.pose[1].toFixed(2)})${e.covers ? ", " + esc(e.covers) : ""}; tip-over ratio ${e.tip_ratio}.`}); break;
       case "standoff_failed": add({cls: "bad", t: e.t, html: `${esc(e.task)} ${esc(e.skill)}: no standoff. ${esc(e.reason || "")}`}); break;
@@ -282,7 +284,7 @@ function drawRobot(S) {
       else if (k === "ego_cam") { v = parts.ego_cam === "none" ? "none" : "RealSense D435i"; sub = parts.ego_cam === "none" ? "" : nm(parts.ego_cam); } else v = nm(parts[k]); }
     const ch = parts && prevParts[k] !== undefined && prevParts[k] !== v + sub; if (parts) prevParts[k] = v + sub;
     return `<tr class="${ch ? "changed" : ""}"><td>${label}</td><td><b>${esc(v)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</td></tr>`; }).join("");
-  $("funnel").innerHTML = S.funnel ? `<b>${S.funnel.considered.toLocaleString()}</b> combinations → <b>${S.funnel.passed_arithmetic}</b> pass the card arithmetic → <b>${S.cands.length}</b> composed and checked${S.design ? " → <b>1</b> chosen" : ""}` : "";
+  $("funnel").innerHTML = S.funnel ? `<b>${S.funnel.considered.toLocaleString()}</b> combinations → <b>${S.funnel.passed_arithmetic}</b> pass the card arithmetic → <b>${S.cands.length}</b> composed and checked${S.design ? " → <b>1</b> chosen" : ""}${S.fixes ? ` · <b>${S.fixes}</b> redesign${S.fixes > 1 ? "s" : ""} after pathing failed` : ""}` : "";
   $("cands").innerHTML = S.cands.map((c, i) => `<button class="cand ${c.feasible ? "pass" : "fail"} ${view && view.type === "cand" && view.i === i ? "sel" : ""}" data-i="${i}" title="${esc(c.feasible ? "passes" : c.failed.map(failLine).join("; "))}"><b>${money(c.price_usd)}</b><small>${esc(c.feasible ? "passes" : (c.failed[0] ? c.failed[0].check + (c.failed[0].task ? " " + c.failed[0].task : "") : "fails"))}</small></button>`).join("")
     + (S.design && S.cands.length ? `<button class="cand ${view && view.type !== "cand" ? "sel" : ""}" data-i="-1"><b>latest</b><small>follow the run</small></button>` : "");
   $("robotnote").textContent = S.cands.length ? "click a candidate to inspect it" : "";
@@ -371,7 +373,7 @@ async function poll() {
 function open(r) { clearTimeout(timer); clearInterval(playing); playing = null; run = r; events = []; shown = 0; pick = null; prevParts = {}; follow = true; history.replaceState(null, "", "?run=" + encodeURIComponent(r)); draw(); poll(); }
 async function loadRuns(select) {
   const list = await (await fetch("/api/runs")).json();
-  $("runs").innerHTML = `<option value="">Past runs (${list.length})</option>` + list.map(r => `<option value="${esc(r.run)}" ${r.run === run ? "selected" : ""}>${esc(new Date(r.modified * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}))} · ${esc((r.job || r.run).slice(0, 44))}${r.finished ? "" : " · running"}</option>`).join("");
+  $("runs").innerHTML = `<option value="">Past runs (${list.length})</option>` + list.map(r => `<option value="${esc(r.run)}" ${r.run === run ? "selected" : ""}>${esc(new Date(r.modified * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}))} · ${esc((r.run.startsWith("runs/gallery/") ? r.run.slice(13) + ": " : "") + (r.job || r.run)).slice(0, 52)}${r.finished ? "" : " · running"}</option>`).join("");
   if (select && !run && list.length) open(list[0].run);
 }
 $("runs").onchange = e => e.target.value && open(e.target.value);

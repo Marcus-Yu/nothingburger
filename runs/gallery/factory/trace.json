@@ -1,0 +1,869 @@
+{
+  "calls": [
+    {
+      "n": 0,
+      "name": "nav.corridors",
+      "seconds": 0.0,
+      "summary": "3 corridors; narrowest 1.5 m at d_roller; header 2.4 m; step 0.0 m; turn None m"
+    },
+    {
+      "n": 1,
+      "name": "nav.free_floor",
+      "seconds": 0.0031,
+      "summary": "edge 0.251 m, side [-0.0555, -0.9985]"
+    },
+    {
+      "n": 2,
+      "name": "nav.free_floor",
+      "seconds": 0.0023,
+      "summary": "edge 0.176 m, side [-0.0665, -0.9978]"
+    },
+    {
+      "n": 3,
+      "name": "nav.free_floor",
+      "seconds": 0.0023,
+      "summary": "edge 0.075 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 4,
+      "name": "nav.free_floor",
+      "seconds": 0.0028,
+      "summary": "edge 0.147 m, side [-0.8638, -0.5039]"
+    },
+    {
+      "n": 5,
+      "name": "nav.free_floor",
+      "seconds": 0.0025,
+      "summary": "edge 0.283 m, side [-0.932, -0.3624]"
+    },
+    {
+      "n": 6,
+      "name": "nav.free_floor",
+      "seconds": 0.0027,
+      "summary": "edge 0.075 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 7,
+      "name": "nav.free_floor",
+      "seconds": 0.0024,
+      "summary": "edge 0.075 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 8,
+      "name": "nav.free_floor",
+      "seconds": 0.0025,
+      "summary": "edge 0.425 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 9,
+      "name": "nav.free_floor",
+      "seconds": 0.0024,
+      "summary": "edge 0.425 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 10,
+      "name": "nav.free_floor",
+      "seconds": 0.0025,
+      "summary": "edge 0.075 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 11,
+      "name": "nav.free_floor",
+      "seconds": 0.0024,
+      "summary": "edge 0.075 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 12,
+      "name": "nav.free_floor",
+      "seconds": 0.0024,
+      "summary": "edge 0.425 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 13,
+      "name": "nav.free_floor",
+      "seconds": 0.0023,
+      "summary": "edge 0.425 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 14,
+      "name": "nav.free_floor",
+      "seconds": 0.0023,
+      "summary": "edge 0.075 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 15,
+      "name": "nav.free_floor",
+      "seconds": 0.0025,
+      "summary": "edge 0.075 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 16,
+      "name": "nav.free_floor",
+      "seconds": 0.0022,
+      "summary": "edge 0.283 m, side [0.932, -0.3624]"
+    },
+    {
+      "n": 17,
+      "name": "nav.free_floor",
+      "seconds": 0.0023,
+      "summary": "edge 0.147 m, side [0.8638, -0.5039]"
+    },
+    {
+      "n": 18,
+      "name": "nav.free_floor",
+      "seconds": 0.0024,
+      "summary": "edge 0.075 m, side [0.0, -1.0]"
+    },
+    {
+      "n": 19,
+      "name": "composer.design",
+      "seconds": 4.276,
+      "summary": "tidybot_kinova+none+ur5e+robotiq_2f85 $47000 82.38 kg"
+    },
+    {
+      "n": 20,
+      "name": "composer.compose",
+      "seconds": 0.0546,
+      "summary": "robot.xml 35472 chars; stowed 1.083 m wide, 0.647 m tall; 6 arm joints"
+    },
+    {
+      "n": 21,
+      "name": "composer.compose",
+      "seconds": 0.0589,
+      "summary": "robot.xml 35467 chars; stowed 0.898 m wide, 0.657 m tall; 6 arm joints"
+    },
+    {
+      "n": 22,
+      "name": "composer.candidates",
+      "seconds": 0.0013,
+      "summary": "2550 candidates"
+    },
+    {
+      "n": 23,
+      "name": "composer.compose",
+      "seconds": 0.0765,
+      "summary": "robot.xml 35467 chars; stowed 0.898 m wide, 0.657 m tall; 6 arm joints"
+    },
+    {
+      "n": 24,
+      "name": "nav.propose",
+      "seconds": 0.0062,
+      "summary": "36 poses, first [3.2, 5.175, 1.5708]"
+    },
+    {
+      "n": 25,
+      "name": "motion.reachable",
+      "seconds": 0.1613,
+      "summary": "ok=False tip 8.51 missed [1, 2, 5, 6, 9, 10, 13, 14]"
+    },
+    {
+      "n": 26,
+      "name": "motion.reachable",
+      "seconds": 0.1423,
+      "summary": "ok=False tip 13.98 missed [0, 1, 2, 5, 6, 9, 10, 13, 14, 15]"
+    },
+    {
+      "n": 27,
+      "name": "motion.reachable",
+      "seconds": 0.1436,
+      "summary": "ok=False tip 9.01 missed [1, 2, 5, 6, 9, 10, 12, 13, 14, 15]"
+    },
+    {
+      "n": 28,
+      "name": "motion.reachable",
+      "seconds": 0.1453,
+      "summary": "ok=False tip 10.87 missed [0, 1, 2, 5, 6, 9, 10, 13, 14, 15]"
+    },
+    {
+      "n": 29,
+      "name": "motion.reachable",
+      "seconds": 0.1368,
+      "summary": "ok=False tip 8.89 missed [0, 1, 2, 3, 5, 6, 9, 10, 13, 14]"
+    },
+    {
+      "n": 30,
+      "name": "motion.reachable",
+      "seconds": 0.1465,
+      "summary": "ok=False tip 7.42 missed [1, 2, 5, 6, 9, 10, 12, 13, 14, 15]"
+    },
+    {
+      "n": 31,
+      "name": "motion.reachable",
+      "seconds": 0.1522,
+      "summary": "ok=False tip 8.66 missed [0, 1, 2, 5, 6, 9, 10, 13, 14, 15]"
+    },
+    {
+      "n": 32,
+      "name": "motion.reachable",
+      "seconds": 0.1464,
+      "summary": "ok=False tip 7.33 missed [0, 1, 2, 3, 5, 6, 9, 10, 13, 14]"
+    },
+    {
+      "n": 33,
+      "name": "nav.propose",
+      "seconds": 0.0069,
+      "summary": "12 poses, first [2.155, 5.475, 0.5236]"
+    },
+    {
+      "n": 34,
+      "name": "motion.reachable",
+      "seconds": 0.017,
+      "summary": "ok=False tip 13.55 missed [1]"
+    },
+    {
+      "n": 35,
+      "name": "motion.reachable",
+      "seconds": 0.0177,
+      "summary": "ok=False tip 11.87 missed [1]"
+    },
+    {
+      "n": 36,
+      "name": "motion.reachable",
+      "seconds": 0.0204,
+      "summary": "ok=False tip 10.54 missed [1]"
+    },
+    {
+      "n": 37,
+      "name": "nav.propose",
+      "seconds": 0.0064,
+      "summary": "12 poses, first [2.825, 5.175, 1.5708]"
+    },
+    {
+      "n": 38,
+      "name": "motion.reachable",
+      "seconds": 0.016,
+      "summary": "ok=False tip 11.87 missed [0]"
+    },
+    {
+      "n": 39,
+      "name": "motion.reachable",
+      "seconds": 0.0175,
+      "summary": "ok=False tip 9.09 missed [0]"
+    },
+    {
+      "n": 40,
+      "name": "motion.reachable",
+      "seconds": 0.0172,
+      "summary": "ok=False tip 12.65 missed [0]"
+    },
+    {
+      "n": 41,
+      "name": "nav.propose",
+      "seconds": 0.0082,
+      "summary": "12 poses, first [2.975, 5.175, 1.5708]"
+    },
+    {
+      "n": 42,
+      "name": "motion.reachable",
+      "seconds": 0.0181,
+      "summary": "ok=False tip 11.87 missed [1]"
+    },
+    {
+      "n": 43,
+      "name": "motion.reachable",
+      "seconds": 0.0188,
+      "summary": "ok=False tip 9.09 missed [1]"
+    },
+    {
+      "n": 44,
+      "name": "motion.reachable",
+      "seconds": 0.0183,
+      "summary": "ok=False tip 12.65 missed [1]"
+    },
+    {
+      "n": 45,
+      "name": "nav.propose",
+      "seconds": 0.0055,
+      "summary": "12 poses, first [3.125, 5.175, 1.5708]"
+    },
+    {
+      "n": 46,
+      "name": "motion.reachable",
+      "seconds": 0.0161,
+      "summary": "ok=False tip 11.87 missed [0]"
+    },
+    {
+      "n": 47,
+      "name": "motion.reachable",
+      "seconds": 0.0174,
+      "summary": "ok=False tip 9.09 missed [0]"
+    },
+    {
+      "n": 48,
+      "name": "motion.reachable",
+      "seconds": 0.0178,
+      "summary": "ok=False tip 12.65 missed [0]"
+    },
+    {
+      "n": 49,
+      "name": "nav.propose",
+      "seconds": 0.0061,
+      "summary": "12 poses, first [3.275, 5.175, 1.5708]"
+    },
+    {
+      "n": 50,
+      "name": "motion.reachable",
+      "seconds": 0.0186,
+      "summary": "ok=False tip 11.87 missed [1]"
+    },
+    {
+      "n": 51,
+      "name": "motion.reachable",
+      "seconds": 0.019,
+      "summary": "ok=False tip 9.09 missed [1]"
+    },
+    {
+      "n": 52,
+      "name": "motion.reachable",
+      "seconds": 0.0185,
+      "summary": "ok=False tip 12.65 missed [1]"
+    },
+    {
+      "n": 53,
+      "name": "nav.propose",
+      "seconds": 0.0071,
+      "summary": "12 poses, first [3.425, 5.175, 1.5708]"
+    },
+    {
+      "n": 54,
+      "name": "motion.reachable",
+      "seconds": 0.0164,
+      "summary": "ok=False tip 11.87 missed [0]"
+    },
+    {
+      "n": 55,
+      "name": "motion.reachable",
+      "seconds": 0.0175,
+      "summary": "ok=False tip 9.09 missed [0]"
+    },
+    {
+      "n": 56,
+      "name": "motion.reachable",
+      "seconds": 0.0174,
+      "summary": "ok=False tip 12.65 missed [0]"
+    },
+    {
+      "n": 57,
+      "name": "nav.propose",
+      "seconds": 0.0065,
+      "summary": "12 poses, first [3.575, 5.175, 1.5708]"
+    },
+    {
+      "n": 58,
+      "name": "motion.reachable",
+      "seconds": 0.0178,
+      "summary": "ok=False tip 11.87 missed [1]"
+    },
+    {
+      "n": 59,
+      "name": "motion.reachable",
+      "seconds": 0.0179,
+      "summary": "ok=False tip 9.09 missed [1]"
+    },
+    {
+      "n": 60,
+      "name": "motion.reachable",
+      "seconds": 0.018,
+      "summary": "ok=False tip 12.65 missed [1]"
+    },
+    {
+      "n": 61,
+      "name": "nav.propose",
+      "seconds": 0.0068,
+      "summary": "12 poses, first [3.725, 5.175, 1.5708]"
+    },
+    {
+      "n": 62,
+      "name": "motion.reachable",
+      "seconds": 0.0162,
+      "summary": "ok=False tip 11.87 missed [0]"
+    },
+    {
+      "n": 63,
+      "name": "motion.reachable",
+      "seconds": 0.0172,
+      "summary": "ok=False tip 13.46 missed [0]"
+    },
+    {
+      "n": 64,
+      "name": "motion.reachable",
+      "seconds": 0.0173,
+      "summary": "ok=False tip 9.09 missed [0]"
+    },
+    {
+      "n": 65,
+      "name": "nav.propose",
+      "seconds": 0.0062,
+      "summary": "36 poses, first [3.2, 5.15, 1.5708]"
+    },
+    {
+      "n": 66,
+      "name": "motion.reachable",
+      "seconds": 0.0026,
+      "summary": "ok=True tip 5.76 missed []"
+    },
+    {
+      "n": 67,
+      "name": "motion.reachable",
+      "seconds": 0.0025,
+      "summary": "ok=True tip 4.68 missed []"
+    },
+    {
+      "n": 68,
+      "name": "motion.reachable",
+      "seconds": 0.0011,
+      "summary": "ok=True tip 3.97 missed []"
+    },
+    {
+      "n": 69,
+      "name": "motion.reachable",
+      "seconds": 0.0012,
+      "summary": "ok=True tip 3.97 missed []"
+    },
+    {
+      "n": 70,
+      "name": "motion.reachable",
+      "seconds": 0.003,
+      "summary": "ok=True tip 7.25 missed []"
+    },
+    {
+      "n": 71,
+      "name": "motion.reachable",
+      "seconds": 0.0025,
+      "summary": "ok=True tip 5.77 missed []"
+    },
+    {
+      "n": 72,
+      "name": "motion.reachable",
+      "seconds": 0.0024,
+      "summary": "ok=True tip 5.77 missed []"
+    },
+    {
+      "n": 73,
+      "name": "motion.reachable",
+      "seconds": 0.0157,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 74,
+      "name": "nav.plan",
+      "seconds": 0.1507,
+      "summary": "3 legs, 1 doors crossed, 1 failures"
+    },
+    {
+      "n": 75,
+      "name": "motion.retarget",
+      "seconds": 0.0361,
+      "summary": "t2: failed in approach: IK lost the path at sample 18 of 21: 12 mm, 0 deg off"
+    },
+    {
+      "n": 76,
+      "name": "motion.reachable",
+      "seconds": 0.0025,
+      "summary": "ok=True tip 5.77 missed []"
+    },
+    {
+      "n": 77,
+      "name": "motion.retarget",
+      "seconds": 0.0392,
+      "summary": "t2: failed in approach: IK lost the path at sample 12 of 21: 12 mm, 0 deg off"
+    },
+    {
+      "n": 78,
+      "name": "motion.reachable",
+      "seconds": 0.0025,
+      "summary": "ok=True tip 5.77 missed []"
+    },
+    {
+      "n": 79,
+      "name": "motion.retarget",
+      "seconds": 0.0424,
+      "summary": "t2: failed in approach: IK lost the path at sample 12 of 21: 12 mm, 0 deg off"
+    },
+    {
+      "n": 80,
+      "name": "nav.propose",
+      "seconds": 0.0065,
+      "summary": "36 poses, first [3.2, 5.15, 1.5708]"
+    },
+    {
+      "n": 81,
+      "name": "motion.reachable",
+      "seconds": 0.0025,
+      "summary": "ok=True tip 5.76 missed []"
+    },
+    {
+      "n": 82,
+      "name": "motion.retarget",
+      "seconds": 0.0419,
+      "summary": "t2: failed in approach: IK lost the path at sample 12 of 21: 12 mm, 0 deg off"
+    },
+    {
+      "n": 83,
+      "name": "motion.reachable",
+      "seconds": 0.0027,
+      "summary": "ok=True tip 4.68 missed []"
+    },
+    {
+      "n": 84,
+      "name": "motion.retarget",
+      "seconds": 0.0434,
+      "summary": "t2: failed in approach: IK lost the path at sample 5 of 21: 13 mm, 0 deg off"
+    },
+    {
+      "n": 85,
+      "name": "motion.reachable",
+      "seconds": 0.0012,
+      "summary": "ok=True tip 3.97 missed []"
+    },
+    {
+      "n": 86,
+      "name": "motion.retarget",
+      "seconds": 0.0346,
+      "summary": "t2: failed in approach: IK lost the path at sample 5 of 21: 13 mm, 0 deg off"
+    },
+    {
+      "n": 87,
+      "name": "motion.reachable",
+      "seconds": 0.0017,
+      "summary": "ok=True tip 3.97 missed []"
+    },
+    {
+      "n": 88,
+      "name": "motion.retarget",
+      "seconds": 0.0319,
+      "summary": "t2: failed in approach: IK lost the path at sample 5 of 21: 13 mm, 0 deg off"
+    },
+    {
+      "n": 89,
+      "name": "motion.reachable",
+      "seconds": 0.0157,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 90,
+      "name": "motion.reachable",
+      "seconds": 0.017,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 91,
+      "name": "motion.reachable",
+      "seconds": 0.016,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 92,
+      "name": "motion.reachable",
+      "seconds": 0.0225,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 93,
+      "name": "motion.reachable",
+      "seconds": 0.0232,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 94,
+      "name": "motion.reachable",
+      "seconds": 0.0157,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 95,
+      "name": "motion.reachable",
+      "seconds": 0.0158,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 96,
+      "name": "motion.reachable",
+      "seconds": 0.0156,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 97,
+      "name": "motion.reachable",
+      "seconds": 0.0173,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 98,
+      "name": "motion.reachable",
+      "seconds": 0.0189,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 99,
+      "name": "motion.reachable",
+      "seconds": 0.0166,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 100,
+      "name": "motion.reachable",
+      "seconds": 0.0159,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 101,
+      "name": "motion.reachable",
+      "seconds": 0.0159,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 102,
+      "name": "motion.reachable",
+      "seconds": 0.0181,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 103,
+      "name": "motion.reachable",
+      "seconds": 0.0173,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 104,
+      "name": "motion.reachable",
+      "seconds": 0.0163,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 105,
+      "name": "motion.reachable",
+      "seconds": 0.0194,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 106,
+      "name": "motion.reachable",
+      "seconds": 0.0151,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 107,
+      "name": "motion.reachable",
+      "seconds": 0.0151,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 108,
+      "name": "motion.reachable",
+      "seconds": 0.0151,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 109,
+      "name": "motion.reachable",
+      "seconds": 0.0173,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 110,
+      "name": "motion.reachable",
+      "seconds": 0.0164,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 111,
+      "name": "motion.reachable",
+      "seconds": 0.0145,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 112,
+      "name": "motion.reachable",
+      "seconds": 0.0144,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 113,
+      "name": "motion.reachable",
+      "seconds": 0.0172,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 114,
+      "name": "motion.reachable",
+      "seconds": 0.0183,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 115,
+      "name": "motion.reachable",
+      "seconds": 0.0189,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 116,
+      "name": "motion.reachable",
+      "seconds": 0.0164,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 117,
+      "name": "motion.reachable",
+      "seconds": 0.015,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 118,
+      "name": "composer.design",
+      "seconds": 4.1122,
+      "summary": "tidybot_arx5+liftkit_900+ur5e+robotiq_2f85 $52580 91.48 kg"
+    },
+    {
+      "n": 119,
+      "name": "composer.compose",
+      "seconds": 0.0661,
+      "summary": "robot.xml 36167 chars; stowed 0.645 m wide, 1.172 m tall; 7 arm joints"
+    },
+    {
+      "n": 120,
+      "name": "composer.compose",
+      "seconds": 0.0625,
+      "summary": "robot.xml 36167 chars; stowed 0.623 m wide, 1.372 m tall; 7 arm joints"
+    },
+    {
+      "n": 121,
+      "name": "composer.candidates",
+      "seconds": 0.0013,
+      "summary": "2550 candidates"
+    },
+    {
+      "n": 122,
+      "name": "composer.compose",
+      "seconds": 0.0666,
+      "summary": "robot.xml 36175 chars; stowed 0.623 m wide, 1.372 m tall; 7 arm joints"
+    },
+    {
+      "n": 123,
+      "name": "nav.propose",
+      "seconds": 0.0059,
+      "summary": "36 poses, first [3.2, 5.225, 1.5708]"
+    },
+    {
+      "n": 124,
+      "name": "motion.reachable",
+      "seconds": 0.0539,
+      "summary": "ok=True tip 4.48 missed []"
+    },
+    {
+      "n": 125,
+      "name": "motion.reachable",
+      "seconds": 0.0108,
+      "summary": "ok=True tip 3.64 missed []"
+    },
+    {
+      "n": 126,
+      "name": "motion.reachable",
+      "seconds": 0.049,
+      "summary": "ok=False tip 3.3 missed [1, 14]"
+    },
+    {
+      "n": 127,
+      "name": "motion.reachable",
+      "seconds": 0.0423,
+      "summary": "ok=False tip 3.16 missed [13, 14]"
+    },
+    {
+      "n": 128,
+      "name": "motion.reachable",
+      "seconds": 0.0382,
+      "summary": "ok=False tip 3.11 missed [1, 14]"
+    },
+    {
+      "n": 129,
+      "name": "motion.reachable",
+      "seconds": 0.0356,
+      "summary": "ok=False tip 3.19 missed [1, 2]"
+    },
+    {
+      "n": 130,
+      "name": "motion.reachable",
+      "seconds": 0.0568,
+      "summary": "ok=False tip 2.99 missed [10, 13, 14]"
+    },
+    {
+      "n": 131,
+      "name": "motion.reachable",
+      "seconds": 0.069,
+      "summary": "ok=False tip 2.95 missed [1, 2, 13, 14]"
+    },
+    {
+      "n": 132,
+      "name": "nav.propose",
+      "seconds": 0.0068,
+      "summary": "36 poses, first [3.2, 5.2, 1.5708]"
+    },
+    {
+      "n": 133,
+      "name": "motion.reachable",
+      "seconds": 0.0023,
+      "summary": "ok=True tip 2.98 missed []"
+    },
+    {
+      "n": 134,
+      "name": "motion.reachable",
+      "seconds": 0.0021,
+      "summary": "ok=True tip 2.67 missed []"
+    },
+    {
+      "n": 135,
+      "name": "motion.reachable",
+      "seconds": 0.0026,
+      "summary": "ok=True tip 2.67 missed []"
+    },
+    {
+      "n": 136,
+      "name": "motion.reachable",
+      "seconds": 0.0027,
+      "summary": "ok=True tip 2.67 missed []"
+    },
+    {
+      "n": 137,
+      "name": "motion.reachable",
+      "seconds": 0.002,
+      "summary": "ok=True tip 2.41 missed []"
+    },
+    {
+      "n": 138,
+      "name": "motion.reachable",
+      "seconds": 0.0018,
+      "summary": "ok=True tip 2.41 missed []"
+    },
+    {
+      "n": 139,
+      "name": "motion.reachable",
+      "seconds": 0.0019,
+      "summary": "ok=True tip 3.66 missed []"
+    },
+    {
+      "n": 140,
+      "name": "motion.reachable",
+      "seconds": 0.0019,
+      "summary": "ok=True tip 3.17 missed []"
+    },
+    {
+      "n": 141,
+      "name": "nav.plan",
+      "seconds": 0.0793,
+      "summary": "4 legs, 1 doors crossed, 0 failures"
+    },
+    {
+      "n": 142,
+      "name": "motion.retarget",
+      "seconds": 0.4621,
+      "summary": "t1: 3 segments, 4160 samples, max error 0.0005 m"
+    },
+    {
+      "n": 143,
+      "name": "motion.retarget",
+      "seconds": 0.1561,
+      "summary": "t2: 3 segments, 2777 samples, max error 0.0 m"
+    }
+  ],
+  "seconds": 12.529
+}

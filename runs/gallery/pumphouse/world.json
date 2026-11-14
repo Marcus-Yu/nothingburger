@@ -1,0 +1,168 @@
+{
+  "schema": "world/1",
+  "id": "pumphouse",
+  "frame": "metres, Z up, right handed",
+  "source": "hand-written scenario, not a scan: a water utility pump house with a 0.15 m kerb at its door",
+  "mesh": null,
+  "floors": [
+    {
+      "id": "f0",
+      "z": 0.0
+    }
+  ],
+  "rooms": [
+    {
+      "id": "yard",
+      "type": "yard",
+      "floor": "f0",
+      "polygon": [
+        [
+          0,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          0,
+          5
+        ]
+      ],
+      "ceiling_m": 3.0,
+      "source": "manual"
+    },
+    {
+      "id": "pump_room",
+      "type": "plant_room",
+      "floor": "f0",
+      "polygon": [
+        [
+          4,
+          0
+        ],
+        [
+          9,
+          0
+        ],
+        [
+          9,
+          5
+        ],
+        [
+          4,
+          5
+        ]
+      ],
+      "ceiling_m": 3.0,
+      "source": "manual"
+    }
+  ],
+  "doorways": [
+    {
+      "id": "d_gate",
+      "rooms": [
+        "outside",
+        "yard"
+      ],
+      "position": [
+        0,
+        2.5
+      ],
+      "along": [
+        0,
+        1
+      ],
+      "width_m": 1.2,
+      "header_m": 2.2,
+      "step_m": 0.0,
+      "source": "manual"
+    },
+    {
+      "id": "d_pump",
+      "rooms": [
+        "yard",
+        "pump_room"
+      ],
+      "position": [
+        4,
+        2.5
+      ],
+      "along": [
+        0,
+        1
+      ],
+      "width_m": 0.9,
+      "header_m": 2.05,
+      "step_m": 0.15,
+      "source": "manual"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "pump_skid",
+      "room": "pump_room",
+      "box": {
+        "min": [
+          6.0,
+          0.4,
+          0.0
+        ],
+        "max": [
+          8.6,
+          1.8,
+          1.2
+        ]
+      }
+    },
+    {
+      "id": "sample_shelf",
+      "room": "pump_room",
+      "box": {
+        "min": [
+          8.5,
+          3.2,
+          0.0
+        ],
+        "max": [
+          9.0,
+          4.6,
+          0.8
+        ]
+      }
+    }
+  ],
+  "dock": {
+    "room": "yard",
+    "pose": [
+      1.0,
+      2.5,
+      0.0
+    ]
+  },
+  "way_out": {
+    "doorway": "d_gate"
+  },
+  "anchors": [
+    {
+      "id": "sample_bottle",
+      "room": "pump_room",
+      "kind": "shelf_item",
+      "point": [
+        8.6,
+        3.9,
+        0.84
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "source": "manual"
+    }
+  ]
+}

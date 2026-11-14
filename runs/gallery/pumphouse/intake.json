@@ -1,0 +1,27 @@
+{
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "job": "Collect today's water sample from the pump house: the bottle is on the sample shelf inside, past the kerb at the door. Bring it out to the gate.",
+  "understood_as": "Pick up today's 500 ml water sample bottle from the sample shelf in the pump room and carry it out of the building to the gate.",
+  "steps": [
+    "Enter the pump room, stepping over the kerb at the door.",
+    "Find the sample bottle on the sample shelf and grip it firmly without squeezing it.",
+    "Carry the bottle out past the kerb and leave the building by the way out, towards the gate."
+  ],
+  "demos": [
+    {
+      "chore": "pick sample bottle",
+      "kind": "path",
+      "why": "Shows how a hand reaches into the shelf, lifts the bottle clear and carries it upright, so the robot copies the motion on the real shelf."
+    },
+    {
+      "chore": "pick sample bottle",
+      "kind": "squeeze",
+      "why": "Sets how hard to grip a full bottle so it does not slip out or get squeezed enough to spill or crack."
+    }
+  ],
+  "questions": [
+    "The robot can only take the bottle as far as the building's way out; the gate itself has not been located in the scan. Could you add the gate as a mapped spot, or confirm that leaving the bottle at the pump house door is fine?",
+    "How high is the kerb at the pump house door? Its height decides whether the robot can step or roll over it while carrying the bottle."
+  ]
+}

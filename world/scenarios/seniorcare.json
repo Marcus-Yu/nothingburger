@@ -255,6 +255,38 @@
      0.85
     ]
    }
+  },
+  {
+   "id": "footstool",
+   "room": "bedroom",
+   "box": {
+    "min": [
+     2.2,
+     2.4,
+     0.0
+    ],
+    "max": [
+     2.6,
+     2.8,
+     0.3
+    ]
+   }
+  },
+  {
+   "id": "bath_edge",
+   "room": "bathroom",
+   "box": {
+    "min": [
+     6.0,
+     2.6,
+     0.0
+    ],
+    "max": [
+     7.8,
+     3.2,
+     0.5
+    ]
+   }
   }
  ],
  "dock": {
@@ -270,13 +302,13 @@
  },
  "anchors": [
   {
-   "id": "remote_on_floor",
+   "id": "remote_on_footstool",
    "room": "bedroom",
-   "kind": "floor_item",
+   "kind": "low_item",
    "point": [
     2.4,
-    2.6,
-    0.03
+    2.5,
+    0.34
    ],
    "normal": [
     0,
@@ -336,13 +368,13 @@
    ]
   },
   {
-   "id": "towel_on_bath_floor",
+   "id": "towel_on_bath_edge",
    "room": "bathroom",
-   "kind": "floor_item",
+   "kind": "low_item",
    "point": [
     6.6,
-    2.2,
-    0.04
+    2.7,
+    0.54
    ],
    "normal": [
     0,

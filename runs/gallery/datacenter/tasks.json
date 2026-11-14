@@ -1,0 +1,23 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "bay_a_u40",
+      "object": "drive_sled",
+      "demo": "pull drive sled",
+      "carries": false,
+      "why": "The failed drive high up in row A at U40 has to be pulled from its bay."
+    },
+    {
+      "id": "t2",
+      "skill": "pick",
+      "anchor": "bay_b_u10",
+      "object": "drive_sled",
+      "demo": "pull drive sled",
+      "carries": true,
+      "why": "The failed drive low down in row B at U10 is pulled last, so this is the one carried out of the hall.",
+      "deliver_to": "way_out"
+    }
+  ]
+}

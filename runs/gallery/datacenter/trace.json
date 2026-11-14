@@ -1,0 +1,971 @@
+{
+  "calls": [
+    {
+      "n": 0,
+      "name": "nav.corridors",
+      "seconds": 0.0001,
+      "summary": "3 corridors; narrowest 0.91 m at d_hall; header 2.1 m; step 0.0 m; turn 2.0 m"
+    },
+    {
+      "n": 1,
+      "name": "nav.free_floor",
+      "seconds": 0.0051,
+      "summary": "edge 0.007 m, side [-0.1211, 0.9926]"
+    },
+    {
+      "n": 2,
+      "name": "nav.free_floor",
+      "seconds": 0.004,
+      "summary": "edge 0.0 m, side [0.0, 0.0]"
+    },
+    {
+      "n": 3,
+      "name": "composer.design",
+      "seconds": 2.456,
+      "summary": "tidybot_franka+none+xarm7+xarm_gripper $19500 82.4 kg"
+    },
+    {
+      "n": 4,
+      "name": "composer.compose",
+      "seconds": 1.0272,
+      "summary": "robot.xml 26375 chars; stowed 0.594 m wide, 0.886 m tall; 7 arm joints"
+    },
+    {
+      "n": 5,
+      "name": "composer.candidates",
+      "seconds": 0.0016,
+      "summary": "2550 candidates"
+    },
+    {
+      "n": 6,
+      "name": "composer.compose",
+      "seconds": 0.0541,
+      "summary": "robot.xml 26375 chars; stowed 0.594 m wide, 0.886 m tall; 7 arm joints"
+    },
+    {
+      "n": 7,
+      "name": "nav.propose",
+      "seconds": 0.0092,
+      "summary": "36 poses, first [5.0, 2.42, -0.0]"
+    },
+    {
+      "n": 8,
+      "name": "motion.reachable",
+      "seconds": 0.043,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 9,
+      "name": "motion.reachable",
+      "seconds": 0.0209,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 10,
+      "name": "motion.reachable",
+      "seconds": 0.0137,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 11,
+      "name": "motion.reachable",
+      "seconds": 0.018,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 12,
+      "name": "motion.reachable",
+      "seconds": 0.0178,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 13,
+      "name": "motion.reachable",
+      "seconds": 0.0142,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 14,
+      "name": "motion.reachable",
+      "seconds": 0.0139,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 15,
+      "name": "motion.reachable",
+      "seconds": 0.0156,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 16,
+      "name": "nav.propose",
+      "seconds": 0.0093,
+      "summary": "36 poses, first [7.0, 2.92, 1.5708]"
+    },
+    {
+      "n": 17,
+      "name": "motion.reachable",
+      "seconds": 0.0147,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 18,
+      "name": "motion.reachable",
+      "seconds": 0.0172,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 19,
+      "name": "motion.reachable",
+      "seconds": 0.0106,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 20,
+      "name": "motion.reachable",
+      "seconds": 0.0107,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 21,
+      "name": "motion.reachable",
+      "seconds": 0.0141,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 22,
+      "name": "motion.reachable",
+      "seconds": 0.014,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 23,
+      "name": "motion.reachable",
+      "seconds": 0.0144,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 24,
+      "name": "motion.reachable",
+      "seconds": 0.0169,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 25,
+      "name": "nav.plan",
+      "seconds": 0.0056,
+      "summary": "1 legs, 0 doors crossed, 2 failures"
+    },
+    {
+      "n": 26,
+      "name": "composer.design",
+      "seconds": 1.6219,
+      "summary": "tidybot_arx5+liftkit_500+xarm7+xarm_gripper $23800 80.1 kg"
+    },
+    {
+      "n": 27,
+      "name": "composer.compose",
+      "seconds": 1.1482,
+      "summary": "robot.xml 26949 chars; stowed 0.573 m wide, 1.262 m tall; 8 arm joints"
+    },
+    {
+      "n": 28,
+      "name": "composer.candidates",
+      "seconds": 0.0013,
+      "summary": "2550 candidates"
+    },
+    {
+      "n": 29,
+      "name": "composer.compose",
+      "seconds": 0.0419,
+      "summary": "robot.xml 26957 chars; stowed 0.573 m wide, 1.262 m tall; 8 arm joints"
+    },
+    {
+      "n": 30,
+      "name": "nav.propose",
+      "seconds": 0.009,
+      "summary": "36 poses, first [5.0, 2.37, -0.0]"
+    },
+    {
+      "n": 31,
+      "name": "motion.reachable",
+      "seconds": 0.027,
+      "summary": "ok=True tip 63.63 missed []"
+    },
+    {
+      "n": 32,
+      "name": "motion.reachable",
+      "seconds": 0.0074,
+      "summary": "ok=True tip 55.59 missed []"
+    },
+    {
+      "n": 33,
+      "name": "motion.reachable",
+      "seconds": 0.0016,
+      "summary": "ok=True tip 40.86 missed []"
+    },
+    {
+      "n": 34,
+      "name": "motion.reachable",
+      "seconds": 0.0017,
+      "summary": "ok=True tip 41.26 missed []"
+    },
+    {
+      "n": 35,
+      "name": "motion.reachable",
+      "seconds": 0.002,
+      "summary": "ok=True tip 36.94 missed []"
+    },
+    {
+      "n": 36,
+      "name": "motion.reachable",
+      "seconds": 0.0022,
+      "summary": "ok=True tip 37.59 missed []"
+    },
+    {
+      "n": 37,
+      "name": "motion.reachable",
+      "seconds": 0.0023,
+      "summary": "ok=True tip 35.36 missed []"
+    },
+    {
+      "n": 38,
+      "name": "motion.reachable",
+      "seconds": 0.0059,
+      "summary": "ok=True tip 14.2 missed []"
+    },
+    {
+      "n": 39,
+      "name": "nav.propose",
+      "seconds": 0.0088,
+      "summary": "36 poses, first [7.0, 2.97, 1.5708]"
+    },
+    {
+      "n": 40,
+      "name": "motion.reachable",
+      "seconds": 0.0211,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 41,
+      "name": "motion.reachable",
+      "seconds": 0.0336,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 42,
+      "name": "motion.reachable",
+      "seconds": 0.0439,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 43,
+      "name": "motion.reachable",
+      "seconds": 0.0338,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 44,
+      "name": "motion.reachable",
+      "seconds": 0.0396,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 45,
+      "name": "motion.reachable",
+      "seconds": 0.0354,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 46,
+      "name": "motion.reachable",
+      "seconds": 0.0414,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 47,
+      "name": "motion.reachable",
+      "seconds": 0.0405,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 48,
+      "name": "nav.plan",
+      "seconds": 0.0715,
+      "summary": "2 legs, 1 doors crossed, 1 failures"
+    },
+    {
+      "n": 49,
+      "name": "motion.retarget",
+      "seconds": 0.0955,
+      "summary": "t1: 3 segments, 2188 samples, max error 4e-05 m"
+    },
+    {
+      "n": 50,
+      "name": "composer.design",
+      "seconds": 1.5585,
+      "summary": "tidybot_arx5+liftkit_900+xarm7+xarm_gripper $24580 81.5 kg"
+    },
+    {
+      "n": 51,
+      "name": "composer.compose",
+      "seconds": 1.1685,
+      "summary": "robot.xml 26949 chars; stowed 0.573 m wide, 1.462 m tall; 8 arm joints"
+    },
+    {
+      "n": 52,
+      "name": "composer.candidates",
+      "seconds": 0.0013,
+      "summary": "2550 candidates"
+    },
+    {
+      "n": 53,
+      "name": "composer.compose",
+      "seconds": 0.0427,
+      "summary": "robot.xml 26957 chars; stowed 0.573 m wide, 1.462 m tall; 8 arm joints"
+    },
+    {
+      "n": 54,
+      "name": "nav.propose",
+      "seconds": 0.0089,
+      "summary": "36 poses, first [5.0, 2.37, -0.0]"
+    },
+    {
+      "n": 55,
+      "name": "motion.reachable",
+      "seconds": 0.033,
+      "summary": "ok=True tip 59.45 missed []"
+    },
+    {
+      "n": 56,
+      "name": "motion.reachable",
+      "seconds": 0.0067,
+      "summary": "ok=True tip 58.51 missed []"
+    },
+    {
+      "n": 57,
+      "name": "motion.reachable",
+      "seconds": 0.0011,
+      "summary": "ok=True tip 18.26 missed []"
+    },
+    {
+      "n": 58,
+      "name": "motion.reachable",
+      "seconds": 0.0053,
+      "summary": "ok=True tip 42.66 missed []"
+    },
+    {
+      "n": 59,
+      "name": "motion.reachable",
+      "seconds": 0.0017,
+      "summary": "ok=True tip 17.65 missed []"
+    },
+    {
+      "n": 60,
+      "name": "motion.reachable",
+      "seconds": 0.0064,
+      "summary": "ok=True tip 39.49 missed []"
+    },
+    {
+      "n": 61,
+      "name": "motion.reachable",
+      "seconds": 0.0061,
+      "summary": "ok=True tip 37.38 missed []"
+    },
+    {
+      "n": 62,
+      "name": "motion.reachable",
+      "seconds": 0.0015,
+      "summary": "ok=True tip 13.65 missed []"
+    },
+    {
+      "n": 63,
+      "name": "nav.propose",
+      "seconds": 0.0092,
+      "summary": "36 poses, first [7.0, 2.97, 1.5708]"
+    },
+    {
+      "n": 64,
+      "name": "motion.reachable",
+      "seconds": 0.025,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 65,
+      "name": "motion.reachable",
+      "seconds": 0.0355,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 66,
+      "name": "motion.reachable",
+      "seconds": 0.0379,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 67,
+      "name": "motion.reachable",
+      "seconds": 0.0314,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 68,
+      "name": "motion.reachable",
+      "seconds": 0.0383,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 69,
+      "name": "motion.reachable",
+      "seconds": 0.0327,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 70,
+      "name": "motion.reachable",
+      "seconds": 0.0328,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 71,
+      "name": "motion.reachable",
+      "seconds": 0.0454,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 72,
+      "name": "nav.plan",
+      "seconds": 0.075,
+      "summary": "2 legs, 1 doors crossed, 1 failures"
+    },
+    {
+      "n": 73,
+      "name": "motion.retarget",
+      "seconds": 0.0847,
+      "summary": "t1: 3 segments, 1684 samples, max error 0.0005 m"
+    },
+    {
+      "n": 74,
+      "name": "composer.design",
+      "seconds": 1.6624,
+      "summary": "tidybot_arx5+liftkit_1400+xarm7+xarm_gripper $25400 83.2 kg"
+    },
+    {
+      "n": 75,
+      "name": "composer.compose",
+      "seconds": 1.2286,
+      "summary": "robot.xml 26950 chars; stowed 0.573 m wide, 1.712 m tall; 8 arm joints"
+    },
+    {
+      "n": 76,
+      "name": "composer.candidates",
+      "seconds": 0.0013,
+      "summary": "2550 candidates"
+    },
+    {
+      "n": 77,
+      "name": "composer.compose",
+      "seconds": 0.0424,
+      "summary": "robot.xml 26958 chars; stowed 0.573 m wide, 1.712 m tall; 8 arm joints"
+    },
+    {
+      "n": 78,
+      "name": "nav.propose",
+      "seconds": 0.0089,
+      "summary": "36 poses, first [5.0, 2.37, -0.0]"
+    },
+    {
+      "n": 79,
+      "name": "motion.reachable",
+      "seconds": 0.0346,
+      "summary": "ok=True tip 48.05 missed []"
+    },
+    {
+      "n": 80,
+      "name": "motion.reachable",
+      "seconds": 0.0057,
+      "summary": "ok=True tip 60.35 missed []"
+    },
+    {
+      "n": 81,
+      "name": "motion.reachable",
+      "seconds": 0.0011,
+      "summary": "ok=True tip 18.21 missed []"
+    },
+    {
+      "n": 82,
+      "name": "motion.reachable",
+      "seconds": 0.0048,
+      "summary": "ok=True tip 44.32 missed []"
+    },
+    {
+      "n": 83,
+      "name": "motion.reachable",
+      "seconds": 0.0016,
+      "summary": "ok=True tip 17.96 missed []"
+    },
+    {
+      "n": 84,
+      "name": "motion.reachable",
+      "seconds": 0.0056,
+      "summary": "ok=True tip 40.51 missed []"
+    },
+    {
+      "n": 85,
+      "name": "motion.reachable",
+      "seconds": 0.0106,
+      "summary": "ok=True tip 29.78 missed []"
+    },
+    {
+      "n": 86,
+      "name": "motion.reachable",
+      "seconds": 0.0016,
+      "summary": "ok=True tip 14.0 missed []"
+    },
+    {
+      "n": 87,
+      "name": "nav.propose",
+      "seconds": 0.0089,
+      "summary": "36 poses, first [7.0, 2.97, 1.5708]"
+    },
+    {
+      "n": 88,
+      "name": "motion.reachable",
+      "seconds": 0.0244,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 89,
+      "name": "motion.reachable",
+      "seconds": 0.0282,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 90,
+      "name": "motion.reachable",
+      "seconds": 0.036,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 91,
+      "name": "motion.reachable",
+      "seconds": 0.0383,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 92,
+      "name": "motion.reachable",
+      "seconds": 0.0537,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 93,
+      "name": "motion.reachable",
+      "seconds": 0.0488,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 94,
+      "name": "motion.reachable",
+      "seconds": 0.0492,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 95,
+      "name": "motion.reachable",
+      "seconds": 0.0455,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 96,
+      "name": "nav.plan",
+      "seconds": 0.0828,
+      "summary": "2 legs, 1 doors crossed, 1 failures"
+    },
+    {
+      "n": 97,
+      "name": "motion.retarget",
+      "seconds": 0.1511,
+      "summary": "t1: 3 segments, 563 samples, max error 0.00788 m"
+    },
+    {
+      "n": 98,
+      "name": "composer.design",
+      "seconds": 8.0509,
+      "summary": "tidybot_kinova+none+ur5e+robotiq_2f85 $47000 82.38 kg"
+    },
+    {
+      "n": 99,
+      "name": "composer.compose",
+      "seconds": 1.0604,
+      "summary": "robot.xml 31582 chars; stowed 0.712 m wide, 0.647 m tall; 6 arm joints"
+    },
+    {
+      "n": 100,
+      "name": "composer.compose",
+      "seconds": 0.9883,
+      "summary": "robot.xml 31585 chars; stowed 0.737 m wide, 0.657 m tall; 6 arm joints"
+    },
+    {
+      "n": 101,
+      "name": "composer.compose",
+      "seconds": 1.0171,
+      "summary": "robot.xml 31591 chars; stowed 0.726 m wide, 0.796 m tall; 6 arm joints"
+    },
+    {
+      "n": 102,
+      "name": "composer.compose",
+      "seconds": 1.0997,
+      "summary": "robot.xml 35468 chars; stowed 0.792 m wide, 0.647 m tall; 6 arm joints"
+    },
+    {
+      "n": 103,
+      "name": "composer.compose",
+      "seconds": 1.0605,
+      "summary": "robot.xml 35469 chars; stowed 0.758 m wide, 0.657 m tall; 6 arm joints"
+    },
+    {
+      "n": 104,
+      "name": "composer.candidates",
+      "seconds": 0.0013,
+      "summary": "2550 candidates"
+    },
+    {
+      "n": 105,
+      "name": "composer.compose",
+      "seconds": 0.0876,
+      "summary": "robot.xml 35469 chars; stowed 0.758 m wide, 0.657 m tall; 6 arm joints"
+    },
+    {
+      "n": 106,
+      "name": "nav.propose",
+      "seconds": 0.0153,
+      "summary": "36 poses, first [5.0, 2.42, -0.0]"
+    },
+    {
+      "n": 107,
+      "name": "motion.reachable",
+      "seconds": 0.053,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 108,
+      "name": "motion.reachable",
+      "seconds": 0.0157,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 109,
+      "name": "motion.reachable",
+      "seconds": 0.015,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 110,
+      "name": "motion.reachable",
+      "seconds": 0.015,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 111,
+      "name": "motion.reachable",
+      "seconds": 0.0147,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 112,
+      "name": "motion.reachable",
+      "seconds": 0.0161,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 113,
+      "name": "motion.reachable",
+      "seconds": 0.0154,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 114,
+      "name": "motion.reachable",
+      "seconds": 0.0149,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 115,
+      "name": "nav.propose",
+      "seconds": 0.0105,
+      "summary": "36 poses, first [7.0, 2.92, 1.5708]"
+    },
+    {
+      "n": 116,
+      "name": "motion.reachable",
+      "seconds": 0.0187,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 117,
+      "name": "motion.reachable",
+      "seconds": 0.0152,
+      "summary": "ok=True tip 60.08 missed []"
+    },
+    {
+      "n": 118,
+      "name": "motion.reachable",
+      "seconds": 0.0015,
+      "summary": "ok=True tip 45.49 missed []"
+    },
+    {
+      "n": 119,
+      "name": "motion.reachable",
+      "seconds": 0.0015,
+      "summary": "ok=True tip 46.86 missed []"
+    },
+    {
+      "n": 120,
+      "name": "motion.reachable",
+      "seconds": 0.0227,
+      "summary": "ok=True tip 39.21 missed []"
+    },
+    {
+      "n": 121,
+      "name": "motion.reachable",
+      "seconds": 0.0023,
+      "summary": "ok=True tip 41.97 missed []"
+    },
+    {
+      "n": 122,
+      "name": "motion.reachable",
+      "seconds": 0.0023,
+      "summary": "ok=True tip 40.18 missed []"
+    },
+    {
+      "n": 123,
+      "name": "motion.reachable",
+      "seconds": 0.0169,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 124,
+      "name": "nav.plan",
+      "seconds": 0.2329,
+      "summary": "3 legs, 2 doors crossed, 1 failures"
+    },
+    {
+      "n": 125,
+      "name": "motion.retarget",
+      "seconds": 0.0322,
+      "summary": "t2: failed in approach: IK lost the path at sample 6 of 21: 11 mm, 0 deg off"
+    },
+    {
+      "n": 126,
+      "name": "motion.reachable",
+      "seconds": 0.0017,
+      "summary": "ok=True tip 46.86 missed []"
+    },
+    {
+      "n": 127,
+      "name": "motion.retarget",
+      "seconds": 0.0314,
+      "summary": "t2: failed in approach: IK lost the path at sample 15 of 21: 10 mm, 0 deg off"
+    },
+    {
+      "n": 128,
+      "name": "motion.reachable",
+      "seconds": 0.0016,
+      "summary": "ok=True tip 45.49 missed []"
+    },
+    {
+      "n": 129,
+      "name": "motion.retarget",
+      "seconds": 0.0322,
+      "summary": "t2: failed in approach: IK lost the path at sample 15 of 21: 10 mm, 0 deg off"
+    },
+    {
+      "n": 130,
+      "name": "nav.propose",
+      "seconds": 0.0104,
+      "summary": "36 poses, first [7.0, 2.92, 1.5708]"
+    },
+    {
+      "n": 131,
+      "name": "motion.reachable",
+      "seconds": 0.0189,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 132,
+      "name": "motion.reachable",
+      "seconds": 0.0227,
+      "summary": "ok=True tip 39.21 missed []"
+    },
+    {
+      "n": 133,
+      "name": "motion.retarget",
+      "seconds": 0.0477,
+      "summary": "t2: 3 segments, 362 samples, max error 0.00049 m"
+    },
+    {
+      "n": 134,
+      "name": "nav.plan",
+      "seconds": 0.1899,
+      "summary": "3 legs, 2 doors crossed, 1 failures"
+    },
+    {
+      "n": 135,
+      "name": "composer.design",
+      "seconds": 3.4872,
+      "summary": "tidybot_arx5+liftkit_900+ur5e+xarm_gripper $49580 91.18 kg"
+    },
+    {
+      "n": 136,
+      "name": "composer.compose",
+      "seconds": 1.1214,
+      "summary": "robot.xml 32207 chars; stowed 0.645 m wide, 1.172 m tall; 7 arm joints"
+    },
+    {
+      "n": 137,
+      "name": "composer.compose",
+      "seconds": 1.1433,
+      "summary": "robot.xml 32207 chars; stowed 0.623 m wide, 1.372 m tall; 7 arm joints"
+    },
+    {
+      "n": 138,
+      "name": "composer.candidates",
+      "seconds": 0.0013,
+      "summary": "2550 candidates"
+    },
+    {
+      "n": 139,
+      "name": "composer.compose",
+      "seconds": 0.0522,
+      "summary": "robot.xml 32215 chars; stowed 0.623 m wide, 1.372 m tall; 7 arm joints"
+    },
+    {
+      "n": 140,
+      "name": "nav.propose",
+      "seconds": 0.01,
+      "summary": "36 poses, first [5.0, 2.37, -0.0]"
+    },
+    {
+      "n": 141,
+      "name": "motion.reachable",
+      "seconds": 0.0385,
+      "summary": "ok=True tip 27.63 missed []"
+    },
+    {
+      "n": 142,
+      "name": "motion.reachable",
+      "seconds": 0.0197,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 143,
+      "name": "motion.reachable",
+      "seconds": 0.0031,
+      "summary": "ok=True tip 45.87 missed []"
+    },
+    {
+      "n": 144,
+      "name": "motion.reachable",
+      "seconds": 0.0032,
+      "summary": "ok=True tip 15.67 missed []"
+    },
+    {
+      "n": 145,
+      "name": "motion.reachable",
+      "seconds": 0.0314,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 146,
+      "name": "motion.reachable",
+      "seconds": 0.0184,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 147,
+      "name": "motion.reachable",
+      "seconds": 0.0253,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 148,
+      "name": "motion.reachable",
+      "seconds": 0.0027,
+      "summary": "ok=True tip 8.51 missed []"
+    },
+    {
+      "n": 149,
+      "name": "nav.propose",
+      "seconds": 0.0101,
+      "summary": "36 poses, first [7.0, 2.97, 1.5708]"
+    },
+    {
+      "n": 150,
+      "name": "motion.reachable",
+      "seconds": 0.043,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 151,
+      "name": "motion.reachable",
+      "seconds": 0.0245,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 152,
+      "name": "motion.reachable",
+      "seconds": 0.0395,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 153,
+      "name": "motion.reachable",
+      "seconds": 0.0247,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 154,
+      "name": "motion.reachable",
+      "seconds": 0.027,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 155,
+      "name": "motion.reachable",
+      "seconds": 0.0234,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 156,
+      "name": "motion.reachable",
+      "seconds": 0.035,
+      "summary": "ok=False tip 0.0 missed [0]"
+    },
+    {
+      "n": 157,
+      "name": "motion.reachable",
+      "seconds": 0.0051,
+      "summary": "ok=True tip 12.09 missed []"
+    },
+    {
+      "n": 158,
+      "name": "nav.plan",
+      "seconds": 0.1257,
+      "summary": "4 legs, 2 doors crossed, 0 failures"
+    },
+    {
+      "n": 159,
+      "name": "motion.retarget",
+      "seconds": 0.2886,
+      "summary": "t1: 3 segments, 3550 samples, max error 0.00048 m"
+    },
+    {
+      "n": 160,
+      "name": "motion.retarget",
+      "seconds": 0.0359,
+      "summary": "t2: 3 segments, 301 samples, max error 0.0005 m"
+    }
+  ],
+  "seconds": 34.939
+}

@@ -1,0 +1,287 @@
+{
+  "schema": "requirements/1",
+  "world": "datacenter",
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "bay_a_u40",
+      "object": "drive_sled",
+      "demo": "pull drive sled",
+      "carries": false,
+      "why": "The failed drive high up in row A at U40 has to be pulled from its bay."
+    },
+    {
+      "id": "t2",
+      "skill": "pick",
+      "anchor": "bay_b_u10",
+      "object": "drive_sled",
+      "demo": "pull drive sled",
+      "carries": true,
+      "why": "The failed drive low down in row B at U10 is pulled last, so this is the one carried out of the hall.",
+      "deliver_to": "way_out"
+    }
+  ],
+  "corridors": [
+    {
+      "trip": "dock->t1",
+      "rooms": [
+        "corridor",
+        "hall"
+      ],
+      "doorways": [
+        "d_hall"
+      ],
+      "bottleneck": {
+        "doorway": "d_hall",
+        "width_m": 0.91
+      },
+      "header_m": 2.1,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": [
+        {
+          "hallway": "corridor",
+          "doorway": "d_hall",
+          "width_m": 2.0
+        }
+      ]
+    },
+    {
+      "trip": "dock->t2",
+      "rooms": [
+        "corridor",
+        "hall"
+      ],
+      "doorways": [
+        "d_hall"
+      ],
+      "bottleneck": {
+        "doorway": "d_hall",
+        "width_m": 0.91
+      },
+      "header_m": 2.1,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": [
+        {
+          "hallway": "corridor",
+          "doorway": "d_hall",
+          "width_m": 2.0
+        }
+      ]
+    },
+    {
+      "trip": "t2->way_out",
+      "rooms": [
+        "hall",
+        "corridor",
+        "outside"
+      ],
+      "doorways": [
+        "d_hall",
+        "d_entry"
+      ],
+      "bottleneck": {
+        "doorway": "d_hall",
+        "width_m": 0.91
+      },
+      "header_m": 2.1,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": [
+        {
+          "hallway": "corridor",
+          "doorway": "d_hall",
+          "width_m": 2.0
+        },
+        {
+          "hallway": "corridor",
+          "doorway": "d_entry",
+          "width_m": 2.0
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "id": "r_width",
+      "task": null,
+      "quantity": "base_width_max",
+      "value": 0.81,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "d_hall 0.91 m less 0.05 m a side"
+    },
+    {
+      "id": "r_length",
+      "task": null,
+      "quantity": "base_length_max",
+      "value": 1.9,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "hallway 2.0 m wide at the tightest turn into a doorway, less 0.05 m at each end"
+    },
+    {
+      "id": "r_header",
+      "task": null,
+      "quantity": "stowed_height_max",
+      "value": 2.05,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "lowest header 2.1 m less 0.05 m"
+    },
+    {
+      "id": "r_step",
+      "task": null,
+      "quantity": "step_max",
+      "value": 0.0,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "assumed",
+      "from": "doorway records give 0.0 m; steps are not measured from a mesh, corridor assumed flat"
+    },
+    {
+      "id": "r_t1_reach",
+      "task": "t1",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            5.0,
+            2.07,
+            1.85
+          ],
+          "tool_axis": [
+            0.0,
+            -1.0,
+            0.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.007,
+          "side": [
+            -0.1211,
+            0.9926
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "bay_a_u40",
+      "yaw_free": false
+    },
+    {
+      "id": "r_t1_floor",
+      "task": "t1",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.007,
+        "side": [
+          -0.1211,
+          0.9926
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t1_opening",
+      "task": "t1",
+      "quantity": "gripper_opening_min",
+      "value": 0.04,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "drive_sled width 0.03 m plus 0.01 m"
+    },
+    {
+      "id": "r_t1_payload",
+      "task": "t1",
+      "quantity": "payload",
+      "value": 0.75,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "drive_sled card"
+    },
+    {
+      "id": "r_t2_reach",
+      "task": "t2",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            7.0,
+            3.27,
+            0.5
+          ],
+          "tool_axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.0,
+          "side": [
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "bay_b_u10",
+      "yaw_free": false
+    },
+    {
+      "id": "r_t2_floor",
+      "task": "t2",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.0,
+        "side": [
+          0.0,
+          0.0
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t2_opening",
+      "task": "t2",
+      "quantity": "gripper_opening_min",
+      "value": 0.04,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "drive_sled width 0.03 m plus 0.01 m"
+    },
+    {
+      "id": "r_t2_payload",
+      "task": "t2",
+      "quantity": "payload",
+      "value": 0.75,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "drive_sled card"
+    }
+  ],
+  "conflicts": []
+}

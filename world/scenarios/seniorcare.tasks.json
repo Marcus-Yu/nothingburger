@@ -4,7 +4,7 @@
   {
    "id": "t1",
    "skill": "pick",
-   "anchor": "remote_on_floor",
+   "anchor": "remote_on_footstool",
    "object": "tv_remote",
    "carries": false
   },
@@ -25,7 +25,7 @@
   {
    "id": "t4",
    "skill": "pick",
-   "anchor": "towel_on_bath_floor",
+   "anchor": "towel_on_bath_edge",
    "object": "hand_towel",
    "carries": false
   }

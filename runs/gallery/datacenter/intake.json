@@ -1,0 +1,28 @@
+{
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "job": "Two drives have failed in the data hall: one high up in row A at U40 and one low down in row B at U10. Pull both sled caddies and bring the last one out to the staging bench outside the hall.",
+  "understood_as": "Pull the failed drive sleds from bay U40 in row A and bay U10 in row B of the data hall, then carry the second one pulled out of the hall.",
+  "steps": [
+    "Go to row A and pull the drive sled from bay U40.",
+    "Go to row B and pull the drive sled from bay U10.",
+    "Carry the sled from U10 out of the hall."
+  ],
+  "demos": [
+    {
+      "chore": "pull drive sled",
+      "kind": "path",
+      "why": "Shows how a hand releases the sled handle and slides the caddy straight out of the bay without catching on the rails."
+    },
+    {
+      "chore": "grip sled handle",
+      "kind": "squeeze",
+      "why": "Shows how firmly to hold the sled handle so the drive does not slip out, without bending the handle or latch."
+    }
+  ],
+  "questions": [
+    "Nobody has located the staging bench outside the hall. The plan only takes the drive out of the hall. Can the bench be added to the scan so the drive can be set down on it?",
+    "What should happen to the first drive pulled (row A, U40)? As planned, it is pulled but stays in the hall. Should it also go out to the staging bench?",
+    "I took 'the last one' to mean the drive pulled second, so I pulled U40 first and U10 last. Is that the order you want?"
+  ]
+}

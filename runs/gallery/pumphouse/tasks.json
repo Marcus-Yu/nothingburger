@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "sample_bottle",
+      "object": "sample_bottle",
+      "demo": "pick sample bottle",
+      "carries": true,
+      "why": "The job is to collect the sample bottle from the shelf and bring it out of the pump house; no weight was stated, so the card's 0.55 kg is used.",
+      "deliver_to": "way_out"
+    }
+  ]
+}

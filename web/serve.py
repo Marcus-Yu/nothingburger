@@ -36,7 +36,8 @@ def list_runs() -> list:
         out.append({"run": str(ev.parent.relative_to(REPO)), "modified": ev.stat().st_mtime,
                     "job": first.get("job") or (f"tasks: {first.get('tasks_file')}" if first.get("tasks_file") else ""),
                     "finished": last.get("kind") == "run_end", "ok": last.get("ok")})
-    return sorted(out, key=lambda r: -r["modified"])
+    # the kept gallery first, then everything else, newest first
+    return sorted(out, key=lambda r: (not r["run"].startswith("runs/gallery/"), -r["modified"]))
 
 
 def start_run(job: str | None, use_model: bool) -> str:

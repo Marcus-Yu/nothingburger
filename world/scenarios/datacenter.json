@@ -166,13 +166,13 @@
    "source": "manual"
   },
   {
-   "id": "bay_b_u03",
+   "id": "bay_b_u10",
    "room": "hall",
    "kind": "drive_bay",
    "point": [
     7.0,
     3.27,
-    0.2
+    0.5
    ],
    "normal": [
     0,

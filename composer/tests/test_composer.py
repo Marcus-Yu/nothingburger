@@ -87,7 +87,8 @@ def test_compose_loads_in_mujoco_and_build_fits_the_contract(parts):
     tool_z = data.site_xpos[model.site("tool").id][2]
     assert 0 < tool_z <= build["stowed"]["height_m"] + 1e-6
     if parts is LEGGED:
-        assert build["base"]["kind"] == "legged" and not build["base"]["holonomic"]
+        # a quadruped sidesteps and turns in place, so it is planned as holonomic (assumed in its card)
+        assert build["base"]["kind"] == "legged" and build["base"]["holonomic"]
         assert any(k.startswith("base/") for k in build["stowed"]["qpos"])
 
 
