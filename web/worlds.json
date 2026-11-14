@@ -1,0 +1,16 @@
+[
+  {
+    "id": "rabinowitz-hall",
+    "name": "Rabinowitz Hall foyer, Princeton",
+    "matterport": "2K7G7cdukZV",
+    "site": null,
+    "note": "Captured Friday by the CoStar team. Web tour only: our API key cannot read this model, so there is no mesh for the headset yet."
+  },
+  {
+    "id": "la-mirada",
+    "name": "5836 La Mirada Ave, Los Angeles",
+    "matterport": "zvKHR9DHNjJ",
+    "site": "la-mirada",
+    "note": "House from the hackathon set. Also loads in the headset, with a Vexcel exterior (la-mirada-aerial)."
+  }
+]

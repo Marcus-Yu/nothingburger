@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robots for buildings</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Robots for buildings</h1>
+  <label>Space
+    <select id="world"></select>
+  </label>
+</header>
+
+<main>
+  <section id="viewer">
+    <iframe id="tour" title="3D tour of the space" allow="fullscreen; xr-spatial-tracking" allowfullscreen></iframe>
+    <p id="world-note" class="note"></p>
+  </section>
+
+  <section id="flow">
+    <div class="card" id="job-card">
+      <h2><span class="n">1</span> The job</h2>
+      <label>Repeated tasks
+        <select id="tasks"></select>
+      </label>
+      <label>Or say it in your own words
+        <textarea id="job" rows="3" placeholder="Change the dead bulb over the kitchen table"></textarea>
+      </label>
+      <button id="create-plan">Create plan</button>
+    </div>
+
+    <div class="card hidden" id="plan-card">
+      <h2><span class="n">2</span> The plan</h2>
+      <p class="note" id="planner-note"></p>
+      <ol id="plan-steps"></ol>
+    </div>
+
+    <div class="card hidden" id="demo-card">
+      <h2><span class="n">3</span> Show it once</h2>
+      <p>Put on the Quest and do the task for real, in the room you are in, wearing the gloves.
+         Pinch at the thing you will work on to start; pinch thumb and middle finger when you are done.</p>
+      <div id="demos"></div>
+    </div>
+
+    <div class="card hidden" id="robot-card">
+      <h2><span class="n">4</span> The robot</h2>
+      <p class="todo">Not wired in yet: the build agent's robot, the reason each part was picked and what it beat
+         will appear here (read from the run folder's <code>build.json</code> and <code>decisions.jsonl</code>).</p>
+    </div>
+
+    <div class="card hidden" id="watch-card">
+      <h2><span class="n">5</span> Watch it work</h2>
+      <p class="todo">Not wired in yet: the simulated run replayed here, or in the headset inside the scan.</p>
+    </div>
+
+    <div class="card hidden" id="parts-card">
+      <h2><span class="n">6</span> Parts that fit</h2>
+      <p>Measure the opening in the headset (Measure tool), or type its size here, and search the shops for parts that fit.</p>
+      <div class="row">
+        <input id="part-query" placeholder="window ac unit">
+        <input id="part-w" type="number" step="0.01" placeholder="width m">
+        <input id="part-h" type="number" step="0.01" placeholder="height m">
+        <button id="part-search">Search</button>
+      </div>
+      <ul id="parts"></ul>
+    </div>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

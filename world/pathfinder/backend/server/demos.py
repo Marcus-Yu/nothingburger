@@ -141,3 +141,13 @@ def get_demo(demo_id: str) -> dict:
     if not path.is_file():
         raise HTTPException(404, "no such recording")
     return json.loads(path.read_text(encoding="utf8"))
+
+
+@router.get("/demos/{demo_id}/read")
+def read_demo(demo_id: str) -> dict:
+    """What the capture stream reads in a saved recording: 404 until the headset has uploaded it."""
+    recording = get_demo(demo_id)
+    samples = recording.get("samples") or []
+    duration = float(samples[-1].get("t", 0.0)) - float(samples[0].get("t", 0.0)) if len(samples) > 1 else 0.0
+    return {"id": demo_id, "chore": recording.get("chore"), "kind": recording.get("kind"),
+            "duration_s": round(duration, 2), "read_as": _summary(recording)}  # fmt: skip

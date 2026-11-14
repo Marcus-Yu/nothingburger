@@ -88,6 +88,14 @@ app = FastAPI(title="pathfinder parts server", version=__version__, lifespan=_li
 from server import demos as _demos  # noqa: E402 -- the demonstration intake has its own router
 
 app.include_router(_demos.router)
+
+from fastapi.staticfiles import StaticFiles  # noqa: E402
+
+from server import flow as _flow  # noqa: E402 -- the website and its stand-in planner
+
+app.include_router(_flow.router)
+if _flow.WEB_DIR.is_dir():
+    app.mount("/web", StaticFiles(directory=_flow.WEB_DIR, html=True), name="web")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 _PART_ID_RE = re.compile(r"^[a-z0-9-]+$")
