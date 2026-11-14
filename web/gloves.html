@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glove fingers</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .wrap { padding: 16px; max-width: 1100px; margin: 0 auto; }
+  .glove { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 14px; }
+  .glove h2 { justify-content: space-between; }
+  canvas { width: 100%; height: 300px; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .legend b { min-width: 3.2em; text-align: right; display: inline-block; }
+  .bar { height: 6px; border-radius: 3px; background: var(--line); width: 70px; overflow: hidden; }
+  .bar div { height: 100%; }
+  #status { color: var(--muted); font-size: 13px; }
+  .rec { color: #e5484d; font-weight: 600; }
+  .row { align-items: center; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<header><h1>Glove fingers, live</h1><span id="status">connecting...</span></header>
+<div class="wrap">
+  <div class="row">
+    <button id="ask">Ask the headset for the squeeze</button>
+    <button id="stop" class="tab">Stop recording</button>
+    <label style="margin:0">Window
+      <select id="window" style="display:inline-block;width:auto;margin:0 0 0 6px">
+        <option value="10">10 s</option><option value="20" selected>20 s</option><option value="60">60 s</option>
+      </select>
+    </label>
+    <span id="note" class="note" style="margin:0"></span>
+  </div>
+  <div id="gloves"></div>
+  <p class="note">Raw fingertip readings, 0 to 4095. Not newtons: each sensor has its own curve until it is calibrated.
+     Above about 3500 a sensor barely moves. A line that never leaves 0 while you press is a sensor or wire that is not connected.
+     A gap in the lines is the glove itself going quiet: "restarted" counts the times its ESP32 rebooted, which takes 2 to 3 seconds each.</p>
+</div>
+<script>
+// one colour per finger, fixed, with the name always written next to it
+const FINGERS = ["thumb", "index", "middle", "ring", "pinky"];
+const COLOURS = ["#e5484d", "#f5a524", "#30a46c", "#3e8ef7", "#a368e8"];
+const FULL = 4095;
+const panels = {};
+
+function panel(hand) {
+  if (panels[hand]) return panels[hand];
+  const box = document.createElement("div");
+  box.className = "glove";
+  box.innerHTML = `<h2><span>${hand} glove <span class="note" data-port></span></span><span class="note" data-rate></span></h2>
+    <canvas></canvas><div class="legend">` + FINGERS.map((f, k) =>
+      `<span><i style="background:${COLOURS[k]}"></i>${f} <b data-now="${k}">0</b>
+       <span class="bar"><div data-bar="${k}" style="background:${COLOURS[k]};width:0"></div></span>
+       <span class="note">peak <b data-peak="${k}">0</b></span></span>`).join("") + `</div>`;
+  document.getElementById("gloves").append(box);
+  return (panels[hand] = { box, canvas: box.querySelector("canvas") });
+}
+
+function draw(p, g, seconds) {
+  const c = p.canvas, dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = c.clientHeight;
+  if (c.width !== w * dpr) { c.width = w * dpr; c.height = h * dpr; }
+  const x = c.getContext("2d");
+  x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const css = getComputedStyle(document.documentElement);
+  const ink = css.getPropertyValue("--muted"), line = css.getPropertyValue("--line");
+  x.clearRect(0, 0, w, h);
+  const L = 44, R = 8, T = 8, B = 22, pw = w - L - R, ph = h - T - B;
+  x.font = "11px system-ui"; x.fillStyle = ink; x.strokeStyle = line; x.lineWidth = 1;
+  for (const v of [0, 1000, 2000, 3000, 4095]) {
+    const y = T + ph * (1 - v / FULL);
+    x.beginPath(); x.moveTo(L, y); x.lineTo(w - R, y); x.stroke();
+    x.textAlign = "right"; x.fillText(String(v), L - 6, y + 4);
+  }
+  x.textAlign = "center";
+  for (let s = 0; s <= seconds; s += seconds / 4) x.fillText(s === 0 ? "now" : `-${s}s`, w - R - pw * s / seconds, h - 6);
+  // the stretch where a sensor is near its ceiling
+  x.fillStyle = "rgba(229,72,77,0.08)"; x.fillRect(L, T, pw, ph * (1 - 3500 / FULL));
+  g.raw.forEach((series, k) => {
+    x.strokeStyle = COLOURS[k]; x.lineWidth = 2; x.beginPath();
+    series.forEach((v, i) => {
+      const px = w - R + pw * g.t[i] / seconds, py = T + ph * (1 - v / FULL);
+      i ? x.lineTo(px, py) : x.moveTo(px, py);
+    });
+    x.stroke();
+  });
+}
+
+async function tick() {
+  const seconds = +document.getElementById("window").value;
+  try {
+    const d = await (await fetch(`/gloves/recent?seconds=${seconds}`)).json();
+    const status = document.getElementById("status");
+    status.innerHTML = d.recording ? `<span class="rec">● recording ${d.recording.for_s.toFixed(0)} s</span>` :
+      d.gloves.length ? "live" : "no gloves connected to the server (start it with GLOVE_PORTS)";
+    for (const g of d.gloves) {
+      const p = panel(g.hand);
+      p.box.querySelector("[data-port]").textContent = g.port;
+      const recent = g.t.filter((t) => t > -1).length;
+      const restarts = g.resets ? ` · restarted ${g.resets}x` + (g.last_reset_s_ago != null ? ` (last ${g.last_reset_s_ago.toFixed(0)} s ago)` : "") : "";
+      p.box.querySelector("[data-rate]").textContent = (g.error ? `not reading: ${g.error}` :
+        g.t.length ? `${recent ? "streaming" : "silent for " + (-g.t[g.t.length - 1]).toFixed(0) + " s"}` : "no readings yet") + restarts;
+      g.raw.forEach((series, k) => {
+        const now = series.length ? series[series.length - 1] : 0, peak = series.length ? Math.max(...series) : 0;
+        p.box.querySelector(`[data-now="${k}"]`).textContent = now;
+        p.box.querySelector(`[data-peak="${k}"]`).textContent = peak;
+        p.box.querySelector(`[data-bar="${k}"]`).style.width = `${100 * now / FULL}%`;
+      });
+      draw(p, g, seconds);
+    }
+  } catch (e) {
+    document.getElementById("status").textContent = `server not answering: ${e.message}`;
+  }
+  setTimeout(tick, 100);
+}
+
+document.getElementById("ask").onclick = async () => {
+  const note = document.getElementById("note");
+  try {
+    const r = await fetch("/demos/request", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ chore: "hold container", kind: "squeeze", max_seconds: 30 }) });
+    note.textContent = r.ok ? "Sent. The headset shows the task and counts down from 8." : `Could not send: HTTP ${r.status}`;
+  } catch (e) { note.textContent = `Could not send: ${e.message}`; }
+};
+document.getElementById("stop").onclick = () => fetch("/demos/stop", { method: "POST" });
+tick();
+</script>
+</body>
+</html>
