@@ -125,7 +125,7 @@ def _plane_rows(structure: dict) -> list[tuple[float, float, float]]:
 def geometry_signals(structure: dict | None) -> list[dict]:
     """Roofs from the plane layout. A pitched roof: sloped planes (20-70° off level) are a
     quarter of the plane area. A flat roof: large level planes 3 m or more above the lowest
-    level plane (a drone over a building)."""
+    level plane (a building seen from above)."""
     rows = _plane_rows(structure or {})
     total = sum(a for _, a, _ in rows)
     if not rows or total <= 0:
@@ -218,7 +218,7 @@ PROMPT = """You set up a hardware-store catalog for someone standing inside a 3D
 place. The images are {n} frames from the scan.{hints}
 Which kind of place is it? Pick "environment" from:
 {envs}
-"setting": indoor, outdoor or aerial (a drone above it). "place": at most 6 words naming what you \
+"setting": indoor, outdoor or aerial (seen from above). "place": at most 6 words naming what you \
 see, e.g. "pitched tile roof with dormers". "confidence": 0-1.
 "extras": at most 2 more product categories for installed fixtures, equipment or building \
 parts you can see in the images that your environment's list lacks, e.g. polycarbonate roof \
@@ -256,7 +256,7 @@ def _hints(things: list[dict]) -> str:
 
 
 def pick_thumbs(site: str, meta: dict, n: int = 2) -> list[Path]:
-    """`n` thumbnails spread over the flight (a third and two thirds of the way)."""
+    """`n` thumbnails spread over the scan's photos (a third and two thirds of the way)."""
     base = _site_dir(site)
     cams = _read(site, meta.get("cameras"))
     paths = []
@@ -339,7 +339,7 @@ ALSO_MAX = 2
 
 def combine(signals: list[dict], place: dict | None) -> tuple[str, float, list[dict], str | None]:
     """(environment, confidence, signals incl. Grok's, runner-up) from weighted votes. The
-    runner-up is named when its score is at least ALSO_RATIO of the winner's (a drone scan of a
+    runner-up is named when its score is at least ALSO_RATIO of the winner's (an aerial scan of a
     building is roof and facade at once)."""
     signals = list(signals)
     if place is not None:

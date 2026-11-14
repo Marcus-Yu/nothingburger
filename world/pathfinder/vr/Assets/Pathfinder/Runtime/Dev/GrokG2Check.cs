@@ -46,7 +46,7 @@ namespace Pathfinder.Dev
             }
             if (AppState.Mode == AppMode.Passthrough) AppCommands.OpenChest();
             string site = root.Site;
-            Check("G2.scene", site == "kitchen" || site == "synthetic-facade", $"site={site} runtime={root.IsRuntimePackage} handlers={string.Join(",", new[] { "show_plan", "place_array", "survey_started", "show_survey", "show_coverage", "show_labels" }.Where(n => AgentActions.Handlers.ContainsKey(n)))}");
+            Check("G2.scene", site == "kitchen" || site == "synthetic-facade", $"site={site} runtime={root.IsRuntimePackage} handlers={string.Join(",", new[] { "show_plan", "place_array", "survey_started", "show_survey", "show_labels" }.Where(n => AgentActions.Handlers.ContainsKey(n)))}");
             o.ClearAll();
             if (site == "kitchen") Kitchen(o, root, Check);
             else if (site == "synthetic-facade") Facade(o, root, Check);
@@ -73,13 +73,6 @@ namespace Pathfinder.Dev
 
             Survey(o, check, "G2.show_survey.kitchen", GrokG2Fixtures.KitchenSurveyStarted, GrokG2Fixtures.KitchenShowSurvey, GrokG2Fixtures.KitchenSurveyReply, 2);
 
-            bool cov = Exec("show_coverage", GrokG2Fixtures.KitchenCoverage);
-            check("G2.show_coverage.interior", cov && !o.IsShown(GrokOverlayKind.Coverage) && o.Coverage != null && o.Coverage.Interior
-                && o.card != null && o.card.BodyText.StartsWith("This scan is only"), $"ok={cov} ring={o.IsShown(GrokOverlayKind.Coverage)} card=\"{CardText(o)}\"");
-            // A coverage body for another site is ignored.
-            var other = JObject.Parse(GrokG2Fixtures.FacadeCoverage);
-            check("G2.show_coverage.other_site", !AgentActions.Execute(new AgentAction { name = "show_coverage", args = other }), $"last=\"{o.LastResult}\"");
-
             Labels(o, root, check, "G2.show_labels.kitchen", GrokG2Fixtures.KitchenLabels, GrokG2Fixtures.KitchenLabelsReply, 4);
             // The outlet's ray against the pre-labelled outlet anchor (a18, seen in 0221): the same place on the scan.
             var streamer = Services.Get<SceneStreamer>();
@@ -104,34 +97,6 @@ namespace Pathfinder.Dev
         {
             Plan(o, root, check, "G2.show_plan.facade", GrokG2Fixtures.FacadePlanFascia, null, GrokG2Fixtures.FacadePlaceFascia);
             Survey(o, check, "G2.show_survey.facade", "{\"survey_id\":\"synthetic-facade-g2\"}", GrokG2Fixtures.FacadeSurvey, null, 2);
-
-            bool cov = Exec("show_coverage", GrokG2Fixtures.FacadeCoverage, null);
-            var c = o.Coverage;
-            string side = "-";
-            bool camSide = false;
-            if (c != null && c.HasRing)
-            {
-                // docs/api.md: the green wedge sits on the side the flight's cameras are on (the loaded cameras, scene frame).
-                var streamer = Services.Get<SceneStreamer>();
-                var cams = streamer != null ? streamer.Cameras.Select(SceneCameras.Position).ToList() : new List<Vector3>();
-                if (cams.Count == 0) cams = GrokG2Fixtures.FacadeCameraPositions.Select(p => GltfFrame.ToUnity(p[0], p[1], p[2])).ToList();
-                var centre = CoverageGeometry.Flip(c.RingCentre); centre.y = 0f;
-                var mean = Vector3.zero; foreach (var p in cams) mean += new Vector3(p.x, 0f, p.z);
-                var toCams = (mean / cams.Count - centre).normalized;
-                camSide = true;
-                var dots = new List<string>();
-                for (int k = 0; k < c.Sides.Count; k++)
-                {
-                    if (!c.Sides[k].Seen) continue;
-                    var w = CoverageGeometry.WedgeCentre(c, k, 0.05); w.y = 0f;
-                    float dot = Vector3.Dot((w - centre).normalized, toCams);
-                    dots.Add($"{c.Sides[k].Label}:{dot.ToString("0.00", C)}");
-                    camSide &= dot > 0.3f;
-                }
-                side = string.Join(" ", dots);
-            }
-            check("G2.show_coverage.facade", cov && o.WedgesDrawn == 8 && o.GreenWedges == 2 && o.LegsDrawn == 3 && camSide,
-                $"ok={cov} wedges={o.WedgesDrawn} green={o.GreenWedges} legs={o.LegsDrawn} green_toward_cameras=[{side}] card=\"{CardText(o)}\"");
 
             if (root.IsRuntimePackage) Labels(o, root, check, "G2.show_labels.facade", GrokG2Fixtures.FacadeLabels, null, 2);
             else check("G2.show_labels.facade", !Exec("show_labels", GrokG2Fixtures.FacadeLabels), "built-in facade: no package cameras, labels refused (load synthetic-facade from the server to place them)");
@@ -231,8 +196,7 @@ namespace Pathfinder.Dev
 
         /// Put the eye where a capture should look from (scene frame poses, through the content): "kitchen-labels" (the
         /// labels' own camera, 0221), "kitchen-survey" (camera 0001, which saw pin f1), "kitchen-plan" (1.2 m in front of
-        /// the hooks under o10), "facade-plan" (a raised origin in front of the fascia), "facade-coverage" (high over the
-        /// ring). Then: unity command capture_game_view --source screen.
+        /// the hooks under o10), "facade-plan" (a raised origin in front of the fascia). Then: unity command capture_game_view --source screen.
         public static string Look(string shot)
         {
             var root = Services.Get<SceneRoot>();
@@ -255,8 +219,7 @@ namespace Pathfinder.Dev
                 }
                 case "kitchen-plan": from = new Vector3(0.15f, 0.25f, -0.95f); at = new Vector3(1.33f, 0.0f, -0.95f); break;
                 case "facade-plan": from = new Vector3(0f, 6.6f, 3.5f); at = new Vector3(0f, 6.05f, 0f); break;
-                case "facade-coverage": from = new Vector3(0f, 55f, 60f); at = new Vector3(0f, 0f, 2.5f); break;
-                default: return "shots: kitchen-labels, kitchen-survey, kitchen-plan, facade-plan, facade-coverage";
+                default: return "shots: kitchen-labels, kitchen-survey, kitchen-plan, facade-plan";
             }
             var p = content.TransformPoint(from);
             var q = content.TransformPoint(at);

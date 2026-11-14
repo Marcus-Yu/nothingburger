@@ -3,7 +3,7 @@ using Pathfinder.Core;
 namespace Pathfinder.Agent.Grok
 {
     /// Lane G2's agent actions (backend docs/api.md §5), registered with [AgentAction] (they take precedence over
-    /// AgentActions' switch): show_plan, place_array, survey_started, show_survey, show_coverage, show_labels. They parse
+    /// AgentActions' switch): show_plan, place_array, survey_started, show_survey, show_labels. They parse
     /// the args into view models and hand them to GrokOverlays; none of them pays.
     public static class GrokOverlayActions
     {
@@ -61,16 +61,6 @@ namespace Pathfinder.Agent.Grok
             var o = Overlays;
             if (o == null) { Log.Warn("show_survey: no GrokOverlays in the scene"); return false; }
             return o.ShowSurvey(survey);
-        }
-
-        /// show_coverage: args are the GET /scenes/{site}/coverage body (F12 capture coach).
-        [AgentAction("show_coverage")]
-        static bool ShowCoverage(AgentAction a, string reply)
-        {
-            var c = CoverageView.Parse(a.args);
-            if (c == null) return false;
-            var o = Overlays;
-            return o != null && o.ShowCoverage(c);
         }
 
         /// show_labels {frame_id, labels} (F16 "what am I looking at?"). The reply (the names, verbatim) is shown and

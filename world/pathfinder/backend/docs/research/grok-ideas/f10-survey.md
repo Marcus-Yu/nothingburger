@@ -1,4 +1,4 @@
-# F10: drone condition survey
+# F10: condition survey
 
 Feature agent F10, 2026-09-26. Built pick 1 of [G4](g4-round3.md) ("The three to build first"):
 Grok vision over a scene's capture frames, with findings pinned on the mesh. Branch

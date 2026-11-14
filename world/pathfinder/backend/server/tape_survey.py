@@ -1,6 +1,6 @@
 """Tape survey and slope results from the headset's own tape (brain.md S1) -- deterministic, no
-LLM. Not F10's drone condition survey (server/survey.py): that one triages damage from drone
-frames; this one groups the sizes the headset measured.
+LLM. Not F10's condition survey (server/survey.py): that one triages damage from the scan's
+photos; this one groups the sizes the headset measured.
 
 The agent never measures anything itself: `survey` / `check_slope` actions make the headset run its
 real measure tool, and the headset reports what it measured back through `POST /agent/observe`

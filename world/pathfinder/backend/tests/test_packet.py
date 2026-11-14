@@ -193,7 +193,7 @@ def _seed_extras(tmp_path):
                 }
             ],
             "looked_fine": ["roof (0021)"],  # triaged by F10: a severity-none finding isn't a pin
-            "label": "AI triage from drone frames, not an inspection",
+            "label": "AI triage from scan photos, not an inspection",
         },
     )
     _done_job(

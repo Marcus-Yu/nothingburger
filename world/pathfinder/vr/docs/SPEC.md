@@ -1,8 +1,7 @@
 # Pathfinder — XR build spec (the Unity app)
 
-*Rev 1, Thu 2026-09-24. Scope: everything that runs on the Quest (roles P2 engine + P3 tools in the implementation plan).
-Background, pitch and the full-team plan: `docs/ref/writeup.md` (take design choices loosely) and `docs/ref/implementation-plan.md` (more rigid).
-When this file and the reference docs disagree, **this file wins**. When the team makes a new call, record it in §9 Decisions log.*
+*Rev 1, Thu 2026-09-24. Scope: everything that runs on the Quest (roles P2 engine + P3 tools).
+When the team makes a new call, record it in §9 Decisions log.*
 
 ---
 
@@ -12,7 +11,7 @@ When this file and the reference docs disagree, **this file wins**. When the tea
 - Checks are marked:
   - **[A]** you (the agent) verify it yourself, using the Unity CLI, EditMode/PlayMode tests and XR Operator in the Simulator
   - **[H]** a human must verify it on the Quest 3S headset (hand feel, performance, passthrough). List every open [H] check in your final message so the human can run them.
-- Build against the **synthetic facade** (§4) first. It has exact, known dimensions, so every measuring and fit check has a ground truth. Real drone scenes arrive Saturday and replace it through the same loader.
+- Build against the **synthetic facade** (§4) first. It has exact, known dimensions, so every measuring and fit check has a ground truth. Real scanned scenes replace it through the same loader.
 - Build against the **mock parts server** (§5.3) first. The real parts server (P4, Python) implements the same contract later, and swapping to it is a URL change.
 - Make every interaction work with **controllers as well as hands** (Interaction SDK supports both). The Simulator and XR Operator drive controllers reliably, which makes everything agent-testable. Hand-specific feel is an [H] check.
 - Keep to the conventions in `CLAUDE.md` (folders, asmdefs, the "Do NOT" list).
@@ -23,7 +22,7 @@ The team decided (Thu 09-24) that HackGT does not restrict pre-written code, so 
 
 ## 2. What we're building (XR side, one paragraph)
 
-The judge starts in passthrough with a ship's chest on the real table. Opening it swaps the room for a drone-captured building at 1:1 (a textured mesh for looks — Gaussian splats were cut after M0, see §9 — and an invisible collider mesh for snapping). A toolbox on the hip gives a **point-measure** tool (mark 2 points for a distance; 3–4 points for the shape's corner angles, side lengths and area), a **level**, and a **notebook** that logs every reading with its source photo. The chest is also a parts store. Voice or the crate menu finds a real part, and the part lands in your hand at true size. You press it onto the building, where it snaps and shows a green/amber/red fit outline. You array it along the tape run, scroll real sellers, and pay with a 1-second pinch-hold (Visa sandbox, run on the server) or open the seller's page. Closing the chest brings you back to passthrough with the bought part on the real table.
+The judge starts in passthrough with a ship's chest on the real table. Opening it swaps the room for a scanned building at 1:1 (a textured mesh for looks — Gaussian splats were cut after M0, see §9 — and an invisible collider mesh for snapping). A toolbox on the hip gives a **point-measure** tool (mark 2 points for a distance; 3–4 points for the shape's corner angles, side lengths and area), a **level**, and a **notebook** that logs every reading with its source photo. The chest is also a parts store. Voice or the crate menu finds a real part, and the part lands in your hand at true size. You press it onto the building, where it snaps and shows a green/amber/red fit outline. You array it along the tape run, scroll real sellers, and pay with a 1-second pinch-hold (Visa sandbox, run on the server) or open the seller's page. Closing the chest brings you back to passthrough with the bought part on the real table.
 
 **Must ship:** passthrough ↔ world transition, scene at 1:1, point measure (distance + 3/4-point angles/sides/area), level, notebook, one cached part placed and fit-checked.
 **Should ship:** voice, array, seller carousel, checkout, take-it-home, tabletop scale.
@@ -53,7 +52,7 @@ One shipping scene (`Main.unity`). Each lane edits **its own prefabs** and a `Sa
 
 ### 3.2 Core contracts (agree these first; lanes code against them)
 ```csharp
-// App state (writeup §3 state diagram)
+// App state
 public enum AppMode { Passthrough, World, Tabletop }
 public static class AppState { AppMode Mode; event Action<AppMode,AppMode> Changed; void Set(AppMode m); }
 
@@ -85,7 +84,7 @@ public static class AppCommands {
 ```
 Units: SI (metres) internally, everywhere. Display metric first, then ft-in (`Units.Format(double metres)` → `"4.20 m · 13′ 9⅜″"`).
 
-### 3.3 Scene package (contract §1 of the implementation plan, unchanged)
+### 3.3 Scene package (contract unchanged)
 `scene/<site>/ scene.json, splat.ply|spz (optional, unused by the app since M0), mesh.glb, cameras.json, thumbs/NNNN.jpg, path.json`. In Unity, `ScenePackage` (a ScriptableObject) references the imported splat asset, the mesh prefab, the camera list and the thumbnails. `SceneLoader` applies `up`/`north`, puts the mesh on layer `SceneSurface` with an invisible material, and places the rig at `recommended_spawn`. The synthetic facade is just another `ScenePackage`.
 
 ### 3.4 Parts runtime (contract §1b, unchanged)
@@ -404,7 +403,7 @@ toast, world labels). Docs: `docs/UI.md` (audit, tokens, palette, state matrix, 
 
 
 **Fri 2026-09-25 — Backend integration (branch `backend-integration` on `m7`, a second Editor in a git worktree; no Play/Simulator/Operator)**
-Brief: integrate the pathfinder-drone-backend contract (docs/api.md). Full report for P1/P4: `docs/backend-integration.md`.
+Brief: integrate the pathfinder-backend contract (docs/api.md). Full report for P1/P4: `docs/backend-integration.md`.
 Built: `Scene/` SceneManifest, GltfFrame, SceneCameras, StructureLayer, StructureSnapper, SceneStreamer, UrpMaterialGenerator;
 SceneRoot calibration + Rescaled; SnapService structure branch + axis lock + toggle; `Structure/` ScaleCalibration,
 CalibrationSync, SnapCursor, StructureOverlay, Scene window (ScenePanel); `Agent/` AgentClient, AgentActions,

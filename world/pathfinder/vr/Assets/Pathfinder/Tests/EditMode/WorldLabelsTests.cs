@@ -173,7 +173,7 @@ namespace Pathfinder.Tests
             var survey = new Producer();
             survey.Claims.Add(C(LabelClass.Task, 0, 18, 1f));      // B1: 18 doors
             var grok = new Producer();
-            grok.Claims.Add(C(LabelClass.Focus, 1, 0, 2f));         // "AI triage from drone frames, not an inspection"
+            grok.Claims.Add(C(LabelClass.Focus, 1, 0, 2f));         // "AI triage from scan photos, not an inspection"
             grok.Claims.Add(C(LabelClass.Task, 0, 6, 2f));          // its pins: newer than the survey
             var edges = new Producer();
             edges.Claims.Add(C(LabelClass.Safety, 3, 0));

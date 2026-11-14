@@ -14,22 +14,22 @@ namespace Pathfinder.Agent.Grok
 {
     /// Lane G2: the Grok actions that draw in the scene (backend docs/api.md §5): show_plan (dashed segments with their
     /// lengths, 30 % ghosts of the selected part, the plan's label, a Place chip), place_array on a plan's points,
-    /// survey_started (spinner, then polling) / show_survey (severity pins with pinchable "issue · 90 %" labels),
-    /// show_coverage (the capture coach's ring, legs and drone icons) and show_labels / the pre-labelled scan (pinchable
+    /// survey_started (spinner, then polling) / show_survey (severity pins with pinchable "issue · 90 %" labels)
+    /// and show_labels / the pre-labelled scan (pinchable
     /// name labels that search for the part).
     /// Everything lives under the scene content (the package frame), so it follows calibration, the tabletop model and
     /// revision swaps; points come in the glTF / structure-file frame and go through GltfFrame's X flip, the same one the
     /// mesh and the structure layer get. Nothing is drawn without a loaded scene or for another site. Lines are the
     /// measure style's (camera-facing, dark casing), captions are MeasureLabels (LabelLayout), and pinchable labels are
     /// clones of a UiBuild chip. Labels come from WorldLabels' one pool of 12 (declutter S10): the layer's honesty
-    /// caption first, then its items; over the pool an item drops to its pin, line, wedge or anchor dot. Nothing here pays.
-    /// One Grok layer at a time (DC6, declutter M10): a new plan, survey, coverage ring or live-label set replaces the
+    /// caption first, then its items; over the pool an item drops to its pin, line or anchor dot. Nothing here pays.
+    /// One Grok layer at a time (DC6, declutter M10): a new plan, survey or live-label set replaces the
     /// others; the scan's own labels (Settings ▸ Labels) are the exception, a layer toggle rather than a Grok answer.
     public class GrokOverlays : MonoBehaviour, IWorldLabelSource, ISiteScoped   // sitescope: ISiteScoped
     {
         public SceneRoot sceneRoot;
         public MeasureStyle style = new MeasureStyle();
-        [Tooltip("Transparent unlit material (alpha blend, both faces, no depth write): coverage wedges and part ghosts.")]
+        [Tooltip("Transparent unlit material (alpha blend, both faces, no depth write): part ghosts.")]
         public Material glassMaterial;
         [Tooltip("Inactive chip (UiBuild GlassButton, Chip style, poke + ray) cloned for every pinchable world label.")]
         public GlassButton chipTemplate;
@@ -78,7 +78,6 @@ namespace Pathfinder.Agent.Grok
 
         public PlanView Plan { get; private set; }
         public SurveyView Survey { get; private set; }
-        public CoverageView Coverage { get; private set; }
         public LabelsView Labels { get; private set; }
         public LabelsView SceneLabels { get; private set; }
         public bool SceneLabelsOn { get; private set; }
@@ -95,9 +94,6 @@ namespace Pathfinder.Agent.Grok
         public int LabelsPlaced { get; private set; }
         public int LabelsMissed { get; private set; }
         public int SceneLabelsDrawn { get; private set; }
-        public int WedgesDrawn { get; private set; }
-        public int GreenWedges { get; private set; }
-        public int LegsDrawn { get; private set; }
 
         SceneRoot Root => sceneRoot != null ? sceneRoot : Services.Get<SceneRoot>();
 
@@ -164,7 +160,7 @@ namespace Pathfinder.Agent.Grok
             foreach (var s in m_Sets.Values) DestroySet(s);
             m_Sets.Clear();
             m_Root = null;
-            Plan = null; Survey = null; Coverage = null; Labels = null;
+            Plan = null; Survey = null; Labels = null;
             GrokState.PlanId = null;
             string site = LoadedSite;
             if (site != m_Site)
@@ -177,7 +173,7 @@ namespace Pathfinder.Agent.Grok
             else if (SceneLabelsOn && SceneLabels != null) DrawSceneLabels();
             RefreshToggle();
             ApplyBudget();
-            RestoreParked();   // sitescope: the arriving site's plan / survey / coverage / labels, under the new content
+            RestoreParked();   // sitescope: the arriving site's plan / survey / labels, under the new content
         }
 
         Transform OverlayRoot()
@@ -195,7 +191,7 @@ namespace Pathfinder.Agent.Grok
         /// The kinds that draw in the scene, in a fixed order (deterministic walks over m_Sets).
         static readonly GrokOverlayKind[] s_Layers =
         {
-            GrokOverlayKind.Plan, GrokOverlayKind.Survey, GrokOverlayKind.Coverage, GrokOverlayKind.Labels, GrokOverlayKind.SceneLabels,
+            GrokOverlayKind.Plan, GrokOverlayKind.Survey, GrokOverlayKind.Labels, GrokOverlayKind.SceneLabels,
         };
 
         OverlaySet NewSet(GrokOverlayKind kind)
@@ -227,7 +223,6 @@ namespace Pathfinder.Agent.Grok
         {
             if (m_Sets.TryGetValue(kind, out var s)) { DestroySet(s); m_Sets.Remove(kind); }
             if (kind == GrokOverlayKind.Plan) { Plan = null; GrokState.PlanId = null; }
-            if (kind == GrokOverlayKind.Coverage) Coverage = null;
             if (kind == GrokOverlayKind.Labels) Labels = null;
             if (kind == GrokOverlayKind.SceneLabels) { SceneLabelsOn = false; RefreshToggle(); }
         }
@@ -258,7 +253,7 @@ namespace Pathfinder.Agent.Grok
         {
             foreach (var s in m_Sets.Values) DestroySet(s);
             m_Sets.Clear();
-            Plan = null; Survey = null; Coverage = null; Labels = null;
+            Plan = null; Survey = null; Labels = null;
             GrokState.PlanId = null;
             SceneLabelsOn = false;
             RefreshToggle();
@@ -269,8 +264,8 @@ namespace Pathfinder.Agent.Grok
 
         // ---------------- sitescope: a Grok layer belongs to the site it was drawn on ----------------
 
-        /// One site's Grok layer while another site is loaded: its sets (plan with its ghosts, survey pins, coverage
-        /// ring, live labels) parked under an inactive holder in their package-frame poses, the views, the plan and
+        /// One site's Grok layer while another site is loaded: its sets (plan with its ghosts, survey pins,
+        /// live labels) parked under an inactive holder in their package-frame poses, the views, the plan and
         /// survey ids the context sends, and a survey still being polled. The scan's own labels (Settings ▸ Labels) are
         /// the loaded site's already (fetched per site).
         sealed class SiteState
@@ -278,7 +273,6 @@ namespace Pathfinder.Agent.Grok
             public readonly List<OverlaySet> Sets = new List<OverlaySet>();
             public PlanView Plan;
             public SurveyView Survey;
-            public CoverageView Coverage;
             public LabelsView Labels;
             public string PlanId, SurveyId, PendingSurveyId;
         }
@@ -322,10 +316,10 @@ namespace Pathfinder.Agent.Grok
                 park.Sets.Add(set);
                 m_Sets.Remove(kind);
             }
-            if (park != null || Plan != null || Survey != null || Coverage != null || Labels != null || !string.IsNullOrEmpty(GrokState.SurveyId) || PendingSurveyId != null)
+            if (park != null || Plan != null || Survey != null || Labels != null || !string.IsNullOrEmpty(GrokState.SurveyId) || PendingSurveyId != null)
             {
                 park ??= new SiteState();
-                park.Plan = Plan; park.Survey = Survey; park.Coverage = Coverage; park.Labels = Labels;
+                park.Plan = Plan; park.Survey = Survey; park.Labels = Labels;
                 park.PlanId = GrokState.PlanId; park.SurveyId = GrokState.SurveyId; park.PendingSurveyId = PendingSurveyId;
             }
             if (m_Restore != null)
@@ -335,12 +329,12 @@ namespace Pathfinder.Agent.Grok
                 else
                 {
                     park.Sets.AddRange(m_Restore.Sets);
-                    park.Plan ??= m_Restore.Plan; park.Survey ??= m_Restore.Survey; park.Coverage ??= m_Restore.Coverage; park.Labels ??= m_Restore.Labels;
+                    park.Plan ??= m_Restore.Plan; park.Survey ??= m_Restore.Survey; park.Labels ??= m_Restore.Labels;
                     park.PlanId ??= m_Restore.PlanId; park.SurveyId ??= m_Restore.SurveyId; park.PendingSurveyId ??= m_Restore.PendingSurveyId;
                 }
                 m_Restore = null;
             }
-            Plan = null; Survey = null; Coverage = null; Labels = null;
+            Plan = null; Survey = null; Labels = null;
             GrokState.PlanId = null; GrokState.SurveyId = null;
             PendingSurveyId = null;   // its poll stops; it starts again when the site comes back
             GrokState.LastFrameId = null; GrokState.ViewFrameId = null;   // frame ids are the site left's cameras'
@@ -366,7 +360,7 @@ namespace Pathfinder.Agent.Grok
                 set.Root.transform.SetParent(parent, false);
                 m_Sets[set.Kind] = set;
             }
-            Plan = st.Plan; Survey = st.Survey; Coverage = st.Coverage; Labels = st.Labels;
+            Plan = st.Plan; Survey = st.Survey; Labels = st.Labels;
             GrokState.PlanId = st.PlanId;
             if (!string.IsNullOrEmpty(st.SurveyId)) GrokState.SurveyId = st.SurveyId;
             if (!string.IsNullOrEmpty(st.PendingSurveyId))
@@ -578,12 +572,12 @@ namespace Pathfinder.Agent.Grok
         {
             if (string.IsNullOrEmpty(surveyId)) return Fail("survey_started: no survey_id");
             PendingSurveyId = surveyId;
-            card?.SetBusy(GrokOverlayKind.Survey, "Condition survey", "Grok is looking at the drone photos", SurveyLabel);
+            card?.SetBusy(GrokOverlayKind.Survey, "Condition survey", "Grok is looking at the scan photos", SurveyLabel);
             if (Application.isPlaying && isActiveAndEnabled) StartCoroutine(AwaitSurvey(surveyId));
             return Ok($"survey_started {surveyId}");
         }
 
-        const string SurveyLabel = "AI triage from drone frames, not an inspection";
+        const string SurveyLabel = "AI triage from scan photos, not an inspection";
 
         IEnumerator AwaitSurvey(string id)
         {
@@ -687,88 +681,6 @@ namespace Pathfinder.Agent.Grok
             string text = $"find a fix for pin {pinId}";
             if (!AppCommands.SendCommand(text)) UiToast.Show("Can't reach the agent · say it instead", ColorRole.Warning);
             Log.Info($"Grok survey: \"{text}\"");
-        }
-
-        // ---------------- show_coverage (F12) ----------------
-
-        /// The capture coach: 8 ground wedges (green seen, red not, labelled), the legs as dashed arcs / a dashed square
-        /// with a drone icon tilted by the gimbal pitch, and the caption. Interior scans: the note only.
-        public bool ShowCoverage(CoverageView c)
-        {
-            if (c == null) return Fail("show_coverage: unreadable");
-            if (Content == null) return Fail("show_coverage ignored: no scene loaded");
-            if (!IsLoadedSite(c.Site)) return Fail($"show_coverage ignored: site {c.Site} isn't the loaded {LoadedSite}");
-            Coverage = c;
-            WedgesDrawn = GreenWedges = LegsDrawn = 0;
-            if (c.Interior || !c.HasRing)
-            {
-                Hide(GrokOverlayKind.Coverage);
-                Coverage = c;
-                card?.Show(GrokOverlayKind.None, "Capture coverage", c.Interior ? "room scan" : "", c.Caption, "", false);
-                return Ok($"show_coverage {c.Site}: {c.Mode}, caption only");
-            }
-            var s = NewSet(GrokOverlayKind.Coverage);
-            var verts = new List<Vector3>();
-            var tris = new List<int>();
-            double lift = 0.05;
-            for (int k = 0; k < c.Sides.Count; k++)
-            {
-                CoverageGeometry.Wedge(c, k, 8, lift, verts, tris);
-                var side = c.Sides[k];
-                var color = RoleColor(side.Seen ? ColorRole.Success : ColorRole.Danger);
-                color.a = 0.35f;
-                Surface(s, $"Wedge {side.Label}", verts, tris, color);
-                WedgesDrawn++;
-                if (side.Seen) GreenWedges++;
-                var label = Label(s.Root.transform, $"Side {side.Label}", $"{(side.Seen ? "✓" : "✗")} {Copy.Cap(side.Label)}", CoverageGeometry.WedgeCentre(c, k, lift + 0.3), 1f, 1);
-                AddItem(s, label.gameObject);   // over the pool: the wedge stays
-            }
-            var legColor = RoleColor(SeverityStyle.Named("Info", ColorRole.TextPrimary));
-            int n = 0;
-            foreach (var leg in c.Legs)
-            {
-                List<Vector3> pts; bool closed;
-                if (leg.IsArc) { pts = CoverageGeometry.Arc(c, leg); closed = CoverageGeometry.IsFullCircle(leg); }
-                else if (leg.Pattern == "nadir_grid") { pts = CoverageGeometry.NadirSquare(c, leg); closed = true; }
-                else continue;
-                if (pts.Count < 2) continue;
-                var line = DashedLine.Create(s.Root.transform, $"Leg{n++} {leg.Pattern}", style);
-                line.nominalWidth = 0.05f;
-                float sweep = (float)(leg.IsArc ? Math.Abs(leg.SweepDeg ?? 360.0) : 360.0);
-                Dashes.Pattern(Dashes.Length(pts, closed), Mathf.Max(8, Mathf.RoundToInt(sweep / 6f)), 0.2f, out float dash, out float gap);
-                line.Set(pts, closed, dash, gap, legColor);
-                s.Lines.Add(line);
-                Drone(s, $"Drone {leg.Pattern}", CoverageGeometry.DronePoint(c, leg), CoverageGeometry.DroneForward(c, leg), legColor);
-                LegsDrawn++;
-            }
-            ApplyBudget();
-            card?.Show(GrokOverlayKind.Coverage, "Capture coverage", $"{CoverageGeometry.SeenCount(c)} of {c.Sides.Count} sides", c.Caption, VerdictWords(c.Verdict), false);
-            return Ok($"show_coverage {c.Site}: wedges={WedgesDrawn} green={GreenWedges} legs={LegsDrawn}");
-        }
-
-        static string VerdictWords(string verdict) => verdict switch
-        {
-            "good" => "Good coverage",
-            "reshoot_some" => "Reshoot some sides",
-            "reshoot_most" => "Reshoot most sides",
-            _ => "",
-        };
-
-        /// A small drone: body, four rotors and a camera nose, its forward along the gimbal's view.
-        void Drone(OverlaySet s, string name, Vector3 local, Vector3 forwardLocal, Color color)
-        {
-            var go = new GameObject(name);
-            go.transform.SetParent(s.Root.transform, false);
-            go.transform.localPosition = local;
-            var fwd = forwardLocal.sqrMagnitude > 1e-8f ? forwardLocal.normalized : Vector3.forward;
-            var up = Mathf.Abs(Vector3.Dot(fwd, Vector3.up)) > 0.98f ? Vector3.forward : Vector3.up;
-            // The body's plane tilts with the gimbal (a drone icon "tilted down by gimbal_pitch_deg").
-            go.transform.localRotation = Quaternion.LookRotation(fwd, up);
-            Prim(go.transform, PrimitiveType.Cube, new Vector3(0f, 0f, 0f), new Vector3(0.5f, 0.18f, 0.5f), color);
-            foreach (var (x, z) in new[] { (0.45f, 0.45f), (-0.45f, 0.45f), (0.45f, -0.45f), (-0.45f, -0.45f) })
-                Prim(go.transform, PrimitiveType.Cylinder, new Vector3(x, 0.08f, z), new Vector3(0.42f, 0.02f, 0.42f), color);
-            Prim(go.transform, PrimitiveType.Cube, new Vector3(0f, -0.02f, 0.38f), new Vector3(0.16f, 0.16f, 0.26f), RoleColor(ColorRole.Background));
-            s.Scaled.Add((go.transform, 0.03f, 0.3f));
         }
 
         void Prim(Transform parent, PrimitiveType type, Vector3 pos, Vector3 scale, Color color)
@@ -1057,7 +969,7 @@ namespace Pathfinder.Agent.Grok
             var list = new List<Vector3>();
             if (!m_Sets.TryGetValue(kind, out var s)) return list;
             foreach (var g in s.Ghosts) if (g != null) list.Add(GltfFrame.ToGltf(g.transform.localPosition));
-            foreach (var m in s.Scaled) if (m.t != null && !m.t.name.StartsWith("Drone", StringComparison.Ordinal)) list.Add(GltfFrame.ToGltf(m.t.localPosition));
+            foreach (var m in s.Scaled) if (m.t != null) list.Add(GltfFrame.ToGltf(m.t.localPosition));
             foreach (var a in s.Anchors) list.Add(GltfFrame.ToGltf(a));
             return list;
         }

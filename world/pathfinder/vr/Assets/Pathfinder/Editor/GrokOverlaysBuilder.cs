@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Pathfinder.Editor
 {
     /// Grok lane G2 scene wiring (3D overlays in the scene frame): the GrokOverlays component, its transparent glass
-    /// material (coverage wedges, 30 % part ghosts), the pinchable world-label chip template, the overlay card (main
+    /// material (30 % part ghosts), the pinchable world-label chip template, the overlay card (main
     /// window slot) and a "Labels" toggle in the Scene window's title row (the pre-labelled scan). UI is built only with
     /// UiBuild (docs/UI.md). Called once from MainSceneBuilder.WireTools (Pathfinder ▸ Wire Main Scene); idempotent.
     public static class GrokOverlaysBuilder

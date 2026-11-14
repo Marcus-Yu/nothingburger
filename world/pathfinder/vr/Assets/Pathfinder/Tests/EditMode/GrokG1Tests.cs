@@ -454,7 +454,7 @@ namespace Pathfinder.Tests
             // tests/test_survey.py test_agent_survey_then_fix_pin: two actions each.
             var survey = JsonConvert.DeserializeObject<AgentReply>(@"{""reply"": ""2 problems found."", ""actions"": [
                 {""name"": ""survey_started"", ""args"": {""survey_id"": ""84e27743a1c9""}},
-                {""name"": ""show_survey"", ""args"": {""survey_id"": ""84e27743a1c9"", ""pins"": [{""id"": ""f1""}, {""id"": ""f2""}], ""label"": ""AI triage from drone frames, not an inspection""}}]}");
+                {""name"": ""show_survey"", ""args"": {""survey_id"": ""84e27743a1c9"", ""pins"": [{""id"": ""f1""}, {""id"": ""f2""}], ""label"": ""AI triage from scan photos, not an inspection""}}]}");
             CollectionAssert.AreEqual(new[] { "survey_started", "show_survey" }, survey.actions.ConvertAll(x => x.name));
             var fix = JsonConvert.DeserializeObject<AgentReply>(@"{""reply"": ""Searching the supply shops."", ""job_id"": ""job9"", ""actions"": [
                 {""name"": ""search_started"", ""args"": {""job_id"": ""job9""}},
@@ -484,11 +484,10 @@ namespace Pathfinder.Tests
         }
 
         [Test]
-        public void ZabelScan_CarriesItsCredit()
+        public void CurrentScans_NeedNoCredit()
         {
-            Assert.AreEqual("\"Haus Schiller – Zabelgymnasium Gera – Drohnenflug\" by zabelgymnasium, CC BY 3.0, via Wikimedia Commons",
-                SceneCredits.For("zabel-gymnasium"));
-            Assert.IsNull(SceneCredits.For("kitchen"));
+            Assert.IsNull(SceneCredits.For("la-mirada"));
+            Assert.IsNull(SceneCredits.For("la-mirada-aerial"));
             Assert.IsNull(SceneCredits.For(null));
         }
 

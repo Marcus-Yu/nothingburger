@@ -403,7 +403,7 @@ Exit closes Settings.
 | Class | Labels | Share |
 |---|---|---|
 | **P0 Safety** | the coach's "Don't drill here" card · fall-edge labels while Fall edges is on · RECALLED on a placed part | ≤ 3 |
-| **P1 Honesty + focus** | the Grok layer's honesty caption ("AI triage from drone frames, not an inspection", "AI preview") · the live or just-made shape · the held part's fit label · a new ask pin (30 s) | 1 caption + ≤ 4 + 1 + 1 |
+| **P1 Honesty + focus** | the Grok layer's honesty caption ("AI triage from scan photos, not an inspection", "AI preview") · the live or just-made shape · the held part's fit label · a new ask pin (30 s) | 1 caption + ≤ 4 + 1 + 1 |
 | **P2 The active task** | the newest Grok layer's items (plan lengths and "Place N"; pins by severity; live labels by confidence) **or** the B1 survey (unverified → focus → newest), whichever is newer | the rest |
 | **P3 Saved measurements** | one summary pill per shape, newest first | the rest |
 | **P4 Placed parts** | one callout per part; arrays get one group label | the rest |

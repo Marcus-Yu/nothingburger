@@ -15,7 +15,7 @@ compared with the p4-b1-b3 contract.
 ## How to apply
 
 ```sh
-cd pathfinder-drone-backend
+cd pathfinder-backend
 git switch -c app-handoff-grok origin/integration/grok-all     # c706f13
 git am /path/to/Pathfinder/docs/handoff/p4-grok/*.patch            # 0001–0011
 uv sync --extra pipeline
@@ -103,7 +103,7 @@ The server ran with `DATA_DIR` set to a copy of your `data/`. All four responses
    ```
 2. `POST /agent/command` `{"session_id":"smoke-1","text":"survey the roof","context":{"site":"kitchen"}}`. This took F10's
    path: `survey_condition` → `_survey`. It has no cached survey offline, and the local scenes
-   have no drone scan.
+   have no exterior scan.
    ```json
    {"reply":"Can't do that yet: the survey needs the uplink.","actions":[],"job_id":null}
    ```
@@ -187,7 +187,7 @@ Everything in the p4-b1-b3 contract still holds except the items below.
   "unverified": ["o1"], "skipped": ["o9"], "focus": ["o6"]}}
 ```
 On this server, `show_survey` means F10's condition survey only:
-`{"name": "show_survey", "args": {"survey_id": "<12 hex>", "pins": [...], "label": "AI triage from drone frames, not an inspection"}}`,
+`{"name": "show_survey", "args": {"survey_id": "<12 hex>", "pins": [...], "label": "AI triage from scan photos, not an inspection"}}`,
 usually right after `survey_started {survey_id}`.
 
 **What the app must change** (line numbers are on `backend-integration`):
@@ -261,7 +261,7 @@ usually right after `survey_started {survey_id}`.
 3. **About 30 new action names** (`survey_started`, `show_plan`, `show_rules`, `show_video`,
    `coach_*`, `job_*`, …) reach any app build without the Grok handlers. On `backend-integration`
    they fall through to the "Can't do that yet" toast. Because `site` is in every command, the LLM
-   is now also offered `plan_placement`, `survey_condition`, `coach_capture` and
+   is now also offered `plan_placement`, `survey_condition`, the capture coach (since removed) and
    `walk_in_preview` (the last with `frame_id`). So ordinary online commands can come back with
    these actions.
 4. **Some agent calls block longer.** A command can now wait up to 20 s:

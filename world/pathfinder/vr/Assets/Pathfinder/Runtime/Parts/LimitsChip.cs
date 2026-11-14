@@ -11,7 +11,7 @@ namespace Pathfinder.Parts
     /// wrist (hand tracking) or the left controller, facing the eyes, 0.16 m wide.
     /// - Line 1: the purchase limits ("≤ $40 · by Fri · fastest"; voice can only tighten a limit, and a refused loosening
     ///   adds "raise it on the panel") and the scale state ("Scale ✓" / "Scale ×1.63"; not "Scale not set", user 09-27).
-    /// - Under it: the loaded scan's credit, verbatim (SceneCreditChip; the Zabel credit wraps to 3 rows at the floor).
+    /// - Under it: the loaded scan's credit, verbatim (SceneCreditChip; a long credit wraps to 3 rows at the floor).
     /// Shown in the world while there are limits or a credit (the scale alone isn't a reason to show); hidden in
     /// passthrough and whenever neither the wrist nor a controller is tracked — never head-locked. Recomposed only when
     /// its inputs change (no per-frame allocation).

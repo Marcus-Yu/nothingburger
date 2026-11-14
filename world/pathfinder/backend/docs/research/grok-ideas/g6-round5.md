@@ -23,7 +23,6 @@ Already built or in progress, so not proposed again:
 - manual Q&A (F9);
 - condition survey (F10);
 - finish variants (F11);
-- capture coach (F12);
 - rules and rebates check (F13);
 - job packet (F14);
 - the queued "do the whole job" chain.
@@ -182,7 +181,7 @@ the top-left in 0–1000). Keep F10's parser, which accepts 0–1, 0–100 and 0
   2026-09-19) does real-time TSDF room reconstruction on Quest 3, plus server Gaussian splats [V
   sub].
   - A second scan made in the headset is how idea 8 ("what changed") would get its second visit
-    without a drone.
+    without a second aerial scan.
 - HN: [Show HN: tracking a real golf ball in MR at 90 FPS on the Quest 3 GPU](https://puttdojo.com/devlog/tracking-a-real-golf-ball.html)
   (2026-06-23) shows that on-device tracking is fast. Naming is the LLM's job [S].
 

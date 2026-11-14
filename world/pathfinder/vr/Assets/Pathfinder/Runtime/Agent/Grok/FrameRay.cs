@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Pathfinder.Agent.Grok
 {
-    /// The one camera ray for "a box in a drone photo → a point on the scan", shared by scene_pin (SceneAsk.PinFromFrame)
+    /// The one camera ray for "a box in a scan photo → a point on the scan", shared by scene_pin (SceneAsk.PinFromFrame)
     /// and show_labels: the ray from camera `frame_id`'s centre through the box centre, with that camera's full-frame
     /// intrinsics from cameras.r&lt;rev&gt;.json (u = x·w, v = y·h; (u − cx)/fx, (v − cy)/fy; OpenCV → scene by Rᵀ; then the
     /// same glTF → Unity X flip as the mesh: SceneCameras.PixelRay), taken from the package frame to the world through

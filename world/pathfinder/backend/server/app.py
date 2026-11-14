@@ -41,7 +41,6 @@ from server import (
     catalog_index,
     checkout,
     coach,
-    coverage,
     finish,
     flythrough,
     hf_warm,
@@ -503,19 +502,6 @@ def list_scenes() -> list[dict]:
             }
         )
     return sites
-
-
-@app.get("/scenes/{site}/coverage")
-async def scene_coverage(site: str) -> dict:
-    """Capture coach (server/coverage.py): which sides the flight covered, the legs to fly next
-    and one spoken line. Registered before the file route so `coverage` isn't read as a file."""
-    scene_dir = coverage.site_dir(site)
-    if scene_dir is None:
-        raise HTTPException(404, "unknown site")
-    try:
-        return await coverage.coach(scene_dir)
-    except coverage.Incomplete as exc:
-        raise HTTPException(409, f"scene package incomplete: {exc}") from exc
 
 
 @app.get("/scenes/{site}/labels")

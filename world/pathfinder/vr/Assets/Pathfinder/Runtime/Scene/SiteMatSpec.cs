@@ -8,7 +8,7 @@ namespace Pathfinder.Scene
     /// `pathfinder:mat:v1;w=0.420;h=0.297;qr=0.120;pad=0.300,0.150` (optional `model=x,z` and `parts=x,z`).
     /// Mat frame: origin at the QR code's centre, x along the mat's long edge, z across it (away from you), y up.
     /// Assumed print layout: the QR sits in the mat's near-left corner, `margin` in from both edges, so the mat's
-    /// near-left corner is at (−qr/2 − margin, 0, −qr/2 − margin). `pad` is the drone helipad centre (S2); the 1:50
+    /// near-left corner is at (−qr/2 − margin, 0, −qr/2 − margin). `pad` is the pad centre (S2); the 1:50
     /// model stands at `model` and the bought parts at `parts` (to the right of the model, clear of the helipad).
     [Serializable]
     public class SiteMatSpec

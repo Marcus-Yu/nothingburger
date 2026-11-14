@@ -420,7 +420,7 @@ namespace Pathfinder.Tests
             Assert.IsTrue(CatalogFoci.IsIndoor("hospital", null), "a hospital room");
             Assert.IsTrue(CatalogFoci.IsIndoor(null, "kitchen"));
             Assert.IsFalse(CatalogFoci.IsIndoor(null, "zabel-gymnasium"));
-            Assert.IsFalse(CatalogFoci.IsIndoor(null, "hospital-bg"), "a drone scan of a hospital is outside it");
+            Assert.IsFalse(CatalogFoci.IsIndoor(null, "hospital-bg"), "an aerial scan of a hospital is outside it");
         }
 
         // ---------------- the model ----------------

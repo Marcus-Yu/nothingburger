@@ -14,7 +14,7 @@ namespace Pathfinder.Agent.Grok
     {
         [Tooltip("Line width in scene metres at full scale (the plan's 1 cm).")]
         public float nominalWidth = 0.01f;
-        [Tooltip("Minimum width per metre of viewing distance (keeps a flight leg 40 m away visible).")]
+        [Tooltip("Minimum width per metre of viewing distance (keeps a line 40 m away visible).")]
         public float widthPerMetre = 0.0015f;
         public float casingFactor = 1.8f;
 

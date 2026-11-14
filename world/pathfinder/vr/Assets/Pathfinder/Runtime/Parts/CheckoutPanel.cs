@@ -38,7 +38,7 @@ namespace Pathfinder.Parts
         public TextMeshPro checks;
         [Tooltip("B3: the session's limits (≤ $40 · by Fri · fastest).")]
         public TextMeshPro limits;
-        [Tooltip("B3: the evidence photo on the receipt (the tape's drone thumbnail).")]
+        [Tooltip("B3: the evidence photo on the receipt (the tape's scan thumbnail).")]
         public MeshRenderer evidenceThumb;
         [Tooltip("Declutter M3 (the W1.6 CTA): the receipt's own primary — leave the world with the bought parts on the table. The Next-step pill yields to this window, so the judge's path stays at 10 actions.")]
         public GlassButton takeHome;
@@ -592,7 +592,7 @@ namespace Pathfinder.Parts
             });
         }
 
-        /// The receipt's evidence photo: the tape's drone thumbnail (by camera id); without one, the postcard (the
+        /// The receipt's evidence photo: the tape's scan thumbnail (by camera id); without one, the postcard (the
         /// receipt text carries its "AI preview, not to scale" label); hidden when there is neither.
         void ShowEvidenceThumb(bool paid)
         {

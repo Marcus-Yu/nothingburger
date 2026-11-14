@@ -34,7 +34,6 @@ from server import (
     booth,
     cache,
     coach,
-    coverage,
     finish,
     flythrough,
     imagine,
@@ -374,7 +373,7 @@ TOOLS: list[dict[str, Any]] = [
         "function": {
             "name": "survey_condition",
             "description": "Survey the loaded building's condition (damage, problems) from the "
-            "drone footage and pin them on the model ('survey the roof', 'anything wrong with "
+            "scan's photos and pin them on the model ('survey the roof', 'anything wrong with "
             "it?', 'is the roof damaged?'). Never for sizes or lengths: that's measure.",
             "parameters": {
                 "type": "object",
@@ -482,15 +481,6 @@ TOOLS: list[dict[str, Any]] = [
                 "properties": {"question": {"type": "string"}},
                 "required": ["question"],
             },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "coach_capture",
-            "description": "'What did I miss?' after a drone scan: which sides of the building "
-            "the flight covered and the legs to fly next, from the loaded scene's cameras.",
-            "parameters": {"type": "object", "properties": {}, "required": []},
         },
     },
     {
@@ -700,9 +690,8 @@ _CANNED_REPLY = {
     "plan_placement": "Plan's up.",
     "walk_in_preview": flythrough.RENDERING_LINE,
     "ask_manual": "Checked the manual.",
-    "survey_condition": "Looking over the footage.",
+    "survey_condition": "Looking over the photos.",
     "fix_pin": "Searching the supply shops.",
-    "coach_capture": "Coverage is up.",
     "check_rules": "Checking the rules and the rebates.",
     "check_quote": "Quote checked.",
     "send_packet": "Packet's up.",
@@ -842,14 +831,6 @@ _SURVEY_RE = re.compile(r"\bsurvey\b(?:.*?\b(roof|gutters?|facade)\b)?", re.IGNO
 _FINISH_RE = re.compile(
     r"\bshow\s+(?:it|this|that)\s+in\s+(?!(?:the|my|your|our|place|ar)\b)(?:an?\s+)?(.+?)"
     r"(?:\s+finish)?[.!?]?\s*$",
-    re.IGNORECASE,
-)
-# "what did I miss?" after a drone scan. Not a bare "coverage": "what's the coverage on this
-# sealant?" is a part question, so only scan/capture/flight/drone coverage or "show coverage".
-_COACH_RE = re.compile(
-    r"\bwhat did (?:i|we) miss\b|\bwhich sides (?:did|have|are|of the (?:building|house))\b"
-    r"|\bcapture coach\b|\b(?:scan|capture|flight|drone) coverage\b"
-    r"|^\W*(?:show (?:me )?(?:the )?)?coverage\W*$",
     re.IGNORECASE,
 )
 _COACH_START_RE = re.compile(
@@ -1126,8 +1107,6 @@ def _match_fast_intent(text: str) -> tuple[str, dict[str, Any], str] | None:
     if m:
         return "set_finish", {"name": m.group(1)}, _CANNED_REPLY["set_finish"]
 
-    if _COACH_RE.search(text):
-        return "coach_capture", {}, _CANNED_REPLY["coach_capture"]
     if _LABEL_RE.search(text):
         return "label_view", {"focus": None}, _CANNED_REPLY["label_view"]
     if _COACH_START_RE.search(text):
@@ -2200,16 +2179,6 @@ async def _run_tool(
 
     if name == "fix_pin":
         return await _fix_pin(session, str(args.get("pin_id", "")), context)
-    if name == "coach_capture":
-        scene_dir = coverage.site_dir(str(context.get("site") or ""))
-        if scene_dir is None:
-            return {"error": "no scene loaded"}, None, None
-        try:
-            cov = await coverage.coach(scene_dir)
-        except coverage.Incomplete as exc:
-            return {"error": f"the scan isn't finished ({exc})"}, None, None
-        result = {"seen": cov.get("seen"), "verdict": cov["verdict"], "spoken": cov["spoken"]}
-        return result, {"name": "show_coverage", "args": cov}, None
     if name == "check_rules":
         return await _check_rules(session, args, context)
     if name == "run_job":
@@ -2903,8 +2872,8 @@ async def _handle_command(session_id: str, text: str, context: dict[str, Any]) -
     walk_from_refine = session.rv_fresh and session.reimagine and session.reimagine["steps"]
     if (not ctx.get("site") or not ctx.get("frame_id")) and not walk_from_refine:
         hidden.add("walk_in_preview")
-    if not ctx.get("site"):  # no drone scene to survey or coach
-        hidden |= {"survey_condition", "coach_capture"}
+    if not ctx.get("site"):  # no scene to survey
+        hidden.add("survey_condition")
     # check_rules stays offered: "a permit for a mini-split?" names its job with no part picked.
     if report._notebook_entries(session.id) is None:  # nothing to put in a packet
         hidden.add("send_packet")
@@ -2943,7 +2912,6 @@ async def _handle_command(session_id: str, text: str, context: dict[str, Any]) -
                 "ask_manual",
                 "survey_condition",
                 "set_finish",
-                "coach_capture",
                 "check_rules",
                 "check_quote",
                 "send_packet",

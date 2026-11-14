@@ -166,7 +166,7 @@ def _write_minimal_package(
     thumbs_dir.mkdir(exist_ok=True)
     if with_thumb:
         Image.new("RGB", (10, 10)).save(thumbs_dir / "0001.jpg")
-    scale = ScaleEstimate(method="gps", scale=1.0, residual_m=0.1)
+    scale = ScaleEstimate(method="survey", scale=1.0, residual_m=0.1)
     publish_revision(
         tmp_path,
         revision=revision,
@@ -219,7 +219,7 @@ def test_publish_revision_does_not_touch_thumbs(tmp_path):
         revision=2,
         quality="full",
         name="site",
-        scale=ScaleEstimate(method="gps", scale=1.0, residual_m=0.1),
+        scale=ScaleEstimate(method="survey", scale=1.0, residual_m=0.1),
         gravity_residual_deg=0.1,
         frame_id="site-aaaa",
         aligned_to_preview=True,
@@ -230,8 +230,8 @@ def test_publish_revision_does_not_touch_thumbs(tmp_path):
 
 def test_publish_revision_lists_scale_candidates(tmp_path):
     _write_revision_files(tmp_path, 1)
-    winner = ScaleEstimate(method="scalebar_aruco", scale=1.001, residual_m=0.004)
-    candidates = [ScaleEstimate(method="gps", scale=1.05, residual_m=1.2), winner]
+    winner = ScaleEstimate(method="known_dimension", scale=1.001, residual_m=0.004)
+    candidates = [ScaleEstimate(method="survey", scale=1.05, residual_m=1.2), winner]
     thumbs_dir = tmp_path / "thumbs"
     thumbs_dir.mkdir()
     Image.new("RGB", (10, 10)).save(thumbs_dir / "0001.jpg")
@@ -250,10 +250,10 @@ def test_publish_revision_lists_scale_candidates(tmp_path):
     )
     scene = json.loads((tmp_path / "scene.json").read_text())
 
-    assert scene["scale_method"] == "scalebar_aruco"
+    assert scene["scale_method"] == "known_dimension"
     assert scene["scale_candidates"] == [
-        {"method": "gps", "scale": 1.05, "residual_m": 1.2},
-        {"method": "scalebar_aruco", "scale": 1.001, "residual_m": 0.004},
+        {"method": "survey", "scale": 1.05, "residual_m": 1.2},
+        {"method": "known_dimension", "scale": 1.001, "residual_m": 0.004},
     ]
 
 
@@ -311,7 +311,7 @@ def test_validate_package_flags_old_flat_package(tmp_path):
     """Pre-0.3.0 packages had a flat scene.json with no 'revision'/'cameras' field -- must be a
     clear error, not a crash or a silent pass."""
     _textured_box().export(tmp_path / "mesh.glb")
-    (tmp_path / "scene.json").write_text(json.dumps({"scale_method": "gps"}))
+    (tmp_path / "scene.json").write_text(json.dumps({"scale_method": "survey"}))
     problems = validate_package(tmp_path)
     assert len(problems) == 1
     assert "old flat package" in problems[0]

@@ -12,7 +12,7 @@ changes its width / height / depth ("Fit to opening") and finish, and the server
 ## How to apply
 
 ```sh
-cd pathfinder-drone-backend
+cd pathfinder-backend
 git switch e2e-measure-replace            # 4398ffb or later; also applies on its tip cae56b6
 git am /path/to/Pathfinder/docs/handoff/p4-asset/*.patch
 uv run pytest -q tests/test_asset_window.py tests/test_resize.py tests/test_opening.py
@@ -58,7 +58,7 @@ GET /parts/{id}/part.json until asset.status == "ready", then GET /parts/{id}/mo
 POST /parts/{id}/resize {w, h, d, finish?} → model-size-….glb                                            [0002]
 ```
 
-Measured on the test server `:8007` (this worktree; `SCENE_DIR` the drone backend's scenes; a scratch `DATA_DIR` seeded
+Measured on the test server `:8007` (this worktree; `SCENE_DIR` the backend's scenes; a scratch `DATA_DIR` seeded
 from the demo's cache), 2026-09-26 20:30–21:20:
 
 | Step | Result |

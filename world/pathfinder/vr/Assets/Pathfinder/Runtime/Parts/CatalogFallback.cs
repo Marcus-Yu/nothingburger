@@ -78,7 +78,7 @@ namespace Pathfinder.Parts
         };
 
         /// The kind of place: the server's `environment` when it names one, else the site id's words (kitchen; a roof,
-        /// canopy, gym, pavilion, tower or hospital scan from the drone; the synthetic / built-in house front).
+        /// canopy, gym, pavilion, tower or hospital scan from above; the synthetic / built-in house front).
         public static SiteKind KindOf(string site, string environment = null)
         {
             var e = Match(environment);

@@ -2,7 +2,7 @@
 
 *Sat 2026-09-26, app lane → P4. Specs: `docs/ideas/brain.md` §4 S1 (B1) and S2 (B3), on `m7`.*
 
-These are three more patches for `pathfinder-drone-backend`. They go **on top of the 8 patches in
+These are three more patches for `pathfinder-backend`. They go **on top of the 8 patches in
 `docs/handoff/p4/`**, and together they sit on `main` @ `715d119`. We made and tested them in a
 private scratch clone. Nothing changed in your repo or on your running `:8000` server, and nothing
 was pushed. No test calls an LLM or the network.
@@ -13,7 +13,7 @@ without reading the server code.
 ## How to apply
 
 ```sh
-cd pathfinder-drone-backend                     # main @ 715d119
+cd pathfinder-backend                     # main @ 715d119
 git switch -c app-handoff-p4
 git am /path/to/Pathfinder/docs/handoff/p4/*.patch          # 0001–0008 (first hand-off)
 git am /path/to/Pathfinder/docs/handoff/p4-b1-b3/*.patch    # 0009–0011 (this one)

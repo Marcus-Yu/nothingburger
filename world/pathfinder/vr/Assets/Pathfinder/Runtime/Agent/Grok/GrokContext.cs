@@ -86,7 +86,7 @@ namespace Pathfinder.Agent.Grok
             }
             if (s.CandidateIds != null && s.CandidateIds.Count > 0) ctx["candidate_ids"] = new List<string>(s.CandidateIds);
             if (!string.IsNullOrEmpty(s.Tool)) ctx["tool"] = s.Tool;
-            // Drone photos describe the scan, not the room you see in passthrough.
+            // Scan photos describe the scan, not the room you see in passthrough.
             if (s.SceneInView && s.Frames != null && s.Frames.Count > 0) ctx["frames"] = s.Frames;
             if (!string.IsNullOrEmpty(s.Site))
             {

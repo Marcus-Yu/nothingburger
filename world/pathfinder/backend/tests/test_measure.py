@@ -16,7 +16,7 @@ from server import agent, scene_digest, structure_measure
 from server.config import get_settings
 
 CANOPY, KITCHEN = "canopy-test", "kitchen-test"
-REAL = Path("/Users/ravil/pathfinder-drone-backend/scene/gt-lcc-canopy/structure.r2.json")
+REAL = Path("/Users/ravil/pathfinder-backend/scene/gt-lcc-canopy/structure.r2.json")
 
 # The GT scans' up is ~15 deg off +Y (the canopy's is about (-0.10, 0.97, 0.24)).
 UP = np.array([-0.1, 0.966, 0.237])

@@ -1,14 +1,13 @@
-"""Import an already-reconstructed textured mesh as a scene package: a Matterport MatterPak OBJ,
-a Vexcel (or any aerial photogrammetry) mesh tile, a RealityScan/Metashape export.
+"""Import a finished textured mesh as a scene package: a Matterport MatterPak OBJ, the Matterport
+API mesh baked from its panoramas, or the block model `pipeline.vexcel` builds.
 
-`pipeline.run` starts from video and solves poses, geometry and scale itself. A survey product
-arrives with all three done, so this skips to the last stage: put the mesh in the package frame
+The source is already metric and textured, so this only has to put the mesh in the package frame
 (metres, +Y up, origin on the ground under the middle of the scan), fit it to the headset's
 triangle and texture budgets, and publish `mesh.r<rev>.glb`, `collision.r<rev>.glb`, an empty
 `cameras.r<rev>.json` and `scene.json`.
 
 What an imported package does not have: source photos with poses (`thumbs/` and the cameras
-list are empty) and the structure and parts layers, which the full pipeline fits from them. The
+list are empty, unless Matterport panoramas posed them) and no structure or parts layers. The
 headset falls back to mesh snapping; server features that read the photos answer "not ready".
 """
 

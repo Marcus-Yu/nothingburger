@@ -12,7 +12,7 @@ using UnityEngine.Networking;
 namespace Pathfinder.Agent
 {
     /// "Ask the scene" (backend docs/api.md /scene/ask): sends the (up to 3) package photos nearest to what you're
-    /// looking at — the drone's own thumbs/NNNN.jpg, with the camera id as the frame id — and a question. The answer
+    /// looking at — the scan's own thumbs/NNNN.jpg, with the camera id as the frame id — and a question. The answer
     /// comes back with a box in one frame; the pin ray goes through the box centre using that camera's full-frame
     /// intrinsics (u = cx·w…, OpenCV → world by Rᵀ, then the X flip), and the pin lands where it hits the collider.
     /// Without a box (or if that ray misses) the answer is pinned on the spot that was asked about.

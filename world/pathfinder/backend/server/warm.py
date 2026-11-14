@@ -1,5 +1,5 @@
-"""Demo warm-up CLI (plan §4b.5, docs "Pathfinder final writeup.md" §9 risks: "Everything the
-scripted demo needs is cached locally; only the live search is lost").
+"""Demo warm-up CLI: everything the scripted demo needs is cached locally, so only the live search
+is lost when the network is.
 
     uv run python -m server.warm [--queries-file demo.json] [--retry-proxies] [--grok-moulded]
     uv run python -m server.warm --labels <site> [--every 4]
@@ -68,8 +68,8 @@ IMPORTANT -- query wording: `DEFAULT_QUERIES` must use the exact, already-normal
 strings the agent's `find_part` tool call actually emits for the scripted demo phrases (e.g. the
 LLM turns "find a hanger for this gutter" into "gutter hanger") -- `find_parts`' cache key is
 `cache.normalize(query)` plus the measurement, so a live query worded differently is a cache
-miss even if it means the same thing. Verify these against a real agent transcript/log (or
-`docs/Pathfinder final writeup.md` §3's demo script) before changing them.
+miss even if it means the same thing. Verify these against a real agent transcript/log before
+changing them.
 """
 
 import argparse

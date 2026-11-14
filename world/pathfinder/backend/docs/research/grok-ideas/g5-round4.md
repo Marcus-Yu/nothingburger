@@ -21,8 +21,7 @@ Already built or in progress on branches, so not proposed again:
 - placement planner (F7);
 - walk-in video (F8);
 - install-manual Q&A (F9);
-- drone condition survey (F10);
-- capture coach;
+- condition survey (F10);
 - finish variants.
 
 Tags: **[V]** verified from xAI docs or by our own live call. **[S]** secondary source: a blog,

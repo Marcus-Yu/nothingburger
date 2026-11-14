@@ -62,7 +62,7 @@ namespace Pathfinder.Tests
 
         // ---------------- S9 (M9, DC5): one wrist strip; the credit ahead for 8 s ----------------
 
-        const string ZabelCredit = "\"Haus Schiller – Zabelgymnasium Gera – Drohnenflug\" by zabelgymnasium, CC BY 3.0, via Wikimedia Commons";
+        const string SampleCredit = "\"A scan\" by its author, CC BY 3.0";
 
         [Test]
         public void TheHeadCreditShowsForEightSecondsThenLeaves()
@@ -79,11 +79,9 @@ namespace Pathfinder.Tests
         [Test]
         public void TheWristStripCarriesLimitsScaleAndTheCreditVerbatim()
         {
-            // The credit, verbatim, for the Zabel scan only (cached per site string).
-            Assert.AreEqual(ZabelCredit, Pathfinder.Scene.SceneCredits.Zabel);
-            Assert.AreEqual(ZabelCredit, Pathfinder.Scene.SceneCreditChip.CreditFor("zabel-gymnasium"));
-            Assert.IsNull(Pathfinder.Scene.SceneCreditChip.CreditFor("kitchen"));
-            Assert.AreEqual(ZabelCredit, Pathfinder.Scene.SceneCreditChip.CreditFor("zabel-gymnasium"), "back again");
+            // No current scene needs a credit (cached per site string).
+            Assert.IsNull(Pathfinder.Scene.SceneCreditChip.CreditFor("la-mirada"));
+            Assert.IsNull(Pathfinder.Scene.SceneCreditChip.CreditFor("la-mirada-aerial"));
             Assert.IsNull(Pathfinder.Scene.SceneCreditChip.CreditFor(null));
 
             // The scale state (ScenePanel.ScaleChip's rule, in one word).
@@ -98,19 +96,18 @@ namespace Pathfinder.Tests
             Assert.AreEqual("", LimitsChip.FirstLine(null, false, "Scale not set"));
             Assert.AreEqual("", LimitsChip.FirstLine(null, false, null));
 
-            // While a Zabel scan is loaded the wrist text carries the credit under line 1.
-            string wrist = LimitsChip.Compose(LimitsChip.FirstLine(null, false, LimitsChip.ScaleWord(true, true, 1f)),
-                Pathfinder.Scene.SceneCreditChip.CreditFor("zabel-gymnasium"));
+            // While a scan that needs a credit is loaded the wrist text carries it under line 1.
+            string wrist = LimitsChip.Compose(LimitsChip.FirstLine(null, false, LimitsChip.ScaleWord(true, true, 1f)), SampleCredit);
             StringAssert.Contains("CC BY 3.0", wrist);
-            Assert.AreEqual(ZabelCredit, wrist, "the credit only");
+            Assert.AreEqual(SampleCredit, wrist, "the credit only");
             Assert.AreEqual("≤ $40", LimitsChip.Compose("≤ $40", null));
-            Assert.AreEqual(ZabelCredit, LimitsChip.Compose("", ZabelCredit));
+            Assert.AreEqual(SampleCredit, LimitsChip.Compose("", SampleCredit));
 
             // It shows in the world with limits or a credit; the scale alone isn't a reason; never in passthrough.
             Assert.IsFalse(LimitsChip.HasSomething(false, null, false));
             Assert.IsTrue(LimitsChip.HasSomething(true, null, false));
-            Assert.IsTrue(LimitsChip.HasSomething(false, ZabelCredit, false));
-            Assert.IsFalse(LimitsChip.HasSomething(true, ZabelCredit, true));
+            Assert.IsTrue(LimitsChip.HasSomething(false, SampleCredit, false));
+            Assert.IsFalse(LimitsChip.HasSomething(true, SampleCredit, true));
         }
     }
 

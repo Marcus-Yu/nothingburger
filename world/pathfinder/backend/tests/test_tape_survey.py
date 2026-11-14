@@ -276,13 +276,13 @@ def test_condition_survey_args_unchanged_by_the_tape():
 @pytest.mark.asyncio
 async def test_both_surveys_end_to_end_on_one_site(monkeypatch):
     """With a site loaded, "measure every cabinet door" is the tape and "survey the roof" still
-    reaches F10's `_survey` (stubbed: it needs a real drone scene)."""
+    reaches F10's `_survey` (stubbed: it needs a scene with posed photos)."""
     monkeypatch.setattr(agent, "chat", _no_llm_chat)
     seen = []
 
     async def fake_condition_survey(session, args, context):
         seen.append((args, context.get("site")))
-        return {"survey_id": "abc", "spoken": "Looking over the footage."}, [], None
+        return {"survey_id": "abc", "spoken": "Looking over the photos."}, [], None
 
     monkeypatch.setattr(agent, "_survey", fake_condition_survey)
     ctx = {"site": "kitchen"}
@@ -291,7 +291,7 @@ async def test_both_surveys_end_to_end_on_one_site(monkeypatch):
 
     assert tape["reply"] == "Surveying 18 doors."
     assert [a["name"] for a in tape["actions"]] == ["survey"]
-    assert condition["reply"] == "Looking over the footage."
+    assert condition["reply"] == "Looking over the photos."
     assert seen == [({"focus": "roof", "careful": False}, "kitchen")]
 
 

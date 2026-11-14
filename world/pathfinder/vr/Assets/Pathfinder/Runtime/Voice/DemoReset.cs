@@ -58,7 +58,7 @@ namespace Pathfinder
             if (Services.TryGet<PalmMenu>(out var palm)) palm.CloseFromController();
 
             // Declutter S1: the last judge's Grok state — the job rail and the install coach (GrokRails), the scene
-            // overlays (plan, survey pins, coverage, labels), the picture / video quad.
+            // overlays (plan, survey pins, labels), the picture / video quad.
             ResetGrok();
 
             // Tools, with their notebook rows and their undo / redo stacks.

@@ -3,7 +3,7 @@
 Research agent G4, 2026-09-26. Question: which Grok uses would add the most in areas rounds 1–2 barely
 touched? Those areas are:
 
-- the capture side: drone coaching, and turning footage into condition findings and a parts list;
+- the capture side: turning a scan's photos into condition findings and a parts list;
 - sharing and handoff: X, public links, contractor and homeowner;
 - xAI's newest releases;
 - Imagine for asset looks: finish variants and tileable textures;
@@ -25,7 +25,7 @@ and read it today.
 
 **Bottom line.**
 - Six live calls, **$0.309** in total, settled four things.
-  1. **Grok vision can triage building condition from our own drone frames.**
+  1. **Grok vision can triage building condition from our own scan photos.**
      - On B1's frames it rated the red-tile school (Zabel) as fine and the derelict block
        (Hospital) as severe: failed flat roof, trees growing on the deck, weathered facade.
      - `grok-4.20-0309-non-reasoning` did it for **$0.007** in 9 s (3 frames).
@@ -39,17 +39,14 @@ and read it today.
   3. **Imagine can turn a blurry roof crop into a crisp tile texture**, for $0.07 in 9 s. It wraps
      cleanly left to right but not top to bottom. A local crop to a whole number of tile courses
      makes it passable. The API still has no tiling flag.
-  4. **A capture coach needs local maths, not Grok maths.**
-     - Our own `cameras.r2.json` shows that all 118 Zabel views sit on **one side** of the
-       building.
-     - Grok phrased the reshoot well, for $0.002 in 2.9 s. But it listed the 7 missing sides as 7
-       identical legs, so merging them into legs must stay in Python.
+  4. **A capture coach needs local maths, not Grok maths** (call #6). The coach (pick 2) was
+     built as F12 and has since been removed.
 - A fifth call checked storm evidence: $0.141. It found a real 2026-09-19 wind report 7.8 km from
   Georgia Tech with trees through roofs. The free NOAA SPC CSV confirmed it word for word. But Grok
   also listed events 100–200 km away after being asked for 25 km, so filter distance locally.
 - The three to build first:
-  1. a **drone condition survey** that drops severity pins on the mesh and feeds `find_part`;
-  2. a **capture coach** that tells the pilot which sides to fly next;
+  1. a **condition survey** that drops severity pins on the mesh and feeds `find_part`;
+  2. a **capture coach** (built as F12, since removed);
   3. **finish variants that re-texture the GLB**, not just tint it.
 
   All three reuse modules on `main` (`meshgen.project`, `cache.cached`, the scene package, the
@@ -77,7 +74,7 @@ never printed. Costs are from `usage.cost_in_usd_ticks`.
 | 3 | `POST /v1/images/edits`, `grok-imagine-image-2.0`, input: a 400×400 crop of the Zabel roof (tiles are not resolved at that altitude). Prompt: "a seamless, tileable, square material swatch of that same roof covering, orthographic, flat lighting …" | 1024² plain clay tiles in the right colour. **Wrap seam ratio** (mean wrap-edge difference ÷ mean neighbour difference; 1.0 is invisible): **1.11 left to right, 10.3 top to bottom**. An offset-and-blend fix measured 0.87/0.71 but ghosts the tile courses visibly. Cropping to 751×882 px (a whole number of courses, found by searching for the best-matching row) gives 1.2/4.3 and looks passable when tiled 2×2 [V] | **$0.070** | 9.4 s |
 | 4 | `POST /v1/responses`, `grok-4.20-0309-non-reasoning`, tools `[{"type":"image_generation"}]`. Input: our cached `delta-75641` photo (chrome shower head) plus "edit into Matte Black, change only the finish" | Output item `image_generation_call` with `result` (base64 JPEG, 1024²) and the tool's own rewritten `prompt`. `usage.server_side_tool_usage_details.image_generation_calls: 1`. The shape is identical: the silhouette bbox is (106,136)–(917,886) against (106,136)–(916,887) on the original, silhouette IoU 0.80 (the spray holes differ). The text reply was "Matte Black." [V] | **$0.0663** | 6.8 s |
 | 5 | `POST /v1/responses`, `grok-4.20-0309-non-reasoning`, `web_search` (`allowed_domains`: spc.noaa.gov, weather.gov, ncei.noaa.gov, ajc.com, 11alive.com) plus `x_search` (`from_date` 2026-06-01, `to_date` 2026-09-25), `max_turns: 3`, strict schema `events[] {date, hazard, detail, place, distance_km, source, url}`. Ask: hail, wind or tornado events within 25 km of Georgia Tech | 4 events, all with SPC URLs. The one that matters: **2026-09-19, Fulton County**. Trees were down in Thomasville Heights, "a couple of trees falling on homes and causing roof damage", and a tree went through a roof on McWilliams Rd. The other 3 were 100–200 km away (Rome hail, Hephzibah hail, central-GA tornadoes), despite the 25 km ask. Tool usage: 8 web searches, 1 X search, 10 X posts fetched, **0 used**. 61k input tokens [V] | **$0.1414** | 14.3 s |
-| 6 | `POST /v1/responses`, `grok-4.20-0309-non-reasoning`, no tools, 3 Zabel thumbs at `detail: low`. The input carried coverage stats computed locally from `cameras.r2.json`: view-side octants `[118,0,0,0,0,0,0,0]`, 34 frames pitched more than 35° down. Strict schema `{verdict, spoken, legs[] {side_octant, pattern enum, gimbal_pitch_deg, why}}` | `reshoot_most`. Spoken: "Coverage is only from one side with low variety in pitch and height. Need to fly all other sides and add more downward pitched shots for the roof." It then gave **7 legs, one per empty octant, all identical** (orbit, 45°). The wording is right; the leg list should be merged locally. (Our prompt said 166 frames in total, wrongly counting B1's 48 preview thumbs; the model didn't lean on it.) [V] | **$0.0019** | 2.9 s |
+| 6 | `POST /v1/responses`, `grok-4.20-0309-non-reasoning`, no tools, 3 Zabel thumbs at `detail: low`, for the capture coach (pick 2, since removed) | The wording was right, but the leg list it returned had to be merged locally [V] | **$0.0019** | 2.9 s |
 
 ![Call 2: grok-4.7 boxes on Zabel 0491 (left: roof, dormers, gable all "none"; overhanging trees "minor") and Hospital 0141 (right: roof membrane and vegetation "severe", parapet "moderate", facade "severe")](g4/survey-boxes.jpg)
 
@@ -155,17 +152,9 @@ worked, so the entries below are pages we fetched. Treat the social signal in th
   - Hover runs 3D model → estimate → homeowner proposal with e-sign in one flow
     ([2026-01-15](https://www.roofingcontractor.com/articles/101753-hover-launches-connected-visual-ai-platform))
     [V sub].
-  - Our edge: the customer's own drone or phone video, VR measuring, and real parts at real
-    prices.
-- **Photo compliance is a real coaching need.** Contractors use apps that check in real time that
-  they have captured every angle the insurer requires, because insurers' AI denies claims with
-  missing evidence
-  ([marketingcode, May 2026](https://www.marketingcode.com/roofing-ai-claims-storm-season-may-2026/))
-  [V sub]. A "you missed the back slope" coach is the same need.
-- **Test squares.** Loveland's IMGING auto-places 10×10 ft test squares from a 3D model. DroneDeploy
-  ships built-in Progress, Safety and Inspection agents and a roof report
-  ([IMGING](https://www.lovelandinnovations.com/imging-flight/),
-  [DroneDeploy](https://help.dronedeploy.com/hc/en-us/articles/1500004861021-Roof-Report)) [S].
+  - Our edge: the customer's own scan, VR measuring, and real parts at real prices.
+- **Test squares.** Loveland's IMGING auto-places 10×10 ft test squares from a 3D model
+  ([IMGING](https://www.lovelandinnovations.com/imging-flight/)) [S].
 - **No one publishes detection accuracy.** SkyeBrowse's 2026 buyer's guide (video → measurable 3D,
   no ground control) gives no false-positive or false-negative numbers
   ([SkyeBrowse](https://www.skyebrowse.com/news/posts/roof-inspection-software)) [V sub]. A visible
@@ -199,8 +188,8 @@ worked, so the entries below are pages we fetched. Treat the social signal in th
 - **Say numbers in the demo:** "$0.007 to survey this roof, 9 seconds".
 
 **Gaps.**
-- No Aug–Sep 2026 GitHub repo matched "grok + drone" or "grok imagine texture".
-- No Devpost roof or drone winner turned up.
+- No Aug–Sep 2026 GitHub repo matched "grok imagine texture".
+- No Devpost roof-inspection winner turned up.
 - No benchmark measures Grok vision on shingle or gutter damage.
 - The open ground from G3 is still open: Grok over a metric capture's structure.
 
@@ -213,8 +202,8 @@ to a new action) × **Fit** (reuses our endpoints and modules). Costs are per us
 
 | Rank | Idea | Wow | Feas | Fit | Score | Cost / latency | Main risk |
 |---|---|---|---|---|---|---|---|
-| **1** | **Drone condition survey**: Grok vision over chosen capture frames → severity pins on the mesh → `find_part` for each repair | 5 | 4 | 5 | 100 | $0.007–0.012 and 9–15 s (4.20 NR, 3–6 frames); $0.02–0.05 and 35–60 s (4.7 low) [V] | Region-level boxes; invented findings; hail can't be seen |
-| **2** | **Capture coach**: coverage computed from `cameras.r<rev>.json` → merged reshoot legs → one spoken line | 4 | 5 | 4 | 80 | $0.002, 3 s [V]; the maths is local | The octant is relative to the flight, since `north` is null; in the field, not at the booth |
+| **1** | **Condition survey**: Grok vision over chosen scan photos → severity pins on the mesh → `find_part` for each repair | 5 | 4 | 5 | 100 | $0.007–0.012 and 9–15 s (4.20 NR, 3–6 frames); $0.02–0.05 and 35–60 s (4.7 low) [V] | Region-level boxes; invented findings; hail can't be seen |
+| **2** | **Capture coach**: coverage computed from `cameras.r<rev>.json` → one spoken line (built as F12, since removed) | 4 | 5 | 4 | 80 | $0.002, 3 s [V]; the maths is local | Removed |
 | **3** | **Finish variants that re-texture the GLB** (`set_finish` "show it in matte black") | 3 | 5 | 5 | 75 | $0.066–0.07 per finish, 7–11 s, cached [V] | The finish may not exist at the seller; label it |
 | 4 | **Public share and X handoff**: share card PNG/PDF → xAI Files public URL → QR plus X intent, with an optional native X post | 4 | 4 | 4 | 64 | Grok text ~$0.002; X post $0.015 (media, no link) or $0.20 (link) [V sub] | No X keys yet; storage price for Files not found |
 | 5 | **Storm check and claim pack**: SPC CSV (free) + Grok web/X colour + survey pins + a 10×10 test square | 4 | 4 | 3 | 48 | $0 (SPC) + $0.14 (Grok) [V] | Needs the site's lat/lon (`origin_gps` is null today); insurance claims are a sensitive domain |
@@ -223,7 +212,6 @@ to a new action) × **Fit** (reuses our endpoints and modules). Costs are per us
 | 8 | **Batch survey of every frame** → a condition heat map on the mesh | 3 | 3 | 4 | 36 | ~$0.25 for 118 frames on 4.20 NR [I]; Batch API is async, ≤24 h | Duplicate findings across views need merging in 3D |
 | 9 | **Two headsets, one session** (contractor and homeowner, colocated) | 5 | 2 | 3 | 30 | tokens only | Mostly Unity and colocation work; a second Quest at the booth |
 | 10 | **@Pathfinder reply bot on X**: photo in a mention → diagnosis, part and price in the reply | 5 | 2 | 3 | 30 | $0.01 per reply + $0.005 per mention read + ~$0.003 vision [V sub prices] | X developer account, a public webhook or a poller, and moderation |
-| 11 | **"Show me the other side"**: video extension of the drone clip | 4 | 2 | 2 | 16 | ~$0.08/s if 1.5 prices apply [I] | Pure hallucination of unseen geometry; `extensions` not verified on 1.5 |
 
 **4. Public share and X handoff.**
 - F4 already renders the report and has a "Share on X" intent link, but no public URL.
@@ -279,18 +267,14 @@ Build it only after pick 1.
 - It is cheap per reply but needs X credentials, a public poller and abuse handling. A good
   Devpost story, but risky live.
 
-**11. "Show me the other side".** A video extension continues the real drone clip around the
-building, which reads as magic but is invented geometry. Keep it for the Devpost reel with a
-visible "AI guess" label, if at all.
-
 ---
 
 ## 5. The three to build first
 
-### Pick 1: Drone condition survey (`server/survey.py`, `POST /scene/survey`, tool `survey_condition`)
+### Pick 1: Condition survey (`server/survey.py`, `POST /scene/survey`, tool `survey_condition`)
 
 **Why.**
-- It turns P1 footage into insight: "Grok, survey the roof". Red and amber pins appear on the real
+- It turns a scan's photos into insight: "Grok, survey the roof". Red and amber pins appear on the real
   building, each saying what's wrong. Pinching one runs `find_part` for the repair.
 - Call #1 shows it gets the big picture right on our own frames for under a cent. Call #2 shows the
   careful model gets region boxes that are good enough for pins.
@@ -298,10 +282,10 @@ visible "AI guess" label, if at all.
 
 **Module.** `server/survey.py`:
 - `def pick_frames(cams: list[dict], n: int = 6) -> list[str]`
-  - Group cameras by view-side octant (see pick 2) and pitch band: roof views pitched more than
-    30° down, facade views pitched less than 15°.
+  - Group cameras by view-side octant (the camera's azimuth around the scene, in 45° bins) and
+    pitch band: roof views pitched more than 30° down, facade views pitched less than 15°.
   - Take evenly spaced frames from each group, round robin, up to `n`.
-  - Pure; shared with pick 2.
+  - Pure.
 - `def frame_path(site, frame_id) -> Path`
   - Prefer a `survey/<id>.jpg` at 1280 px if the scene package has one.
   - Else use `thumbs/<id>.jpg` (640×360, served today).
@@ -346,7 +330,7 @@ visible "AI guess" label, if at all.
  "looked_fine": ["roof_covering (Zabel 0491)"],
  "coverage_gaps": ["Gutters, downspouts and tile-edge flashing not resolved"],
  "spoken": "Two severe problems: the flat roof is failing and trees are growing on it. I pinned them.",
- "label": "AI triage from drone frames, not an inspection", "cost_usd": 0.0071}
+ "label": "AI triage from scan photos, not an inspection", "cost_usd": 0.0071}
 ```
 
 - Errors:
@@ -360,7 +344,7 @@ visible "AI guess" label, if at all.
 - Tool `survey_condition(focus?: "roof"|"gutters"|"facade"|"all", careful?: bool)` uses the
   context's `site`.
 - Its first action is `survey_started {survey_id}` with the filler line "Looking over the
-  footage…". When the survey is done it sends `show_survey {survey_id, pins, label}` and speaks
+  photos.". When the survey is done it sends `show_survey {survey_id, pins, label}` and speaks
   `spoken`.
 - "Find a fix for that one" (or a pinch on a pin) calls the existing `find_part` with the pin's
   `part_query` and adds a notebook entry with `{pin id, frame_id}`.
@@ -408,91 +392,9 @@ One `-m live` test runs `fast` on Hospital 0141.
 - The mesh and cameras come from fixtures: a synthetic plane plus the trimmed Zabel
   `cameras.r2.json`, so there's no hfbox dependency. The scene package files are small.
 
-### Pick 2: Capture coach (`server/coverage.py`, `GET /scenes/{site}/coverage`, tool `coach_capture`)
+### Pick 2: Capture coach
 
-**Why.**
-- A reconstruction is only as good as its flight. Zabel's 118 cameras all look at one side, and
-  nothing in the pipeline says so today.
-- The coach turns the camera file we already publish into "you only flew the front; orbit the back
-  at 45° and do one slow eave pass", spoken to the pilot on the phone after the ~1 min preview.
-- Contractors already pay for "did I get every required angle?" apps (§3).
-- Call #6 shows Grok phrases it well for $0.002. It also shows the leg list must be computed, not
-  generated.
-
-**Module.** `server/coverage.py`, pure except for one phrasing call:
-- `def view_sides(cams) -> list[int]`
-  - An 8-bin histogram of view-side azimuths.
-  - For each camera, `f = R[2]` (the camera +Z in world). The side is `atan2(-f_z, -f_x)` in the
-    scene XZ plane (glTF, +Y up), in degrees, [0, 360).
-  - This is the direction from what the camera looks at back to the camera.
-  - When `scene.json.north` is set, rotate so that 0° = north. Otherwise 0° is "the start side",
-    the first camera's side.
-- `def pitches(cams) -> list[float]`: `asin(-f_y)` in degrees, positive when looking down.
-- `def legs(hist, pitch) -> list[Leg]`
-  - Merge contiguous empty octants (circularly) into one `orbit` leg `{from_deg, to_deg,
-    gimbal_pitch_deg: 45}`.
-  - Add a `nadir_grid` leg when fewer than 10 % of frames are pitched more than 60° down.
-  - Add an `eave_pass` leg when fewer than 15 % are between 20° and 40°.
-  - Zabel gives **one** orbit leg over 45–360°, not seven.
-- `def coverage(site) -> Coverage`
-  - Returns the histogram, the pitch bands, `registered = len(cameras)`, the thumbs count excluding
-    `p*` preview thumbs, `seen_ratio = nonzero octants / 8`, the legs, and a `verdict`: `good` if
-    `seen_ratio ≥ 0.75` and there are no legs, else `reshoot_some` or `reshoot_most`.
-- `async def spoken(cov) -> str`
-  - One `grok-4.20-0309-non-reasoning` call, no tools, input = the `Coverage` JSON (no images; the
-    stats carry it). Output: at most 2 sentences, no numbers that aren't in the input.
-  - Cached by the coverage hash.
-  - Offline or on failure, use a template: "You've covered {n} of 8 sides. Orbit {from}–{to}° at
-    45°, then …".
-
-**Endpoints.** `GET /scenes/{site}/coverage` returns:
-
-```json
-{"site": "zabel", "rev": 2, "registered": 118, "octants": [118,0,0,0,0,0,0,0], "zero_deg": "start_side",
- "pitch": {"under_15": 71, "15_to_35": 13, "over_35": 34, "over_60": 6},
- "seen_ratio": 0.125, "verdict": "reshoot_most",
- "legs": [{"pattern": "orbit", "from_deg": 45, "to_deg": 360, "gimbal_pitch_deg": 45},
-          {"pattern": "nadir_grid", "gimbal_pitch_deg": 90}],
- "spoken": "You only flew the front. Orbit the rest of the building at 45 degrees, then one pass straight down over the roof."}
-```
-
-These are Zabel's real numbers from `cameras.r2.json`: 6 of 118 frames (5 %) are pitched more than 60° down, which triggers the `nadir_grid` leg. 19 frames (16 %) fall between 20° and 40°, so there is no eave pass.
-- Errors: `404` for an unknown site; `409` for a preview-only scene with no cameras.
-- It is cheap enough to compute on each GET, with the Grok line cached.
-
-**Agent.**
-- Tool `coach_capture()` uses the context's `site` and returns the action
-  `show_coverage {site, octants, legs, spoken}`.
-- On F1's realtime relay the line is spoken; on `/agent/command` it goes to TTS as usual.
-- Optional: the pipeline's preview step `POST`s to a small hook so the coach speaks without being
-  asked. Skip that until the phone app has a speaker path.
-
-**Unity contract.** `show_coverage`:
-- Draw a ground ring around the mesh bbox centre with 8 wedges: green when the octant has ≥ 5
-  frames, else red.
-- Rotate the ring so that 0° matches `zero_deg`. Apply the X flip, which mirrors azimuth
-  (a → 180° − a in Unity's XZ).
-- Draw each `orbit` leg as a dashed arc at `from_deg`–`to_deg`, radius = 1.5 × the bbox radius,
-  with a small drone icon tilted to `gimbal_pitch_deg`.
-- Show `spoken` as a caption.
-
-**Cost per use.** $0 for the maths (under 5 ms on 118 cameras), plus $0.002 and 3 s for the
-phrasing on a miss [V].
-
-**Test plan.** `tests/test_coverage.py`:
-1. Synthetic cameras on a full circle give 8 non-empty octants and `good`.
-2. Cameras on one side give one merged orbit leg covering the other 315° (the circular merge
-   across 0° is tested).
-3. Pitch: a camera looking straight down gives 90°; a level camera gives 0.
-4. The Zabel fixture gives `[118,0,…]`, `reshoot_most`, and exactly 1 orbit leg.
-5. `north` set to 90° rotates the histogram by 2 octants.
-6. The `p*` preview thumbs don't count.
-7. A mocked Grok line is cached by hash (the second call makes no HTTP call); OFFLINE gives the
-   template text.
-8. An agent test: `coach_capture` emits `show_coverage`.
-
-**What to mock.** Only `llm.responses`. The rest is fixtures (a trimmed Zabel camera file under
-`tests/fixtures/coverage/`).
+Built as F12 and since removed, so its design is no longer kept here.
 
 ### Pick 3: Finish variants (`server/finish.py`, `POST /parts/{part_id}/finish`, tool `set_finish` moves server-side)
 
@@ -615,9 +517,7 @@ costs about $0.70.
   - [Gunner Roofing on ChatGPT roof diagnosis](https://www.gunnerroofing.com/our-work/can-chatgpt-estimate-your-roof-or-diagnose-roof-damage-from-a-photo-wh/)
   - [EagleView Horizon](https://www.roofingcontractor.com/articles/102133-eagleview-horizon-new-ai-engine-for-property-intelligence-launches)
   - [Hover connected platform](https://www.roofingcontractor.com/articles/101753-hover-launches-connected-visual-ai-platform)
-  - [roofing AI claims, May 2026](https://www.marketingcode.com/roofing-ai-claims-storm-season-may-2026/)
   - [IMGING](https://www.lovelandinnovations.com/imging-flight/)
-  - [DroneDeploy roof report](https://help.dronedeploy.com/hc/en-us/articles/1500004861021-Roof-Report)
   - [SkyeBrowse guide](https://www.skyebrowse.com/news/posts/roof-inspection-software)
   - [RAPID, arXiv 2606.21819](https://arxiv.org/abs/2606.21819) (VLM disaster triage: 0.92 on
     type, ≤ 0.63 on severity)

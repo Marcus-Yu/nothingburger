@@ -15,7 +15,7 @@ running; give it a moment". This route stops the run at once and frees the sessi
 ## How to apply
 
 ```sh
-cd pathfinder-drone-backend            # or ~/pathfinder-backend-demo
+cd pathfinder-backend            # or ~/pathfinder-backend-demo
 git switch catalog-on-asset-mode     # 42c0899
 git am /path/to/Pathfinder/docs/handoff/p4-jobcancel/*.patch
 uv run pytest -q tests/test_job_cancel.py tests/test_runjob.py tests/test_replace_job.py tests/test_jobs.py
@@ -57,7 +57,7 @@ A cancelled run:
 |---|---|---|
 | `0001-job-cancel-POST-job-run-run_id-cancel-…` | `runjob.Run.tasks` holds the chain task and, for a replace run, its next-model builds. New `runjob.cancel(run, reason)` and `runjob.cancelled(run)`. Both chains (`runjob._chain` / `_step`, `replace_job._chain` / `_progress`) write nothing after a cancel. `replace_job` cancels `st.others` when its chain is cancelled. `app.py` adds the route (`async def`, so `task.cancel()` runs on the loop). | `tests/test_job_cancel.py`: a replace waiting on its search (the same session starts a new job at once, there is no `place_part`, and one `job_done`), its next-model builds, idempotence and 404, 403, and a whole-job run |
 
-## Live check (port 8013, scratch `DATA_DIR` seeded from `data/cache`, `SCENE_DIR` = the drone backend's scenes)
+## Live check (port 8013, scratch `DATA_DIR` seeded from `data/cache`, `SCENE_DIR` = the backend's scenes)
 
 Ports 8008–8012 were all taken by other lanes' servers, so the check ran on the free port 8013. `:8004` wasn't touched.
 

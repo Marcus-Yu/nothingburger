@@ -1,4 +1,4 @@
-"""Drone condition survey (server/survey.py): rules, boxes, projection, cache, endpoints, agent.
+"""Condition survey (server/survey.py): rules, boxes, projection, cache, endpoints, agent.
 Only the Grok call (`llm.chat`) is mocked; the scene is a trimmed kitchen package (2 cameras)."""
 
 import json

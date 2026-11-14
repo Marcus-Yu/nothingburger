@@ -74,13 +74,11 @@ matches all of them. Building it showed where the README and the server differ:
 ## F4. The Grok demo on the real Zabel scan (grok-all + our patches, online, Sat 09-26 14:10)
 
 Run against `scene/zabel-gymnasium` r3 with `context.site = "zabel-gymnasium"`, using the demo script's words:
-1. **"what did I miss?"** works as scripted: "You've covered 1 of 8 sides…", with `show_coverage` in exterior mode, the front
-   side seen, and the orbit and roof-grid legs.
-2. **"survey the roof"** and **"survey the gutters"** both answer "Nothing wrong that I can see in the footage." (no pins,
+1. **"survey the roof"** and **"survey the gutters"** both answer "Nothing wrong that I can see in the footage." (no pins,
    about $0.004 each). **"survey the facade"** finds 2 pinned problems: f1 moderate, "overgrown vegetation near base potentially
    causing moisture issues" (0.75), and f2 minor, "staining and discoloration on lower brickwork" (0.70). Neither pin has a
    `part_query`, so "find a fix for pin f1" can only add a note.
-3. **"do the whole job" stops at step 1.** The survey finds the vegetation pin, and then part, safety, rules, postcard, packet
+2. **"do the whole job" stops at step 1.** The survey finds the vegetation pin, and then part, safety, rules, postcard, packet
    and checkout all skip ("Nothing in the survey needs a part."). A goal doesn't change that: "do the whole job: replace the
    gutters on this building" (run `460ac077833c`) produced the same seven dots, and `run_job(goal)` ignores the goal's part
    when no pin carries a `part_query`. Suggested fix: when the survey yields no fixable pin, fall back to a `find_part` on the

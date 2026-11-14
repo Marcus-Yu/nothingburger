@@ -6,7 +6,7 @@ namespace Pathfinder.Scene
     /// The reveal state the SceneReveal and SkyDome shaders read (globals), set by the TransitionDirector:
     /// - a sphere (`_AirReveal` xyz centre, w radius; `_AirRevealBand`) behind keyword AIR_REVEAL_SPHERE: only scene
     ///   fragments inside it draw, with an accent band at its surface;
-    /// - a "seen" progress (`_AirRevealProgress`) behind AIR_REVEAL_SEEN (S2's drone paint-in);
+    /// - a "seen" progress (`_AirRevealProgress`) behind AIR_REVEAL_SEEN (S2's paint-in);
     /// - the sky dome's cone (`_AirSkyReveal` xyz direction, w half-angle in radians; π = the whole dome).
     /// The keywords are on only during an effect, so the scene keeps early-Z the rest of the time.
     /// <see cref="Contains"/> mirrors the shader's test so EditMode tests can check it.

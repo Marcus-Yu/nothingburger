@@ -78,7 +78,7 @@ can be shown in the headset at that camera's pose, or projected back onto the me
   background" image, then run Hunyuan3D or Tripo on it
   ([Kinomoto, Medium](https://medium.com/kinomoto-mag/from-grok-to-a-3d-model-in-just-2-minutes-a-quick-guide-bf5dc1fc5ef2)).
   This is the same trick as our clean-front-view idea.
-- **Video.** Image-to-video demos of FPV drone shots, time-lapses and photo zooms
+- **Video.** Image-to-video demos of fly-through shots, time-lapses and photo zooms
   ([DataCamp](https://www.datacamp.com/tutorial/grok-imagine-api)); product showcases and
   "locking product placement" with reference images
   ([x.ai 1.5 references](https://x.ai/news/grok-imagine-video-1-5-references)); a multi-agent
@@ -105,7 +105,7 @@ Scoring: user value × demo wow ÷ build risk. Costs are per use at `auto` quali
   anything.
 - **Wow.** High. In the headset a framed "magic window" appears, exactly aligned with the real
   mesh behind it, and the judge flips before/after with a pinch. It uses the SpaceXAI track's
-  newest model on real drone data.
+  newest model on real scan data.
 - **Architecture.**
   - New `POST /scene/reimagine {site, frame_id, prompt}` → `{frame_id, image_url, camera}`.
   - The server reads `scene/<site>/thumbs/<id>.jpg`, or the full frame if the package has one,
@@ -119,7 +119,7 @@ Scoring: user value × demo wow ÷ build risk. Costs are per use at `auto` quali
 - **Cost / latency.** $0.07, about 11 s. The voice agent fills the wait ("Sketching it up…").
 - **Risks.**
   - It is not metric, so label it "AI preview, not to scale".
-  - Drone thumbnails are small; use `frames/` when present (outputs come back at 2× anyway).
+  - Scan thumbnails are small; use `frames/` when present (outputs come back at 2× anyway).
   - Moderation if a person is in frame.
   - Prompt drift (sign text changes). The fix is the "change nothing else" clause, which worked
     in our run.
@@ -184,10 +184,10 @@ Scoring: user value × demo wow ÷ build risk. Costs are per use at `auto` quali
 
 ### 4. Checkout "delivery" clip: image-to-video from the postcard
 
-- **What it is.** Animate #2's postcard with `grok-imagine-video-1.5`, 6 s at 480p: "a delivery
-  drone lowers the box to the door, the installer fits the unit, camera pushes in". Native audio
+- **What it is.** Animate #2's postcard with `grok-imagine-video-1.5`, 6 s at 480p: "the box
+  arrives at the door, the installer fits the unit, camera pushes in". Native audio
   included. It plays on the receipt panel.
-- **Wow.** Very high, and the drone ties back to our capture story.
+- **Wow.** Very high.
 - **Cost / latency.** About $0.48 per clip. Async, up to minutes. Pre-bake it for the demo parts
   and show "live" only as a bonus.
 - **Build (1 h).** `POST /parts/{id}/clip` starts the job and stores the `request_id`, and
@@ -196,7 +196,7 @@ Scoring: user value × demo wow ÷ build risk. Costs are per use at `auto` quali
 
 ### 5. Devpost / stage before-after transformation clip
 
-- **What it is.** An offline script. It takes a drone frame and the #1 edit of the same frame as
+- **What it is.** An offline script. It takes a scan photo and the #1 edit of the same frame as
   first frame and `last_frame` (video-1.5 keyframes), and produces a 5–8 s "house transforms" shot
   for the 2-minute video and the booth loop.
 - **Cost.** About $0.40–1.12 per clip. Zero demo risk.

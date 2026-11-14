@@ -2,7 +2,6 @@
 
 Pathfinder is a VR app for **Meta Quest 3S**, built in **Unity 6000.3.24f1 (6.3 LTS)** on an Apple Silicon Mac.
 Build spec: `docs/SPEC.md` — source of truth (milestones, contracts, acceptance checks, lanes, decisions log). Read §0 and §5 first.
-Background only: `docs/ref/writeup.md` (pitch/demo) and `docs/ref/implementation-plan.md` (whole-team plan). SPEC.md wins on conflicts.
 Before starting work, check SPEC §5 for which lane you are in; only the XR lane may enter Play mode or use XR Operator.
 
 ## Stack (verified working 2026-09-24 — do not change versions without being asked)
@@ -81,7 +80,7 @@ A feature is "done" only when it compiles clean, is verified at runtime in the S
 - **One MonoBehaviour per file, named after the class** (EditMode test enforces it), or components go missing when the scene reloads.
 - **The Simulator can crash the Editor** (SIGSEGV in `SIMULATOR.so` telemetry) or deadlock it. Commit before long Play sessions; after a relaunch answer the scene-backup prompt "Yes" and ask the user to reconnect the Operator via `/mcp`.
 
-## Backend integration (pathfinder-drone-backend; report + contract findings: `docs/backend-integration.md`)
+## Backend integration (pathfinder-backend; report + contract findings: `docs/backend-integration.md`)
 - Scene packages load at runtime (`SceneStreamer`, auto-loads `kitchen`; Scene window ▸ Next scene / Built-in). Synthetic
   packages with exact ground truth: **Pathfinder ▸ Export Synthetic Scene Packages** → `tools/.scenes/` (serve with the
   real server's `SCENE_DIR` or the mock's `--scene-dir`). Revision-named files are cached forever in

@@ -92,8 +92,6 @@
   .box.sev-severe { border-color: #dc2626; } .sev-severe span { background: #dc2626; }
   .box.sev-moderate { border-color: #d97706; } .sev-moderate span { background: #d97706; }
   .box.sev-minor { border-color: #ca8a04; } .sev-minor span { background: #ca8a04; }
-  #cov-svg { width: 100%; max-width: 520px; aspect-ratio: 1; background: #fafbfc; border: 1px solid #e5e7eb; border-radius: 6px; }
-  #cov-spoken { font-weight: 600; min-height: 1.2em; margin: .5rem 0; }
   .lbl-frame { position: relative; display: inline-block; max-width: 100%; }
   .lbl-frame img { display: block; max-width: 100%; }
   .lbl-box { position: absolute; border: 2px solid #f59e0b; border-radius: 3px; }
@@ -294,16 +292,10 @@
 </section>
 
 <section>
-  <h2>Capture coach</h2>
+  <h2>Scene</h2>
   <div class="row">
-    <div><label>site (also sent as context.site)</label><select id="cov-site"><option value="">none</option></select></div>
-    <div><button id="cov-go">Check coverage</button></div>
+    <div><label>site (also sent as context.site)</label><select id="scene-site"><option value="">none</option></select></div>
   </div>
-  <div id="cov-spoken"></div>
-  <p class="muted">Top down in the scene frame (X right, Z down). Wedges: green once a side has 3+ aimed views.
-    Dashed: the legs to fly (orbit blue, eave pass purple, roof grid grey). Dots: cameras.</p>
-  <svg id="cov-svg" xmlns="http://www.w3.org/2000/svg"></svg>
-  <pre id="cov-json"></pre>
 </section>
 
 <section>
@@ -486,8 +478,8 @@ function buildContext() {
   if (pcBox) ctx.placed_box = pcBox;
   const svSite = document.getElementById("sv-site").value.trim(); // typed = wins over the defaults below
   if (svSite && !ctx.site) ctx.site = svSite;
-  const covSite = document.getElementById("cov-site").value; // picked = wins over the defaults below
-  if (covSite && !ctx.site) ctx.site = covSite;
+  const pickedSite = document.getElementById("scene-site").value; // picked = wins over the defaults below
+  if (pickedSite && !ctx.site) ctx.site = pickedSite;
   const fxSite = document.getElementById("fx-site").value.trim();
   const fxFrame = document.getElementById("fx-frame").value.trim();
   if (fxSite && fxFrame && !ctx.site) { ctx.site = fxSite; ctx.frame_id = fxFrame; }
@@ -538,8 +530,6 @@ function showCommandResult(result) {
   if (manual) renderManualAnswer(manual.args, "from the agent's show_manual_answer action");
   const sv = (result.actions || []).find((a) => a.name === "survey_started");
   if (sv) pollSurvey({ survey_id: sv.args.survey_id, status: "running" });
-  const cov = (result.actions || []).find((a) => a && a.name === "show_coverage");
-  if (cov) drawCoverage(cov.args);
   const actions = result.actions || [];
   const rulesShown = actions.find((a) => a.name === "show_rules");
   const started = actions.find((a) => a.name === "rules_started");
@@ -901,11 +891,11 @@ document.getElementById("fin-go").addEventListener("click", async () => {
   out.innerHTML = finishCard("Before", `${base}/image.jpg`, `${base}/model.glb`, "seller photo and model.glb") + after;
 });
 
-// --- capture coach: the show_coverage ring, top down -----------------------------
+// --- scene picker: the loaded scene packages ----------------------------------
 
 async function loadSites() {
   const resp = await fetch("/scenes");
-  const sel = document.getElementById("cov-site");
+  const sel = document.getElementById("scene-site");
   for (const s of await resp.json()) {
     const opt = document.createElement("option");
     opt.value = opt.textContent = s.site;
@@ -914,71 +904,6 @@ async function loadSites() {
 }
 loadSites();
 
-document.getElementById("cov-go").addEventListener("click", async () => {
-  const site = document.getElementById("cov-site").value;
-  if (!site) return;
-  const resp = await fetch(`/scenes/${encodeURIComponent(site)}/coverage`);
-  const body = await resp.json();
-  if (!resp.ok) { document.getElementById("cov-spoken").textContent = body.detail || resp.status; return; }
-  drawCoverage(body);
-});
-
-async function drawCoverage(cov) {
-  document.getElementById("cov-spoken").textContent = cov.spoken || "";
-  document.getElementById("cov-json").textContent = JSON.stringify(cov, null, 2);
-  const svg = document.getElementById("cov-svg");
-  svg.innerHTML = "";
-  if (cov.mode !== "exterior") return;
-  const cams = await (await fetch(`/scenes/${encodeURIComponent(cov.site)}/${encodeURI(cov.cameras)}`)).json();
-  const [cx, , cz] = cov.ring.centre;
-  const z0 = cov.ring.zero_dir, q = cov.ring.quarter_dir;
-  // bearing (degrees clockwise from above, from zero_dir) and radius -> scene [x, z]
-  const at = (deg, r) => {
-    const a = deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
-    return [cx + r * (c * z0[0] + s * q[0]), cz + r * (c * z0[2] + s * q[2])];
-  };
-  const arc = (from, sweep, r) => {
-    const pts = [];
-    for (let d = 0; d <= sweep + 1e-6; d += 3) pts.push(at(from + d, r));
-    return pts;
-  };
-  let extent = Math.max(cov.ring.radius * 1.4, ...cov.legs.map((l) => l.radius * 1.15));
-  for (const c of cams) extent = Math.max(extent, Math.abs(c.position[0] - cx) * 1.05, Math.abs(c.position[2] - cz) * 1.05);
-  svg.setAttribute("viewBox", `${cx - extent} ${cz - extent} ${2 * extent} ${2 * extent}`);
-  const font = extent * 0.045;
-  const el = (tag, attrs) => {
-    const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
-    node.setAttribute("vector-effect", "non-scaling-stroke");
-    svg.appendChild(node);
-    return node;
-  };
-  const poly = (pts) => pts.map((p) => p.join(",")).join(" ");
-  const R = cov.ring.radius;
-  cov.sides.forEach((side, k) => {
-    const outer = arc(side.bearing_deg - 22.5, 45, R), inner = arc(side.bearing_deg - 22.5, 45, R * 0.7).reverse();
-    el("polygon", { points: poly([...outer, ...inner]), fill: side.seen ? "#16a34a" : "#dc2626", "fill-opacity": 0.55, stroke: "#fff", "stroke-width": 1.5 });
-    const [lx, lz] = at(side.bearing_deg, R * 0.85);
-    const t = el("text", { x: lx, y: lz, "font-size": font * 0.8, "text-anchor": "middle", "dominant-baseline": "middle", fill: "#111" });
-    t.textContent = side.label;
-  });
-  for (const leg of cov.legs) {
-    if (leg.pattern === "nadir_grid") {
-      const r = leg.radius;
-      el("rect", { x: cx - r, y: cz - r, width: 2 * r, height: 2 * r, fill: "none", stroke: "#6b7280", "stroke-width": 2, "stroke-dasharray": "6 4" });
-      continue;
-    }
-    const color = leg.pattern === "orbit" ? "#2563eb" : "#9333ea";
-    el("polyline", { points: poly(arc(leg.from_deg, leg.sweep_deg, leg.radius)), fill: "none", stroke: color, "stroke-width": 3, "stroke-dasharray": "8 6" });
-  }
-  for (const c of cams) {
-    el("circle", { cx: c.position[0], cy: c.position[2], r: extent * 0.008, fill: "#111", "fill-opacity": 0.6 });
-  }
-  const [zx, zz] = at(0, R * 1.25);
-  el("line", { x1: cx, y1: cz, x2: zx, y2: zz, stroke: "#111", "stroke-width": 1 });
-  const t = el("text", { x: zx, y: zz, "font-size": font, "text-anchor": "middle", fill: "#111" });
-  t.textContent = cov.zero === "north" ? "N (0°)" : "start side (0°)";
-}
 
 // --- live labels ---------------------------------------------------------------
 

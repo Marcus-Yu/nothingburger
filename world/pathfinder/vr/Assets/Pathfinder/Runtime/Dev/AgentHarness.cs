@@ -1423,7 +1423,7 @@ namespace Pathfinder.Dev
         /// Grok lanes: the backend's example payloads for a lane's actions through AgentActions.ExecuteAll on the loaded
         /// scene, one [Pathfinder.Check] line per action. "g2": 3D overlays (load kitchen or synthetic-facade first).
 
-        /// Grok G2 capture angles: "kitchen-labels", "kitchen-survey", "kitchen-plan", "facade-plan", "facade-coverage".
+        /// Grok G2 capture angles: "kitchen-labels", "kitchen-survey", "kitchen-plan", "facade-plan".
         public static string GrokLook(string shot) => GrokG2Check.Look(shot);
         // end Grok G2
 

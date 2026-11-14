@@ -1,4 +1,4 @@
-"""Drone condition survey: capture frames -> one Grok vision call -> severity pins on the mesh.
+"""Condition survey: the scan's posed photos -> one Grok vision call -> severity pins on the mesh.
 
 Spec: docs/research/grok-ideas/g4-round3.md pick 1; results in docs/research/grok-ideas/f10-survey.md.
 
@@ -35,7 +35,7 @@ from server.meshgen import photo_data_url
 
 logger = logging.getLogger(__name__)
 
-LABEL = "AI triage from drone frames, not an inspection"
+LABEL = "AI triage from scan photos, not an inspection"
 NOT_READY = "I need the full scan to pin anything"
 MIN_CONFIDENCE = 0.5
 MERGE_M = 1.5  # same-element pins closer than this merge, on metric scenes
@@ -69,7 +69,7 @@ _HAIL_RE = re.compile(r"\b(hail|impact)", re.IGNORECASE)
 _SAME_AS = {"flat_roof_membrane": "roof_covering"}
 _SITE_RE = re.compile(r"^[a-z0-9-]+$")
 
-PROMPT = """You are triaging the condition of a building from drone frames for a repair \
+PROMPT = """You are triaging the condition of a building from photos of it for a repair \
 contractor. Frame ids, in order: {ids}. Focus: {focus}.
 For each building element you can see, add one finding:
 - frame: the id of the frame it is clearest in;
@@ -136,7 +136,7 @@ def pick_frames(cams: list[dict], n: int = 6, focus: str = "all") -> list[str]:
         band = "roof" if pitch > 30 else "facade" if pitch < 15 else None
         if band in bands:
             groups[(band != "roof", side)].append(cam["id"])
-    if not groups:  # e.g. an all-oblique flight: fall back to spreading over every camera
+    if not groups:  # e.g. all-oblique photos: fall back to spreading over every camera
         groups[(0, 0)] = [cam["id"] for cam in cams]
     quota = dict.fromkeys(sorted(groups), 0)
     while sum(quota.values()) < n and any(quota[k] < len(groups[k]) for k in quota):
@@ -319,7 +319,7 @@ def merge_pins(pins: list[dict], radius: float) -> list[dict]:
 def spoken(pins: list[dict], fine: list[str]) -> str:
     if not pins:
         return (
-            "Nothing wrong that I can see in the footage."
+            "Nothing wrong that I can see in the photos."
             if fine
             else ("I couldn't make out the building in those frames.")
         )

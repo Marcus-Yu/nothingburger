@@ -11,7 +11,7 @@ namespace Pathfinder.Agent.Grok
 {
     /// The G2 overlays' HTTP calls (backend docs/api.md §4), on the parts server's base URL through PartsClient's helpers:
     /// GET /scene/survey/{id} (a survey that didn't arrive in the reply), GET /scenes/{site}/labels (the pre-labelled
-    /// scan), GET /scenes/{site}/coverage (harness), and POST /voice/speak (a polled survey's `spoken`, played the way a
+    /// scan), and POST /voice/speak (a polled survey's `spoken`, played the way a
     /// /voice/command reply is: WavUtil.Decode on the agent's voice source). Never /checkout.
     public static class GrokOverlayClient
     {
@@ -23,7 +23,7 @@ namespace Pathfinder.Agent.Grok
             using (var req = UnityWebRequest.Get(PartsClient.Resolve(path)))
             {
                 req.timeout = timeoutSeconds;
-                yield return HttpDeadline.Send(req, HttpDeadline.SmallIdle);   // fix-ux: small JSON (labels, survey, coverage) on our clock
+                yield return HttpDeadline.Send(req, HttpDeadline.SmallIdle);   // fix-ux: small JSON (labels, survey) on our clock
                 code = HttpDeadline.GaveUp(req) != null ? 0 : req.responseCode;
                 if (HttpDeadline.Ok(req)) text = req.downloadHandler.text;
                 else if (code != 404) Log.Warn($"Grok overlays: GET {path}: {HttpDeadline.Error(req)} {PartsClient.ServerDetail(req.downloadHandler?.text)}");

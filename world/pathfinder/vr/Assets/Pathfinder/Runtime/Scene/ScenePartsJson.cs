@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Pathfinder.Scene
 {
     /// parts.r&lt;rev&gt;.json, schema pathfinder.parts/1 (backend docs/api.md "parts.r&lt;rev&gt;.json: removable components and their
-    /// cavities"; research docs/research/p1-parts/e1-remove-dishwasher.md): the components the user can take out of a
+    /// cavities"): the components the user can take out of a
     /// scene, the node names of each in the split mesh / collision / cavity GLBs, and the box each one leaves behind.
     /// Same frame as the mesh (glTF: metres, right-handed, +Y up); Unity coordinates come from CavityBox (X flip).
     /// Unknown fields (evidence, cut, colors, cost, …) are ignored; missing optional ones stay null. Pure: no engine

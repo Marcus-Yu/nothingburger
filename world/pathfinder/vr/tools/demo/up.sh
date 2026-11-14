@@ -19,14 +19,14 @@
 #   --no-presenter      (D7) don't start the presenter relay / its adb reverse
 #   --demo on|off       (D7) launch extra: DemoMode (default: off; the user disabled it Sat 09-26 evening)
 #   -n, --dry-run       print the commands that change something; run only the read-only checks
-# Env: BACKEND_DIR (default ~/pathfinder-drone-backend), PORT (8000), MOCK_PORT (8765), SERIAL (adb serial if several),
+# Env: BACKEND_DIR (default ~/pathfinder-backend), PORT (8000), MOCK_PORT (8765), SERIAL (adb serial if several),
 #      PRESENTER_PORT (8766, D7)
 set -uo pipefail
 
 PKG=com.pathfinder.quest
 ACTIVITY=com.unity3d.player.UnityPlayerGameActivity
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-BACKEND_DIR="${BACKEND_DIR:-$HOME/pathfinder-drone-backend}"
+BACKEND_DIR="${BACKEND_DIR:-$HOME/pathfinder-backend}"
 PORT="${PORT:-8000}"
 MOCK_PORT="${MOCK_PORT:-8765}"
 SPIKE="$ROOT/SpikeData"

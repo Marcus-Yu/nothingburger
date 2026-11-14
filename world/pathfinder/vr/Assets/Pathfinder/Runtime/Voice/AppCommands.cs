@@ -182,7 +182,7 @@ namespace Pathfinder
             return true;
         }
 
-        // Backend integration (pathfinder-drone-backend docs/api.md)
+        // Backend integration (pathfinder-backend docs/api.md)
 
         /// "What else do I need?" lines from the agent's show_bom action; the next checkout adds them to the same cart.
         public static PartBom CurrentBom { get; private set; }
@@ -216,11 +216,11 @@ namespace Pathfinder
             return true;
         }
 
-        /// scene_pin {frame_id, box}: project the box centre from that drone photo onto the scene and pin it.
+        /// scene_pin {frame_id, box}: project the box centre from that scan photo onto the scene and pin it.
         public static bool PinFromFrame(string frameId, float[] box, string text) =>
             Services.TryGet<Pathfinder.Agent.SceneAsk>(out var ask) && ask.PinFromFrame(frameId, box, text);
 
-        /// Ask a question about what you're looking at (POST /scene/ask with the nearest drone photos).
+        /// Ask a question about what you're looking at (POST /scene/ask with the nearest scan photos).
         public static bool AskScene(string question)
         {
             if (!Services.TryGet<Pathfinder.Agent.SceneAsk>(out var ask) || ask.Busy) return false;

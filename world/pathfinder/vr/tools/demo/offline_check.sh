@@ -6,10 +6,10 @@
 # agent, voice 503, one offline checkout), then stops it and deletes the snapshot. No network, no LLM calls.
 #
 #   tools/demo/offline_check.sh                 # extra args go to parts_check.py, e.g. --queries "cabinet hinge"
-# Env: BACKEND_DIR (default ~/pathfinder-drone-backend), CHECK_PORT (8002)
+# Env: BACKEND_DIR (default ~/pathfinder-backend), CHECK_PORT (8002)
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-BACKEND_DIR="${BACKEND_DIR:-$HOME/pathfinder-drone-backend}"
+BACKEND_DIR="${BACKEND_DIR:-$HOME/pathfinder-backend}"
 PORT="${CHECK_PORT:-8002}"
 
 if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then

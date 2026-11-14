@@ -58,15 +58,13 @@ ROLE_DEFAULTS = {
     # "Where does it go?" planner picker (server/plan.py): one short strict-schema call, no
     # geometry. A Grok-feature default; groq:openai/gpt-oss-120b also works (f7-planner.md).
     "plan": "xai:grok-4.20-0309-non-reasoning",
-    # Drone condition survey (server/survey.py): one vision call over <=6 capture frames. 4.20
+    # Condition survey (server/survey.py): one vision call over <=6 capture frames. 4.20
     # non-reasoning did it for $0.007 in 9 s on 3 frames; grok-4.7 at low effort gives tighter
     # boxes for ~3x the cost and ~35 s (docs/research/grok-ideas/g4-round3.md calls #1/#2).
     "survey": "xai:grok-4.20-0309-non-reasoning",
     "survey_careful": "xai:grok-4.7",
-    # Capture coach (server/coverage.py): two spoken sentences from computed coverage, ~$0.002.
-    "coach": "xai:grok-4.20-0309-non-reasoning",
     # Install coach (server/coach.py): yes/no/cant_see answers on one headset frame, ~$0.001 and
-    # ~2 s (G6 call #14). `coach` is F12's capture coach, hence the longer name.
+    # ~2 s (G6 call #14).
     "coach_vision": "xai:grok-4.20-0309-non-reasoning",
     # Job packet blurbs (server/packet.py): one fast call per packet content hash, via
     # `responses()`, so it must stay an xai model; any failure falls back to a template.

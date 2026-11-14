@@ -15,7 +15,7 @@ tests against.
 ## How to apply
 
 ```sh
-cd pathfinder-drone-backend
+cd pathfinder-backend
 git switch app-handoff-vrnext          # or any branch with p4-grok 0001–0011 (0001 touches their code)
 git am /path/to/Pathfinder/docs/handoff/p4-e2e/*.patch
 uv run pytest -q tests/test_replace.py tests/test_agent.py tests/test_search.py tests/test_mandate.py

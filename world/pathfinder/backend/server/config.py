@@ -85,7 +85,6 @@ class Settings(BaseSettings):
     LLM_PLAN: str | None = None
     LLM_SURVEY: str | None = None
     LLM_SURVEY_CAREFUL: str | None = None
-    LLM_COACH: str | None = None
     LLM_COACH_VISION: str | None = None  # install coach step checks (server/coach.py)
     LLM_PACKET: str | None = None  # job packet blurbs (server/packet.py), xai only
     LLM_LABELS: str | None = None

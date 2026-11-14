@@ -163,7 +163,7 @@ uv sync                                              # + onnxruntime
 mkdir -p data/cache/models && cp /private/tmp/claude-501/-Users-ravil-Pathfinder/texture-data/cache/models/u2netp.onnx data/cache/models/   # or let --retexture fetch it
 # stop :8004, then:
 set -a; . .env; set +a; uv run python -m server.warm --retexture     # ~50 s, prints "$0"
-SCENE_DIR=/Users/ravil/pathfinder-drone-backend/scene LLM_AGENT=xai:grok-4.20-0309-non-reasoning \
+SCENE_DIR=/Users/ravil/pathfinder-backend/scene LLM_AGENT=xai:grok-4.20-0309-non-reasoning \
   .venv/bin/uvicorn server.app:app --host 0.0.0.0 --port 8004
 ```
 

@@ -1,6 +1,6 @@
 # Research: web search + seller/pricing data sources for the parts server
 
-*Written 2026-09-24. Covers §1b (part.json contract) and §4b.1–4b.2 of `Pathfinder implementation plan.md`.*
+*Written 2026-09-24. Covers §1b (part.json contract) and §4b.1–4b.2 of the original implementation plan (since removed).*
 
 Test queries used across every service:
 - Primary: `"Amerimax 5 in. K-style hidden gutter hanger"` (and `"...buy"` variants for text-search APIs)

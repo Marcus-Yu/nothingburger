@@ -29,7 +29,7 @@ namespace Pathfinder.Agent.Grok
         }
     }
 
-    /// Dashed polylines (plan segments, flight legs): cut once into dash sub-polylines in their parent's space; the
+    /// Dashed polylines (plan segments): cut once into dash sub-polylines in their parent's space; the
     /// renderer turns those into camera-facing ribbons each frame. Pure.
     public static class Dashes
     {

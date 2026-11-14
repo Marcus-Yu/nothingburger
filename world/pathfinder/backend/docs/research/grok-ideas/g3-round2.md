@@ -120,7 +120,7 @@ Friedrich KÜHL recall (fire and burn hazard) [V].
   ([basenor](https://www.basenor.com/blogs/news/xai-grokathon-2026-4-standout-moments-that-reveal-groks-range)).
   We found no Devpost entry that uses Imagine video or the structure of a 3D capture [S].
 - **Gaps.** Our web search tool returned almost nothing from Reddit or X for these topics
-  (r/grok, r/virtualreality, r/drones, r/HomeImprovement), so social signal here comes from GitHub,
+  (r/grok, r/virtualreality, r/HomeImprovement), so social signal here comes from GitHub,
   HN and blogs. We did not spend x_search budget on meta-research. We found **no** project that:
   - pins real capture frames as video keyframes;
   - asks Grok about a metric structure layer;
@@ -147,8 +147,7 @@ endpoints and modules. **Score** = Wow × Feas × Fit. Costs are per use.
 | 7 | Install-manual Q&A from an xAI Collection per site | 3 | 3 | 4 | 36 | $2.50 per 1k searches + storage | Finding the right PDF manual per part |
 | 8 | AR "ghost" install steps per placed part | 5 | 2 | 3 | 30 | ~$0.01 per step list | Mostly Unity work; invented steps |
 | 9 | Ad-hoc load/fit maths through `code_interpreter` | 2 | 4 | 3 | 24 | $0.15 and 194 s on reasoning [V]; faster non-reasoning untested | Local tools (`hanger_plan`, `btu_for_room`) already cover the common cases |
-| 10 | Capture coach by voice for the drone/phone pilot | 4 | 2 | 2 | 16 | $0.08/min voice | Needs coverage stats from the P1 preview; happens in the field, not at the booth |
-| 11 | Expose the parts server as a remote MCP server | 2 | 3 | 2 | 12 | tokens only | Needs a public URL from the hall; F1 already runs our tools server-side |
+| 10 | Expose the parts server as a remote MCP server | 2 | 3 | 2 | 12 | tokens only | Needs a public URL from the hall; F1 already runs our tools server-side |
 
 **4. Voice-refined reimagine.** F2's `reimagine` returns an edited frame. Add a
 `refine_reimagine(prompt)` tool that feeds the last edited JPEG back into `imagine.edit` with the same
@@ -181,12 +180,7 @@ most of the work is on P3.
 answer the common questions in under 1 ms. Keep it only as a fallback for questions nobody modelled
 ("snow load on 3.66 m of gutter at 60 cm spacing"), with a "calculating…" filler line.
 
-**10. Capture coach.** The P1 preview (about 1 minute after upload) could report the facades or
-corners with too few views, and Grok Voice could tell the pilot "orbit the north-east corner again,
-3 m lower". This needs coverage numbers the pipeline doesn't emit yet. Good for a Devpost story, not
-for this weekend.
-
-**11. Parts server as MCP.** It would let grok.com or any MCP client use Pathfinder. It isn't needed for
+**10. Parts server as MCP.** It would let grok.com or any MCP client use Pathfinder. It isn't needed for
 the demo, and it needs a public tunnel.
 
 ---
@@ -281,7 +275,7 @@ One `-m live` test runs on MAW08U1QWT.
 ### Pick 2: Walk-in renovation clip (`server/flythrough.py`, `POST /scene/flythrough`, tool `walk_in_preview`)
 
 **Why.** F2 shows a still "after" on a quad. This beat is a real capture frame that *moves* into the
-renovated view, generated from our own drone/phone frames and camera poses. Call #3 shows the pinned
+renovated view, generated from our own scan photos and camera poses. Call #3 shows the pinned
 first and last frames hold the room geometry. No one else has capture poses to choose the frames
 from.
 

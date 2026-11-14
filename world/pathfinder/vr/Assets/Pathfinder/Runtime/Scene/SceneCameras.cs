@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Pathfinder.Scene
 {
-    /// One entry of cameras.r&lt;rev&gt;.json (plan §1): the drone photo's pose and full-frame intrinsics.
+    /// One entry of cameras.r&lt;rev&gt;.json (plan §1): the scan photo's pose and full-frame intrinsics.
     /// R is world-to-camera (OpenCV: x right, y down, z forward), x_cam = R·x_world + t, in the glTF scene frame.
     public class SceneCameraJson
     {

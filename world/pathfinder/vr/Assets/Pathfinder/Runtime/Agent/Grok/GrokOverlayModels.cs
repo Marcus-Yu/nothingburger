@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 namespace Pathfinder.Agent.Grok
 {
     /// The kinds of 3D overlay the Grok actions draw in the scene frame (lane G2).
-    public enum GrokOverlayKind { None, Plan, Survey, Coverage, Labels, SceneLabels }
+    public enum GrokOverlayKind { None, Plan, Survey, Labels, SceneLabels }
 
     /// JSON → view models for the G2 actions (backend docs/api.md §4–§5): pure, tolerant of missing fields, no Unity
     /// objects, so they are unit-tested offline against payloads copied from the backend's tests. Every point stays in
@@ -185,82 +185,6 @@ namespace Pathfinder.Agent.Grok
             });
             return list;
         }
-    }
-
-    // ---------------- show_coverage (F12 capture coach) ----------------
-
-    public sealed class CoverageSide
-    {
-        public string Label;
-        public double BearingDeg, Views;
-        public bool Seen;
-    }
-
-    public sealed class CoverageLeg
-    {
-        /// "orbit", "eave_pass" or "nadir_grid".
-        public string Pattern;
-        public double? FromDeg, SweepDeg;
-        public double GimbalPitchDeg, Radius, Altitude;
-        public List<int> Sides = new List<int>();
-        public bool IsArc => Pattern == "orbit" || Pattern == "eave_pass";
-    }
-
-    /// The GET /scenes/{site}/coverage body (also show_coverage's args).
-    public sealed class CoverageView
-    {
-        public string Site, Mode, Units, Zero, Verdict, Spoken, Note;
-        public int Seen;
-        public double[] RingCentre, ZeroDir, QuarterDir;
-        public double RingRadius;
-        public readonly List<CoverageSide> Sides = new List<CoverageSide>();
-        public readonly List<CoverageLeg> Legs = new List<CoverageLeg>();
-
-        public bool Interior => Mode == "interior";
-        public bool HasRing => !Interior && RingCentre != null && ZeroDir != null && QuarterDir != null && RingRadius > 0;
-
-        public static CoverageView Parse(JObject args)
-        {
-            if (args == null) return null;
-            var c = new CoverageView
-            {
-                Site = GrokJson.Str(args, "site"), Mode = GrokJson.Str(args, "mode") ?? "exterior", Units = GrokJson.Str(args, "units"),
-                Zero = GrokJson.Str(args, "zero"), Verdict = GrokJson.Str(args, "verdict"), Spoken = GrokJson.Str(args, "spoken"),
-                Note = GrokJson.Str(args, "note"), Seen = (int)(GrokJson.Num(args, "seen") ?? 0),
-            };
-            if (args["ring"] is JObject ring)
-            {
-                c.RingCentre = GrokJson.Vec(ring["centre"]);
-                c.RingRadius = GrokJson.Num(ring, "radius") ?? 0;
-                c.ZeroDir = GrokJson.Vec(ring["zero_dir"]);
-                c.QuarterDir = GrokJson.Vec(ring["quarter_dir"]);
-            }
-            if (args["sides"] is JArray sides)
-                foreach (var t in sides)
-                    if (t is JObject o)
-                        c.Sides.Add(new CoverageSide
-                        {
-                            Label = GrokJson.Str(o, "label"), BearingDeg = GrokJson.Num(o, "bearing_deg") ?? c.Sides.Count * 45.0,
-                            Views = GrokJson.Num(o, "views") ?? 0, Seen = GrokJson.Bool(o, "seen"),
-                        });
-            if (args["legs"] is JArray legs)
-                foreach (var t in legs)
-                    if (t is JObject o)
-                    {
-                        var leg = new CoverageLeg
-                        {
-                            Pattern = GrokJson.Str(o, "pattern"), FromDeg = GrokJson.Num(o, "from_deg"), SweepDeg = GrokJson.Num(o, "sweep_deg"),
-                            GimbalPitchDeg = GrokJson.Num(o, "gimbal_pitch_deg") ?? 0, Radius = GrokJson.Num(o, "radius") ?? 0,
-                            Altitude = GrokJson.Num(o, "altitude") ?? 0,
-                        };
-                        if (o["sides"] is JArray s) foreach (var k in s) if (k != null && k.Type == JTokenType.Integer) leg.Sides.Add((int)k);
-                        c.Legs.Add(leg);
-                    }
-            return c;
-        }
-
-        /// The caption: `spoken` (the agent's reply), or the interior `note`.
-        public string Caption => Interior ? (Note ?? Spoken ?? "") : (Spoken ?? Note ?? "");
     }
 
     // ---------------- show_labels / GET /scenes/{site}/labels (F16 live labels) ----------------

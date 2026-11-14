@@ -60,7 +60,7 @@ nothing (cache).
   `session_id` does), so an agent-created BOM shows up only once it rides along in a checkout.
 - Grok's next steps can skip items. In the demo it didn't list the unpriced sink clips. The
   template summary always does, but the LLM one doesn't.
-- The thumbnail is the nearest drone frame, not a view of the reading itself, so it shows
+- The thumbnail is the nearest scan photo, not a view of the reading itself, so it shows
   roughly where the reading was taken, not what was measured.
 - The measurement rows don't carry a per-reading error bar; the report states the scene's
   scale residual once. For the demo kitchen that's ±5 cm, which is the same size as the

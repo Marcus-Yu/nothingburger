@@ -1,8 +1,8 @@
 # Backend integration: status report (P2/P3 → P1/P4)
 
 *Fri 2026-09-25, branch `backend-integration` (on top of `m7`). Covers the brief "integrating the backend (P1 pipeline
-+ P4 parts server) into the Unity app" against `pathfinder-drone-backend` `main` @ `715d119` (docs/api.md,
-plan §1/§1a/§1b, schema.md, R6 §7.3, p2-structure-bench §5). No backend files were changed.
++ P4 parts server) into the Unity app" against `pathfinder-backend` `main` @ `715d119` (docs/api.md and
+the structure layer's `schema.md`). No backend files were changed.
 Updated late Fri 09-25 with the **real kitchen** (`scene/kitchen` r1 from hfbox) and the **real server with its
 `.env`** (Groq agent, voice, vision): see the kitchen column below and the new findings (P1 §A–C, P4 10–15).*
 
@@ -28,7 +28,7 @@ Updated late Fri 09-25 with the **real kitchen** (`scene/kitchen` r1 from hfbox)
   It is the patched server in OFFLINE mode; 46 tests, and side by side with the patched server on `:8002` all 49
   comparisons match. The kitchen lives in the backend's scene dir, so point the mock at it:
   ```
-  python3 tools/mock_parts_server.py --port 8765 --scene-dir ~/pathfinder-drone-backend/scene \
+  python3 tools/mock_parts_server.py --port 8765 --scene-dir ~/pathfinder-backend/scene \
       --voice-transcript "measure every cabinet door|which one is the tallest?|under \$40, arriving by Friday"
   ```
   `--voice-transcript "a|b|c"` makes each recording say the next phrase. `POST /mock/voice-transcript {"text": "…"}`

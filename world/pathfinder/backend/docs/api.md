@@ -294,7 +294,7 @@ locally (server/catalog.py). No `site`: the generic catalog. `404`: unknown site
 |---|---|
 | `environment` | `kitchen`, `bathroom`, `laundry`, `garage`, `interior` (living room, bedroom, office), `gym`, `hospital` (a room), `rooftop`, `facade`, `pavilion` (canopy, shelter, courtyard, park) or `generic`; `title` is its display name |
 | `place`, `confidence` | Grok's few words for what it saw; the winner's share of all votes (0-1) |
-| `also` | a runner-up environment scoring at least half the winner's (a drone scan of a building is `facade` and `rooftop`): its first 2 categories follow the list with `"also": true` |
+| `also` | a runner-up environment scoring at least half the winner's (an aerial scan of a building is `facade` and `rooftop`): its first 2 categories follow the list with `"also": true` |
 | `categories[]` | display order: what the scene shows first (`in_scene`: a parts-file component, a label or Grok named it; `components` = the parts-file ids, e.g. `["dw1"]`), then the rest of the environment's list, then `also` categories, then up to 2 site-specific ones Grok proposed (`"extra": true`, `id` starts with `x-`) |
 | `icon` | a Phosphor 2.1 icon name (the app's icon font); the code points are in `server/catalog_tables.py` `ICON_CODEPOINTS` |
 | `query` | the category's search; send it to `POST /parts/search` for a live search |
@@ -539,9 +539,8 @@ symlink inside `scene/` that resolves outside its site directory).
 #### `structure.r<rev>.json`: the snap layer (P3 tools)
 
 The fitted planes, edges and corners the tape/level/part tools snap to instead of the raw mesh
-(research and numbers: `docs/research/p2-structure-bench.md`; full schema:
-`docs/research/structure/schema.md`). Written by the full stage only (the preview has none), so
-it is optional: read `scene.json`'s `structure` entry and fall back to mesh snapping when it is
+(full schema: `docs/research/structure/schema.md`). Written by the full stage only (the preview
+has none), so it is optional: read `scene.json`'s `structure` entry and fall back to mesh snapping when it is
 `null` or missing.
 
 ```json
@@ -570,9 +569,8 @@ fast enough (a kitchen has ~600 corners and ~700 edges).
 
 #### `parts.r<rev>.json`: removable components and their cavities (remove and measure)
 
-Written by `python -m pipeline.parts scene/<site>` after the structure layer (research and numbers:
-`docs/research/p1-parts/e1-remove-dishwasher.md`). Optional: when `scene.json` has no `parts`
-entry, keep using `mesh.r<rev>.glb` as one piece. `mesh.r<rev>.glb` and `collision.r<rev>.glb` are
+No current import writes this file: Matterport and Vexcel scenes have no parts layer. Optional: when
+`scene.json` has no `parts` entry, keep using `mesh.r<rev>.glb` as one piece. `mesh.r<rev>.glb` and `collision.r<rev>.glb` are
 unchanged, so older apps keep working.
 
 ```json
@@ -607,52 +605,6 @@ Same frame as the mesh (metres, +Y up; apply the glTF-to-Unity X flip). Fields p
 | `cavity.bounds`, `cavity.planes` | which structure planes and edges bound each side (`observed: false` = extended behind the part) |
 
 Top-level: `scale` (`method`, `residual_m`), `cost`, `method`. Ignore unknown fields.
-
-### `GET /scenes/{site}/coverage` — capture coach
-
-"What did I miss?" after a drone scan. Computed from the scene's own `cameras.r<rev>.json` and
-collision mesh on every call (no cost, well under a second); only the spoken line is an LLM call
-(`LLM_COACH`, default `xai:grok-4.20-0309-non-reasoning`, about $0.0004), cached by its input,
-with a template fallback when `OFFLINE`, keyless or failing. Code: `server/coverage.py`.
-
-```json
-{"site": "zabel-gymnasium", "rev": 2, "cameras": "cameras.r2.json", "registered": 118, "units": "m",
- "target": {"centre": [-32.27, -27.26, 0.76], "width": 49.62, "height": 30.25},
- "mode": "exterior", "zero": "start_side",
- "ring": {"centre": [-32.27, -27.26, 0.76], "radius": 27.29,
-          "zero_dir": [1.0, 0.0, -0.07], "quarter_dir": [0.07, 0.0, 1.0]},
- "sides": [{"label": "front", "bearing_deg": 0, "views": 112.0, "seen": true},
-           {"label": "front-left", "bearing_deg": 45, "views": 0.0, "seen": false}, "... 8 in all"],
- "seen": 1, "aimed": 118, "pitch": {"nadir": 6, "oblique": 41, "level": 71},
- "legs": [{"pattern": "orbit", "from_deg": 22.5, "sweep_deg": 315, "sides": [1, 2, 3, 4, 5, 6, 7],
-           "gimbal_pitch_deg": 30, "radius": 49.62, "altitude": 43.77,
-           "radius_widths": 1.0, "altitude_widths": 0.88},
-          {"pattern": "nadir_grid", "from_deg": null, "sweep_deg": null, "sides": [],
-           "gimbal_pitch_deg": 90, "radius": 24.81, "altitude": 79.87,
-           "radius_widths": 0.5, "altitude_widths": 1.61}],
- "verdict": "reshoot_most",
- "spoken": "You've covered 1 of 8 sides. Next, orbit from the front-left round to the front-right, 50 m out from the middle and 45 m up, camera 30 degrees down, then a straight-down grid over the roof, 80 m up.",
- "spoken_source": "grok-4.20-0309-non-reasoning"}
-```
-
-| field | meaning |
-|---|---|
-| `units` | `"m"` when `scene.json` has a metric scale, else `"scene"` (unscaled SfM units: use the `*_widths` fields, multiples of `target.width`) |
-| `target` | what was scanned: the collision mesh sampled by area; centre of its 5–95 % XZ box at ground level (2 % of Y); `width` = that box's diagonal; `height` = 2–98 % of Y |
-| `zero` | `"north"` when `scene.json.north` is set (labels `N`, `NE`, …), else `"start_side"`: 0° is the side of the first camera that sees the target, and labels read as seen from there facing the building (`front`, `front-left`, … `front-right`) |
-| `ring.zero_dir`, `ring.quarter_dir` | horizontal unit vectors for 0° and 90°. **Bearings run clockwise seen from above (+Y) in the scene frame**: the direction for bearing `b` is `cos(b)·zero_dir + sin(b)·quarter_dir` |
-| `sides[k]` | side `k` is centred on `k·45°` (±22.5°). `views` sums each camera's aim weight (1 when the target is on the optical axis, 0 once it leaves the field of view); nadir views (60° or more down) don't count for a side. `seen` means `views ≥ 3` |
-| `pitch` | aimed cameras by gimbal pitch: `nadir` 60° or more down, `oblique` 20–60°, `level` under 20° (eave/facade height) |
-| `legs[]` | `orbit`: one per run of unseen sides (merged across 0°), an arc from `from_deg` clockwise through `sweep_deg`. `nadir_grid`: when under 10 % of views are nadir; a straight-down grid over a square of half-size `radius`. `eave_pass`: when under 15 % are level; a full circle at eave height. `radius` = horizontal distance from `target.centre`, `altitude` = height above its ground, in scene units |
-| `verdict` | `good` (6+ sides and no legs), `reshoot_some`, `reshoot_most` (under 4 sides), `not_applicable` |
-| `spoken_source` | the model id, `"cache"` or `"template"` |
-
-A metric scene narrower than 8 m is a room or object scan, not a flight. It returns
-`mode: "interior"`, `verdict: "not_applicable"`, `legs: []`, no `ring`/`sides`, and a `note`
-(also the `spoken` line) saying the coach only plans exterior drone flights. The kitchen scan
-gets this.
-
-Errors: `404` unknown site; `409` the package has no camera file or mesh yet.
 
 ---
 
@@ -1566,9 +1518,9 @@ server downloads it the moment it's done.
 that same quad. Always show `label` ("AI preview, not to scale") over it. The clip starts at
 another camera's pose, not the user's, so float the quad in front of the user rather than
 registering it to the mesh.
-### `POST /scene/survey` — drone condition survey
+### `POST /scene/survey` — condition survey
 
-Grok vision over up to 6 of the scene's capture frames → condition findings pinned on the mesh.
+Grok vision over up to 6 of the scan's posed photos → condition findings pinned on the mesh.
 Spec: `docs/research/grok-ideas/g4-round3.md` pick 1; live results:
 `docs/research/grok-ideas/f10-survey.md`.
 
@@ -1603,7 +1555,7 @@ Each frame is sent at 1280 px from `survey/<id>.jpg` if the package has one, els
   "looked_fine": ["roof_covering (0421)"],
   "coverage_gaps": ["interior of gutters"],
   "spoken": "4 problems found, 4 pinned. Worst is the roof covering, severe: extensive deterioration and plant growth.",
-  "label": "AI triage from drone frames, not an inspection",
+  "label": "AI triage from scan photos, not an inspection",
   "cached": false, "cost_usd": 0.00967, "latency_s": 7.7
 }
 ```
@@ -2059,7 +2011,6 @@ running coach there too.
 | `show_manual_answer` | `{part_id, answer, page, quote, pdf_url}` | From the `ask_manual` tool ("what drill bit for the anchors?"). Show `answer`, plus `quote` in quotation marks and "p. `page`" when they're not null; a "Open manual" button opens `pdf_url` (already ends in `#page=n` when `page` is set) in the Quest browser. `page: null` = not covered, no manual found, or offline with no match -- show `answer` only. The reply is spoken as usual |
 | `survey_started` | `{survey_id}` | Show a spinner. If no `show_survey` follows in the same reply, poll `GET /scene/survey/{survey_id}` and speak its `spoken` |
 | `show_survey` | `{survey_id, pins, label}` | A sphere pin at each non-null `pins[].p` (X flip as for the mesh), coloured by `severity` (severe red, moderate amber, minor yellow); a gaze label "`issue` · `confidence` %"; a pinch sends `"find a fix for pin <id>"` as a normal `/agent/command`; always show `label`. Ignore it when no scene is loaded |
-| `show_coverage` | the `GET /scenes/{site}/coverage` body | Draw the capture coach ring and legs, see below |
 | `rules_started` | `{check_id}` | A rules check is running (`check_rules` tool, or any "permit / inspection / rebate / tax credit / incentive" command); optionally poll `GET /rules/check/{check_id}` |
 | `show_rules` | the `GET /rules/check/{id}` body | Two tabs on the spec card. Permit pill: `yes` amber, `no` green, else grey; item rows `name · office` with an "unverified quote" tag when `quote_status != "verified"`. Money rows `name · amount_usd or "see page" · status` (`active` green, `ended`/`closed`/`not_eligible` grey; show `eligibility_reason` under a `not_eligible` or `unverified` row). `energy_star.missing` → warning row "Rebate needs the outdoor unit KUSAH121B" with a button that sends "find KUSAH121B". Always show `label` (it carries "Not legal advice; confirm with the permitting office"). Arrives in the same reply when the check lands within 20 s, else leading the next command's actions |
 | `show_packet` | `{url, qr_png_url, expires_at, public, packet_id, label}` | Draw a QR of `url` on a panel with `expires_at` and `label`. `qr_png_url` is `null` (no server-side QR). `public: false` means `url` is the LAN path (`/packet/<id>.pdf`, prefix the server base URL) |
@@ -2138,7 +2089,7 @@ new edit) and needs no `site`/`frame_id` in the context.
 
 Fast-path priority when several could apply: the stateless phrases first (packet, "do the whole
 job", a bare "stop", the tape survey, the condition survey, equip a tool, "buy it" / "check out",
-array, report, postcard, safety, rules, "show it in <finish>", capture coach, labels, "teach me",
+array, report, postcard, safety, rules, "show it in <finish>", labels, "teach me",
 gutter slope), then "place them" after a plan, then the install coach's words while a coach runs,
 then the reimagine stack's words while a picture is on screen, then "which is the widest?" while
 a tape survey is stored. Before all of them, spoken purchase limits ("under $40", "arriving by
@@ -2158,28 +2109,6 @@ headset measures and reports to `POST /agent/observe`. The thing surveyed decide
 gutter(s), facade, building, or a condition word ("survey the windows for damage", "...
 condition", "cracks", "rot", "rust", "leaks") stays on `survey_condition`. A bare "stop" /
 "cancel the survey" is `stop_survey`.
-
-### `show_coverage` (capture coach)
-
-Sent by the `coach_capture` tool ("what did I miss?", "which sides did I get?", "scan
-coverage", "show coverage"), which needs
-`context.site`. `args` is exactly the `GET /scenes/{site}/coverage` body. Ignore it when no
-scene is loaded or `args.site` isn't the loaded one. Compute every point below in the scene frame
-(glTF, metres or scene units, +Y up), then **apply the same glTF→Unity X flip as the mesh
-(`x → -x`) to it**. The flip mirrors the ring, so clockwise-from-above in the scene reads
-counter-clockwise in Unity; computing first and flipping last keeps it right. Check it once:
-the green wedge must sit on the side the flight's cameras are on.
-
-- `dir(b) = cos(b)·ring.zero_dir + sin(b)·ring.quarter_dir`;
-  `p(b, r, y) = ring.centre + r·dir(b) + (0, y, 0)` (`ring.centre` is at ground level).
-- **Ring:** 8 flat wedges on the ground between `0.7 × ring.radius` and `ring.radius`, wedge `k`
-  from `sides[k].bearing_deg − 22.5` to `+ 22.5`; green when `sides[k].seen`, else red; label it
-  `sides[k].label`.
-- **Legs:** `orbit` and `eave_pass`: a dashed arc through `p(from_deg + t, radius, altitude)` for
-  `t` in `0…sweep_deg`, with a small drone icon tilted down by `gimbal_pitch_deg`. `nadir_grid`: a
-  dashed square of half-size `radius` around `ring.centre` at `altitude`.
-- **Caption:** `spoken` (it is also the agent's `reply`).
-- `mode: "interior"`: no ring; show `note` as the caption.
 
 ---
 
@@ -2220,7 +2149,7 @@ Send with every `/agent/command` and `/voice/command`, and as a `{"type":"contex
 | `tool` | informational; agent does not act on it |
 | `pointer` | aimed point in the structure file's frame; "this"/"that" for `plan_placement` |
 | `placed` | parts actually placed in the scene with their count (e.g. after `place_array`); needed for `what_else` ("what else do I need?"). Falls back to `selected_part_id` x1 if omitted. |
-| `site` | the loaded scene package's site. With `frame_id` (or `frames`) it enables `reimagine_view` ("what would navy cabinets look like?"); `see_it_installed` also uses it when there is no `frame_jpg_b64` or `frames`; on its own it enables `plan_placement` (`show_plan`). Also needed for `survey_condition` ("survey the roof"); and for `coach_capture` ("what did I miss?"). The tape `survey` uses it to count objects ("Surveying 18 doors."), map "doors" to `cabinet_door` in a kitchen, refuse a label the scene lacks, and suggest gutter `edge_ids` for `check_slope`; without it the survey still goes to the headset |
+| `site` | the loaded scene package's site. With `frame_id` (or `frames`) it enables `reimagine_view` ("what would navy cabinets look like?"); `see_it_installed` also uses it when there is no `frame_jpg_b64` or `frames`; on its own it enables `plan_placement` (`show_plan`). Also needed for `survey_condition` ("survey the roof"). The tape `survey` uses it to count objects ("Surveying 18 doors."), map "doors" to `cabinet_door` in a kitchen, refuse a label the scene lacks, and suggest gutter `edge_ids` for `check_slope`; without it the survey still goes to the headset |
 | `frame_id` | the `cameras.r<rev>.json` id of the capture frame nearest the user's view (the same nearest-frame pick as `frames`); falls back to `frames[0].id` for `reimagine_view`. `walk_in_preview` ("walk me into it with navy cabinets") needs `site` + `frame_id` and is not offered without them. Also echoed in `show_labels` (`label_view` labels `frame_jpg_b64`, so send that frame's id) so you can find its camera pose |
 | `location` | optional free text such as `"Atlanta, GA"`, used by `find_installer` when the user doesn't name a place, and by `check_rules` when there's no `address`. Defaults to the server's `DEFAULT_LOCATION` |
 | `address` | the job's street address, for `check_rules` (Census picks the permitting jurisdiction) |

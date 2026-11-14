@@ -1,4 +1,4 @@
-# pathfinder-drone-backend
+# pathfinder-backend
 
 P4 parts server backend for Pathfinder. Takes a voice or text query from a Unity/Quest headset,
 finds real parts on the web at true size with verified dimensions, sellers, prices, delivery
@@ -99,11 +99,10 @@ Each role is independently overridable via environment variable:
 | `LLM_ASSET_SCAD` | `xai:grok-4.7` | Offline OpenSCAD models for moulded parts (`warm --grok-moulded` only) |
 | `LLM_ASSET_RETRY` | `xai:grok-4.20-0309-non-reasoning` | A poor `asset` answer (none, or a known shape such as a window answered with another template) is asked once more here; `""` = off. `asset.made_by` in part.json says who made each model |
 | `LLM_EXTRACT_RETRY` | `xai:grok-4.20-0309-non-reasoning` | The search's page-text dims extraction (`cheap`) found no complete size: one more try here; `""` = off |
-| `LLM_SURVEY` | `xai:grok-4.20-0309-non-reasoning` | Drone condition survey (`POST /scene/survey`): one vision call over up to 6 capture frames |
+| `LLM_SURVEY` | `xai:grok-4.20-0309-non-reasoning` | Condition survey (`POST /scene/survey`): one vision call over up to 6 capture frames. Needs a scene with posed photos, so it does not run on Matterport or Vexcel scenes |
 | `LLM_SURVEY_CAREFUL` | `xai:grok-4.7` | The same survey with `model: "careful"` (low reasoning effort) |
 | `LLM_REPORT` | `xai:grok-4.3` | Site-walk report summary (`GET /report/{session_id}`); falls back to the `agent` role if xAI fails |
 | `LLM_PLAN` | `xai:grok-4.20-0309-non-reasoning` | "Where does it go?" planner pick (`POST /scene/plan`): one short strict-schema call, no geometry |
-| `LLM_COACH` | `xai:grok-4.20-0309-non-reasoning` | Capture coach line (`GET /scenes/{site}/coverage`): two spoken sentences from the computed coverage |
 | `LLM_LABELS` | `xai:grok-4.20-0309-non-reasoning` | Live labels (`POST /scene/labels`, `warm --labels <site>`): one streamed vision call per frame |
 | `LLM_PACKET` | `xai:grok-4.20-0309-non-reasoning` | Job packet summaries (`POST /packet/{session_id}`); xai only (it goes through `responses()`) |
 | `LLM_BOOTH` | `xai:grok-4.20-0309-non-reasoning` | Booth wall caption (`POST /booth/{session_id}/share`): one number-checked line per shared design |

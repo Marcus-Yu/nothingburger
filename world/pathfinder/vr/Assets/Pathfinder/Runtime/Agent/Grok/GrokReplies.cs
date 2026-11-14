@@ -35,7 +35,7 @@ namespace Pathfinder.Agent.Grok
             if (a == null || a.args == null) return null;
             switch (a.name)
             {
-                case "show_rules": case "show_video": case "show_survey": case "show_coverage": case "show_quote_check":
+                case "show_rules": case "show_video": case "show_survey": case "show_quote_check":
                     try { return a.Str("spoken"); } catch (Exception) { return null; }
                 default: return null;
             }

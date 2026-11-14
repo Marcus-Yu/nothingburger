@@ -2,7 +2,7 @@
 
 *Sat 2026-09-26, e2e lane (`feat/e2e-demo`).*
 
-These are 15 prompts that show measure → fit → buy in a drone scan, with the exact phrasing that works. Each prompt
+These are 15 prompts that show measure → fit → buy in a scan, with the exact phrasing that works. Each prompt
 lists the actions it exercises and one of three statuses.
 
 - **Today** works with the demo server as it runs now (`:8004`, `app-handoff-vrnext`) and the app on
@@ -78,7 +78,7 @@ With 0004–0012 on the server, one sentence does all of the steps above. The se
 ## The kitchen's scale
 
 The kitchen's parts file reads the dishwasher gap as 437 × 591 × 445 mm. The backend README says the scan is about
-1.47× small indoors (its scale comes from the drone's altitude caption). At 1.0, every dishwasher is red ("too tall by
+1.47× small indoors (an error in the capture's own scale estimate). At 1.0, every dishwasher is red ("too tall by
 298 mm"), so steps 3–6 need the scale first.
 
 What we chose, as honest and repeatable: **set the scale from the opening's standard height**, 34½″ under a 36″

@@ -291,7 +291,10 @@ def build(lat: float, lon: float, work: Path, *, half_m: float = 35.0,
     # differently each time. Keep one block per building (centres within 8 m, areas within a
     # quarter of each other), preferring a measured height over the assumed one.
     east_m, north_m = metres_per_degree(lat)
-    order = sorted(range(len(blocks)), key=lambda i: (listing[i]["height_assumed"], -listing[i]["footprint_m2"]))
+    order = sorted(
+        range(len(blocks)),
+        key=lambda i: (listing[i]["height_assumed"], -listing[i]["footprint_m2"]),
+    )
     kept: list[int] = []
     for i in order:
         ci = blocks[i]["ring"].mean(axis=0)

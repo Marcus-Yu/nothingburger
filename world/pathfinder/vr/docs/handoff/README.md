@@ -2,7 +2,7 @@
 
 *Fri 2026-09-26, app lane → P4 (and notes for P1).* These patches answer the integration report's
 "Contract findings" 1–15 (`docs/backend-integration.md` on `backend-integration`). They were made and
-tested in a private scratch clone of `pathfinder-drone-backend` `main` @ `715d119`. Nothing was
+tested in a private scratch clone of `pathfinder-backend` `main` @ `715d119`. Nothing was
 changed in your repo or your running `:8000` server, and nothing was pushed.
 
 **Asset generation (assetgen):** [`p4-asset/`](p4-asset/README.md): a window template, a Grok retry for a poor asset
@@ -16,7 +16,7 @@ contract.
 ## How to apply
 
 ```sh
-cd pathfinder-drone-backend            # on main @ 715d119 (or later)
+cd pathfinder-backend            # on main @ 715d119 (or later)
 git switch -c app-handoff-p4
 git am /path/to/Pathfinder/docs/handoff/p4/*.patch
 uv sync --extra pipeline             # the pipeline tests import scipy/pycolmap; server-only work: uv sync

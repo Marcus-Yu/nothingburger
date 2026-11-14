@@ -73,7 +73,7 @@ namespace Pathfinder.Dev
         public static string Result() =>
             $"{(s_Done ? (s_Pass ? "PASS" : "FAIL") : "running…")} {s_Summary}\n{string.Join("\n", s_Log)}";
 
-        /// The kitchen's scan reads ~1.47× small indoors (its scale is from the drone's altitude caption): the flow sets
+        /// The kitchen's scan reads ~1.47× small indoors (its source scale is off): the flow sets
         /// the scale from the dishwasher opening's standard height (34½″ under a 36″ counter) before the search, and the
         /// heads-up line says so ("Scale set from the gap's height · 34½″ · ×1.48").
         public const string KitchenScale = "the opening is 34 and a half inches tall";

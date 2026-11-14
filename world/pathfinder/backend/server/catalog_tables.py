@@ -343,12 +343,12 @@ ENVIRONMENTS: dict[str, Environment] = {e.id: e for e in [
                 ("hospital-beds", "overbed-tables", "iv-poles", "grab-bars", "privacy-curtains",
                  "panel-lights")),
     Environment("rooftop", "Rooftop",
-                "on or over a roof, pitched or flat; a drone view where roofs fill much of the "
+                "on or over a roof, pitched or flat; an aerial view where roofs fill much of the "
                 "frame",
                 ("gutters", "hvac", "solar-panels", "chimney-caps", "roof-vents", "skylights",
                  "flashing")),
     Environment("facade", "Facade",
-                "the outside walls of a building, seen from the street or a drone facing them",
+                "the outside walls of a building, seen from the street or from above",
                 ("windows", "doors", "siding", "gutters", "exterior-lights", "window-ac")),
     Environment("pavilion", "Canopy & pavilion",
                 "a canopy, pavilion, shelter, pergola, patio, courtyard or park",
@@ -375,7 +375,7 @@ FOCUS_ALIASES = {
 }
 
 FOCUS_TABLES: dict[str, dict[str, tuple[str, ...]]] = {
-    # Outside a building: a drone scan of it (Zabel, the hospital), a facade, a roof, a pavilion.
+    # Outside a building: an aerial scan of it, a facade, a roof, a pavilion.
     "exterior": {
         "roof": ("solar-panels", "gutters", "roof-vents", "hvac", "skylights", "chimney-caps",
                  "flashing", "snow-guards", "satellite-mounts"),
@@ -453,7 +453,7 @@ ICON_CODEPOINTS: dict[str, str] = {
 DEFAULT_ICON = "package"
 
 # Words in a site's name. Place words say where you stand (1.5); building words only say what
-# kind of building it is (0.75: "zabel-gymnasium" is a German school, seen from a drone).
+# kind of building it is (0.75: "gymnasium" says what the building is, not where you stand).
 NAME_WORDS: dict[str, tuple[float, tuple[str, ...]]] = {
     "kitchen": (1.5, ("kitchen", "kitchenette")),
     "bathroom": (1.5, ("bath", "bathroom", "restroom", "washroom")),

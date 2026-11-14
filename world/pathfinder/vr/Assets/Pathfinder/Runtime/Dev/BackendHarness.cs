@@ -102,7 +102,7 @@ namespace Pathfinder.Dev
 
         /// Tape every structure object (door / drawer rectangle) along its bottom edge corner to corner `n` times with
         /// ±`noise` m aim noise through the real measure tool. Reports each object's spread and its difference from w_m.
-        /// standoff > 0: tape each object from `standoff` m in front of it (along its plane normal, on the side the drone
+        /// standoff > 0: tape each object from `standoff` m in front of it (along its plane normal, on the side the scan's camera
         /// photographed it from), like a person standing at the cabinet; 0 = from the wearer's eye.
         public static string CheckObjects(int n = 3, float noise = 0.01f, int maxObjects = 12, int seed = 1, float standoff = 0.6f, bool verbose = false, int only = -1)
         {
@@ -120,7 +120,7 @@ namespace Pathfinder.Dev
                 var a = space.TransformPoint(o.corners[0]); var b = space.TransformPoint(o.corners[1]);
                 if (standoff > 0f)
                 {
-                    // Stand at the cabinet, on the side the drone photographed it from (shared with the survey).
+                    // Stand at the cabinet, on the side the scan's camera photographed it from (shared with the survey).
                     var centre = space.TransformPoint((o.corners[0] + o.corners[1] + o.corners[2] + o.corners[3]) * 0.25f);
                     eye = centre + Pathfinder.Agent.SurveyPlanner.FacingNormal(r, o, centre, Eye()) * standoff * r.transform.lossyScale.x;
                 }

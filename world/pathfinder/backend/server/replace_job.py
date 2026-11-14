@@ -18,8 +18,7 @@ replace, which part, and what to search for (agent.py `replace_component`). The 
 ("next one", "option 2", "put it back", "undo") are agent._replace_route's, on the session
 state this chain leaves behind (removed, candidate_ids, gap_index, scale).
 
-Scale sanity (step 3). The kitchen scan reads ~1.47x small indoors (its scale comes from the
-drone's altitude caption). When the headset's scale isn't calibrated yet (context `scale` 1.0)
+Scale sanity (step 3). A scan can read small indoors when its source scale is off. When the headset's scale isn't calibrated yet (context `scale` 1.0)
 and the gap is implausible for its kind (PRIORS `plausible_in`, e.g. a dishwasher opening
 narrower than 20 in), the job scales the scene from the kind's standard opening: a 34.5 in
 dishwasher opening height, a 30 in range, a 30/33/36 in fridge opening, a 34.5 in base cabinet.

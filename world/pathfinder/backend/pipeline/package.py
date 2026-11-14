@@ -5,16 +5,14 @@ A scene package directory looks like:
     scene/<site>/
         scene.json               # metadata, written LAST (publish_revision) -- the only file the
                                   # app polls; points at this revision's files below
-        mesh.r<rev>.glb           # textured surface mesh (written by the reconstruct step, not
-                                  # here) -- the visual
+        mesh.r<rev>.glb           # textured surface mesh (written by pipeline.ingest) -- the visual
         collision.r<rev>.glb      # lighter, untextured -- for tool snapping (ditto)
         cameras.r<rev>.json       # per-frame pose -- write_cameras_json
         thumbs/NNNN.jpg           # 640px evidence photos -- make_thumbs, shared across revisions
-        path.json                 # optional GPS track (written by the reconstruct step, not here)
 
 This module only writes the tool-independent metadata (`scene.json`, `cameras.r<rev>.json`,
-`thumbs/`) and validates a finished package; `mesh.r<rev>.glb`/`collision.r<rev>.glb`/`path.json`
-come from whichever pose + meshing stage published this revision (`pipeline.fast`/`pipeline.run`).
+`thumbs/`) and validates a finished package; `mesh.r<rev>.glb`/`collision.r<rev>.glb` come from
+`pipeline.ingest`.
 """
 
 import json
@@ -276,7 +274,7 @@ def _validate_structure(path: Path, mesh_path: Path) -> list[str]:
 
 
 def _validate_parts(directory: Path, entry: dict) -> list[str]:
-    """`parts.r<rev>.json` (pipeline/parts.py): an pathfinder.parts/1 doc whose GLBs exist and hold
+    """`parts.r<rev>.json` (no current writer; Matterport and Vexcel scenes have none): an pathfinder.parts/1 doc whose GLBs exist and hold
     a node for every component (`part_<id>` in the split mesh, `cavity_<id>` in the cavities)."""
     try:
         doc = json.loads((directory / entry["file"]).read_text())

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mock of the Pathfinder parts server (backend repo docs/api.md). Python standard library only.
 
-Mirrors the real FastAPI server (pathfinder-drone-backend `server/app.py`) closely enough for the app's automated
+Mirrors the real FastAPI server (pathfinder-backend `server/app.py`) closely enough for the app's automated
 tests, without API keys, network or GPU:
 
   GET  /health

@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Pathfinder.Agent.Grok
 {
     /// The overlays' card (a main-slot window, built by GrokOverlaysBuilder with UiBuild): what the scene overlay is,
-    /// its long caption (the coverage coach's `spoken`, the survey's findings, the plan's spoken line), the backend's
+    /// its long caption (the survey's findings, the plan's spoken line), the backend's
     /// honesty label verbatim, and its controls: Place (a plan: sends "place them"), Hide (removes that overlay from the
     /// scene) and Close (just the card). While a survey runs it shows a spinner line instead of the findings.
     public class GrokOverlayCard : MonoBehaviour

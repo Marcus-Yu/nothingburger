@@ -1,7 +1,7 @@
 # Pathfinder demo runbook
 
 *Sat 2026-09-26. For the app on `backend-integration` (tool ring build `b2fd73a`) with the backend
-`~/pathfinder-drone-backend` (FastAPI on :8000). Scripts live in `tools/demo/`. Every script is safe to re-run.*
+`~/pathfinder-backend` (FastAPI on :8000). Scripts live in `tools/demo/`. Every script is safe to re-run.*
 
 | Script | What it does |
 |---|---|
@@ -22,7 +22,7 @@
 > **Demo backend since Sat 09-26 14:00: `~/pathfinder-backend-demo` on :8004.** Since 16:10 it is the backend team's
 > `integration/vr-next` (the 20 Grok features, removable scene parts, the latest `main`) plus our 11 hand-off patches
 > (`docs/handoff/p4-grok/`, branch `app-handoff-vrnext`; they apply cleanly, 1252 backend tests pass on macOS), and since 19:00 the three measure-and-replace patches (`docs/handoff/p4-e2e/`, fast-forwarded from `e2e-measure-replace`; kitchen parts from the backend's `scenes-glb` branch), online with the current `GROK_API_KEY` in its own `.env` (gitignored; copied from
-> `~/pathfinder-drone-backend/.env`). It serves the same `scene/` folder (`SCENE_DIR=~/pathfinder-drone-backend/scene`)
+> `~/pathfinder-backend/.env`). It serves the same `scene/` folder (`SCENE_DIR=~/pathfinder-backend/scene`)
 > and its own `data/`. The backend team's own server on :8000 is left alone. Bring-up against it:
 >
 > ```bash
@@ -30,7 +30,7 @@
 > ```
 >
 > Start the server by hand if it's down (from `~/pathfinder-backend-demo`):
-> `SCENE_DIR=~/pathfinder-drone-backend/scene LLM_AGENT=xai:grok-4.7 nohup .venv/bin/uvicorn server.app:app --host 0.0.0.0 --port 8004 >> logs/server8004.log 2>&1 &` (since 19:55: Grok is the agent, and any Groq call that fails falls back to Grok, `LLM_FALLBACK`; STT falls back to xAI grok-transcribe).
+> `SCENE_DIR=~/pathfinder-backend/scene LLM_AGENT=xai:grok-4.7 nohup .venv/bin/uvicorn server.app:app --host 0.0.0.0 --port 8004 >> logs/server8004.log 2>&1 &` (since 19:55: Grok is the agent, and any Groq call that fails falls back to Grok, `LLM_FALLBACK`; STT falls back to xAI grok-transcribe).
 > Warmed so far: the kitchen's scan labels (`python -m server.warm --labels kitchen`) and the Midea recall check.
 > Zabel (`scene/zabel-gymnasium` r3, from hfbox via fedora): "what did I miss?" works as scripted. Say **"survey the
 > facade"**, not "survey the roof": on this footage the roof and gutters come back clean, while the facade gives 2 pins. "Do the whole
@@ -158,7 +158,7 @@ With DemoMode on there is **one heads-up line** (declutter M1): the toasts in be
 ## 6. After the demo
 
 - **Frame rate:** `python3 tools/demo/fps.py SpikeData/quest-<time>.log 'AppState Passthrough -> World'`, with `--app-only` to hide the compositor's lines. The last kitchen session (09-26 02:34, 655 s) held 72 Hz for 99.7 % of seconds, with GPU at 42 % median and 2.6 ms app GPU time.
-- **Receipts and notebooks:** `~/pathfinder-drone-backend/data/orders/` and `data/notebook/`.
+- **Receipts and notebooks:** `~/pathfinder-backend/data/orders/` and `data/notebook/`.
 
 ## 7. What the app sends (why the cache hits or misses)
 

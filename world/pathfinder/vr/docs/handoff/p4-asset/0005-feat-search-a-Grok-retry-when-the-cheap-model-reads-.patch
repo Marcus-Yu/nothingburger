@@ -28,7 +28,7 @@ index c767cc4..9f16e78 100644
  | `LLM_ASSET_SCAD` | `xai:grok-4.7` | Offline OpenSCAD models for moulded parts (`warm --grok-moulded` only) |
  | `LLM_ASSET_RETRY` | `xai:grok-4.20-0309-non-reasoning` | A poor `asset` answer (none, or a known shape such as a window answered with another template) is asked once more here; `""` = off. `asset.made_by` in part.json says who made each model |
 +| `LLM_EXTRACT_RETRY` | `xai:grok-4.20-0309-non-reasoning` | The search's page-text dims extraction (`cheap`) found no complete size: one more try here; `""` = off |
- | `LLM_SURVEY` | `xai:grok-4.20-0309-non-reasoning` | Drone condition survey (`POST /scene/survey`): one vision call over up to 6 capture frames |
+ | `LLM_SURVEY` | `xai:grok-4.20-0309-non-reasoning` | Condition survey (`POST /scene/survey`): one vision call over up to 6 capture frames |
  | `LLM_SURVEY_CAREFUL` | `xai:grok-4.7` | The same survey with `model: "careful"` (low reasoning effort) |
  | `LLM_REPORT` | `xai:grok-4.3` | Site-walk report summary (`GET /report/{session_id}`); falls back to the `agent` role if xAI fails |
 diff --git a/docs/api.md b/docs/api.md

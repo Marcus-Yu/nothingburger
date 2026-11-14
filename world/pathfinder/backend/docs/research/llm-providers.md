@@ -1,6 +1,6 @@
 # LLM provider research — Groq (primary) / DeepSeek (fallback) / xAI Grok (later swap)
 
-Researched 2026-09-24 for `docs/Pathfinder implementation plan.md` §1b (parts server contract)
+Researched 2026-09-24 for the original implementation plan (since removed), §1b (parts server contract)
 and §4b (`server/grok.py`: voice agent, search + spec extraction, seller recommendation).
 The plan was written against xAI Grok; this doc adapts it to Groq-primary / DeepSeek-fallback,
 keeping the client OpenAI-compatible so the later swap back to xAI is config-only.

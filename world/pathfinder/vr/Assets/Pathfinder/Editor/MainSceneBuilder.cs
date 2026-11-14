@@ -279,7 +279,7 @@ namespace Pathfinder.Editor
             GrokRailsBuilder.Build(app, rig, sceneRoot, template, style);   // Grok G4: job rail, install coach card, coach overlay, drill crosshair
             G1Builder.Build(app, rig, sceneRoot, template);   // Grok G1: view tracker (context frame), scan credit chip
             GrokPanelsBuilder.Build(app, rig, sceneRoot, template);   // Grok G3: panels, cards, image / video quad, QR codes, safety pills
-            GrokOverlaysBuilder.Build(app, rig, sceneRoot, template, style);   // Grok G2: plan / survey / coverage / labels overlays
+            GrokOverlaysBuilder.Build(app, rig, sceneRoot, template, style);   // Grok G2: plan / survey / labels overlays
             ModelSwitcherBuilder.Build(app, rig, sceneRoot, template);   // modelview: Model view's model-only declutter and the switcher row
         }
 
@@ -379,7 +379,7 @@ namespace Pathfinder.Editor
             content.SetActive(false);
         }
 
-        /// Backend integration (pathfinder-drone-backend): calibration sync, snap cursor, structure overlay, the agent,
+        /// Backend integration (pathfinder-backend): calibration sync, snap cursor, structure overlay, the agent,
         /// voice and ask-the-scene clients, and the Scene window.
         static void WireBackend(GameObject app, OVRCameraRig rig, SceneRoot sceneRoot, GameObject template,
             Pathfinder.Tools.MeasureStyle style, Shader unlit, Pathfinder.Tools.MeasureTool measure)

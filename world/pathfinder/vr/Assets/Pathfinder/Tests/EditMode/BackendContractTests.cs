@@ -15,7 +15,7 @@ using UnityEngine;
 
 namespace Pathfinder.Tests
 {
-    /// The parts / agent / voice side of the backend contract (pathfinder-drone-backend docs/api.md), parsed from the
+    /// The parts / agent / voice side of the backend contract (pathfinder-backend docs/api.md), parsed from the
     /// real server's shapes (server/models.py, agent.py, checkout.py).
     public class BackendContractTests
     {

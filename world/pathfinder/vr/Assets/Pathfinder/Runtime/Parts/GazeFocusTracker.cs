@@ -22,7 +22,7 @@ namespace Pathfinder.Parts
         public float samplesPerSecond = 4f;
         [Tooltip("Seconds a focus must hold before the catalog follows it / before looking at nothing clears it.")]
         public float holdSeconds = 1.2f, noneSeconds = 2.5f;
-        [Tooltip("Metres the ray reaches (a drone scan's roof can be a hundred metres off).")]
+        [Tooltip("Metres the ray reaches (an aerial scan's roof can be a hundred metres off).")]
         public float maxDistance = 150f;
         [Tooltip("Degrees between the centre ray and the four rays that smooth a mesh normal.")]
         public float spreadDeg = 2f;

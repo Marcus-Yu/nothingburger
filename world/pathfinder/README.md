@@ -1,6 +1,6 @@
 # Pathfinder
 
-Pathfinder is a mixed-reality app for the Meta Quest 3S for measuring, fitting and buying parts inside 3D scans of real places. You scan a building or a room with a drone or a phone, then walk through it in the headset at true scale. There you can measure an opening and ask Grok for a part that fits. Grok searches real store listings, builds a 3D model of each candidate at its listed size, and places it in the scan, so you can check the fit before you buy.
+Pathfinder is a mixed-reality app for the Meta Quest 3S for measuring, fitting and buying parts inside 3D scans of real places. You load an existing 3D scan of a building or a unit (a Matterport model, or a property built from Vexcel aerial data), then walk through it in the headset at true scale. There you can measure an opening and ask Grok for a part that fits. Grok searches real store listings, builds a 3D model of each candidate at its listed size, and places it in the scan, so you can check the fit before you buy.
 
 ![Pathfinder system overview](docs/architecture.png)
 
@@ -20,7 +20,7 @@ Pathfinder is a mixed-reality app for the Meta Quest 3S for measuring, fitting a
 |---|---|
 | `vr/` | Unity 6.3 project for Meta Quest 3S (URP, OpenXR, Meta XR SDK, glTFast) |
 | `backend/server/` | FastAPI server: voice, the Grok agent, parts search, catalog, 3D asset pipeline, checkout |
-| `backend/pipeline/` | Scan pipeline: drone video to a metric, textured scene package |
+| `backend/pipeline/` | Scan import: a Matterport model or a Vexcel location to a metric, textured scene package |
 | `docs/` | Architecture diagram |
 
 ## Getting started
@@ -52,40 +52,33 @@ Scene packages are served from `SCENE_DIR` (default `./scene`), and cached resul
 
 In the Editor, Play mode runs with the Meta XR Simulator.
 
-### Scan pipeline
+### Scenes from Matterport and Vexcel
 
-Turns a drone video into a scene package: pycolmap or VGGT for camera poses, OpenMVS for dense reconstruction and texturing, then metric calibration and structure extraction. It runs on a GPU machine:
+Every scene comes from data that already exists: a Matterport scan of a unit or building, or a Vexcel aerial view of a property. The import puts it in the package frame (metres, +Y up), fits it to the headset's triangle and texture budgets and publishes it. It needs no GPU. Keys go in `backend/.env` (`MATTERPORT_API_KEY`, `MATTERPORT_API_TOKEN`, `VEXCEL_API_KEY`).
 
 ```bash
 cd backend
 uv sync --extra pipeline
-uv run python -m pipeline.cli run flight.mp4 --site my-site --out scene/my-site
+
+# A Matterport model id: downloads the MatterPak mesh through the Model API. With no MatterPak,
+# it textures the API's bare mesh from the model's panoramas.
+uv run python -m pipeline.cli matterport zvKHR9DHNjJ --site la-mirada --out scene/la-mirada
+
+# A latitude and longitude: the Vexcel ortho photo on the ground, each building footprint
+# extruded into a block. Plan dimensions are measured; heights are assumed where Vexcel has none.
+uv run python -m pipeline.cli vexcel --lat 34.0934917 --lon -118.3171 --site la-mirada-aerial --out scene/la-mirada-aerial
 ```
 
-`pipeline.cli remote` uploads the video to a remote GPU box, runs the same command there, and copies each finished revision back.
-
-#### Importing a finished mesh (Matterport, Vexcel)
-
-A scan that already is a textured mesh skips reconstruction. `pipeline.cli import` puts it in the package frame (metres, +Y up), fits it to the headset's triangle and texture budgets and publishes it. It needs no GPU.
+A MatterPak already on disk goes through `pipeline.cli import`:
 
 ```bash
-# Matterport MatterPak: the OBJ with its MTL and JPEGs beside it (metres, Z up)
+# The OBJ with its MTL and JPEGs beside it (metres, Z up)
 uv run python -m pipeline.cli import matterpak/house.obj --site my-house --out scene/my-house --source matterport
-
-# One building out of an aerial mesh tile: crop by easting and northing, in the tile's own units
-uv run python -m pipeline.cli import tile.obj --site my-roof --out scene/my-roof --source vexcel \
-    --up z --bbox 741208 3741888 741232 3741912
 ```
 
-`--unit` (`m`, `ft`, `usft`, ...) and `--scale` set the source units, and `--up` overrides the guessed up axis. It reads OBJ, GLB/glTF and PLY meshes. Point clouds (E57, LAS) and tiled formats (3D Tiles, SLPK) need converting to one of those first.
+`--unit` (`m`, `ft`, `usft`, ...) and `--scale` set the source units, and `--up` overrides the guessed up axis. It reads OBJ, GLB/glTF and PLY meshes.
 
-An imported package has no source photos and no structure or parts layers. Walking, measuring (snapped to the mesh), the catalog, part placement and checkout work. The features that read the drone photos or the fitted structure do not: the capture coach, surveys, labels, "see it installed" pictures, edge and corner snapping, and removing a scene part.
-
-#### Pipeline roadmap
-
-The eight pipeline stages, from frame ingest to packaging for the Quest, and the work planned or under way at each. Solid grey boxes are the pipeline stages. Dashed boxes are planned improvements from the ranked plan. Blue boxes are coverage experiments that are running, and yellow boxes are work in progress on a branch.
-
-![Reconstruction pipeline roadmap](docs/pipeline-roadmap.webp)
+On these scenes, walking, measuring (snapped to the mesh), the catalog, part placement and checkout work. A few features need posed photos or a fitted structure layer, which Matterport and Vexcel scenes don't have: condition surveys, live labels, "see it installed" pictures, edge and corner snapping, and removing a scene part.
 
 ## Tech stack
 
@@ -93,4 +86,4 @@ The eight pipeline stages, from frame ingest to packaging for the Quest, and the
 - **Backend:** Python 3.13, FastAPI, uvicorn, uv
 - **AI:** xAI Grok for the agent and tool calling, scene vision, speech, OpenSCAD code generation and web search
 - **3D:** OpenSCAD (manifold backend), trimesh, manifold3d, pymeshlab, Open3D
-- **Reconstruction:** COLMAP (pycolmap), VGGT, OpenMVS, MoGe-2, LIMAP, SAM 2.1
+- **Scan data:** Matterport Model API (MatterPak mesh, panoramas), Vexcel API (ortho imagery, building footprints)

@@ -18,8 +18,8 @@ git merge --ff-only cad                         # or: git am /path/to/Pathfinder
 #   LLM_ASSET_SCAD unset -> xai:grok-4.7, ASSET_SCAD_EFFORT unset -> "low", ASSET_SCAD_PHOTO unset -> true
 # restart uvicorn on :8004 the way it runs now (cwd ~/pathfinder-backend-demo, .env, SCENE_DIR, LLM_AGENT)
 set -a; . ./.env; set +a
-SCENE_DIR=~/pathfinder-drone-backend/scene .venv/bin/python -m server.warm --scad --estimate   # the plan, no calls
-SCENE_DIR=~/pathfinder-drone-backend/scene .venv/bin/python -m server.warm --scad --scad-jobs 3
+SCENE_DIR=~/pathfinder-backend/scene .venv/bin/python -m server.warm --scad --estimate   # the plan, no calls
+SCENE_DIR=~/pathfinder-backend/scene .venv/bin/python -m server.warm --scad --scad-jobs 3
 ```
 
 - The warm can run while :8004 serves (restart first, so the server knows the lock files and picks each CAD model up

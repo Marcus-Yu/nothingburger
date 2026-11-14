@@ -397,7 +397,7 @@ index 27584ec..aba4a64 100644
 +}
 +
 +FOCUS_TABLES: dict[str, dict[str, tuple[str, ...]]] = {
-+    # Outside a building: a drone scan of it (Zabel, the hospital), a facade, a roof, a pavilion.
++    # Outside a building: a scan of it (Zabel, the hospital), a facade, a roof, a pavilion.
 +    "exterior": {
 +        "roof": ("solar-panels", "gutters", "roof-vents", "hvac", "skylights", "chimney-caps",
 +                 "flashing", "snow-guards", "satellite-mounts"),

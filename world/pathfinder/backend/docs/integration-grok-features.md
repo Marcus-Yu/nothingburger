@@ -9,7 +9,8 @@ only adds the conflict resolutions.
 Merge order: F1 realtime quartermaster, F2 reimagine, F3 installer intel, F4 site report,
 F5 postcard, F6 safety radar, F7 placement planner, F8 flythrough. Then `main` again (the B1
 pipeline fixes and the G5 research doc), then F9 manual Q&A, F10 condition survey, F11 finish
-variants and F12 capture coach. Then `main` again (the G5 review index), F13 rules check and
+variants and F12 capture coach (F12 has since been removed, so the rest of this page leaves it
+out). Then `main` again (the G5 review index), F13 rules check and
 F14 job packet, then `main` once more (the S4 orthophoto cap and the G6 research). Final pass:
 `main` again (the review index and the P1 buildings bench), F13's eligibility fix (f1ec9dd),
 F15 do the whole job, F16 live labels, F17 install coach, F18 voice-refined reimagine, F19 booth
@@ -38,7 +39,6 @@ favicon, and `/booth` renders the empty wall and the three leaderboards with no 
 | F9 | `feat/grok-manual-qa` | `POST /parts/{part_id}/manual`, `POST /parts/{part_id}/manual/ask`, `GET /parts/{part_id}/manual.pdf` | `ask_manual(question, part_id)` (LLM; offline: a question about the selected part with its manual cached) | `show_manual_answer` | none |
 | F10 | `feat/grok-condition-survey` | `POST /scene/survey`, `GET /scene/survey/{survey_id}` | `survey_condition(focus, careful)` ("survey the roof"), `fix_pin` ("find a fix for pin f1") | `survey_started`, `show_survey`, then `search_started` + `add_note` | `LLM_SURVEY`, `LLM_SURVEY_CAREFUL` |
 | F11 | `feat/grok-finish-variants` | `POST /parts/{part_id}/finish`, `GET /parts/{part_id}/model-{slug}.glb`, `GET /parts/{part_id}/finish-{slug}.jpg` | `set_finish(name)`, now server-side ("show it in matte black") | `set_finish` with `model_url`, `label` | none |
-| F12 | `feat/grok-capture-coach` | `GET /scenes/{site}/coverage` | `coach_capture` ("what did I miss?", "which sides did I get?", "scan coverage") | `show_coverage` | `LLM_COACH` |
 | F13 | `feat/grok-rules-check` | `POST /rules/check`, `GET /rules/check/{check_id}` | `check_rules(job, address)` ("permit", "inspection", "rebate", "tax credit", "incentive") | `rules_started`, `show_rules` | `DEFAULT_LOCATION` (shared with F3) |
 | F14 | `feat/grok-job-packet` | `POST /packet/{session_id}`, `GET /packet/{packet_id}.pdf`, `DELETE /packet/{packet_id}` | `send_packet(days)` ("send it to my contractor", "share the job"), `revoke_packet` ("take the packet down") | `show_packet`, `packet_revoked` | `LLM_PACKET` |
 | F15 | `feat/grok-do-the-whole-job` | `POST /job/run`, `GET /job/run/{run_id}?after=n` | `run_job(goal)` ("do the whole job", a bare "handle it" / "take care of it") | `job_started`, `job_step`, `job_done`, plus each step's own actions | none |
@@ -69,7 +69,6 @@ New in these branches (all optional):
 | `LLM_PLAN` | unset: `xai:grok-4.20-0309-non-reasoning` | F7 planner pick |
 | `LLM_SURVEY` | unset: `xai:grok-4.20-0309-non-reasoning` | F10 survey, `model: "fast"` |
 | `LLM_SURVEY_CAREFUL` | unset: `xai:grok-4.7` | F10 survey, `model: "careful"` |
-| `LLM_COACH` | unset: `xai:grok-4.20-0309-non-reasoning` | F12 coach line (the template is the fallback) |
 | `LLM_PACKET` | unset: `xai:grok-4.20-0309-non-reasoning` | F14 packet summaries (xai only: it goes through `responses()`) |
 | `LLM_LABELS` | unset: `xai:grok-4.20-0309-non-reasoning` | F16 live labels, one streamed vision call per frame |
 | `LLM_COACH_VISION` | unset: `xai:grok-4.20-0309-non-reasoning` | F17 install coach step checks (yes / no / cant_see on one frame) |
@@ -81,7 +80,7 @@ New in these branches (all optional):
 Already on `main` and needed here: `GROK_API_KEY` (every Grok feature), `GROQ_API_KEY` (agent,
 STT), `OFFLINE` (`true` replays the disk cache only; uncached Grok calls return `503` or an
 "offline" line), `DATA_DIR` (`./data`: Imagine JPEGs, clips, manuals, caches) and `SCENE_DIR`
-(`./scene`: the scene packages the survey, coach, planner and Imagine features read).
+(`./scene`: the scene packages the survey, planner and Imagine features read).
 
 The README's roles table lists every `LLM_*` role. `.env.example` still lacks these variables:
 a write hook refuses edits to that file, so add them by hand (commented, so an empty value
@@ -92,7 +91,6 @@ doesn't override a default):
 # LLM_PLAN=xai:grok-4.20-0309-non-reasoning
 # LLM_SURVEY=xai:grok-4.20-0309-non-reasoning
 # LLM_SURVEY_CAREFUL=xai:grok-4.7
-# LLM_COACH=xai:grok-4.20-0309-non-reasoning
 # LLM_PACKET=xai:grok-4.20-0309-non-reasoning
 # LLM_LABELS=xai:grok-4.20-0309-non-reasoning
 # LLM_COACH_VISION=xai:grok-4.20-0309-non-reasoning
@@ -112,20 +110,20 @@ doesn't override a default):
 The merge commit bodies have the full list. The ones that change behaviour:
 
 - **One early-exit rule in `agent.handle_command`.** F2 (`ends_turn`), F3 (`has_installer`), F7
-  (`speaks_itself`), F9 (`has_manual`), F10 (`has_ask_scene` widened), F11 (`finish_reply`),
-  F12 (`has_coach`) and F13 (`has_rules`) each added a "this tool already has the reply, don't spend a second LLM turn"
+  (`speaks_itself`), F9 (`has_manual`), F10 (`has_ask_scene` widened), F11 (`finish_reply`)
+  and F13 (`has_rules`) each added a "this tool already has the reply, don't spend a second LLM turn"
   check. They are now one tuple: `ask_scene`, `reimagine_view`, `find_installer`,
   `see_it_installed`, `check_safety`, `plan_placement`, `walk_in_preview`, `ask_manual`,
-  `survey_condition`, `set_finish`, `coach_capture`, `check_rules`, `send_packet`,
+  `survey_condition`, `set_finish`, `check_rules`, `send_packet`,
   `revoke_packet`. These tools run even when the model also
-  returns text (on F11 and F12 alone, filler text skipped the tool). Reply order: the tool's
+  returns text (on F11 alone, filler text skipped the tool). Reply order: the tool's
   `spoken`, then the model's text, then `answer`, then the canned line. F6's verbatim safety line
   (check_safety or start_checkout with `spoken`) still goes first. Tests:
   `test_check_safety_runs_even_when_the_model_also_returns_text`,
   `test_speaking_tools_run_despite_model_text`.
 - **Tool hiding** keeps every branch's rule. `ask_scene` needs `frames`. `reimagine_view` needs
   `site` plus `frame_id` or `frames`. `see_it_installed` needs a frame (b64, or site plus
-  frame_id). `plan_placement`, `survey_condition` and `coach_capture` need `site`.
+  frame_id). `plan_placement` and `survey_condition` need `site`.
   `walk_in_preview` needs `site` plus `frame_id`. `send_packet` needs a notebook for the
   session, `revoke_packet` a live public packet. `check_rules` is always offered ("do I need a
   permit for a mini-split?" names its job with no part selected). Test:
@@ -166,8 +164,7 @@ The merge commit bodies have the full list. The ones that change behaviour:
   they run again (both replay from cache at once). `tests/test_packet.py` seeds F10/F13-shaped
   jobs and F6's cache and checks the lines.
 - **Cost logging**: one `llm.cost_usd(usage)` helper serves F7's per-call cost log in `chat()`,
-  F10's survey and F12's coach. The coach's own duplicate log line is gone (`chat()` already logs
-  `role=coach` with latency and cost).
+  F10's survey.
 - **`hanger_plan`**: F1 and F7 had identical copies. `server/realtime.py` now imports it from
   `server/plan.py`.
 - **`XAI_VOICE`**: F1 and F4 both added it with the same default. There is one definition, and
@@ -188,10 +185,7 @@ The merge commit bodies have the full list. The ones that change behaviour:
     kitchen" / "in my room" is refused: not a finish.
   - "Is it recalled / is it safe" goes to `check_safety`.
   - "Survey the roof" goes to `survey_condition`; "... pin f1" goes to `fix_pin`.
-  - "What did I miss?", "which sides did I get?", "scan coverage" and a bare "(show me the)
-    coverage" go to `coach_capture`. F12 matched any "coverage" or "which sides", which stole
-    "what's the coverage on this sealant?" and "which sides of the cabinet get the strip?"; those
-    now go to the LLM. "What else do I need?" still goes to `what_else`.
+  - "What else do I need?" goes to `what_else`.
   - "Do I need a permit?", "any rebates on a mini-split?", "is there a tax credit?" go to
     `check_rules` (the job kind comes from the words, else the selected part). The rules
     matcher sits after the report and safety matchers: "show me the report on the permits"
@@ -208,9 +202,9 @@ The merge commit bodies have the full list. The ones that change behaviour:
     need?") go to the LLM's `ask_manual`; offline, F9's question matcher answers from the cached
     manual.
 - **`/debug`**: each feature gets its own section. `showCommandResult` handles every new action
-  (a `survey_started` polls and draws the survey; `show_coverage` draws the ring). `buildContext`
+  (a `survey_started` polls and draws the survey). `buildContext`
   takes `site`/`frame_id` from, in priority order: a picked reimagine frame, a picked postcard
-  frame, a typed survey site, the coach's site picker, the walk-in site/frame boxes, then the plan
+  frame, a typed survey site, the walk-in site/frame boxes, then the plan
   site box. A frame always belongs to the `site` sent with it. Selecting a card fills the
   postcard, safety and finish part boxes. The rules section adds `context.address`; a
   `show_rules` draws its result and a `rules_started` polls; a `show_packet` fills the packet
@@ -279,7 +273,7 @@ coach running, a reimagine on screen, both).
 | 7 | `check_quote` (F20) | "check / review / look over ... quote / estimate / bid" (not "... from the manual") | always |
 | 8 | `check_safety` (F6), `check_rules` (F13) | "is it recalled?", "do I need a permit?", "any rebates?" | always |
 | 9 | `set_finish` (F11) | "show it / this / that in matte black" | always |
-| 10 | `coach_capture` (F12), `label_view` (F16), `start_coach` (F17), then `check_slope` (app lane) | "what did I miss?"; "what am I looking at?"; "teach me to install this", "walk me through it"; "is this gutter sloped enough to drain?" (gutter / sill / ledge + slope / drain / fall / pitch, not with find / get / need / buy) | always |
+| 10 | `label_view` (F16), `start_coach` (F17), then `check_slope` (app lane) | "what am I looking at?"; "teach me to install this", "walk me through it"; "is this gutter sloped enough to drain?" (gutter / sill / ledge + slope / drain / fall / pitch, not with find / get / need / buy) | always |
 | 11 | `place_plan` (F7) | "place them" | after a plan |
 | 12 | coach words (F17) | "check it", "done" → `check_step`; "next", "skip", "I did it", "back", "go back", "step back", "back up", "previous step", "repeat that" → `coach_step` | while a coach runs |
 | 13 | reimagine words (F18) | "undo", "go back", "step back" → undo; "start over", "show me the original" → step 0; "darker ...", "no, lighter", "add ...", "remove ...", "swap ...", "replace ...", "paint ..." → refine ("add a note" excluded) | while a reimagine is on screen |
@@ -329,17 +323,14 @@ quote, is it under $2000?") isn't a limit (`tests/test_mandate.py`).
 - `ruff format --check` flags two files that `main` already had unformatted (`server/search.py`,
   `tests/test_jobs.py`); left alone here.
 
-## Demo script (~8 min): one building, outside then in
+## Demo script (~7 min): one building, outside then in
 
-One story: a facilities manager gets an old school building ready for work. The drone scan of
-the outside finds the problems and the fix; inside, the staff kitchen gets planned, refined,
+One story: a facilities manager gets an old school building ready for work. The scan of the
+outside finds the problems and the fix; inside, the staff kitchen gets planned, refined,
 checked, taught and quoted, and everything ends up in one packet for the contractor.
 
-**Credit (on the title slide and under every Zabel shot):** *"Haus Schiller – Zabelgymnasium
-Gera – Drohnenflug" by zabelgymnasium, CC BY 3.0, via Wikimedia Commons.* The scan is that public
-footage (`scene/zabel-gymnasium`, scaled to the OSM footprint, see
-`docs/research/p1-buildings-bench.md`); the job address in the demo is the server default
-(Atlanta, GA), so permits and rebates are Georgia's. Say so once.
+The exterior scan is `scene/zabel-gymnasium`, scaled to the OSM footprint. The job address in the
+demo is the server default (Atlanta, GA), so permits and rebates are Georgia's. Say so once.
 
 **Before the demo:** run every step below once online with the same words, so each Grok call is
 cached, then run with `OFFLINE=true`: the Zabel survey, the kitchen labels (`uv run python -m
@@ -348,53 +339,48 @@ the Midea, the LG rules check, the quote (`tests/fixtures/quotes/bad.png`, SYNTH
 summary and the booth caption. Keep the realtime voice (F1) open for questions; the scripted
 lines below go through `/agent/command` (the push-to-talk path), which has every fast path.
 
-1. **Fly-in and capture coach (0:00–0:40).** Load the Zabel scan (`context.site =
-   "zabel-gymnasium"`). "What did I miss?" `show_coverage` draws the ring: 1 of 8 sides (the
-   front) green, with the orbit from front-left to front-right and a roof grid dashed in; the
-   coach reads the legs out. Computed from the cameras; Grok only phrases it (offline: the
-   template says the same).
-2. **Condition survey (0:40–1:30).** "Survey the roof." `survey_started`, then `show_survey`
-   pins findings on the mesh by severity, labelled "AI triage from drone frames, not an
-   inspection". Pinch the worst pin: "find a fix for pin f1" searches for its part and drops a
-   notebook note.
-3. **Do the whole job (1:30–2:30).** "Do the whole job." `job_started` draws the rail: survey
+1. **Condition survey (0:00–0:50).** Load the Zabel scan (`context.site =
+   "zabel-gymnasium"`). "Survey the roof." `survey_started`, then `show_survey` pins findings on
+   the mesh by severity, labelled "AI triage from scan photos, not an inspection". Pinch the
+   worst pin: "find a fix for pin f1" searches for its part and drops a notebook note.
+2. **Do the whole job (0:50–1:50).** "Do the whole job." `job_started` draws the rail: survey
    (cached), part, then safety + rules + postcard in parallel, packet, pay panel. Each dot turns
    green or grey with a spoken line (a gutter part has no permit rules on file, so `rules` skips
    and says so). It stops at the hold-to-pay panel: **it never pays**, and a recalled part would
    stop it before the panel. `job_done` shows the total; a rebate comes off only when F13 found
    it eligible.
-4. **Inside: live labels (2:30–3:00).** Switch to the kitchen scan. "What am I looking at?"
+3. **Inside: live labels (1:50–2:20).** Switch to the kitchen scan. "What am I looking at?"
    `show_labels` puts the pre-labelled outlets, switch, sink and cabinets on the mesh; sizes show
    only when printed on the part. Tap one to shop for it.
-5. **Planner (3:00–3:30).** Point at the wall cabinets: "LED strip under these cabinets, it
+4. **Planner (2:20–2:50).** Point at the wall cabinets: "LED strip under these cabinets, it
    comes in 1 metre strips." `show_plan` draws the runs and speaks length and strip count; "place
    them" opens the BOM for that count.
-6. **Reimagine and refine (3:30–4:30).** "What would navy cabinets with brass pulls look like?"
+5. **Reimagine and refine (2:50–3:50).** "What would navy cabinets with brass pulls look like?"
    `show_reimagined` puts the edit on the frame's camera. Then "darker blue", then "add a
    butcher-block counter", then "undo": each is a `show_reimagined` step (pinch flips before and
    after, the original frame rides in every edit, so the rest stays put). "Walk me into it":
    `show_video` plays the 3 s clip landing on the refined picture.
-7. **Safety and the install coach (4:30–5:40).** Select the Midea window AC: "is this
+6. **Safety and the install coach (3:50–5:00).** Select the Midea window AC: "is this
    recalled?" A red RECALLED pill with the CPSC headline. "Teach me to install this":
    `coach_started`, steps from its manual with page numbers. On the drill step, aim the crosshair
    straight above the outlet and "check it": `coach_stop` ("Stop: that spot is straight above an
    outlet...", plus the stud and wire finder line). Say "back": the coach's previous step, even
    with the reimagine still on screen ("undo" would have been the picture's; see the priority
    table). "I did it" moves on; the notebook records it was the user's word, not the camera's.
-8. **Rules and money (5:40–6:15).** Select the LG mini-split: "do I need a permit for this?"
+7. **Rules and money (5:00–5:35).** Select the LG mini-split: "do I need a permit for this?"
    `show_rules`: the permits and office, code editions, and each rebate with its status. A
    program that needs ENERGY STAR shows `not_eligible` for an unlisted unit, or `unverified`
    with its reason; only eligible amounts count. "Not legal advice; confirm with the permitting
    office."
-9. **Check the contractor's quote (6:15–6:50).** Hold up the printed quote (the SYNTHETIC
+8. **Check the contractor's quote (5:35–6:10).** Hold up the printed quote (the SYNTHETIC
    `bad.png`): "check this quote". `show_quote_check` flags the line whose math doesn't add up,
    the missing permit line, the recalled AC, a price spread against a verified seller (a spread,
    never a verdict) and the rebate, with the same eligibility wording.
-10. **Packet and booth wall (6:50–7:30).** "Send it to my contractor." `show_packet` draws the QR
-    of a public 7-day link; the PDF carries the survey pins, recall check, permits and eligible
-    rebates. "Add it to the wall as Maya": `show_share_preview`, and the booth TV (`/booth`)
-    shows the card, caption and leaderboards. The X post only goes out on the hold-to-post ring
-    (and only with the `X_*` keys set); skip it offline.
-11. **Report (7:30–8:00).** "Send me the report." `show_report` opens `/report/<session>` (as a
+9. **Packet and booth wall (6:10–6:50).** "Send it to my contractor." `show_packet` draws the QR
+   of a public 7-day link; the PDF carries the survey pins, recall check, permits and eligible
+   rebates. "Add it to the wall as Maya": `show_share_preview`, and the booth TV (`/booth`)
+   shows the card, caption and leaderboards. The X post only goes out on the hold-to-post ring
+   (and only with the `X_*` keys set); skip it offline.
+10. **Report (6:50–7:20).** "Send me the report." `show_report` opens `/report/<session>` (as a
     QR for a phone), and `POST /report/<session>/narrate` reads the recap in the `XAI_VOICE`
     voice to close. Leave the Zabel credit on screen.

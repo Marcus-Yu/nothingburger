@@ -181,9 +181,9 @@ index d8ac9e0..5875cbd 100644
 +condition", "cracks", "rot", "rust", "leaks") stays on `survey_condition`. A bare "stop" /
 +"cancel the survey" is `stop_survey`.
 +
- ### `show_coverage` (capture coach)
+ ### The capture coach action (since removed)
  
- Sent by the `coach_capture` tool ("what did I miss?", "which sides did I get?", "scan
+ Sent by the capture coach tool ("what did I miss?", "which sides did I get?", "scan
 @@ -1730,7 +1805,8 @@ Send with every `/agent/command` and `/voice/command`, and as a `{"type":"contex
    "pointer": [-1.36, 0.15, -0.12],
    "survey_id": "84e27743a1c9",
@@ -198,8 +198,8 @@ index d8ac9e0..5875cbd 100644
  | `tool` | informational; agent does not act on it |
  | `pointer` | aimed point in the structure file's frame; "this"/"that" for `plan_placement` |
  | `placed` | parts actually placed in the scene with their count (e.g. after `place_array`); needed for `what_else` ("what else do I need?"). Falls back to `selected_part_id` x1 if omitted. |
--| `site` | the loaded scene package's site. With `frame_id` (or `frames`) it enables `reimagine_view` ("what would navy cabinets look like?"); `see_it_installed` also uses it when there is no `frame_jpg_b64` or `frames`; on its own it enables `plan_placement` (`show_plan`). Also needed for `survey_condition` ("survey the roof"); and for `coach_capture` ("what did I miss?") |
-+| `site` | the loaded scene package's site. With `frame_id` (or `frames`) it enables `reimagine_view` ("what would navy cabinets look like?"); `see_it_installed` also uses it when there is no `frame_jpg_b64` or `frames`; on its own it enables `plan_placement` (`show_plan`). Also needed for `survey_condition` ("survey the roof"); and for `coach_capture` ("what did I miss?"). The tape `survey` uses it to count objects ("Surveying 18 doors."), map "doors" to `cabinet_door` in a kitchen, refuse a label the scene lacks, and suggest gutter `edge_ids` for `check_slope`; without it the survey still goes to the headset |
+-| `site` | the loaded scene package's site. With `frame_id` (or `frames`) it enables `reimagine_view` ("what would navy cabinets look like?"); `see_it_installed` also uses it when there is no `frame_jpg_b64` or `frames`; on its own it enables `plan_placement` (`show_plan`). Also needed for `survey_condition` ("survey the roof"); and for the capture coach ("what did I miss?") |
++| `site` | the loaded scene package's site. With `frame_id` (or `frames`) it enables `reimagine_view` ("what would navy cabinets look like?"); `see_it_installed` also uses it when there is no `frame_jpg_b64` or `frames`; on its own it enables `plan_placement` (`show_plan`). Also needed for `survey_condition` ("survey the roof"); and for the capture coach ("what did I miss?"). The tape `survey` uses it to count objects ("Surveying 18 doors."), map "doors" to `cabinet_door` in a kitchen, refuse a label the scene lacks, and suggest gutter `edge_ids` for `check_slope`; without it the survey still goes to the headset |
  | `frame_id` | the `cameras.r<rev>.json` id of the capture frame nearest the user's view (the same nearest-frame pick as `frames`); falls back to `frames[0].id` for `reimagine_view`. `walk_in_preview` ("walk me into it with navy cabinets") needs `site` + `frame_id` and is not offered without them. Also echoed in `show_labels` (`label_view` labels `frame_jpg_b64`, so send that frame's id) so you can find its camera pose |
  | `location` | optional free text such as `"Atlanta, GA"`, used by `find_installer` when the user doesn't name a place, and by `check_rules` when there's no `address`. Defaults to the server's `DEFAULT_LOCATION` |
  | `address` | the job's street address, for `check_rules` (Census picks the permitting jurisdiction) |
@@ -233,8 +233,8 @@ index fcf1fef..d8f9f6e 100644
  | 7 | `check_quote` (F20) | "check / review / look over ... quote / estimate / bid" (not "... from the manual") | always |
  | 8 | `check_safety` (F6), `check_rules` (F13) | "is it recalled?", "do I need a permit?", "any rebates?" | always |
  | 9 | `set_finish` (F11) | "show it / this / that in matte black" | always |
--| 10 | `coach_capture` (F12), `label_view` (F16), `start_coach` (F17) | "what did I miss?"; "what am I looking at?"; "teach me to install this", "walk me through it" | always |
-+| 10 | `coach_capture` (F12), `label_view` (F16), `start_coach` (F17), then `check_slope` (app lane) | "what did I miss?"; "what am I looking at?"; "teach me to install this", "walk me through it"; "is this gutter sloped enough to drain?" (gutter / sill / ledge + slope / drain / fall / pitch, not with find / get / need / buy) | always |
+-| 10 | capture coach (F12), `label_view` (F16), `start_coach` (F17) | "what did I miss?"; "what am I looking at?"; "teach me to install this", "walk me through it" | always |
++| 10 | capture coach (F12), `label_view` (F16), `start_coach` (F17), then `check_slope` (app lane) | "what did I miss?"; "what am I looking at?"; "teach me to install this", "walk me through it"; "is this gutter sloped enough to drain?" (gutter / sill / ledge + slope / drain / fall / pitch, not with find / get / need / buy) | always |
  | 11 | `place_plan` (F7) | "place them" | after a plan |
  | 12 | coach words (F17) | "check it", "done" → `check_step`; "next", "skip", "I did it", "back", "go back", "step back", "back up", "previous step", "repeat that" → `coach_step` | while a coach runs |
  | 13 | reimagine words (F18) | "undo", "go back", "step back" → undo; "start over", "show me the original" → step 0; "darker ...", "no, lighter", "add ...", "remove ...", "swap ...", "replace ...", "paint ..." → refine ("add a note" excluded) | while a reimagine is on screen |
@@ -1114,8 +1114,8 @@ index 0000000..153aad6
 +++ b/server/tape_survey.py
 @@ -0,0 +1,342 @@
 +"""Tape survey and slope results from the headset's own tape (brain.md S1) -- deterministic, no
-+LLM. Not F10's drone condition survey (server/survey.py): that one triages damage from drone
-+frames; this one groups the sizes the headset measured.
++LLM. Not F10's condition survey (server/survey.py): that one triages damage from the scan's
++photos; this one groups the sizes the headset measured.
 +
 +The agent never measures anything itself: `survey` / `check_slope` actions make the headset run its
 +real measure tool, and the headset reports what it measured back through `POST /agent/observe`
@@ -1739,7 +1739,7 @@ index 0000000..2485982
 +@pytest.mark.asyncio
 +async def test_both_surveys_end_to_end_on_one_site(monkeypatch):
 +    """With a site loaded, "measure every cabinet door" is the tape and "survey the roof" still
-+    reaches F10's `_survey` (stubbed: it needs a real drone scene)."""
++    reaches F10's `_survey` (stubbed: it needs a real scene with photos)."""
 +    monkeypatch.setattr(agent, "chat", _no_llm_chat)
 +    seen = []
 +

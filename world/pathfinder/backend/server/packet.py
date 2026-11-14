@@ -498,7 +498,7 @@ def render(report: Report, ex: dict, blurb: dict, expires: datetime | None) -> l
         if s.get("accuracy"):
             con.text(s["accuracy"], 20, MUTE)
     if "survey" in rows:
-        con.heading("Drone survey findings")
+        con.heading("Condition survey findings")
         con.rows([text for text, _ in rows["survey"]])
         con.text(EXTRA_LABELS["survey"], 20, MUTE)
     if report.notes:
