@@ -178,6 +178,7 @@ namespace Pathfinder.Capture
             var rig = FindFirstObjectByType<OVRCameraRig>();
             if (rig != null && rig.trackingSpace != null) m_Recording.floorY = ToFrame(content, rig.trackingSpace.position).y;
             m_Started = Time.unscaledTime;
+            StartCoroutine(TellStarted(m_Request.id));   // the laptop's clock at this moment lines the gloves up
             m_NextSample = m_Started;
             m_StopAsked = false;
             Current = State.Recording;
@@ -197,6 +198,13 @@ namespace Pathfinder.Capture
             Current = State.Uploading;
             if (Services.TryGet<ToolManager>(out var tools)) tools.Equip(m_ToolBefore == ToolKind.None ? ToolManager.Default : m_ToolBefore);
             StartCoroutine(Upload(m_Recording));
+        }
+
+        static IEnumerator TellStarted(string id)
+        {
+            string url = ServerConfig.Current.TrimEnd('/') + "/demos/started?id=" + UnityWebRequest.EscapeURL(id);
+            using (var req = new UnityWebRequest(url, UnityWebRequest.kHttpVerbPOST) { downloadHandler = new DownloadHandlerBuffer(), timeout = 3 })
+                yield return req.SendWebRequest();
         }
 
         IEnumerator Upload(DemoRecording recording)

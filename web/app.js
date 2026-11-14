@@ -101,6 +101,7 @@ async function createPlan() {
     $("plan-steps").replaceChildren(...plan.steps.map((s) => el("li", s)));
     $("plan-card").classList.remove("hidden");
     $("demo-card").classList.toggle("hidden", plan.demos.length === 0);
+    if (plan.demos.length) showGloves();
     $("demos").replaceChildren(...plan.demos.map(demoRow));
     if (plan.outside && !$("tab-outside").disabled) showSide("outside");
     $("parts-card").classList.toggle("hidden", !plan.parts);
@@ -152,7 +153,8 @@ async function filmDemo(demo, button, state) {
 
 function describe(read) {
   if (!read) return "Saved, but the capture code could not read a motion in it.";
-  if (read.grip) return `Grip band ${read.grip.min} to ${read.grip.max} N (uncalibrated).`;
+  const grip = describeGrip(read.grip);
+  if (!read.motion) return grip || "Saved, but no grip was read in it.";
   const m = read.motion || {};
   const bits = {
     wipe: () => `a wipe over ${m.size_m?.[0]} x ${m.size_m?.[1]} m in ${m.passes} passes`,
@@ -162,7 +164,29 @@ function describe(read) {
     reach: () => `a reach of ${m.distance_m} m`,
   };
   const two = read.two_handed ? `, two hands ${read.two_handed.width_m} m apart` : "";
-  return `Read as ${(bits[m.kind] || (() => "an unrecognised motion"))()}${two}.`;
+  return `Read as ${(bits[m.kind] || (() => "an unrecognised motion"))()}${two}.` + (grip ? " " + grip : "");
+}
+
+function describeGrip(g) {
+  if (!g) return "";
+  if (g.source === "glove") return `Grip ${g.force_n.min} to ${g.force_n.max} N, measured by the glove.`;
+  if (g.source === "glove_raw") {
+    const r = g.glove_raw.raw;
+    return `Glove pressure ${r.min} to ${r.max} of 4095 (raw, not yet newtons)` + (g.glove_raw.near_ceiling ? ", near the sensor's ceiling." : ".");
+  }
+  return `Grip about ${g.force_n.min} to ${g.force_n.max} N from hand closure alone: a placeholder, no glove.`;
+}
+
+async function showGloves() {
+  let text = "Gloves: none connected to the server.";
+  try {
+    const s = await api("/gloves");
+    if (s.gloves.length) {
+      text = "Gloves: " + s.gloves.map((g) =>
+        `${g.hand} ${g.error ? "not reading" : g.rate_hz + " Hz"}${g.calibrated ? "" : " (uncalibrated)"}`).join(", ") + ".";
+    }
+  } catch { /* the server may be older */ }
+  $("glove-note").textContent = text;
 }
 
 async function searchParts() {

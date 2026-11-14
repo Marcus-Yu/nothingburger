@@ -50,4 +50,4 @@ def test_bad_recordings_and_ids_are_refused(client):
     assert client.get("/demos/..%2Fsecret").status_code in (400, 404)
     assert client.get("/demos/missing").status_code == 404
     assert client.post("/demos/request", json={"chore": "x", "kind": "dance"}).status_code == 422
-    assert client.post("/demos", json=good).json()["read_as"]["grip"]["max"] > 0
+    assert client.post("/demos", json=good).json()["read_as"]["grip"]["force_n"]["max"] > 0

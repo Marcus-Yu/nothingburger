@@ -30,6 +30,27 @@ SCHEMA = "capture.recording/1"
 MAX_SAMPLES = 30 * 60 * 5  # five minutes at 30 Hz
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 
+_started: dict[str, float] = {}  # recording id -> laptop time the headset said it began
+_hub = None
+
+
+def gloves():
+    """The glove readers, started on first use from GLOVE_PORTS (none without it). None when
+    the capture package or pyserial is not importable."""
+    global _hub
+    if _hub is None:
+        root = str(Path(__file__).resolve().parents[4])
+        if root not in sys.path:
+            sys.path.append(root)
+        try:
+            from capture import glove
+
+            _hub = glove.GloveHub.from_env()
+        except Exception:  # noqa: BLE001
+            _hub = False
+    return _hub or None
+
+
 _pending: dict[str, Any] | None = None
 _active: str | None = None
 _stop: set[str] = set()
@@ -55,10 +76,21 @@ def _summary(recording: dict) -> dict | None:
     try:
         from capture import process
 
+        grip = None
+        try:
+            built = process.build_grip(recording)
+            grip = {
+                "source": built["source"],
+                "force_n": built["force_n"],
+                "glove_raw": built.get("glove_raw"),
+            }
+        except ValueError:
+            pass
         if recording.get("kind") == "squeeze":
-            return {"grip": process.build_grip(recording)["force_n"]}
+            return {"grip": grip}
         demo = process.build_demo(recording)
-        return {"motion": demo["motion"], "phases": demo["phases"], "two_handed": demo["two_handed"]}
+        return {"motion": demo["motion"], "phases": demo["phases"], "two_handed": demo["two_handed"],
+                "hand_shape": demo["hand_shape"], "arm": demo["arm"], "grip": grip}  # fmt: skip
     except Exception:  # noqa: BLE001 -- a summary is a courtesy; the recording is saved regardless
         return None
 
@@ -67,7 +99,10 @@ def _summary(recording: dict) -> dict | None:
 def request_demo(req: DemoRequest) -> dict:
     """Ask the wearer for a demonstration. Replaces a request the headset has not picked up."""
     global _pending
-    _pending = {"id": f"demo-{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:4]}", **req.model_dump()}
+    _pending = {
+        "id": f"demo-{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:4]}",
+        **req.model_dump(),
+    }
     return _pending
 
 
@@ -90,6 +125,22 @@ def stop_demo() -> dict:
     return {"stopping": _active}
 
 
+@router.post("/demos/started")
+def started(id: str) -> dict:
+    """The headset calls this the moment a recording begins. The laptop time is kept so glove
+    readings, which are stamped with the same clock, can be laid onto the recording."""
+    if not _ID.match(id):
+        raise HTTPException(400, "invalid id")
+    _started[id] = time.time()
+    return {"id": id, "gloves": [g["hand"] for g in (gloves().status() if gloves() else [])]}
+
+
+@router.get("/gloves")
+def glove_status() -> dict:
+    hub = gloves()
+    return {"gloves": hub.status() if hub else [], "configured": bool(hub and hub.readers)}
+
+
 @router.post("/demos")
 def save_demo(recording: dict) -> dict:
     """Save a raw recording from the headset."""
@@ -104,6 +155,14 @@ def save_demo(recording: dict) -> dict:
     demo_id = str(recording.get("id") or "")
     if not _ID.match(demo_id):
         raise HTTPException(422, "id must be letters, digits, dot, dash or underscore")
+    duration = float(samples[-1].get("t", 0.0)) - float(samples[0].get("t", 0.0))
+    merged = {}
+    hub = gloves()
+    if hub and hub.readers:
+        # without the headset's start call, the start is the upload time less the recording
+        begun = _started.pop(demo_id, None)
+        merged = hub.merge(recording, begun if begun is not None else time.time() - duration - 0.2)
+        recording["glove_sync"] = "start call" if begun is not None else "upload time (approximate)"
     out = folder()
     out.mkdir(parents=True, exist_ok=True)
     tmp = out / f".{demo_id}.json.tmp"
@@ -112,8 +171,8 @@ def save_demo(recording: dict) -> dict:
     _stop.discard(demo_id)
     if _active == demo_id:
         _active = None
-    duration = float(samples[-1].get("t", 0.0)) - float(samples[0].get("t", 0.0))
-    return {"id": demo_id, "samples": len(samples), "duration_s": round(duration, 2), "read_as": _summary(recording)}
+    return {"id": demo_id, "samples": len(samples), "duration_s": round(duration, 2),
+            "gloves": merged, "read_as": _summary(recording)}  # fmt: skip
 
 
 @router.get("/demos")
@@ -148,6 +207,10 @@ def read_demo(demo_id: str) -> dict:
     """What the capture stream reads in a saved recording: 404 until the headset has uploaded it."""
     recording = get_demo(demo_id)
     samples = recording.get("samples") or []
-    duration = float(samples[-1].get("t", 0.0)) - float(samples[0].get("t", 0.0)) if len(samples) > 1 else 0.0
+    duration = (
+        float(samples[-1].get("t", 0.0)) - float(samples[0].get("t", 0.0))
+        if len(samples) > 1
+        else 0.0
+    )
     return {"id": demo_id, "chore": recording.get("chore"), "kind": recording.get("kind"),
             "duration_s": round(duration, 2), "read_as": _summary(recording)}  # fmt: skip

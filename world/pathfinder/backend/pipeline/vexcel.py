@@ -287,6 +287,27 @@ def build(lat: float, lon: float, work: Path, *, half_m: float = 35.0,
                 "roof_material": st.get("roof-characteristics.material.class"),
                 "primary": str(st.get("primary-structure")).lower() == "true",
             })  # fmt: skip
+    # The same building comes back once per parcel record and collection, traced slightly
+    # differently each time. Keep one block per building (centres within 8 m, areas within a
+    # quarter of each other), preferring a measured height over the assumed one.
+    east_m, north_m = metres_per_degree(lat)
+    order = sorted(range(len(blocks)), key=lambda i: (listing[i]["height_assumed"], -listing[i]["footprint_m2"]))
+    kept: list[int] = []
+    for i in order:
+        ci = blocks[i]["ring"].mean(axis=0)
+        same = False
+        for j in kept:
+            cj = blocks[j]["ring"].mean(axis=0)
+            apart = float(np.hypot((ci[0] - cj[0]) * east_m, (ci[1] - cj[1]) * north_m))
+            ratio = (listing[i]["footprint_m2"] + 1.0) / (listing[j]["footprint_m2"] + 1.0)
+            if apart <= 8.0 and 0.75 <= ratio <= 1.33:
+                same = True
+                break
+        if not same:
+            kept.append(i)
+    blocks = [blocks[i] for i in sorted(kept)]
+    listing = [listing[i] for i in sorted(kept)]
+
     with Image.open(got["ortho"]) as ortho:
         mesh = block_model(ortho, got["bounds"], lat, lon, blocks)
         gsd = (e - w) * metres_per_degree(lat)[0] / ortho.width

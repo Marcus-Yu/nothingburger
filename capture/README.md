@@ -82,8 +82,12 @@ the ground truth the tests check the processing against.
 - **Field names are a proposal.** `demo.json` and `grip.json` follow the plan's one-line
   descriptions; the schemas in `contracts/` are Stream A's to freeze.
 - **One real recording has been processed** (a short wipe). The tests use synthetic data.
-- **Gloves.** There is a `force_n` slot per hand and nothing fills it. The gloves are two ESP32s
-  over Bluetooth with a raw 0 to 4095 reading per fingertip; a laptop bridge that reads them and
-  merges by timestamp, and a per-fingertip calibration to newtons, are still to build.
+- **Gloves are read but not calibrated.** `glove.py` reads both ESP32s on the laptop (start the
+  backend with `GLOVE_PORTS=left=COM8,right=COM9`) and lays their readings on each recording by
+  time, as `glove_raw` per hand per sample. `grip.json` then has `source: "glove_raw"` and a
+  band in the glove's own 0 to 4095 units, with `force_n` null. Newtons need a calibration:
+  `python -m capture.glove point right index 200` with 200 g on that fingertip, a few weights
+  per fingertip. Which port is which hand is a guess until someone squeezes one
+  (`python -m capture.glove watch`).
 - **The arm is an estimate.** Body tracking is not switched on in the app.
 - **Depth and video.** The headset's depth and passthrough camera are not recorded.

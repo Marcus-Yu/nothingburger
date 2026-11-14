@@ -424,8 +424,19 @@ def build_grip(recording: dict, n_per_unit: float = DEFAULT_N_PER_UNIT, rate_hz:
         values = track["force_n"][held] if measured else track["grip"][held] * n_per_unit
         if best is None or held.sum() > best[0]:
             best = (int(held.sum()), hand, measured, values, track["grip"][held])
+    from capture import glove  # noqa: PLC0415
+
+    raw = glove.raw_band(recording)
     if best is None:
-        raise ValueError("no hand gripped anything in this recording")
+        if raw is None:
+            raise ValueError("no hand gripped anything in this recording")
+        # the glove felt a press the hand tracking did not read as a grip (a flat-handed push)
+        return {
+            "schema": "capture.grip/1", "recording": recording.get("id"),
+            "object": (recording.get("anchor") or {}).get("label"), "hand": raw["hand"],
+            "source": "glove_raw", "force_n": None, "glove_raw": raw, "travel": None,
+            "scale_n_per_unit": None, "held_s": None,
+        }  # fmt: skip
     count, hand, measured, values, travel = best
     lo, hi = np.percentile(values, [10, 90])
     return {
@@ -433,9 +444,13 @@ def build_grip(recording: dict, n_per_unit: float = DEFAULT_N_PER_UNIT, rate_hz:
         "recording": recording.get("id"),
         "object": (recording.get("anchor") or {}).get("label"),
         "hand": hand,
-        "source": "glove" if measured else "travel",
-        "force_n": {"min": round(float(lo), 2), "max": round(float(hi), 2), "peak": round(float(values.max()), 2)},
+        # "glove": calibrated newtons. "glove_raw": the glove was worn but is not calibrated, so
+        # the band that means something is glove_raw (this glove's own units) and force_n is null.
+        "source": "glove" if measured else "glove_raw" if raw is not None else "travel",
+        "force_n": None if (raw is not None and not measured) else
+        {"min": round(float(lo), 2), "max": round(float(hi), 2), "peak": round(float(values.max()), 2)},
+        "glove_raw": raw,
         "travel": {"min": round(float(np.percentile(travel, 10)), 3), "max": round(float(np.percentile(travel, 90)), 3)},
-        "scale_n_per_unit": None if measured else n_per_unit,
+        "scale_n_per_unit": None if (measured or raw is not None) else n_per_unit,
         "held_s": round(count / rate_hz, 2),
     }
