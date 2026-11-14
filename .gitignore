@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 .venv/
+.env
+docs/probe/out/
+docs/probe/models_index.csv
