@@ -118,7 +118,13 @@ class GloveReader:
 
         while not self._stop.is_set():
             try:
-                with serial.Serial(self.port, BAUD, timeout=1) as link:
+                # Opening the port with DTR and RTS raised resets an ESP32. Keep them low so a
+                # glove that is already streaming carries on.
+                link = serial.Serial()
+                link.port, link.baudrate, link.timeout = self.port, BAUD, 1
+                link.dtr = link.rts = False
+                link.open()
+                with link:
                     self.error = None
                     link.reset_input_buffer()
                     heard = time.time()
@@ -127,10 +133,11 @@ class GloveReader:
                         if values is not None:
                             heard = time.time()
                             self.feed(heard, values)
-                        elif time.time() - heard > 3.0:
+                        elif time.time() - heard > 10.0:
                             # A glove that was unplugged and plugged back leaves this handle open
-                            # and silent on Windows: reopen the port.
-                            raise OSError("no readings for 3 s: reopening the port")
+                            # and silent on Windows: reopen the port. Ten seconds, because a
+                            # glove that did reset needs a few to boot before it streams.
+                            raise OSError("no readings for 10 s: reopening the port")
             except Exception as exc:  # noqa: BLE001 -- unplugged, busy, wrong port: say so and retry
                 self.error = str(exc)[:200]
                 self._stop.wait(2.0)

@@ -141,6 +141,28 @@ def glove_status() -> dict:
     return {"gloves": hub.status() if hub else [], "configured": bool(hub and hub.readers)}
 
 
+@router.get("/gloves/recent")
+def glove_recent(seconds: float = 10.0) -> dict:
+    """The last `seconds` of every glove's readings, for the live graph: per glove, `t` (seconds
+    before now, negative) and `raw` (five lists, thumb to pinky), thinned to about 50 a second.
+    `recording` names the demonstration under way, with how long it has run."""
+    seconds = min(max(seconds, 1.0), 60.0)
+    now = time.time()
+    out = []
+    hub = gloves()
+    for hand, reader in hub.readers.items() if hub else []:
+        times, raw = reader.window(now - seconds, now)
+        step = max(1, len(times) // int(seconds * 50))
+        out.append({
+            "hand": hand, "port": reader.port, "error": reader.error,
+            "t": [round(float(v - now), 3) for v in times[::step]],
+            "raw": [[int(v) for v in raw[::step, k]] for k in range(5)] if len(times) else [[] for _ in range(5)],
+        })  # fmt: skip
+    active = next(iter(_started.items()), None)
+    return {"gloves": out, "fingers": ["thumb", "index", "middle", "ring", "pinky"], "full_scale": 4095,
+            "recording": None if active is None else {"id": active[0], "for_s": round(now - active[1], 1)}}  # fmt: skip
+
+
 @router.post("/demos")
 def save_demo(recording: dict) -> dict:
     """Save a raw recording from the headset."""
