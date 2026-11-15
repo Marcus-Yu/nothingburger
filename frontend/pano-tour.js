@@ -52,7 +52,7 @@ export function createPanoTour(host, { base, before = null, active = () => true,
       loaded.set(id, t); loading.delete(id);
       if (loaded.size > 14) { const [old] = loaded.keys(); if (old !== here?.id) { loaded.get(old).dispose(); loaded.delete(old); } }
       ok(t);
-    }, undefined, bad));
+    }, undefined, (e) => { loading.delete(id); bad(e); }));   // forget failures so the next visit retries
     loading.set(id, p); return p;
   }
   const prefetchAround = (s) => s.neighbors.slice(0, 6).forEach((id) => byId.has(id) && texture(id).catch(() => {}));
