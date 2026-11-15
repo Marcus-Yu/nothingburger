@@ -201,7 +201,7 @@ export async function loadSpaces() {
 
 /* Jobs a building's staff repeat (the same list as robots-repo/web/app.js). */
 export const TASKS = [
-  ['Everyday', ['Carry a container outside', 'Take out a trash bag', 'Change a light bulb', 'Wipe a surface', 'Open a box']],
+  ['Everyday', ['Carry the recycling bin outside', 'Take out a trash bag', 'Change a light bulb', 'Wipe a surface', 'Open a box']],
   ['Needs the caretaker’s touch', [
     'Relight the water heater pilot',
     'Free a jammed garbage disposal with the hex key',
@@ -217,7 +217,7 @@ export const TASKS = [
    flow can be clicked through offline. Change the two together. */
 const STANDIN_JOBS = [
   {
-    match: ['container', 'outside', 'carry', 'crate', 'move a bin', 'move the bin'],
+    match: ['container', 'outside', 'carry', 'crate', 'recycling', 'move a bin', 'move the bin'],
     title: 'Carry a container outside',
     steps: [
       'Find the container and measure it',

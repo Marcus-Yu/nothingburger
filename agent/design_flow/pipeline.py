@@ -180,7 +180,7 @@ class NoWorld(ValueError):
 
 
 def _rel(path: Path) -> str:
-    return str(path.relative_to(REPO)) if path.is_relative_to(REPO) else str(path)
+    return path.relative_to(REPO).as_posix() if path.is_relative_to(REPO) else str(path)  # used in URLs: no backslashes
 
 
 def _tail(text: str, n: int = 12) -> str:

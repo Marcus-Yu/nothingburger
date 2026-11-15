@@ -137,14 +137,19 @@ function demoSection(plan) {
 function demoRow(demo) {
   const squeeze = demo.kind === 'squeeze';
   const state = h('p.state');
-  const ask = h('button.pill.dark.xs', { type: 'button' }, 'Ask the headset');
-  const stop = h('button.pill.ghost.xs', { type: 'button', disabled: true }, 'Stop');
+  const ask = h('button.pill.dark.xs', { type: 'button' }, demo.done ? 'Redo this take' : 'Ask the headset');
+  const stop = h('button.pill.ghost.xs', { type: 'button', disabled: !demo.busy }, 'Stop');
+  // the panel is rebuilt on every poll of the agent, so what a take said lives on the demo, not on this row
+  demo.row = { state, ask, stop };
+  if (demo.status) { state.className = demo.status.cls; state.textContent = demo.status.text; }
+  if (demo.busy) ask.disabled = true;
   stop.addEventListener('click', () => post('/demos/stop', {}).catch(() => {}));
-  ask.addEventListener('click', () => filmDemo(demo, ask, stop, state));
+  ask.addEventListener('click', () => filmDemo(demo));
   const offline = () => {
     ask.disabled = !backend.online;
     if (!backend.online && !state.textContent) { state.className = 'state'; state.textContent = 'Filming needs the backend running.'; }
     if (backend.online && state.textContent === 'Filming needs the backend running.') state.textContent = '';
+    if (demo.busy) ask.disabled = true;
   };
   const row = h('div.demo',
     h('div.demo-top', tag(squeeze ? 'Squeeze' : 'Motion', squeeze ? 'var(--tape)' : 'var(--scan)'), h('b', demo.chore)),
@@ -155,29 +160,82 @@ function demoRow(demo) {
   return row;
 }
 
-async function filmDemo(demo, ask, stop, state) {
-  ask.disabled = true;
-  stop.disabled = false;
-  state.className = 'state';
+/* The gloves' fingertip pressure, live (GET /gloves/recent), as on web/gloves.html. One element for the
+   page: the panel is rebuilt on every poll of the agent, and the graph is put back into it as it is. */
+const FINGERS = ['thumb', 'index', 'middle', 'ring', 'pinky'];
+const FINGER_COLOURS = ['#e5484d', '#f5a524', '#30a46c', '#3e8ef7', '#a368e8'];
+let gloveBox = null;
+function gloveGraph() {
+  if (gloveBox) return gloveBox;
+  const canvas = h('canvas', { style: 'width:100%;height:130px;display:block' });
+  const legend = h('p.note', { style: 'margin:4px 0 0;font-variant-numeric:tabular-nums' });
+  gloveBox = h('div.demo', h('div.demo-top', tag('Live', 'var(--tape)'), h('b', 'Fingertip pressure')), canvas, legend);
+  const draw = (g) => {
+    const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, hgt = canvas.clientHeight;
+    if (!w) return;
+    if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(hgt * dpr); }
+    const x = canvas.getContext('2d');
+    x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, hgt);
+    x.strokeStyle = 'rgba(128,128,128,.25)'; x.lineWidth = 1;
+    for (const v of [0, 2000, 4095]) { const y = 4 + (hgt - 8) * (1 - v / 4095); x.beginPath(); x.moveTo(0, y); x.lineTo(w, y); x.stroke(); }
+    if (!g) return;
+    g.raw.forEach((series, k) => {
+      x.strokeStyle = FINGER_COLOURS[k]; x.lineWidth = 1.6; x.beginPath();
+      series.forEach((v, i) => { const px = w + w * g.t[i] / 10, py = 4 + (hgt - 8) * (1 - v / 4095); if (i) x.lineTo(px, py); else x.moveTo(px, py); });
+      x.stroke();
+    });
+  };
+  (async function loop() {
+    for (;;) {
+      await sleep(gloveBox.isConnected ? 150 : 1000);
+      if (!gloveBox.isConnected || !backend.online) continue;
+      try {
+        const d = await get('/gloves/recent?seconds=10', 3000);
+        const live = d.gloves.filter((g) => g.t.length);
+        const g = live.sort((a, b) => Math.max(...b.raw.flat(), 0) - Math.max(...a.raw.flat(), 0))[0];   // the glove being pressed
+        draw(g);
+        legend.replaceChildren(...(g
+          ? [`${g.hand} glove · `, ...FINGERS.flatMap((f, k) => [h('b', { style: `color:${FINGER_COLOURS[k]}` }, f), ` ${g.raw[k].length ? g.raw[k][g.raw[k].length - 1] : 0}  `]),
+             d.recording ? h('b', { style: 'color:#e5484d' }, ` ● recording ${Math.round(d.recording.for_s)} s`) : '']
+          : [d.gloves.length ? 'The glove is connected but silent: is it powered?' : 'No glove connected to the backend.']));
+      } catch { /* the backend is restarting: try again */ }
+    }
+  })();
+  return gloveBox;
+}
+
+async function filmDemo(demo) {
+  const say = (cls, text) => {   // on the demo and on whichever row shows it now
+    demo.status = { cls, text };
+    if (demo.row) { demo.row.state.className = cls; demo.row.state.textContent = text; }
+  };
+  demo.busy = true;
+  demo.row.ask.disabled = true;
+  demo.row.stop.disabled = false;
   try {
+    if (demo.lastId) { await post(`/demos/${encodeURIComponent(demo.lastId)}/discard`, {}).catch(() => {}); demo.lastId = null; }   // a redo: the old take is set aside
+    demo.done = false;
     const asked = await post('/demos/request', { chore: demo.chore, kind: demo.kind, max_seconds: 45 });
-    state.textContent = 'Sent. Put on the headset: it shows the task and counts down before recording.';
+    say('state', 'Sent. Put on the headset: it shows the task and counts down before recording.');
     for (let waited = 0; waited < 180; waited += 2) {
       await sleep(2000);
       let read;
       try { read = await get(`/demos/${encodeURIComponent(asked.id)}/read`); } catch { continue; }   // 404 until it is uploaded
-      state.className = 'state ok';
-      state.textContent = `Recorded ${read.duration_s} s. ` + describe(read.read_as);
+      demo.done = true;
+      demo.lastId = asked.id;
+      say('state ok', `✓ Data collected: ${read.duration_s} s recorded. ` + describe(read.read_as));
       return;
     }
-    state.className = 'state warn';
-    state.textContent = 'No recording arrived in three minutes. Is the headset awake and connected?';
+    say('state warn', 'No recording arrived in three minutes. Is the headset awake and connected?');
   } catch (e) {
-    state.className = 'state warn';
-    state.textContent = `Couldn’t ask the headset: ${e.message}`;
+    say('state warn', `Couldn’t ask the headset: ${e.message}`);
   } finally {
-    ask.disabled = !backend.online;
-    stop.disabled = true;
+    demo.busy = false;
+    if (demo.row) {
+      demo.row.ask.disabled = !backend.online;
+      demo.row.ask.textContent = demo.done ? 'Redo this take' : 'Ask the headset';
+      demo.row.stop.disabled = true;
+    }
   }
 }
 
@@ -365,6 +423,7 @@ function renderAgent(view, s, mine) {
     const waiting = step.kind === 'demo' && view.status !== 'working';
     kids.push(section(3, 'Show it once',
       h('p.txt', d.message || 'Recorded with the Quest and the pressure-sensor gloves.'),
+      gloveGraph(),
       current.demos.map(demoRow),
       waiting ? h('div.row', go) : null));
   }
@@ -544,7 +603,18 @@ function robotResult(d, s) {
   if (d.tasks_source && /^rule/.test(d.tasks_source)) out.push(h('p.note', /model named no task/.test(d.tasks_source)
     ? 'Tasks: Claude asked instead of naming a task, so the job was matched to this space by rule.'
     : 'Tasks: matched from your words to this space by rule (no model read the job).'));
-  if ((d.questions || []).length) out.push(h('div.qs', h('p.note', 'Claude would like to know (the run went on without answers):'), h('ul.plan-steps', d.questions.map((q) => h('li', q)))));
+  if ((d.questions || []).length) {
+    const answer = h('input', { type: 'text', placeholder: 'Your answer, e.g. the recycling bin by the entrance', style: 'flex:1;min-width:0' });
+    const again = h('button.pill.dark.xs', { type: 'submit' }, 'Answer and run again');
+    const form = h('form.row', answer, again);
+    form.addEventListener('submit', (e) => {   // the answer joins the job's words, and the job is read again with it
+      e.preventDefault();
+      const said = answer.value.trim();
+      if (said) planJob(`${String(current.job || '').replace(/\s*\(answer: .*\)$/, '')} (answer: ${said})`);
+    });
+    out.push(h('div.qs', h('p.note', 'Claude would like to know (the run went on without an answer; answer here to run it again):'),
+      h('ul.plan-steps', d.questions.map((q) => h('li', q))), form));
+  }
   if (!d.valid) out.push(h('p.state.warn', 'Some run files didn’t validate against the contracts.'));
   if (d.snapshot) {
     const open = h('button.pill.dark.xs', { type: 'button' }, 'Open Robot Design →');
