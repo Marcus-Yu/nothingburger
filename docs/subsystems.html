@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Robot Parts Catalog</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: left = robot stack diagram as slot picker; right = filterable card sheet. Stacks to one column on phones. */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --fg:#17202a; --muted:#5b6876; --line:#d8dee5;
+  --accent:#2f5bd3; --accent-soft:#e3eafb;
+  --now:#1f7a4d; --now-bg:#dcf1e5; --next:#9a5b00; --next-bg:#fbeacc; --later:#5b6876; --later-bg:#e6eaef;
+  --contract:#a3324a;
+  --f-display:"Archivo",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141a; --panel:#171e26; --fg:#e4e9ef; --muted:#93a1b0; --line:#2a3440;
+  --accent:#7d9cf5; --accent-soft:#1f2b48;
+  --now:#6fd39f; --now-bg:#173326; --next:#f0b65a; --next-bg:#3a2a10; --later:#a5b1be; --later-bg:#26303b;
+  --contract:#f08aa0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141a; --panel:#171e26; --fg:#e4e9ef; --muted:#93a1b0; --line:#2a3440;
+  --accent:#7d9cf5; --accent-soft:#1f2b48;
+  --now:#6fd39f; --now-bg:#173326; --next:#f0b65a; --next-bg:#3a2a10; --later:#a5b1be; --later-bg:#26303b;
+  --contract:#f08aa0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0;text-wrap:balance}
+.lede{color:var(--muted);max-width:68ch;margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+.controls{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center}
+.group{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.group .lbl{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+button.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:5px 11px;border-radius:999px;cursor:pointer}
+button.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+button.chip:focus-visible,.slot:focus-visible,.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.main{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start}
+@media (max-width:820px){.main{grid-template-columns:1fr}}
+.stack{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px}
+@media (max-width:820px){.stack{position:static}}
+.stack h2,.sheet h2{font-family:var(--f-display);font-size:15px;font-weight:700;margin:0}
+svg{width:100%;height:auto;display:block}
+.slot{cursor:pointer}
+.slot rect{fill:var(--bg);stroke:var(--line);stroke-width:1.5;transition:fill .15s}
+.slot text{fill:var(--fg);font-family:var(--f-mono);font-size:12px}
+.slot .n{fill:var(--muted);font-size:10px}
+.slot.on rect{fill:var(--accent-soft);stroke:var(--accent)}
+.slot.dim{opacity:.35}
+.link{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:3 3}
+.legend{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.sheet{display:flex;flex-direction:column;gap:14px;min-width:0}
+.sheet-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.section{display:flex;flex-direction:column;gap:8px}
+.section-title{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:6px}
+.section-title h3{font-family:var(--f-display);font-weight:700;font-size:18px;margin:0}
+.section-title .ans{font-size:13px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.card .id{font-family:var(--f-mono);font-size:13px;font-weight:500;word-break:break-all}
+.pill{font-family:var(--f-mono);font-size:11px;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.p-Now{color:var(--now);background:var(--now-bg)}.p-Next{color:var(--next);background:var(--next-bg)}.p-Later{color:var(--later);background:var(--later-bg)}
+.what{font-weight:600;font-size:14px}
+.when{font-size:13.5px;color:var(--fg)}
+.meta{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12.5px;color:var(--muted)}
+.meta dt{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding-top:1px}
+.meta dd{margin:0;min-width:0}
+.tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:11px;font-family:var(--f-mono);border:1px solid var(--line);border-radius:4px;padding:0 6px;color:var(--muted)}
+.tag.contract{color:var(--contract);border-color:currentColor}
+.tag.min{color:var(--accent);border-color:currentColor}
+.empty{color:var(--muted);padding:20px;text-align:center;border:1px dashed var(--line);border-radius:8px}
+.lower{display:grid;grid-template-columns:1.4fr 1fr;gap:24px}
+@media (max-width:820px){.lower{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.box h2{font-family:var(--f-display);font-size:18px;margin:0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td code{font-size:12px}
+ul.checks{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+footer{font-size:12.5px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">docs/SUBSYSTEMS.md · draft 2026-11-14</span>
+    <h1>Robot parts catalog</h1>
+    <p class="lede">Every subsystem the composer could build a robot from. Each is a part card in <code>catalog/&lt;slot&gt;/</code>, picked because a requirement needs it and confirmed by a check in code. Click a slot on the robot or filter by job and priority.</p>
+  </header>
+
+  <div class="controls">
+    <div class="group" role="group" aria-label="Job">
+      <span class="lbl">Job</span>
+      <button class="chip" data-job="all" aria-pressed="true">All</button>
+      <button class="chip" data-job="bag" aria-pressed="false">Trash bag</button>
+      <button class="chip" data-job="bulb" aria-pressed="false">Light bulb</button>
+      <button class="chip" data-job="wipe" aria-pressed="false">Wipe</button>
+    </div>
+    <div class="group" role="group" aria-label="Priority">
+      <span class="lbl">Priority</span>
+      <button class="chip" data-pri="Now" aria-pressed="true">Now</button>
+      <button class="chip" data-pri="Next" aria-pressed="true">Next</button>
+      <button class="chip" data-pri="Later" aria-pressed="true">Later</button>
+    </div>
+    <div class="group">
+      <button class="chip" id="minonly" aria-pressed="false">Minimum set only</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <aside class="stack">
+      <h2>Slots on the robot</h2>
+      <svg id="robot" viewBox="0 0 268 420" role="img" aria-label="Robot slot diagram"></svg>
+      <div class="legend">
+        <span>Solid: slots in <code>design.json</code> today.</span>
+        <span>Dashed: need a contract change to become slots.</span>
+      </div>
+    </aside>
+
+    <section class="sheet">
+      <div class="sheet-head">
+        <h2 id="sheet-title">All slots</h2>
+        <span class="count" id="count"></span>
+      </div>
+      <div id="sections"></div>
+    </section>
+  </div>
+
+  <div class="lower">
+    <div class="box">
+      <h2>Minimum set for the three jobs</h2>
+      <div class="tbl"><table>
+        <thead><tr><th>Job</th><th>Base</th><th>Reach</th><th>Wrist</th><th>Gripper</th><th>Sensors</th></tr></thead>
+        <tbody>
+          <tr><td>Trash bag</td><td><code>diff_drive_compact</code> / <code>_narrow</code></td><td><code>fixed_column</code> or <code>telescoping_mast</code></td><td><code>fixed</code></td><td><code>parallel_jaw</code></td><td><code>fingertip_force</code></td></tr>
+          <tr><td>Light bulb</td><td><code>diff_drive_compact</code> / <code>_narrow</code></td><td><code>telescoping_mast</code> (<code>scissor_lift</code> above ~3 m)</td><td><code>continuous_roll</code></td><td><code>three_finger_soft</code></td><td><code>fingertip_force</code>, <code>wrist_camera</code></td></tr>
+          <tr><td>Wipe</td><td><code>diff_drive_compact</code> / <code>_narrow</code></td><td><code>mast_with_boom</code></td><td><code>compliant_pad</code></td><td><code>wipe_pad</code></td><td><code>wrist_ft</code></td></tr>
+        </tbody>
+      </table></div>
+      <p style="margin:0;font-size:13.5px;color:var(--muted)">13 cards cover all three jobs through both kinds of doorway, plus <code>structure.counterweight</code> if the stability check fails.</p>
+    </div>
+    <div class="box">
+      <h2>Checks the new parts need</h2>
+      <ul class="checks">
+        <li><b>Tip-over:</b> centre of mass inside the wheelbase with the reach at full height and full payload.</li>
+        <li><b>Joint torque:</b> each motor's rating against its load at the worst pose.</li>
+        <li><b>Stowed envelope:</b> width, length, height against the narrowest passage.</li>
+        <li><b>Runtime:</b> battery against route length and task time.</li>
+        <li><b>Force band:</b> grip and wrist force covers the band measured at home, with margin.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>Source: <code>docs/SUBSYSTEMS.md</code>, built from <code>contracts/design.schema.json</code>, <code>contracts/build.schema.json</code> and <code>docs/PLAN_REVISED.md</code>. The catalog is empty today; the example run uses six of these cards.</footer>
+</div>
+
+<script>
+const SLOTS={
+  base:{name:"Base",ans:"Fits doorways, hallways and steps: max_width_m, max_length_m, min_turn_width_m, max_step_m",inSchema:true},
+  reach:{name:"Reach",ans:"Gets the hand to the target: min/max_height_m, max_horizontal_m, payload_kg",inSchema:true},
+  wrist:{name:"Wrist",ans:"Orients the hand: roll and tilt the demo needs (wrist.roll_turns)",inSchema:true},
+  gripper:{name:"Gripper",ans:"Holds the object: aperture range and force bands from the home demo",inSchema:true},
+  sensor:{name:"Sensors",ans:"What the robot feels and sees; kinds already listed in build.json",inSchema:true},
+  actuator:{name:"Actuators",ans:"Motors sized to the load; today bundled inside each card",inSchema:false},
+  power:{name:"Power",ans:"Runtime against the job; build.json already reports battery_runtime_min",inSchema:false},
+  compute:{name:"Compute & safety",ans:"Mass and power draw only; BOM lines without MJCF at first",inSchema:false},
+  structure:{name:"Structure & accessories",ans:"Stability fixes and job-specific add-ons",inSchema:false}
+};
+const C=(slot,id,what,when,params,sim,pri,jobs=[],extra={})=>({slot,id,what,when,params,sim,pri,jobs,...extra});
+const CARDS=[
+ C("base","base.diff_drive_compact","Two hub motors, two casters","Most units: doors 0.65 m and up","width_m, length_m","Easy: two hinge joints, velocity actuators","Now",["bag","bulb","wipe"],{min:true,example:true}),
+ C("base","base.diff_drive_narrow","Same drive, long and thin","Doorways 0.54–0.65 m, the narrowest in the probe","width_m down to ~0.45, length_m","Easy; tips more easily, so stability check matters","Now",["bag","bulb","wipe"],{min:true}),
+ C("base","base.omni_mecanum","Four mecanum wheels","Hallway too narrow to turn; sideways parking under a fixture","width_m, length_m","Medium: model rollers or fake with a planar slide","Next",["bulb","wipe"]),
+ C("base","base.tracked","Rubber tracks","Thresholds and small steps above ~2 cm","width_m, length_m, max_step_m","Hard: approximate with many small wheels","Later"),
+ C("base","base.stair_climber","Tracks with flippers, or legs","More than one floor and no lift","width_m, step_height_m","Hard; out of scope unless a multi-floor unit is chosen","Later"),
+ C("base","base.fixed_mount","Clamp or stand, no drive","Bench test, or a job in one spot","footprint_m","Trivial","Later"),
+ C("reach","reach.telescoping_mast","Nested stages on a lead screw","Ceilings up to ~3 m; base parks under the fixture","stroke_m","Easy: one prismatic joint","Now",["bulb","bag"],{min:true,example:true}),
+ C("reach","reach.scissor_lift","Scissor stack with a platform","High ceilings (3.57 m in the probe) where a mast stows too tall","stroke_m, platform_m","Medium: prismatic joint, scissor visual only","Next",["bulb"]),
+ C("reach","reach.mast_with_boom","Mast plus horizontal boom","Target over a counter the base can't get under (>0.3 m out)","stroke_m, boom_m","Easy: two prismatic joints","Now",["wipe"],{min:true}),
+ C("reach","reach.planar_arm_2link","Shoulder and elbow on the carriage","Wiping a path; reaching into a bin","link1_m, link2_m","Easy","Next",["wipe","bag"]),
+ C("reach","reach.arm_6dof","Full arm on base or carriage","Arbitrary pose; general fallback","reach_m, payload_kg","Medium: more joints to retarget","Later"),
+ C("reach","reach.fixed_column","Fixed post","Low targets: a bag off the floor at tray height","height_m","Trivial","Next",["bag"],{min:true}),
+ C("wrist","wrist.fixed","Rigid flange","Grip and lift, no twist","none","Trivial","Now",["bag"],{min:true}),
+ C("wrist","wrist.continuous_roll","Roll joint, no end stop","Unscrewing a bulb over several turns","roll_turns","Easy: continuous hinge","Now",["bulb"],{min:true,example:true}),
+ C("wrist","wrist.pitch_roll","Pitch then roll","Angled fixtures; pointing the camera into the socket","pitch_range_deg","Easy","Next",["bulb"]),
+ C("wrist","wrist.compliant_pad","Spring-loaded or passive gimbal","Wiping: pad stays flat, press force steady","stiffness_N_per_m, travel_m","Easy: slide joint with a spring","Now",["wipe"],{min:true}),
+ C("wrist","wrist.spherical_3axis","Roll, pitch, yaw","General use with a 6-DoF arm","ranges","Easy","Later"),
+ C("gripper","gripper.parallel_jaw","Two flat fingers on one slide","Bag handles, boxes; simplest grip","max_aperture_m, max_force_N","Easy","Now",["bag"],{min:true}),
+ C("gripper","gripper.three_finger_soft","Three compliant fingers","Round fragile objects: the bulb","max_aperture_m","Medium: soft contact needs tuned solref/solimp","Now",["bulb"],{min:true,example:true}),
+ C("gripper","gripper.bulb_cup","Soft friction cup, like a bulb-changer pole","Bulbs with fewer joints; less squeeze control","cup_diameter_m","Easy: one body, friction does the work","Next",["bulb"]),
+ C("gripper","gripper.suction","Vacuum cup","Flat items: covers, panels, glass shades","cup_diameter_m, vacuum_kPa","Medium: MuJoCo adhesion actuators","Later",["bulb"]),
+ C("gripper","gripper.hook","Passive hook","Carrying a tied bag by its knot or handle","opening_m","Easy","Next",["bag"]),
+ C("gripper","gripper.wipe_pad","Flat pad, no fingers","Wiping a counter","pad_w_m, pad_l_m","Easy; press force from reach and wrist","Now",["wipe"],{min:true}),
+ C("gripper","gripper.tool_changer","Quick-change plate holding several tools","One robot doing several jobs in a unit","tools[]","Medium","Later",["bag","bulb","wipe"],{contract:true}),
+ C("sensor","sensor.fingertip_force","Normal force per finger","Keep grip inside the demo's force band","count","Touch sensor sites","Now",["bulb","bag"],{min:true,example:true}),
+ C("sensor","sensor.wrist_camera","RGB image at the hand","Inspect the empty socket for scorch, glass, bent contact","—","Camera on the wrist body","Now",["bulb"],{min:true,example:true}),
+ C("sensor","sensor.wrist_ft","6-axis force/torque at the wrist","Steady press while wiping; feel the bulb seat","—","Force and torque sensors on a site","Now",["wipe","bulb"],{min:true}),
+ C("sensor","sensor.depth_camera","Depth at the hand or mast","Find the fixture when panorama placement is off","—","Rendered depth","Next",["bulb"]),
+ C("sensor","sensor.lidar","2D scan on the base","Localise and avoid furniture on the route","—","Rangefinder sites in a fan","Next",["bag","bulb","wipe"]),
+ C("sensor","sensor.imu","Tilt and acceleration","Tip-over warning with the mast up","—","Accelerometer and gyro","Next",["bulb"]),
+ C("sensor","sensor.bumper","Contact switch around the base","Stop on a collision","—","Touch sensor","Next",["bag","bulb","wipe"]),
+ C("sensor","sensor.joint_torque","Torque at each joint","Contact detection without fingertip sensors","—","Joint actuator force","Later"),
+ C("actuator","actuator.position_servo","Position-controlled servo","Small joints: wrist, fingers (default)","torque_Nm","Position actuator","Now",[],{contract:true}),
+ C("actuator","actuator.geared_dc","Geared DC motor with encoder","Wheels, mast lead screw (default)","torque_Nm, rpm","Velocity actuator","Now",[],{contract:true}),
+ C("actuator","actuator.series_elastic","Torque-controlled or series-elastic joint","Grip and wipe without fingertip sensors","stiffness","Spring plus motor","Later",["wipe"],{contract:true}),
+ C("actuator","actuator.holding_brake","Locks the mast with power off","Mast above someone's head; refuse to extend without it","—","Equality constraint when off","Next",["bulb"],{contract:true}),
+ C("power","power.battery_pack","Li-ion pack sized by capacity","Always; sized to room count and route length","capacity_Wh","None (mass only)","Next",["bag","bulb","wipe"],{contract:true}),
+ C("power","power.dock","Charging contacts and a dock","Robot stays in the building between jobs","—","None","Later",[],{contract:true}),
+ C("power","power.tether","Cable to a wall socket","Bench tests; one-room jobs","length_m","None","Later",[],{contract:true}),
+ C("compute","compute.sbc","Small onboard computer","Default: runs the task program and sensors","—","BOM only","Next",[],{contract:true}),
+ C("compute","compute.gpu_module","Onboard GPU","Socket-inspection vision on the robot, not off-board","—","BOM only","Later",["bulb"],{contract:true}),
+ C("compute","safety.estop","Red button plus safety relay","Always, for a real build","—","BOM only","Next",[],{contract:true}),
+ C("compute","safety.light_tower","Status light and buzzer","Working near people","—","BOM only","Later",[],{contract:true}),
+ C("structure","structure.counterweight","Ballast low on the base","Stability fails with the mast up on a narrow base","mass_kg","Easy: a heavy box","Now",["bulb"],{contract:true}),
+ C("structure","structure.mount_adapter","Plate joining mismatched mounts","Any card pair that doesn't mate directly","pattern","Trivial","Next",[],{contract:true}),
+ C("structure","accessory.bin","Open tote on the base","Carry the bag out instead of holding it the whole route","volume_L","Easy","Next",["bag"],{contract:true}),
+ C("structure","accessory.bulb_holder","Cup holding the new bulb","Bulb job end to end: remove old, fit new","—","Easy","Next",["bulb"],{contract:true}),
+ C("structure","accessory.spray_nozzle","Pump and nozzle","Wiping with cleaner","—","Visual only","Later",["wipe"],{contract:true}),
+ C("structure","accessory.work_light","LED at the wrist","Socket inspection in a dark fixture","—","MuJoCo light","Next",["bulb"],{contract:true}),
+];
+
+const state={slot:null,job:"all",pri:new Set(["Now","Next","Later"]),min:false};
+
+// Robot diagram: boxes stacked bottom-up, side slots on the right.
+const svg=document.getElementById("robot");
+const NS="http://www.w3.org/2000/svg";
+const layout=[
+ {k:"gripper",x:20,y:16,w:150,h:46},
+ {k:"wrist",x:20,y:80,w:150,h:40},
+ {k:"reach",x:20,y:138,w:150,h:110},
+ {k:"base",x:20,y:266,w:150,h:60},
+ {k:"sensor",x:184,y:16,w:72,h:46},
+ {k:"actuator",x:184,y:138,w:72,h:46,dash:true},
+ {k:"compute",x:184,y:202,w:72,h:46,dash:true},
+ {k:"power",x:184,y:266,w:72,h:60,dash:true},
+ {k:"structure",x:20,y:344,w:236,h:52,dash:true},
+];
+const label={gripper:"gripper",wrist:"wrist",reach:"reach",base:"base",sensor:"sensors",actuator:"actuator",compute:"compute",power:"power",structure:"structure / accessories"};
+[[95,62,95,80],[95,120,95,138],[95,248,95,266],[170,39,184,39],[170,161,184,161],[170,225,184,225],[170,296,184,296],[95,326,95,344]].forEach(([a,b,c,d])=>{
+  const l=document.createElementNS(NS,"line");l.setAttribute("x1",a);l.setAttribute("y1",b);l.setAttribute("x2",c);l.setAttribute("y2",d);l.setAttribute("class","link");svg.appendChild(l)});
+layout.forEach(s=>{
+  const g=document.createElementNS(NS,"g");g.setAttribute("class","slot");g.dataset.slot=s.k;g.setAttribute("tabindex","0");g.setAttribute("role","button");
+  g.setAttribute("aria-label",SLOTS[s.k].name);
+  const r=document.createElementNS(NS,"rect");Object.entries({x:s.x,y:s.y,width:s.w,height:s.h,rx:6}).forEach(([a,v])=>r.setAttribute(a,v));
+  if(s.dash)r.setAttribute("stroke-dasharray","5 4");
+  const t=document.createElementNS(NS,"text");t.setAttribute("x",s.x+10);t.setAttribute("y",s.y+20);t.textContent=label[s.k];
+  const n=document.createElementNS(NS,"text");n.setAttribute("x",s.x+10);n.setAttribute("y",s.y+36);n.setAttribute("class","n");n.dataset.n=s.k;
+  g.append(r,t,n);svg.appendChild(g);
+  const pick=()=>{state.slot=state.slot===s.k?null:s.k;render()};
+  g.addEventListener("click",pick);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick()}});
+});
+
+document.querySelectorAll("[data-job]").forEach(b=>b.addEventListener("click",()=>{state.job=b.dataset.job;render()}));
+document.querySelectorAll("[data-pri]").forEach(b=>b.addEventListener("click",()=>{const p=b.dataset.pri;state.pri.has(p)?state.pri.delete(p):state.pri.add(p);render()}));
+document.getElementById("minonly").addEventListener("click",()=>{state.min=!state.min;render()});
+
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function visible(c){
+  if(!state.pri.has(c.pri))return false;
+  if(state.job!=="all"&&!c.jobs.includes(state.job))return false;
+  if(state.min&&!c.min)return false;
+  return true;
+}
+function render(){
+  document.querySelectorAll("[data-job]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.job===state.job));
+  document.querySelectorAll("[data-pri]").forEach(b=>b.setAttribute("aria-pressed",state.pri.has(b.dataset.pri)));
+  document.getElementById("minonly").setAttribute("aria-pressed",state.min);
+  const vis=CARDS.filter(visible);
+  layout.forEach(s=>{
+    const g=svg.querySelector(`[data-slot="${s.k}"]`);const n=vis.filter(c=>c.slot===s.k).length;
+    g.classList.toggle("on",state.slot===s.k);g.classList.toggle("dim",n===0||(state.slot&&state.slot!==s.k));
+    svg.querySelector(`[data-n="${s.k}"]`).textContent=n+(n===1?" card":" cards");
+  });
+  const shown=state.slot?vis.filter(c=>c.slot===state.slot):vis;
+  document.getElementById("sheet-title").textContent=state.slot?SLOTS[state.slot].name:"All slots";
+  document.getElementById("count").textContent=`${shown.length} of ${CARDS.length} cards`;
+  const out=document.getElementById("sections");out.innerHTML="";
+  const keys=state.slot?[state.slot]:Object.keys(SLOTS);
+  let any=false;
+  keys.forEach(k=>{
+    const cs=shown.filter(c=>c.slot===k);if(!cs.length)return;any=true;
+    const sec=document.createElement("div");sec.className="section";
+    sec.innerHTML=`<div class="section-title"><h3>${SLOTS[k].name}</h3><span class="ans">${esc(SLOTS[k].ans)}</span></div><div class="cards"></div>`;
+    const grid=sec.querySelector(".cards");
+    cs.forEach(c=>{
+      const el=document.createElement("article");el.className="card";
+      const tags=[c.min?'<span class="tag min">minimum set</span>':"",c.example?'<span class="tag">in example run</span>':"",c.contract?'<span class="tag contract">contract change</span>':""].join("");
+      el.innerHTML=`<div class="top"><span class="id">${esc(c.id)}</span><span class="pill p-${c.pri}">${c.pri}</span></div>
+        <div class="what">${esc(c.what)}</div><div class="when">${esc(c.when)}</div>
+        <dl class="meta"><dt>Params</dt><dd class="mono">${esc(c.params)}</dd><dt>MuJoCo</dt><dd>${esc(c.sim)}</dd></dl>
+        ${tags?`<div class="tags">${tags}</div>`:""}`;
+      grid.appendChild(el);
+    });
+    out.appendChild(sec);
+  });
+  if(!any)out.innerHTML='<div class="empty">No cards match these filters. Turn a priority back on or pick another job.</div>';
+}
+render();
+</script>
