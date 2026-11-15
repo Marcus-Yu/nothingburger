@@ -1,10 +1,12 @@
-/* The route stage: a bird's-eye toy model of the run's building on the drafting sheet, the
-   planner's search replayed over it, and the designed robot driving the recorded route.
+/* The route stage: the run's building from above on the drafting sheet, the planner's search
+   replayed over it, and the designed robot driving the recorded route. The building is the scanned
+   place itself where there is one (place.js: the room mesh, or an outdoor lot's aerial photo); a toy
+   model of it, drawn from the world file, shows until that has loaded and whenever there is none.
 
    World frame (world.json): metres, Z up, +X east, +Y north. Three.js: Y up, so a world point
    (x, y, z) is drawn at (x, z, -y): north is up the screen from the starting view.
 
-   createRouteStage(canvas, { snap, reducedMotion, insets }) -> an object the page drives:
+   createRouteStage(canvas, { snap, agentBase, reducedMotion, insets, onPlace }) -> an object the page drives:
      search(i, ms)    reveal leg i's explored cells and dropped branches over ms
      settle(i)        dim leg i's search to a faint trace
      draw(i, ms)      draw leg i's chosen route
@@ -13,12 +15,15 @@
      labels()         screen positions for the place labels
      finishAll()  reset()  nudge()  tilt()  dispose()
 
+   agentBase: the design workflow server, which has the scanned rooms' meshes (place.js; default localhost:8020).
+   onPlace(state): 'fading' as the real place comes in, then 'mesh' or 'photo'.
    insets(w, h) -> { top, right, bottom, left }: how many px of each edge of the canvas the page covers
    (its heading, the route panel, the buttons). The building, the route, the dock and the scale bar
    are framed in what is left, so none of them sits under the page's own things. */
 import * as THREE from 'three';
-import { buildRobot, solidKit, COLORS } from './parts.js';
-import { paperWorld, grid, lines, contactShadow, tweens, easeInOut, disposeScene } from './drafting.js';
+import { buildRobot, solidKit, outlineMaterial, COLORS } from './parts.js';
+import { PAPER, paperWorld, grid, lines, contactShadow, tweens, easeInOut, disposeScene } from './drafting.js';
+import { realPlace } from './place.js';
 
 const WALL_H = 0.5;          // walls are cut low so the bird's-eye view sees inside
 const WALL_T = 0.12;
@@ -129,7 +134,23 @@ function droppedLine(points) {
   return { group: g2, line, cross };
 }
 
-export function routeTube(waypoints, radius = 0.07) {
+/* How the route and the rings are drawn once the real place is under them (place.js), one set of
+   materials a stage. On the toy building none of it shows.
+     casing            a dark edge for the gold route, which lies on a photographed floor
+     under, underEdge  the same shapes in a paler gold, drawn over the scan whatever stands in front: a scanned
+                       wall is 2.2 m high and hides the floor behind it, so the part of a route (or a ring) that
+                       runs behind one stays readable, paler than the part in plain view
+   They are solid and drawn straight after the scan (renderOrder), so the robot and the pins still cover them. */
+export function routeLook(k = 1) {
+  const casing = Object.assign(outlineMaterial(COLORS.line, 0.03 * k), { transparent: true, opacity: 0, depthWrite: false });
+  const under = new THREE.MeshBasicMaterial({ color: 0xEBD7A6, depthTest: false, depthWrite: false, fog: false, visible: false });
+  const underEdge = Object.assign(outlineMaterial(COLORS.ink, 0.022 * k), { depthTest: false, depthWrite: false, fog: false, visible: false });
+  return { casing, under, underEdge, dispose() { casing.dispose(); under.dispose(); underEdge.dispose(); } };
+}
+const behind = (geom, material, order) => Object.assign(new THREE.Mesh(geom, material), { renderOrder: order });
+export const LIFT_M = 0.07;   // on a scanned floor, which is never quite flat, what is drawn on the ground rides this far above it
+
+export function routeTube(waypoints, radius = 0.07, look = null) {
   const pts = [];
   waypoints.forEach(([x, y]) => {
     const p = at(x, y, 0.06);
@@ -143,7 +164,40 @@ export function routeTube(waypoints, radius = 0.07) {
   const m = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ color: COLORS.gold }));
   geom.setDrawRange(0, 0);
   m.userData.total = geom.index.count;
+  if (look) m.add(new THREE.Mesh(geom, look.casing), behind(geom, look.underEdge, -4.5), behind(geom, look.under, -4));   // the same geometry: each is drawn as far as the route is
   return m;
+}
+
+/** The robot's gold ring, with a dark edge under it that shows on a photographed floor. */
+export function robotRing(look) {
+  const flatRing = (r0, r1, color, opacity, y) => {
+    const m = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 48), new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false }));
+    m.rotation.x = -Math.PI / 2;
+    m.position.y = y;
+    return m;
+  };
+  const halo = flatRing(0.62, 0.7, COLORS.gold, 0.9, 0.02);
+  halo.add(behind(halo.geometry, look.under, -4));
+  return { halo, haloEdge: flatRing(0.58, 0.74, COLORS.line, 0, 0.018), shadow: contactShadow(1.4, 0.32) };
+}
+
+/* A stage's part of the change from the toy building to the real place (place.js calls it with t from
+   0 to 1): the route gets its dark edge and the robot's ring one too; over a scanned floor the things on
+   the ground (`flat`, a group, and the robot's ring and shadow) rise clear of it and the paper's grid
+   drops under it. Returns how far they are lifted. */
+export function dresser({ flat, look, ring, grids }) {
+  return (t, kind) => {
+    const lift = kind === 'mesh' ? LIFT_M * t : 0;
+    look.casing.opacity = t;
+    look.under.visible = look.underEdge.visible = kind === 'mesh' && t >= 1;   // once the scan is solid: until then it is drawn after them, and over them
+    flat.position.y = lift;
+    ring.halo.position.y = 0.02 + lift;
+    ring.haloEdge.position.y = 0.018 + lift;
+    ring.haloEdge.material.opacity = 0.5 * t;
+    ring.shadow.position.y = 0.006 + lift;
+    for (const g of grids) g.position.y = -1.2 * lift;
+    return lift;
+  };
 }
 
 /* North arrow and a scale bar on the ground, as on the landing's site plan. Built around (0, 0);
@@ -163,14 +217,24 @@ function drafting(len, k) {
   arrow.rotation.x = -Math.PI / 2;
   arrow.position.y = 0.012;
   g.add(arrow);
-  return { group: g, north: at(ax, ay + 1.6 * k, 0.02), zero: at(x, y - 0.5 * k, 0.02), end: at(x + len, y - 0.5 * k, 0.02) };
+  // a plate of paper under each, for when they lie on a scan or a photo and not on the sheet (see dress)
+  const plate = new THREE.MeshBasicMaterial({ color: PAPER, transparent: true, opacity: 0, depthWrite: false, fog: false });
+  const under = (w, h, cx, cy) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), plate);
+    m.rotation.x = -Math.PI / 2;
+    m.position.copy(at(cx, cy, 0.004));
+    g.add(m);
+  };
+  under(len + 1.0 * k, 1.1 * k, x + len / 2, y - 0.05 * k);
+  under(1.3 * k, 2.3 * k, ax, ay + 0.8 * k);
+  return { group: g, plate, north: at(ax, ay + 1.6 * k, 0.02), zero: at(x, y - 0.5 * k, 0.02), end: at(x + len, y - 0.5 * k, 0.02) };
 }
 
 const niceLength = (span) => [1, 2, 5, 10, 20, 50].find((v) => v >= span / 5) || 50;
 
 /* ---------- the stage ---------- */
 
-export function createRouteStage(canvas, { snap, reducedMotion = false, insets = () => ({ top: 0, right: 0, bottom: 0, left: 0 }) }) {
+export function createRouteStage(canvas, { snap, agentBase = '', reducedMotion = false, insets = () => ({ top: 0, right: 0, bottom: 0, left: 0 }), onPlace = () => {} }) {
   const { renderer, scene } = paperWorld(canvas);
   const world = snap.world;
   const xs = world.rooms.flatMap((r) => r.polygon.map((p) => p[0])), ys = world.rooms.flatMap((r) => r.polygon.map((p) => p[1]));
@@ -182,11 +246,14 @@ export function createRouteStage(canvas, { snap, reducedMotion = false, insets =
   const furniture = drafting(scaleLen, k);
   scene.add(furniture.group);
   // under the building's south-west corner on wide screens; centred under it on phones, which frame it edge to edge
-  const placeFurniture = (compact) => furniture.group.position.copy(at(compact ? (box.x0 + box.x1) / 2 - scaleLen / 2 : box.x0, box.y0 - 1.6 * k));
-  scene.add(grid(Math.ceil(span), 1, 0.12, centre.x, centre.z), grid(Math.ceil(span * 1.6 / 4) * 4, 4, 0.1, centre.x, centre.z));
+  let lift = 0;   // see dress()
+  const placeFurniture = (compact) => furniture.group.position.copy(at(compact ? (box.x0 + box.x1) / 2 - scaleLen / 2 : box.x0, box.y0 - 1.6 * k, lift));
+  const grids = [grid(Math.ceil(span), 1, 0.12, centre.x, centre.z), grid(Math.ceil(span * 1.6 / 4) * 4, 4, 0.1, centre.x, centre.z)];
+  scene.add(...grids);
 
   const kit = solidKit(0.03);
-  scene.add(building(world, kit));
+  const toy = building(world, kit);
+  scene.add(toy);
   const pinKit = solidKit(0.02);
   const pins = {};
   for (const t of snap.tasks) {
@@ -202,27 +269,40 @@ export function createRouteStage(canvas, { snap, reducedMotion = false, insets =
   // the robot, at true size, with a gold ring so it reads from above
   const built = buildRobot(snap.design.parts, snap.catalog);
   const robot = new THREE.Group();
-  const halo = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.7, 48), new THREE.MeshBasicMaterial({ color: COLORS.gold, transparent: true, opacity: 0.9, depthWrite: false }));
-  halo.rotation.x = -Math.PI / 2;
-  halo.position.y = 0.02;
-  robot.add(built.root, halo, contactShadow(1.4, 0.32));
+  const look = routeLook(k);
+  const ringed = robotRing(look);
+  robot.add(built.root, ringed.haloEdge, ringed.halo, ringed.shadow);
   scene.add(robot);
   const setPose = ([x, y, yaw]) => { robot.position.copy(at(x, y)); robot.rotation.y = yaw + Math.PI / 2; };
   setPose(world.dock.pose);
 
+  const flat = new THREE.Group();   // what is drawn on the ground: the search, the routes, the ring
+  scene.add(flat);
   const legs = snap.route.legs.map((leg) => {
     const s = leg.search || { explored: [], dropped: [], bin_m: 0.25 };
     const explored = exploredMesh(s);
     const dropped = s.dropped.map(droppedLine);
-    const tube = routeTube(leg.waypoints, 0.07 * k);
-    scene.add(explored, tube, ...dropped.map((d) => d.group));
+    const tube = routeTube(leg.waypoints, 0.07 * k, look);
+    flat.add(explored, tube, ...dropped.map((d) => d.group));
     return { leg, explored, dropped, tube, n: s.explored.length };
   });
 
   const ring = new THREE.Mesh(new THREE.RingGeometry(0.7, 0.78, 48), new THREE.MeshBasicMaterial({ color: COLORS.gold, transparent: true, opacity: 0, depthWrite: false }));
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = 0.025;
-  scene.add(ring);
+  flat.add(ring);
+
+  /* The real place comes in under all of this (place.js). The searched cells are gold on the toy's paper
+     floor; a scanned floor is often about that colour, so there they turn to paper white. */
+  const onGround = dresser({ flat, look, ring: ringed, grids });
+  const cellTone = [new THREE.Color(COLORS.gold), new THREE.Color(COLORS.paper)];
+  function dress(t, kind) {
+    lift = onGround(t, kind);
+    furniture.group.position.y = lift;
+    furniture.plate.opacity = 0.8 * t;
+    for (const L of legs) L.explored.material.color.lerpColors(cellTone[0], cellTone[1], t);
+  }
+  const place = realPlace({ world, agentBase, renderer, scene, toy, dress, reducedMotion, onState: onPlace });
 
   /* ---------- camera: bird's eye from the south, drag to orbit and tilt ---------- */
 
@@ -413,6 +493,7 @@ export function createRouteStage(canvas, { snap, reducedMotion = false, insets =
     raf = requestAnimationFrame(loop);
     if (!canvas.clientWidth) return;
     tw.tick(now);
+    place.tick();
     renderer.render(scene, camera);
     onFrame();
   }
@@ -424,9 +505,11 @@ export function createRouteStage(canvas, { snap, reducedMotion = false, insets =
   function dispose() {
     cancelAnimationFrame(raf);
     ro.disconnect();
+    place.dispose();
     built.dispose();
     kit.dispose();
     pinKit.dispose();
+    look.dispose();
     disposeScene(scene, renderer);
   }
 

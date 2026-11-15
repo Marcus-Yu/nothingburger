@@ -4,6 +4,7 @@
     .venv/bin/python frontend/robot-design/data/export.py                       # jrr, from the pathing branch
     .venv/bin/python frontend/robot-design/data/export.py --ref HEAD --scenario clinic
     .venv/bin/python frontend/robot-design/data/export.py --run runs/studio/<id>   # any local run folder
+    python3 frontend/robot-design/data/export.py --grounds                      # the outdoor lots' aerial photos, for the route view
 
 Reads the run, the parts catalog and the planner from a git ref with `git archive`, so the
 working tree is never touched and nothing has to be merged first. The output is stamped with
@@ -138,7 +139,30 @@ def world_view(w: dict) -> dict:
         "obstacles": [{"id": o["id"], "room": o.get("room"), "min": o["box"]["min"], "max": o["box"]["max"]} for o in w.get("obstacles", [])],
         "anchors": [{k: a.get(k) for k in ("id", "room", "kind", "point")} for a in w.get("anchors", [])],
         "dock": w.get("dock"), "way_out": w.get("way_out"),
+        **({"floors": [{"id": f.get("id"), "z": f.get("z", 0.0)} for f in w["floors"]]} if w.get("floors") else {}),
     }
+
+
+def grounds() -> None:
+    """Copy each outdoor lot's aerial photo beside the page and list where it lies: data/aerial/grounds.json,
+    {world id: {"image": file name, "extent": [x0, y0, x1, y1] in the world's metres}}. The route view lays the
+    photo on the ground under the route (place.js). Reads world/scenarios/*.json in the working tree."""
+    import shutil
+    out = HERE / "aerial"
+    out.mkdir(exist_ok=True)
+    listing = {}
+    for f in sorted((ROOT / "world" / "scenarios").glob("*.json")):
+        w = load(f)
+        g = w.get("ground") if isinstance(w, dict) else None
+        if not (isinstance(g, dict) and g.get("image") and g.get("extent")):
+            continue
+        src = ROOT / g["image"]
+        if not src.is_file():
+            continue
+        shutil.copyfile(src, out / src.name)
+        listing[w["id"]] = {"image": src.name, "extent": g["extent"], "source": g.get("source")}
+    (out / "grounds.json").write_text(json.dumps(listing, indent=1) + "\n")
+    print(f"wrote {out / 'grounds.json'}: {', '.join(listing) or 'no lots'}")
 
 
 # ---------- route search replay ----------
@@ -260,7 +284,10 @@ def main() -> None:
     ap.add_argument("--run", type=Path, default=None,
                     help="a run folder in this working tree; uses the working tree's nav and catalog instead of --ref")
     ap.add_argument("--out", type=Path, default=None)
+    ap.add_argument("--grounds", action="store_true", help="only refresh data/aerial/: the outdoor lots' photos and where they lie")
     a = ap.parse_args()
+    if a.grounds:
+        return grounds()
 
     if a.run:
         run = a.run.resolve()

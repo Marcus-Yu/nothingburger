@@ -62,7 +62,7 @@ export function tweens(reducedMotion) {
     tick(now) {
       for (let i = list.length - 1; i >= 0; i--) {
         const tw = list[i];
-        const t = Math.min((now - tw.t0) / tw.ms, 1);
+        const t = THREE.MathUtils.clamp((now - tw.t0) / tw.ms, 0, 1);   // a frame's time can be just before a tween made during it
         tw.fn(tw.ease(t));
         if (t >= 1) { list.splice(i, 1); tw.done(); }
       }

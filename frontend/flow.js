@@ -401,7 +401,7 @@ function renderAgent(view, s, mine) {
   syncTrace(view, s);
 }
 
-/* the steer options a session was started with, in words: "no ur5e; under $30,000" */
+/* the steer options a session was started with, in words: "no ur5e; under $1,500" */
 function optionsText(o) {
   if (!o) return '';
   const bits = [];
@@ -526,7 +526,7 @@ async function openDesign(d) {
   try {
     const snap = await agent.snapshot(d.snapshot.replace(/\/snapshot\.json$/, ''));
     hideFlow();
-    openRobotDesign({ snapshot: snap, onClose: () => showFlow() });
+    openRobotDesign({ snapshot: snap, agentBase: AGENT_BASE, onClose: () => showFlow() });
   } catch (e) { alert(`Couldn’t load the run: ${e.message}`); }
 }
 

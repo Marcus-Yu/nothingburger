@@ -1,0 +1,62 @@
+{
+ "kerbside_palmetto": {
+  "image": "palmetto.jpg",
+  "extent": [
+   -30.05,
+   -30.039,
+   30.048,
+   30.013
+  ],
+  "source": "Vexcel Imaging ortho photo and building footprints, collection us-tx-cypress-2026"
+ },
+ "lawn_palmetto": {
+  "image": "palmetto.jpg",
+  "extent": [
+   -30.05,
+   -30.039,
+   30.048,
+   30.013
+  ],
+  "source": "Vexcel Imaging ortho photo and building footprints, collection us-tx-cypress-2026"
+ },
+ "lawn_sanpedro": {
+  "image": "sanpedro.jpg",
+  "extent": [
+   -30.02,
+   -30.025,
+   30.061,
+   30.025
+  ],
+  "source": "Vexcel Imaging ortho photo and building footprints, collection us-ca-losangeles-2025"
+ },
+ "parcel_eastland": {
+  "image": "eastland.jpg",
+  "extent": [
+   -30.059,
+   -30.018,
+   30.027,
+   30.023
+  ],
+  "source": "Vexcel Imaging ortho photo and building footprints, collection us-tx-baytown-2026"
+ },
+ "pooldeck_lakes": {
+  "image": "lakes610.jpg",
+  "extent": [
+   -30.022,
+   -30.022,
+   30.021,
+   30.04
+  ],
+  "source": "Vexcel Imaging ortho photo and building footprints, collection us-tx-houston-2026"
+ },
+ "trash_palmetto": {
+  "image": "palmetto.jpg",
+  "extent": [
+   -30.05,
+   -30.039,
+   30.048,
+   30.013
+  ],
+  "source": "Vexcel Imaging ortho photo and building footprints, collection us-tx-cypress-2026"
+ }
+}

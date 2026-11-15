@@ -3,7 +3,7 @@
 
    import { mountLiveDesign } from './robot-design/live.js';
    const live = mountLiveDesign(container, {
-     agentBase: 'http://localhost:8020',  // the design workflow server
+     agentBase: 'http://localhost:8020',  // the design workflow server: the run's events, the catalog, the scanned place's mesh
      run: 'runs/studio/<run>',            // polls <agentBase>/<run>/events?from=<byte>
      replay: 0,                           // N > 0: fetch the whole log once and play it at N× its own speed
      poll: true,                          // false: the host pushes events with live.feed(events)
@@ -16,7 +16,8 @@
    It renders into `container` and sizes to it. Design: each candidate the composer tests shows on
    the turntable, flagged with what failed, at most one every ~0.8 s (the latest wins; the counter
    counts them all); the robot that passes is assembled. Pathing: the building from run_start seen
-   from above, each standoff as it is found, then the route legs, driven. A redesign (robot_fix)
+   from above (the scanned place itself once its mesh has loaded: place.js), each standoff as it is
+   found, then the route legs, driven. A redesign (robot_fix)
    goes back to the turntable; when the redesigns run out (or one finds nothing) the run keeps the
    best robot it had, and so does the view.
 
@@ -41,6 +42,7 @@ export function worldView(w = {}) {
       .map((o) => ({ id: o.id, room: o.room, min: o.box ? o.box.min : o.min, max: o.box ? o.box.max : o.max })),
     anchors: (w.anchors || []).map((a) => pick(a, ['id', 'room', 'kind', 'point'])),
     dock: w.dock || { pose: [0, 0, 0] }, way_out: w.way_out || null,
+    ...(w.floors?.length ? { floors: w.floors.map((f) => pick(f, ['id', 'z'])) } : {}),
   };
 }
 
@@ -252,8 +254,8 @@ function buildDom() {
 
 /* ---------- the bird's-eye view, built up live ---------- */
 
-function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }) {
-  const { THREE, rs, P, D } = mods;
+function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion, agentBase, onPlace }) {
+  const { THREE, rs, P, D, place: PL } = mods;
   const { renderer, scene } = D.paperWorld(canvas);
   const at = rs.at;
   const pts = world.rooms.flatMap((r) => r.polygon);
@@ -263,9 +265,11 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
   const centre = at((box.x0 + box.x1) / 2, (box.y0 + box.y1) / 2);
   const span = Math.max(box.x1 - box.x0, box.y1 - box.y0, 4);
   const k = THREE.MathUtils.clamp(span / 22, 0.35, 1);
-  scene.add(D.grid(Math.ceil(span), 1, 0.12, centre.x, centre.z));
+  const paperGrid = D.grid(Math.ceil(span), 1, 0.12, centre.x, centre.z);
   const kit = P.solidKit(0.03);
-  scene.add(rs.building(world, kit));
+  const toy = rs.building(world, kit);   // shown until the scanned place has loaded, and when there is none (place.js)
+  const flat = new THREE.Group();        // what is drawn on the ground: the standoffs and the routes
+  scene.add(paperGrid, toy, flat);
 
   const kits = [kit];
   const pins = {};
@@ -283,10 +287,9 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
 
   const built = P.buildRobot(parts, catalog);
   const robot = new THREE.Group();
-  const halo = new THREE.Mesh(new THREE.RingGeometry(0.62, 0.7, 48), new THREE.MeshBasicMaterial({ color: P.COLORS.gold, transparent: true, opacity: 0.9, depthWrite: false }));
-  halo.rotation.x = -Math.PI / 2;
-  halo.position.y = 0.02;
-  robot.add(built.root, halo, D.contactShadow(1.4, 0.32));
+  const look = rs.routeLook(k);   // the route's and the rings' look over the scanned place
+  const ringed = rs.robotRing(look);
+  robot.add(built.root, ringed.haloEdge, ringed.halo, ringed.shadow);
   scene.add(robot);
   const setPose = ([x, y, yaw]) => { robot.position.copy(at(x, y)); robot.rotation.y = yaw + Math.PI / 2; };
   setPose(world.dock.pose);
@@ -302,10 +305,11 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
     const tick = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.42), new THREE.MeshBasicMaterial({ color: P.COLORS.ink, transparent: true, opacity: 0.8, depthWrite: false }));
     tick.rotation.x = -Math.PI / 2;
     tick.position.z = 0.66;   // ahead of the ring: the robot faces +Z, turned to its yaw below
+    ring.add(Object.assign(new THREE.Mesh(ring.geometry, look.under), { renderOrder: -4 }));   // seen behind a scanned wall
     g.add(ring, tick);
     g.position.copy(at(pose[0], pose[1], 0.03));
     g.rotation.y = pose[2] + Math.PI / 2;
-    scene.add(g);
+    flat.add(g);
     marks.push(g);
     return tw.tween(360, (t) => g.scale.setScalar(0.4 + 0.6 * t));
   }
@@ -320,10 +324,10 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
   /* the route: one gold tube per leg, drawn, then driven */
   let legs = [];
   function setRoute(list) {
-    legs.forEach((L) => { scene.remove(L.tube); L.tube.geometry.dispose(); L.tube.material.dispose(); });
+    legs.forEach((L) => { flat.remove(L.tube); L.tube.geometry.dispose(); L.tube.material.dispose(); });
     legs = list.filter((l) => l.waypoints?.length).map((leg) => {
-      const tube = rs.routeTube(leg.waypoints, 0.07 * k);
-      scene.add(tube);
+      const tube = rs.routeTube(leg.waypoints, 0.07 * k, look);
+      flat.add(tube);
       return { leg, tube };
     });
     return legs.length;
@@ -349,6 +353,9 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
     }, D.easeInOut);
   }
   function finishAll() { tw.finishAll(); }
+
+  /* the scanned place, in the toy building's stead once it has loaded */
+  const real = PL.realPlace({ world, agentBase, renderer, scene, toy, dress: rs.dresser({ flat, look, ring: ringed, grids: [paperGrid] }), reducedMotion, onState: onPlace });
 
   /* camera: bird's eye from the south, the building centred in the container; drag to orbit */
   const camera = new THREE.PerspectiveCamera(32, 1, 0.5, 600);
@@ -400,6 +407,7 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
     raf = requestAnimationFrame(loop);
     if (!canvas.clientWidth) return;
     if (!held) tw.tick(now);
+    real.tick();   // on its own clock: a place that arrives after the run has stopped still comes in
     renderer.render(scene, camera);
     onFrame();
   }
@@ -424,6 +432,8 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
       canvas.removeEventListener('pointermove', move);
       canvas.removeEventListener('pointerup', up);
       canvas.removeEventListener('pointercancel', up);
+      real.dispose();
+      look.dispose();
       built.dispose();
       kits.forEach((x) => x.dispose());
       D.disposeScene(scene, renderer);
@@ -436,8 +446,8 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
 
 let modsPromise = null;
 const loadMods = () => (modsPromise ||= Promise.all([
-  import('three'), import('./stage.js'), import('./route-stage.js'), import('./parts.js'), import('./drafting.js'),
-]).then(([THREE, S, rs, P, D]) => ({ THREE, S, rs, P, D })));
+  import('three'), import('./stage.js'), import('./route-stage.js'), import('./parts.js'), import('./drafting.js'), import('./place.js'),
+]).then(([THREE, S, rs, P, D, place]) => ({ THREE, S, rs, P, D, place })));
 
 async function loadCatalog(agentBase, signal) {
   try {
@@ -586,7 +596,9 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
   function buildMap(design) {
     dropMap();
     if (!model.world || !design) return null;
-    const mp = createMap($('.rl-map'), mods, { world: model.world, tasks: model.tasks, parts: design.parts, catalog, reducedMotion: reduced });
+    root.dataset.place = 'toy';   // then 'fading', then 'mesh' or 'photo': the scanned place under the route (place.js)
+    const mp = createMap($('.rl-map'), mods, { world: model.world, tasks: model.tasks, parts: design.parts, catalog, reducedMotion: reduced, agentBase,
+      onPlace: (state) => { if (map === mp) root.dataset.place = state; } });
     map = mp;
     const tags = $('.rl-tags');
     mp.onFrame = () => {

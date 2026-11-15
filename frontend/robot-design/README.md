@@ -3,7 +3,13 @@
 Two full-screen pages that open after **Design robot**:
 
 1. **Robot Design**: replays how the design agent picked the robot in a recorded run. The catalog's combinations are narrowed by arithmetic, real candidates are built and fail named checks, and the cheapest one with no failed check is assembled stage by stage (Body, Torso, Arm, Hand, Sensors) on a turntable. Drag or arrow keys turn and tilt it. **Deploy** opens the route view.
-2. **Route view**: a bird's-eye toy model of the run's building. Each drive replays the planner's search (the cells it expanded, the branches it dropped), then draws the recorded route in gold and drives the robot along it.
+2. **Route view**: the run's building from above. Each drive replays the planner's search (the cells it expanded, the branches it dropped), then draws the recorded route in gold and drives the robot along it.
+
+The building in the route view is the real place where there is a picture of it (`place.js`):
+
+- **A scanned world** (`la_mirada`, `jrr`, `917_main_st_unit_506_169f`): the textured mesh of its rooms, `world/_scans/<world id>/room.glb`, loaded from the design workflow server at `<agentBase>/scans/<world id>/room.glb`. It is cut off 2.2 m above the floor and walls are not drawn from behind, so the camera sees into the rooms. Where a wall hides the route, that part is drawn over it in a paler gold.
+- **An outdoor lot** (the worlds with `ground` in their world file): its Vexcel aerial photo on the ground at true scale, faded out around the lot, with the traced ground and what stands on it outlined in white. The photos and where they lie are in `data/aerial/` (`export.py --grounds` refreshes them from `world/scenarios/`).
+- **Anything else**, a mesh that is not on this machine, or no server: the toy model drawn from the world file, as before. The toy model also shows while the mesh loads; the mesh then fades in over it.
 
 Everything shown comes from one run snapshot, `data/<scenario>.json`. Nothing is invented: when the run doesn't record something (a runner-up per slot, alternative routes), the page doesn't show it.
 
@@ -19,10 +25,10 @@ node --test robot-design/*.test.mjs               # from frontend/
 
 ```js
 import { openRobotDesign } from './robot-design/robot-design.js';
-openRobotDesign({ scenario: 'jrr', onDeploy: (snap) => {}, onClose: () => {} });
+openRobotDesign({ scenario: 'jrr', agentBase: 'http://localhost:8020', onDeploy: (snap) => {}, onClose: () => {} });
 ```
 
-Pass `snapshot` instead of `scenario` to hand it a snapshot object directly.
+Pass `snapshot` instead of `scenario` to hand it a snapshot object directly. `agentBase` is the design workflow server the route view asks for the scanned place's mesh; left out, it tries `http://localhost:8020`. `mountLiveDesign(container, { agentBase, … })` (`live.js`) uses the same address for its pathing map.
 
 ## The data
 
@@ -47,7 +53,8 @@ Pass `snapshot` instead of `scenario` to hand it a snapshot object directly.
 | `plan.js` | Snapshot to stages, recorded checks, funnel, showcase of failed candidates |
 | `route.js` | The route view: DOM and timeline |
 | `route-stage.js` | The bird's-eye scene: building, search replay, route, robot, north arrow and scale bar |
+| `place.js` | The real place under the route: the scanned rooms' mesh or a lot's aerial photo, and the change over from the toy building |
 | `route-plan.js` | Legs grouped into trips, place names, door clearances |
 | `drafting.js`, `ui.js` | Shared scene and DOM helpers |
 | `robot-design.css` | Styles for both pages, scoped under `.rd` |
-| `data/` | `export.py` and the snapshots it writes |
+| `data/` | `export.py` and the snapshots it writes; `aerial/` holds the outdoor lots' photos and `grounds.json`, which says what ground each covers |

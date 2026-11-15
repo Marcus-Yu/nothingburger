@@ -5,6 +5,7 @@
    import { openRobotDesign } from './robot-design/robot-design.js';
    const page = openRobotDesign({
      scenario: 'jrr',               // reads ./data/<scenario>.json (data/export.py); or pass `snapshot`
+     agentBase: 'http://localhost:8020',  // the design workflow server: the route view loads the scanned place's mesh from it (that address when left out)
      onDeploy: (snap) => {},        // also opens the route view
      onClose: () => {},             // Back or Escape; the page has already removed itself
    });
@@ -111,7 +112,7 @@ function partsLine(snap, parts) {
 
 /* ---------- the page ---------- */
 
-export function openRobotDesign({ scenario = 'jrr', snapshot = null, onDeploy = () => {}, onClose = () => {}, mount = document.body } = {}) {
+export function openRobotDesign({ scenario = 'jrr', snapshot = null, agentBase = '', onDeploy = () => {}, onClose = () => {}, mount = document.body } = {}) {
   loadCss();
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const opener = document.activeElement;
@@ -286,7 +287,7 @@ export function openRobotDesign({ scenario = 'jrr', snapshot = null, onDeploy = 
     root.classList.add('away');
     stage.spin(false);
     route = openRoute({
-      snap, mount, reducedMotion: reduced,
+      snap, agentBase, mount, reducedMotion: reduced,
       onBack: () => { route = null; root.classList.remove('away'); stage.spin(true); $('.rd-deploy').focus({ preventScroll: true }); },
       onClose: () => { route = null; close(); },
     });

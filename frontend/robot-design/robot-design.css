@@ -240,6 +240,8 @@
 .rl-phase{font:800 19px/1.1 var(--display);letter-spacing:-.03em;color:var(--ink);text-wrap:balance}
 .rl-job{margin-top:4px;font:700 12.5px/1.3 var(--display);letter-spacing:-.01em;color:var(--sub);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .rl-job:empty{display:none}
+/* over the scanned place or an aerial photo (place.js) the map's heading no longer lies on paper: a halo of paper keeps it readable */
+.rd-live[data-view="map"][data-place="mesh"] .rl-head,.rd-live[data-view="map"][data-place="photo"] .rl-head{text-shadow:0 0 2px var(--paper),0 0 5px var(--paper),0 0 10px var(--paper),0 0 16px var(--paper)}
 .rl-brief{display:none;margin-top:3px;font:500 11px/1.4 var(--mono);color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rl-count,.rl-card,.rl-banner{background:var(--glass);backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15);
   border:1px solid rgba(255,255,255,.75);box-shadow:0 0 0 1px var(--line),0 18px 44px -30px rgba(45,32,12,.5)}

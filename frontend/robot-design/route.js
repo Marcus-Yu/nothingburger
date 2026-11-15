@@ -2,7 +2,8 @@
    building, with the planner's search replayed leg by leg: the cells it expanded, the branches it
    dropped, then the recorded route drawn in gold and the designed robot driving it.
 
-   openRoute({ snap, mount, reducedMotion, onBack, onClose }) -> { close } */
+   openRoute({ snap, agentBase, mount, reducedMotion, onBack, onClose }) -> { close }
+   agentBase: the design workflow server; the scanned place's mesh is loaded from it (place.js). */
 import { createRouteStage } from './route-stage.js';
 import { tripsFor, totals, doorLines, placeName } from './route-plan.js';
 import { ICON, esc, fmt, jobLine, loadCss, trapTab, scrollFade, showRow } from './ui.js';
@@ -48,7 +49,7 @@ function tripRow(trip, no) {
   return `<span class="rd-slot">${trip.kind === 'move' ? 'Drive' : 'Work'}</span><div class="rd-body"><b class="rd-part">${no ? `<i class="rt-no">${no}</i>` : ''}${esc(trip.title)}</b><p class="rd-from">${meta}</p></div>`;
 }
 
-export function openRoute({ snap, mount = document.body, reducedMotion = false, onBack = () => {}, onClose = () => {} }) {
+export function openRoute({ snap, agentBase = '', mount = document.body, reducedMotion = false, onBack = () => {}, onClose = () => {} }) {
   loadCss();
   const root = buildDom(snap);
   mount.append(root);
@@ -69,7 +70,8 @@ export function openRoute({ snap, mount = document.body, reducedMotion = false, 
       bottom: R.bottom - dock.top + (phone ? 96 : 0),
     };
   };
-  const stage = createRouteStage($('.rd-scene'), { snap, reducedMotion, insets });
+  // data-place: 'fading' while the scanned place takes over from the toy building, then 'mesh' or 'photo'
+  const stage = createRouteStage($('.rd-scene'), { snap, agentBase, reducedMotion, insets, onPlace: (state) => { root.dataset.place = state; } });
   const unfade = scrollFade($('.rt-trips'));
   requestAnimationFrame(() => root.classList.add('in'));
 
