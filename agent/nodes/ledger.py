@@ -20,6 +20,7 @@ HEADER_MARGIN_M = 0.05
 OPENING_MARGIN_M = 0.01   # object width plus this
 WIPE_INSET_M = 0.05
 WIPE_LANE_M = 0.15
+WIPE_STROKE_MAX_M = 0.55  # a longer stroke is cut in two at its middle and the surface wiped as two bands
 PRESS_DEFAULT_N = 10.0
 PRESS_TOLERANCE_N = 2.0
 REACH_TOLERANCE_M = 0.01
@@ -97,7 +98,8 @@ def wipe_targets(anchor: dict, side=None) -> list:
     """Stroke end points over the anchor's `extent` polygon inset 0.05 m, lanes 0.15 m apart, as a
     serpentine: targets 2k and 2k+1 are the two ends of stroke k. Lanes step along the polygon's longest
     edge and each stroke runs across it (yaw is free on a horizontal anchor; this is the choice that keeps
-    every stroke as short as it can be for a base standing along the long side). `side` is the free-floor
+    every stroke as short as it can be for a base standing along the long side). A stroke longer than
+    WIPE_STROKE_MAX_M is cut at its middle: all the near halves come first, then all the far halves. `side` is the free-floor
     side: the first stroke starts at the end nearer to it. The extent is taken as convex."""
     extent = [[float(p[0]), float(p[1])] for p in anchor.get("extent") or []]
     if len(extent) < 3:
@@ -115,7 +117,7 @@ def wipe_targets(anchor: dict, side=None) -> list:
         return pick_targets(anchor)
     n = int(math.floor((hi - lo) / WIPE_LANE_M + 1e-9)) + 1
     start = lo + ((hi - lo) - (n - 1) * WIPE_LANE_M) / 2              # centre the lanes in the inset span
-    axis, out = _tool_axis(anchor), []
+    axis, lanes = _tool_axis(anchor), []
     for k in range(n):
         sk = start + k * WIPE_LANE_M
         cuts = []
@@ -128,11 +130,19 @@ def wipe_targets(anchor: dict, side=None) -> list:
                 cuts.append(float((a + f * e) @ v))
         if len(cuts) < 2 or max(cuts) - min(cuts) < 2 * WIPE_INSET_M:
             continue
-        near, far = max(cuts) - WIPE_INSET_M, min(cuts) + WIPE_INSET_M
-        ends = [near, far] if len(out) // 2 % 2 == 0 else [far, near]
-        for c in ends:
-            p = sk * u + c * v
-            out.append({"point": _r([p[0], p[1], z]), "tool_axis": axis, "held_axes": ["position", "tool_axis"]})
+        lanes.append((sk, max(cuts) - WIPE_INSET_M, min(cuts) + WIPE_INSET_M))
+    # A deep surface is wiped as two bands, the near half and then the far half, so that each stroke is short
+    # enough to do from the side it is nearer to (a table with floor on both sides) without the arm's elbow
+    # having to come down across the whole surface.
+    deep = any(near - far > WIPE_STROKE_MAX_M for _, near, far in lanes)
+    bands = [lambda near, far: (near, (near + far) / 2), lambda near, far: (far, (near + far) / 2)] if deep else [lambda near, far: (near, far)]
+    out = []
+    for band in bands:
+        for sk, near, far in lanes:
+            a, b = band(near, far)
+            for c in ([a, b] if len(out) // 2 % 2 == 0 else [b, a]):
+                p = sk * u + c * v
+                out.append({"point": _r([p[0], p[1], z]), "tool_axis": axis, "held_axes": ["position", "tool_axis"]})
     return out or pick_targets(anchor)
 
 

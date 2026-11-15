@@ -60,7 +60,10 @@ def pipeline(state: dict) -> dict:
                          conflicts=state["requirements"]["conflicts"])
     # The loop: a design that pathing cannot use becomes a new constraint, and the design step runs again.
     # A task with no standoff means the arm on that lift does not reach, so that lift-and-arm pair is ruled out.
+    # A task whose arm path still fails after pathing's own fixes counts the same way. If the fixes run out,
+    # the attempt with the fewest tasks stuck, then the fewest failed arm paths, then the lowest price is kept.
     state = {**state, "excluded": [], "robot_fixes": []}
+    best = None
     for attempt in range(MAX_ROBOT_FIXES + 1):
         state = observe.node("3-4 design and compose", design.step)(state)
         if state["infeasible"]:
@@ -68,14 +71,29 @@ def pipeline(state: dict) -> dict:
         state = observe.node("5 pathing", pathing.step)(state)
         stuck = sorted({f["task"] for f in state["route"]["failures"] if f.get("task") and f.get("kind") in ("standoff", "no_standoff", None)}
                        | {t["id"] for t in state["tasks"] if not any(s["task"] == t["id"] for s in state["route"]["standoffs"])})
-        if not stuck or attempt == MAX_ROBOT_FIXES:
+        bad_paths = [e for e in state["trajectory"]["tasks"] if e.get("failure")]
+        no_path = sorted({e["task"] for e in bad_paths} - set(stuck))
+        score = (len(stuck), len(bad_paths), state["design"]["price_usd"])
+        if best is None or score < best[0]:
+            best = (score, state)
+        if not (stuck or no_path) or attempt == MAX_ROBOT_FIXES:
             break
         p = state["design"]["parts"]
-        fix = {"n": attempt + 1, "tasks": stuck, "ruled_out": {"lift": p["lift"], "arm": p["arm"]},
-               "why": f"no standoff reaches {', '.join(stuck)} with {p['arm']} on lift {p['lift']}",
+        why = "; ".join(w for w in (f"no standoff reaches {', '.join(stuck)}" if stuck else "",
+                                    f"{len(bad_paths)} arm paths fail for {', '.join(sorted({e['task'] for e in bad_paths}))}" if bad_paths else "") if w)
+        fix = {"n": attempt + 1, "tasks": sorted(set(stuck) | set(no_path)), "ruled_out": {"lift": p["lift"], "arm": p["arm"]},
+               "why": f"{why} with {p['arm']} on lift {p['lift']}",
                "was": {"parts": p, "price_usd": state["design"]["price_usd"]}}
         state = {**state, "excluded": state["excluded"] + [fix["ruled_out"]], "robot_fixes": state["robot_fixes"] + [fix]}
         observe.emit("robot_fix", **fix)
+    if best is not None and not state["infeasible"] and best[1] is not state:
+        fixes = state["robot_fixes"]  # the last attempt was not the best one: go back to the best
+        state = {**best[1], "robot_fixes": fixes, "excluded": state["excluded"]}
+        observe.emit("design", parts=state["design"]["parts"], price_usd=state["design"]["price_usd"], mass_kg=state["design"]["mass_kg"],
+                     stowed=state["build"]["stowed"] | {"qpos": None}, labels=state["design"].get("labels", []), checks=[],
+                     kept="the best of the attempts: the redesigns ran out without a clean plan")
+    elif best is not None and state["infeasible"]:
+        state = {**best[1], "robot_fixes": state["robot_fixes"], "excluded": state["excluded"]}
     if state["robot_fixes"]:
         state["decisions"] = state["decisions"] + [{"slot": "loop", "robot_fix": f} for f in state["robot_fixes"]]
     if not state["infeasible"]:

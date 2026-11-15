@@ -9,7 +9,7 @@
       "object": "drive_sled",
       "demo": "pull drive sled",
       "carries": false,
-      "why": "First failed drive, high up in row A; pulled first so the low one in row B is the last one and goes straight out."
+      "why": "First failed drive, high up in row A at U40. It is pulled but not taken out, because the job only asks to bring the last one out."
     },
     {
       "id": "t2",
@@ -18,7 +18,7 @@
       "object": "drive_sled",
       "demo": "pull drive sled",
       "carries": true,
-      "why": "Second failed drive, low down in row B; as the last one pulled, it is carried out of the hall to the staging bench.",
+      "why": "Second failed drive, low down in row B at U10. As the last one pulled, it is carried out to the staging bench outside the hall.",
       "deliver_to": "way_out"
     }
   ],

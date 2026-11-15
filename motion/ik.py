@@ -27,8 +27,19 @@ G = 9.81
 
 
 @functools.lru_cache(maxsize=8)
-def _model(robot_xml: str) -> mujoco.MjModel:
-    return mujoco.MjModel.from_xml_string(robot_xml)
+def _model(robot_xml: str, obstacles: str = "") -> mujoco.MjModel:
+    """The robot's model; with `obstacles` (a JSON list of {"id", "box": {"min", "max"}} in the world frame),
+    each box is added as a fixed geom named obs/<id>."""
+    if not obstacles:
+        return mujoco.MjModel.from_xml_string(robot_xml)
+    import json
+
+    spec = mujoco.MjSpec.from_string(robot_xml)
+    for i, o in enumerate(json.loads(obstacles)):
+        lo, hi = np.asarray(o["box"]["min"], dtype=float), np.asarray(o["box"]["max"], dtype=float)
+        spec.worldbody.add_geom(name=f"obs/{o.get('id', i)}", type=mujoco.mjtGeom.mjGEOM_BOX, pos=list((lo + hi) / 2),
+                                size=list(np.maximum((hi - lo) / 2, 1e-3)), contype=1, conaffinity=1, rgba=[0.5, 0.5, 0.5, 0.4])
+    return spec.compile()
 
 
 def unit(v) -> np.ndarray:
@@ -42,8 +53,10 @@ def unit(v) -> np.ndarray:
 class Arm:
     """One robot model with its base parked. `q` is always the vector of `build["arm_joints"]`."""
 
-    def __init__(self, robot_xml: str, build: dict):
-        self.m = m = _model(robot_xml)
+    def __init__(self, robot_xml: str, build: dict, obstacles=None):
+        import json
+
+        self.m = m = _model(robot_xml, json.dumps(obstacles, sort_keys=True) if obstacles else "")
         self.d = mujoco.MjData(m)
         self.names = list(build["arm_joints"])
         if not self.names:
@@ -91,6 +104,20 @@ class Arm:
         # what the arm must not hit: the base, the lift, a legged base's legs, and the floor (world geoms)
         self.is_obstacle = np.array([n in ("base_link", "lift_stage", "world") or n.startswith("base/") for n in body_names])
         self.is_obstacle &= (m.geom_contype != 0) | (m.geom_conaffinity != 0)
+        # the room's furniture (obs/ geoms): no link may enter it except the hand, which has to touch the work.
+        # The hand is the gripper, the wrist camera, and the body the tool point is on with everything past it.
+        geom_names = [mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_GEOM, g) or "" for g in range(m.ngeom)]
+        self.is_room = np.array([n.startswith("obs/") for n in geom_names])
+        self.is_obstacle &= ~self.is_room
+        hand_bodies, tool_body = set(), int(m.site_bodyid[self.tool])
+        for b in range(m.nbody):
+            k = b
+            while k > 0 and k != tool_body:
+                k = int(m.body_parentid[k])
+            if k == tool_body or m.body(b).name.startswith(("grip/", "sens/wrist/")):
+                hand_bodies.add(b)
+        self.is_hand = np.array([int(m.geom_bodyid[g]) in hand_bodies for g in range(m.ngeom)])
+        self.is_link = self.is_arm & ~self.is_hand
 
         sup = np.asarray(build["base"]["support"], dtype=float)
         self.support = sup[ConvexHull(sup).vertices]  # counter-clockwise, whatever order the build gave
@@ -132,6 +159,8 @@ class Arm:
         for c in self.d.contact[: self.d.ncon]:
             a, b = c.geom1, c.geom2
             if c.dist < -PENETRATION and ((self.is_arm[a] and self.is_obstacle[b]) or (self.is_arm[b] and self.is_obstacle[a])):
+                return True
+            if c.dist < -PENETRATION and ((self.is_link[a] and self.is_room[b]) or (self.is_link[b] and self.is_room[a])):
                 return True
         return False
 
@@ -231,8 +260,9 @@ class Arm:
         return None, "position reached but not with the tool axis"
 
 
-def reachable(robot_xml: str, pose, targets, *, build: dict, payload_kg: float = 0.0, tool_force_z_n: float = 0.0) -> dict:
-    arm = Arm(robot_xml, build)
+def reachable(robot_xml: str, pose, targets, *, build: dict, payload_kg: float = 0.0, tool_force_z_n: float = 0.0,
+              obstacles=None) -> dict:
+    arm = Arm(robot_xml, build, obstacles)
     arm.set_base(pose)
     rng = np.random.default_rng(0)
     q_first, missed, whys, tips = None, [], [], []

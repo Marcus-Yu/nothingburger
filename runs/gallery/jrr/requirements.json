@@ -9,7 +9,7 @@
       "object": "cloth",
       "demo": "wipe table",
       "carries": false,
-      "why": "The table in the middle of the room is taken to be table C6. It is wiped first while the robot is free."
+      "why": "This is the table in the middle of the atrium. I am assuming C6 is the centre table."
     },
     {
       "id": "t2",
@@ -18,7 +18,7 @@
       "object": "cloth",
       "demo": "wipe table",
       "carries": false,
-      "why": "Table S3 is in the south row, so it is the second table to wipe."
+      "why": "This is the table in the south row of the atrium."
     },
     {
       "id": "t3",
@@ -27,7 +27,7 @@
       "object": "sample_bottle",
       "demo": "pick up bottle",
       "carries": true,
-      "why": "The bottle on the east-corridor table goes out of the building, so it is done last. The 500 ml bottle card is the closest match to it.",
+      "why": "This is the bottle left on the table by the east corridor, to be taken out of the building. It comes last.",
       "deliver_to": "way_out"
     }
   ],
@@ -201,7 +201,7 @@
         {
           "point": [
             14.04,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -213,16 +213,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.115,
           "side": [
-            -0.0611,
-            0.9981
+            -1.0,
+            0.0
           ]
         },
         {
           "point": [
             14.19,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -234,10 +234,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.265,
           "side": [
-            -0.0611,
-            0.9981
+            -1.0,
+            0.0
           ]
         },
         {
@@ -285,7 +285,7 @@
         {
           "point": [
             14.34,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -297,16 +297,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.4,
           "side": [
-            -0.0611,
-            0.9981
+            -0.025,
+            -0.9997
           ]
         },
         {
           "point": [
             14.49,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -318,10 +318,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.4,
           "side": [
-            -0.0611,
-            0.9981
+            -0.025,
+            -0.9997
           ]
         },
         {
@@ -369,7 +369,7 @@
         {
           "point": [
             14.64,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -381,16 +381,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.4,
           "side": [
-            -0.0611,
-            0.9981
+            -0.025,
+            -0.9997
           ]
         },
         {
           "point": [
             14.79,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -402,10 +402,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.4,
           "side": [
-            -0.0611,
-            0.9981
+            -0.025,
+            -0.9997
           ]
         },
         {
@@ -453,7 +453,7 @@
         {
           "point": [
             14.94,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -465,16 +465,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.4,
           "side": [
-            -0.0611,
-            0.9981
+            -0.025,
+            -0.9997
           ]
         },
         {
           "point": [
             15.09,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -486,10 +486,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.4,
           "side": [
-            -0.0611,
-            0.9981
+            -0.025,
+            -0.9997
           ]
         },
         {
@@ -537,7 +537,7 @@
         {
           "point": [
             15.24,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -549,16 +549,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.4,
           "side": [
-            -0.0611,
-            0.9981
+            -0.025,
+            -0.9997
           ]
         },
         {
           "point": [
             15.39,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -570,10 +570,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.385,
           "side": [
-            -0.0611,
-            0.9981
+            1.0,
+            0.0
           ]
         },
         {
@@ -621,7 +621,7 @@
         {
           "point": [
             15.54,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -633,16 +633,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.235,
           "side": [
-            -0.0611,
-            0.9981
+            1.0,
+            0.0
           ]
         },
         {
           "point": [
             15.69,
-            9.88,
+            9.525,
             0.74
           ],
           "tool_axis": [
@@ -654,10 +654,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.045,
+          "edge_distance_m": 0.085,
           "side": [
-            -0.0611,
-            0.9981
+            1.0,
+            0.0
           ]
         },
         {
@@ -679,6 +679,510 @@
           "side": [
             -0.0611,
             -0.9981
+          ]
+        },
+        {
+          "point": [
+            14.04,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            14.04,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.115,
+          "side": [
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "point": [
+            14.19,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.265,
+          "side": [
+            -1.0,
+            0.0
+          ]
+        },
+        {
+          "point": [
+            14.19,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            14.34,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            14.34,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.4,
+          "side": [
+            -0.025,
+            -0.9997
+          ]
+        },
+        {
+          "point": [
+            14.49,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.4,
+          "side": [
+            -0.025,
+            -0.9997
+          ]
+        },
+        {
+          "point": [
+            14.49,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            14.64,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            14.64,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.4,
+          "side": [
+            -0.025,
+            -0.9997
+          ]
+        },
+        {
+          "point": [
+            14.79,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.4,
+          "side": [
+            -0.025,
+            -0.9997
+          ]
+        },
+        {
+          "point": [
+            14.79,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            14.94,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            14.94,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.4,
+          "side": [
+            -0.025,
+            -0.9997
+          ]
+        },
+        {
+          "point": [
+            15.09,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.4,
+          "side": [
+            -0.025,
+            -0.9997
+          ]
+        },
+        {
+          "point": [
+            15.09,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            15.24,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            15.24,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.4,
+          "side": [
+            -0.025,
+            -0.9997
+          ]
+        },
+        {
+          "point": [
+            15.39,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.385,
+          "side": [
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "point": [
+            15.39,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            15.54,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
+          ]
+        },
+        {
+          "point": [
+            15.54,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.235,
+          "side": [
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "point": [
+            15.69,
+            9.525,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.085,
+          "side": [
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "point": [
+            15.69,
+            9.88,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.045,
+          "side": [
+            -0.0611,
+            0.9981
           ]
         }
       ],
@@ -687,7 +1191,7 @@
       "source": "assumed",
       "anchor": "table_c6_top",
       "yaw_free": true,
-      "strokes": 12,
+      "strokes": 24,
       "from": "strokes regenerated over table_c6_top's extent inset 0.05 m, lanes 0.15 m apart; targets 2k and 2k+1 are the ends of stroke k"
     },
     {
@@ -754,7 +1258,7 @@
         {
           "point": [
             14.46,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -766,16 +1270,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.135,
           "side": [
-            0.0587,
-            -0.9983
+            -0.9996,
+            -0.0298
           ]
         },
         {
           "point": [
             14.61,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -787,10 +1291,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.285,
           "side": [
-            0.0587,
-            -0.9983
+            -0.9998,
+            -0.0206
           ]
         },
         {
@@ -838,7 +1342,7 @@
         {
           "point": [
             14.76,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -850,16 +1354,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.435,
           "side": [
-            0.0587,
-            -0.9983
+            -0.9999,
+            -0.0157
           ]
         },
         {
           "point": [
             14.91,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -871,10 +1375,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.44,
           "side": [
-            0.0587,
-            -0.9983
+            0.0234,
+            0.9997
           ]
         },
         {
@@ -922,7 +1426,7 @@
         {
           "point": [
             15.06,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -934,16 +1438,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.44,
           "side": [
-            0.0587,
-            -0.9983
+            0.0234,
+            0.9997
           ]
         },
         {
           "point": [
             15.21,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -955,10 +1459,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.44,
           "side": [
-            0.0587,
-            -0.9983
+            0.0234,
+            0.9997
           ]
         },
         {
@@ -1006,7 +1510,7 @@
         {
           "point": [
             15.36,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -1018,16 +1522,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.44,
           "side": [
-            0.0587,
-            -0.9983
+            0.0234,
+            0.9997
           ]
         },
         {
           "point": [
             15.51,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -1039,10 +1543,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.44,
           "side": [
-            0.0587,
-            -0.9983
+            0.0234,
+            0.9997
           ]
         },
         {
@@ -1090,7 +1594,7 @@
         {
           "point": [
             15.66,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -1102,16 +1606,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.44,
           "side": [
-            0.0587,
-            -0.9983
+            0.0234,
+            0.9997
           ]
         },
         {
           "point": [
             15.81,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -1123,10 +1627,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.415,
           "side": [
-            0.0587,
-            -0.9983
+            0.9999,
+            -0.0163
           ]
         },
         {
@@ -1174,7 +1678,7 @@
         {
           "point": [
             15.96,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -1186,16 +1690,16 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.265,
           "side": [
-            0.0587,
-            -0.9983
+            0.9998,
+            -0.0215
           ]
         },
         {
           "point": [
             16.11,
-            5.93,
+            6.335,
             0.74
           ],
           "tool_axis": [
@@ -1207,10 +1711,10 @@
             "position",
             "tool_axis"
           ],
-          "edge_distance_m": 0.055,
+          "edge_distance_m": 0.115,
           "side": [
-            0.0587,
-            -0.9983
+            0.9995,
+            -0.0317
           ]
         },
         {
@@ -1232,6 +1736,510 @@
           "side": [
             0.0637,
             0.998
+          ]
+        },
+        {
+          "point": [
+            14.46,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            14.46,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.135,
+          "side": [
+            -0.9996,
+            -0.0298
+          ]
+        },
+        {
+          "point": [
+            14.61,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.285,
+          "side": [
+            -0.9998,
+            -0.0206
+          ]
+        },
+        {
+          "point": [
+            14.61,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            14.76,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            14.76,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.435,
+          "side": [
+            -0.9999,
+            -0.0157
+          ]
+        },
+        {
+          "point": [
+            14.91,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.44,
+          "side": [
+            0.0234,
+            0.9997
+          ]
+        },
+        {
+          "point": [
+            14.91,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            15.06,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            15.06,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.44,
+          "side": [
+            0.0234,
+            0.9997
+          ]
+        },
+        {
+          "point": [
+            15.21,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.44,
+          "side": [
+            0.0234,
+            0.9997
+          ]
+        },
+        {
+          "point": [
+            15.21,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            15.36,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            15.36,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.44,
+          "side": [
+            0.0234,
+            0.9997
+          ]
+        },
+        {
+          "point": [
+            15.51,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.44,
+          "side": [
+            0.0234,
+            0.9997
+          ]
+        },
+        {
+          "point": [
+            15.51,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            15.66,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            15.66,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.44,
+          "side": [
+            0.0234,
+            0.9997
+          ]
+        },
+        {
+          "point": [
+            15.81,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.415,
+          "side": [
+            0.9999,
+            -0.0163
+          ]
+        },
+        {
+          "point": [
+            15.81,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            15.96,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
+          ]
+        },
+        {
+          "point": [
+            15.96,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.265,
+          "side": [
+            0.9998,
+            -0.0215
+          ]
+        },
+        {
+          "point": [
+            16.11,
+            6.335,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.115,
+          "side": [
+            0.9995,
+            -0.0317
+          ]
+        },
+        {
+          "point": [
+            16.11,
+            5.93,
+            0.74
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.055,
+          "side": [
+            0.0587,
+            -0.9983
           ]
         }
       ],
@@ -1240,7 +2248,7 @@
       "source": "assumed",
       "anchor": "table_s3_top",
       "yaw_free": true,
-      "strokes": 12,
+      "strokes": 24,
       "from": "strokes regenerated over table_s3_top's extent inset 0.05 m, lanes 0.15 m apart; targets 2k and 2k+1 are the ends of stroke k"
     },
     {

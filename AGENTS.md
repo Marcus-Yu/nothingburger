@@ -67,8 +67,8 @@ Every argument and return value is a plain dict or list in the shape of the matc
 | `nav.api.free_floor(world, anchor_id, *, radius_m)` | `{"edge_distance_m": float, "side": [x, y], "nearest": [x, y]}`: how close a disc of `radius_m` gets to the anchor's floor projection, and from which side |
 | `nav.api.propose(world, build, task, *, requirements, limit=12)` | ranked list of base poses `[x, y, yaw]` for that task: collision-free and connected to the dock |
 | `nav.api.plan(world, build, *, requirements, standoffs)` | a `route.json` dict; `standoffs` is the list the agent picked, in `route.json`'s `standoffs` shape |
-| `motion.api.reachable(robot_xml, pose, targets, *, build, payload_kg=0.0, tool_force_z_n=0.0)` | `{"ok": bool, "q": {joint: value}, "tip_ratio": float, "missed": [target index, ...], "why": str}` with the base fixed at `pose`; `targets` as in a `reach_targets` requirement |
-| `motion.api.retarget(demo, robot, *, build, task, standoff, requirements)` | one entry of `trajectory.json`'s `tasks`; `robot` is the `robot_xml` string |
+| `motion.api.reachable(robot_xml, pose, targets, *, build, payload_kg=0.0, tool_force_z_n=0.0, obstacles=None)` | `{"ok": bool, "q": {joint: value}, "tip_ratio": float, "missed": [target index, ...], "why": str}` with the base fixed at `pose`; `targets` as in a `reach_targets` requirement. `obstacles` is `world.json`'s list: no arm link may be inside one (the hand may) |
+| `motion.api.retarget(demo, robot, *, build, task, standoff, requirements, obstacles=None)` | one entry of `trajectory.json`'s `tasks`; `robot` is the `robot_xml` string |
 
 Model steps (intake from words, the program) call Claude through `agent/llm.py`; they are off with `--no-model` or no `ANTHROPIC_API_KEY`, and tests never call a model. `python -m web.serve` opens the live run view (see `web/README.md`). `composer.api.design` also takes `on_candidate=`, a progress callback.
 

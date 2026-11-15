@@ -7,7 +7,7 @@
       "object": "cloth",
       "demo": "wipe table",
       "carries": false,
-      "why": "The table in the middle of the room is taken to be table C6. It is wiped first while the robot is free."
+      "why": "This is the table in the middle of the atrium. I am assuming C6 is the centre table."
     },
     {
       "id": "t2",
@@ -16,7 +16,7 @@
       "object": "cloth",
       "demo": "wipe table",
       "carries": false,
-      "why": "Table S3 is in the south row, so it is the second table to wipe."
+      "why": "This is the table in the south row of the atrium."
     },
     {
       "id": "t3",
@@ -25,7 +25,7 @@
       "object": "sample_bottle",
       "demo": "pick up bottle",
       "carries": true,
-      "why": "The bottle on the east-corridor table goes out of the building, so it is done last. The 500 ml bottle card is the closest match to it.",
+      "why": "This is the bottle left on the table by the east corridor, to be taken out of the building. It comes last.",
       "deliver_to": "way_out"
     }
   ]
