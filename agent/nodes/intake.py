@@ -45,7 +45,12 @@ cannot say how hard to grip or how a hand moves: a "path" demo for the motion of
 "squeeze" demo wherever grip force matters (anything that can break, slip or tear). Give each a short chore \
 name such as "unscrew bulb" and one sentence on what it is for.
 - `understood_as` is one sentence restating the job; `steps` is the plan in a few short lines for the \
-person to read."""
+person to read.
+- When the person has already answered earlier questions, the answers are given to you. Treat an answer as \
+part of the job. Do not ask an answered question again; ask a new one only when an answer raises it.
+- `unmet` lists, in plain words, anything the person asked for (in the job or in an answer) that the tasks \
+do not do, for instance a place to put something down that is not the way out, which the planner cannot \
+route to yet. Leave it empty when the tasks cover everything. Never drop a wish silently."""
 
 
 def _schema(anchor_ids: list, object_ids: list) -> dict:
@@ -67,10 +72,11 @@ def _schema(anchor_ids: list, object_ids: list) -> dict:
             "properties": {"chore": {"type": "string"}, "kind": {"type": "string", "enum": ["path", "squeeze"]},
                            "why": {"type": "string"}}}
     return {"type": "object", "additionalProperties": False,
-            "required": ["understood_as", "steps", "tasks", "demos", "questions"],
+            "required": ["understood_as", "steps", "tasks", "demos", "questions", "unmet"],
             "properties": {"understood_as": {"type": "string"}, "steps": {"type": "array", "items": {"type": "string"}},
                            "tasks": {"type": "array", "items": task}, "demos": {"type": "array", "items": demo},
-                           "questions": {"type": "array", "items": {"type": "string"}}}}
+                           "questions": {"type": "array", "items": {"type": "string"}},
+                           "unmet": {"type": "array", "items": {"type": "string"}}}}
 
 
 def _cards() -> list:
@@ -81,12 +87,16 @@ def _cards() -> list:
     return out
 
 
-def from_words(job: str, world: dict) -> dict:
-    """The model's reading of the job: {"understood_as", "steps", "tasks", "demos", "questions"}, checked."""
+def from_words(job: str, world: dict, answers: list | None = None) -> dict:
+    """The model's reading of the job: {"understood_as", "steps", "tasks", "demos", "questions", "unmet"},
+    checked. `answers` is [{"question", "answer"}] from earlier rounds."""
     anchors = [{"id": a["id"], "kind": a.get("kind"), "room": a.get("room")} for a in world.get("anchors", [])]
     cards = _cards()
     user = ("The job, as written:\n" + job.strip() + "\n\nAnchors in this building:\n" + json.dumps(anchors, indent=1)
             + "\n\nObject cards:\n" + json.dumps(cards, indent=1) + "\n\nSkills:\n" + json.dumps(SKILLS, indent=1))
+    if answers:
+        user += "\n\nQuestions already asked, with the person's answers:\n" + "\n".join(
+            f"Q: {a['question']}\nA: {a['answer']}" for a in answers)
     out = llm.ask_json("intake: words to tasks", SYSTEM, user, _schema([a["id"] for a in anchors], [c["id"] for c in cards]))
     known_a, known_o = {a["id"] for a in anchors}, {c["id"] for c in cards}
     tasks = []
@@ -105,12 +115,14 @@ def from_words(job: str, world: dict) -> dict:
 
 
 def step(state: dict) -> dict:
-    """Reads state["job"] (words) or state["tasks_file"]. Writes state["tasks"] and state["intake"]
-    ({"source": "model" | "file", and for the model: understood_as, steps, demos, questions, model})."""
+    """Reads state["job"] (words) or state["tasks_file"], and state["answers"] ([{"question", "answer"}]
+    from earlier rounds). Writes state["tasks"] and state["intake"] ({"source": "model" | "file", and for
+    the model: understood_as, steps, demos, questions, unmet, answers, model})."""
     if state.get("job") and llm.available():
-        out = from_words(state["job"], state["world"])
-        intake = {"source": "model", "model": llm.model(), "job": state["job"],
-                  **{k: out[k] for k in ("understood_as", "steps", "demos", "questions")}}
+        answers = [a for a in state.get("answers") or [] if str(a.get("answer") or "").strip()]
+        out = from_words(state["job"], state["world"], answers)
+        intake = {"source": "model", "model": llm.model(), "job": state["job"], "answers": answers,
+                  **{k: out.get(k, []) for k in ("understood_as", "steps", "demos", "questions", "unmet")}}
         return {**state, "tasks": out["tasks"], "intake": intake}
     if not state.get("tasks_file"):
         raise ValueError("a job in words needs a model (set ANTHROPIC_API_KEY); otherwise pass a tasks file")
