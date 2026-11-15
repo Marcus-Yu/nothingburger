@@ -92,7 +92,7 @@ In every loop the model proposes and code decides. A model answer that fails its
 
 ### Not here yet
 
-- The workspace loop has been run against a scripted stand-in for the model (`tests/test_workspace.py`), not yet against the live model.
+- The workspace loop has run live once, on the example job (11 legs, 9 standoffs): 9 file operations, no revision needed, a 42-step program that passed the checker. A job long enough to need the plan ticked off over many turns, and a rerun that starts from saved notes, have only been run against a scripted stand-in for the model (`tests/test_workspace.py`).
 - Intake does not use the workspace: it is still one request. Its result reaches the program step as `run/intake.json`.
 - The design workflow in `design_flow/` (LangGraph) has no workspace and shares no state with this pipeline.
 - No sub-agents, and no model step chooses a fix in the robot-fix loop; that loop is rules.

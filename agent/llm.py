@@ -94,7 +94,9 @@ def ask_json(name: str, system: str, user: str, schema: dict, *, effort: str = "
                 raise ModelStepError(f"API error {e.status_code}: {e.message}") from e
             except anthropic.APIConnectionError as e:
                 raise ModelStepError(f"network error: {e}") from e
-            usage["input_tokens"] += resp.usage.input_tokens
+            # with caching on, input_tokens is only the uncached part: count what was read from and written to the cache too
+            usage["input_tokens"] += resp.usage.input_tokens + sum(
+                getattr(resp.usage, k, None) or 0 for k in ("cache_read_input_tokens", "cache_creation_input_tokens"))
             usage["output_tokens"] += resp.usage.output_tokens
             if resp.stop_reason == "refusal":
                 raise ModelStepError("the model declined this request")
