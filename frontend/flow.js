@@ -344,7 +344,7 @@ function renderAgent(view, s, mine) {
   const b = view.building;
   if (step.kind === 'building') outline.append(buildingAsk(d, s, mine));
   else if (view.phase === 'building' && view.status === 'working') outline.append(h('p.state.wait', h('i.spin'), ' Finding the building, and reading its scan if it has no world yet'));
-  else if (b) outline.append(h('p.txt', 'Building: ', h('b', b.name), b.address ? ` · ${b.address}` : '', h('span.note', ` (${b.how})`)));
+  else if (b) outline.append(h('p.txt', 'Building: ', h('b', b.name === b.space && s && s.id === b.space ? s.name : b.name), b.address ? ` · ${b.address}` : '', h('span.note', ` (${b.how})`)));
   if (b && b.sid && b.space && !current.switched && (!space.current || space.current.id !== b.space)) {
     current.switched = true;   // the agent settled on another building: show its tour
     setSpace(addSpace(b).id, { quiet: true });
