@@ -40,6 +40,7 @@ def load_config():
 CFG = load_config()
 ISSUE = CFG.get("BOARD_ISSUE", "1")
 HANDLE = CFG.get("BOARD_HANDLE", "").lstrip("@")
+LANE = os.environ.get("AGENT_LANE", "")  # two agents in one checkout each keep their own cursor (tools/lanes/)
 
 
 def gh(*args):
@@ -59,15 +60,18 @@ def comments():
     return json.loads(out)["comments"]
 
 
-def cursor_file():
+def cursor_file(lane=None):
+    lane = LANE if lane is None else lane
     d = ROOT / ".git" / "board"
     d.mkdir(parents=True, exist_ok=True)
-    return d / f"cursor-{HANDLE or 'anon'}"
+    return d / (f"cursor-{HANDLE or 'anon'}" + (f"-{lane}" if lane else ""))
 
 
 def get_cursor():
-    f = cursor_file()
-    return f.read_text().strip() if f.exists() else ""
+    for f in (cursor_file(), cursor_file("")):  # a new lane starts from the owner's cursor
+        if f.exists():
+            return f.read_text().strip()
+    return ""
 
 
 def set_cursor(cs):
@@ -93,6 +97,8 @@ def unseen(cs):
 
 def cmd_post(a):
     prefix = CFG.get("BOARD_PREFIX", "")
+    if prefix and LANE:
+        prefix = f"{prefix}, {LANE}"
     msg = " ".join(a.message).strip()
     if not msg:
         sys.exit("board: empty message")
