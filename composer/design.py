@@ -107,7 +107,35 @@ def _checked_in_order(survivors, requirements, no_reach, workers: int | None = N
                 fut.cancel()
 
 
-def design(requirements: dict, exhaustive: bool = False, on_candidate=None, exclude=None) -> dict:
+def _same(have, want) -> bool:
+    """A pattern value against a candidate's part: wrist_cam is a bool, and a pattern may say "true"/"yes"."""
+    if isinstance(have, bool) and not isinstance(want, bool):
+        return have == (str(want).strip().lower() in ("true", "yes", "1", "on"))
+    return have == want
+
+
+def _matches(parts: dict, pat: dict) -> bool:
+    return all(_same(parts.get(k), v) for k, v in pat.items())
+
+
+def _steer_checks(left_out_price, left_out_require, n_total, require, max_price_usd) -> list:
+    """Binding entries, shaped like checks, for the limits the person set when they leave the search empty-handed."""
+    out = []
+    if require and left_out_require:
+        said = ", ".join(f"{k} {v}" for k, v in require.items())
+        out.append({"check": "required parts", "task": None, "status": "fail", "value": None, "limit": said, "unit": None,
+                    "requirements": [], "why": f"You required {said}; {left_out_require} of {n_total} candidates without "
+                                               f"{'it' if len(require) == 1 else 'them'} were left out."})
+    if max_price_usd is not None and left_out_price:
+        cheapest = min(left_out_price)
+        out.append({"check": "price limit", "task": None, "status": "fail", "value": cheapest, "limit": max_price_usd, "unit": "USD",
+                    "requirements": [], "why": f"You capped the price at ${max_price_usd:,.0f}; {len(left_out_price)} of {n_total} "
+                                               f"candidates cost more (the cheapest of them ${cheapest:,.0f}) and were left out."})
+    return out
+
+
+def design(requirements: dict, exhaustive: bool = False, on_candidate=None, exclude=None, require=None,
+           max_price_usd=None) -> dict:
     """The cheapest candidate that passes every check (price, then mass), as a design.json dict.
 
     Candidates are first tested with the card arithmetic alone; only those with no failure there are
@@ -117,9 +145,19 @@ def design(requirements: dict, exhaustive: bool = False, on_candidate=None, excl
     design also carries `feasible`, the number that pass. `on_candidate`, when given, is called with a
     progress dict: once with {"stage": "arithmetic", ...counts} and then {"stage": "checked", ...check result}
     for every candidate composed. `exclude` is a list of part patterns, e.g. [{"lift": "none", "arm": "xarm7"}]:
-    a candidate matching every key of any pattern is left out (constraints added by the pathing loop)."""
+    a candidate matching every key of any pattern is left out (constraints added by the pathing loop).
+    `require` ({slot: part id}) keeps only candidates with every one of those parts, and `max_price_usd` drops
+    candidates that cost more: limits the person set. Both apply before anything is composed; when they leave
+    nothing that passes, the infeasible form's binding checks name them."""
     L = C.Ledger(requirements)
-    cands = [c for c in P.candidates() if not any(all(P.full(c).get(k) == v for k, v in pat.items()) for pat in (exclude or []))]
+    cands = [c for c in P.candidates() if not any(_matches(P.full(c), pat) for pat in (exclude or []))]
+    n_total, left_out_require, left_out_price = len(cands), 0, []
+    if require:
+        kept = [c for c in cands if _matches(P.full(c), require)]
+        left_out_require, cands = len(cands) - len(kept), kept
+    if max_price_usd is not None:
+        kept = [c for c in cands if P.price(c) <= max_price_usd]
+        left_out_price, cands = [P.price(c) for c in cands if P.price(c) > max_price_usd], kept
     cheap = [(c, C.cheap_failures(c, L)) for c in cands]
     survivors = sorted((c for c, f in cheap if not f), key=lambda c: (P.price(c), P.part_mass(c)))
     if on_candidate:
@@ -168,7 +206,10 @@ def design(requirements: dict, exhaustive: bool = False, on_candidate=None, excl
         if closest is None or len(fails(r)) < len(fails(closest)):
             closest = r
     counts["composed_and_checked"] = n_checked
+    steer = _steer_checks(left_out_price, left_out_require, n_total, require, max_price_usd)
     return {"schema": "design/1", "parts": None, "price_usd": None, "mass_kg": None, "checks": [], "labels": [],
-            "infeasible": {"binding_checks": fails(closest), "closest_parts": closest["parts"],
-                           "closest_price_usd": closest["price_usd"]},
+            "infeasible": {"binding_checks": steer + (fails(closest) if closest else []),
+                           "closest_parts": closest["parts"] if closest else None,
+                           "closest_price_usd": closest["price_usd"] if closest else None,
+                           **({"steer": {"require": require or None, "max_price_usd": max_price_usd}} if steer else {})},
             **counts}

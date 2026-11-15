@@ -39,6 +39,7 @@ The studio opens in a Matterport scan from the backend's `GET /worlds` (the list
 
 - **Matterport scans** show full page as the public Matterport tour. On localhost, when the backend's `GET /web-config` returns a Showcase SDK key, Walk, Dollhouse and Floor plan buttons appear. The key stays in the backend's `.env` and is fetched at runtime.
 - **Outside** shows the Vexcel aerial model when the backend has that space's scene package.
+- **Outdoor lots (Vexcel aerial)** have no tour: a space with `aerial` (a picture in `assets/aerial/`) and no `matterport` opens on its Vexcel aerial photo, with the ground the robot may use outlined in white and its dock as an orange dot. Its own `jobs` are the suggestions under the prompt. Five are listed: `lawn-palmetto`, `trash-palmetto`, `pooldeck-lakes`, `parcel-eastland` and `lawn-sanpedro`; open one with `?space=lawn-palmetto#studio`. Mowing needs no demonstration, so **Mow the lawn** goes straight to the robot (about 10 s); the other jobs ask the headset first, like any skill not yet learned. The pictures and world files come from `python world/scenarios/tools/aerial_worlds.py` (see `web/README.md`, "Outdoor runs on Vexcel aerial photos").
 - **Sample apartment** is the apartment drawn in code, where you drive the robot yourself.
 - **i** shows notes about the space and the backend status.
 

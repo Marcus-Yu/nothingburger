@@ -1,0 +1,122 @@
+{
+ "schema": "world/1",
+ "id": "parcel_eastland",
+ "frame": "metres, Z up, right handed; x east, y north, origin at the fetched point",
+ "source": "traced by eye on a Vexcel aerial photo (us-tx-baytown-2026, 0.0648 m a pixel) around 29.81677, -95.2811517: the concrete driveway of the middle house from its front wall to the street, with the pavement crossing it. Assumed, not in the photo: the front door (put on the east wall, 0.9 m wide, sill taken as flush); that a parcel has been left at the kerb; the parcel itself",
+ "mesh": null,
+ "ground": {
+  "image": "world/scenarios/aerial/eastland.jpg",
+  "extent": [
+   -30.059,
+   -30.018,
+   30.027,
+   30.023
+  ],
+  "m_per_px": 0.0648,
+  "source": "Vexcel Imaging ortho photo and building footprints, collection us-tx-baytown-2026",
+  "lat": 29.81677,
+  "lon": -95.2811517
+ },
+ "floors": [
+  {
+   "id": "f0",
+   "z": 0.0
+  }
+ ],
+ "rooms": [
+  {
+   "id": "driveway",
+   "type": "driveway",
+   "floor": "f0",
+   "polygon": [
+    [
+     6.9,
+     -0.4
+    ],
+    [
+     16.4,
+     -0.4
+    ],
+    [
+     16.4,
+     3.2
+    ],
+    [
+     6.9,
+     3.2
+    ]
+   ],
+   "ceiling_m": 3.0,
+   "source": "manual"
+  }
+ ],
+ "doorways": [
+  {
+   "id": "d_front",
+   "rooms": [
+    "outside",
+    "driveway"
+   ],
+   "position": [
+    6.9,
+    1.4
+   ],
+   "along": [
+    0,
+    1
+   ],
+   "width_m": 0.9,
+   "header_m": 2.05,
+   "step_m": 0.0,
+   "source": "manual"
+  }
+ ],
+ "obstacles": [
+  {
+   "id": "parcel_body",
+   "room": "driveway",
+   "box": {
+    "min": [
+     15.28,
+     0.47,
+     0.0
+    ],
+    "max": [
+     15.52,
+     0.53,
+     0.2
+    ]
+   }
+  }
+ ],
+ "dock": {
+  "room": "driveway",
+  "pose": [
+   8.2,
+   2.4,
+   0.0
+  ]
+ },
+ "way_out": {
+  "doorway": "d_front",
+  "note": "the front door (assumed position)"
+ },
+ "anchors": [
+  {
+   "id": "parcel",
+   "room": "driveway",
+   "kind": "low_item",
+   "point": [
+    15.4,
+    0.5,
+    0.2
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual"
+  }
+ ]
+}

@@ -4,7 +4,7 @@ Every argument and return value is a plain dict or list in the contract shapes.
 """
 from __future__ import annotations
 
-from . import building, route, standoff
+from . import building, coverage, route, standoff
 
 
 def corridors(world: dict, tasks: list) -> dict:
@@ -25,3 +25,8 @@ def propose(world: dict, build: dict, task: dict, *, requirements: dict | None =
 def plan(world: dict, build: dict, *, requirements: dict, standoffs: list) -> dict:
     """A route.json dict: legs, door clearances and recorded failures."""
     return route.plan(world, build, requirements=requirements, standoffs=standoffs)
+
+
+def cover(area: dict, id_: str = "t1") -> dict | None:
+    """The navigate task whose waypoints are back-and-forth passes over one of a world's `areas`, or None."""
+    return coverage.task(area, id_)

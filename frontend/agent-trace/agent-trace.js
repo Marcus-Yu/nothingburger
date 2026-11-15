@@ -72,10 +72,12 @@ function place(id) {
 }
 const thing = (id) => String(id || '').replace(/^sample_/, '').replace(/_/g, ' ');
 
+const passCount = (t) => Math.floor(((t && t.waypoints) || []).length / 2);
 function taskTitle(t) {
   if (!t) return '';
   if (t.skill === 'wipe') return `Wipe ${place(t.anchor)}`;
   if (t.skill === 'pick') return `Pick up the ${thing(t.object)} on ${place(t.anchor)}`;
+  if (t.skill === 'navigate') return `Mow the ${place(t.area) || 'lawn'}: ${passCount(t)} passes`;   // a coverage pattern, no arm work
   return `${cap(t.skill)} at ${place(t.anchor)}`;
 }
 
@@ -247,13 +249,13 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
   function stepMeta(key) {
     switch (key) {
       case '0 intake': return S.taskList.length ? `${S.taskList.length} tasks` : null;
-      case '1 building pre-pass': return S.building ? `Narrowest door ${S.building.narrowest_m} m` : null;
+      case '1 building pre-pass': return S.building ? (S.building.narrowest_m == null ? 'No doors on the way' : `Narrowest door ${S.building.narrowest_m} m`) : null;
       case '2 requirements ledger': return S.requirements ? `${S.requirements} things to check` : null;
       case '3-4 design and compose':
         if (S.design) return `${money(S.design.price_usd)} · ${Math.round(S.design.mass_kg)} kg`;
         if (S.infeasible) return 'No robot fits';
         return S.built ? `${S.built} robots tested${stepClock(key)}` : null;
-      case '5 pathing': return S.route ? `${stops()} stops · ${metres()} m` : null;
+      case '5 pathing': return S.route ? `${stopsText()} · ${metres()} m` : null;
       case '5d program': return S.program ? `${S.program.steps.length} steps` : null;
       default: return null;
     }
@@ -262,6 +264,10 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
   const metres = () => Math.round(S.route.legs.reduce((a, l) => a + l.length_m, 0));
   const goesOut = () => S.route.legs.some((l) => l.to === 'way_out');
   const stops = () => new Set(S.route.legs.map((l) => l.to).filter((t) => S.tasks[t])).size;
+  /* waypoints of a navigate task the route reaches (its stops are named "<task>.<n>") */
+  const reached = (t) => S.route ? S.route.legs.filter((l) => String(l.to).startsWith(t.id + '.')).length : 0;
+  const passes = () => S.taskList.filter((t) => t.skill === 'navigate').reduce((a, t) => a + Math.floor(reached(t) / 2), 0);
+  const stopsText = () => [stops() || !passes() ? `${stops()} stops` : '', passes() ? `${passes()} passes` : ''].filter(Boolean).join(', ');
   const lastT = () => (S.events.length ? S.events.at(-1).t || 0 : 0);
   function stepClock(key) {
     const st = S.steps[key];
@@ -348,6 +354,12 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
 
   function pathingFocus() {
     const rows = S.taskList.map((t) => {
+      if (t.skill === 'navigate') {   // nowhere to stand and no arm motion: the route drives its passes
+        const n = (t.waypoints || []).length, done = reached(t);
+        const state = !S.route ? 'wait' : done >= n ? 'ok' : 'no';
+        const note = !S.route ? 'Laying out the passes' : done >= n ? `${passCount(t)} passes, ${t.lane_m} m apart, every one reachable ✓` : `Only ${done} of ${n} pass ends can be reached`;
+        return h('li', { 'data-state': state }, h('span.at-n', String(S.tasks[t.id].n)), h('div', h('b', S.tasks[t.id].title), h('small', note)));
+      }
       const got = S.standoffs[t.id] || [];
       const ok = got.filter((x) => !x.failed).length;
       const bad = got.find((x) => x.failed);
@@ -368,7 +380,7 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
     const out = card('Step 5 of 6', 'Finding where to stand and how to get there',
       h('p.at-lede', 'For each task: spots the arm reaches it from without tipping, a path for the base through the doors, then the arm motion itself.'),
       h('ol.at-spots', rows));
-    if (S.route) out.push(h('p.at-note', `Route: ${metres()} m from the dock, ${stops()} stops${goesOut() ? ', out the door' : ''} and back.`));
+    if (S.route) out.push(h('p.at-note', `Route: ${metres()} m from the dock, ${stopsText()}${goesOut() ? ', out the door' : ''} and back.`));
     return out;
   }
 
@@ -395,14 +407,14 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
     const go = h('button.at-go', { type: 'button' }, 'Open Robot Design', h('span', { html: '<svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' }));
     go.addEventListener('click', () => onOpenDesign(r));
     const notYet = caveats();
-    const planned = S.taskList.filter((t) => (S.standoffs[t.id] || []).some((x) => !x.failed)).length;
+    const planned = S.taskList.filter((t) => (t.skill === 'navigate' ? reached(t) >= (t.waypoints || []).length : (S.standoffs[t.id] || []).some((x) => !x.failed))).length;
     return card('Done', 'Found a robot that can do it',
       h('p.at-lede', `The cheapest of ${S.built} robots tested in simulation that passes every check.`),
       h('p.at-parts', partsLine(r.parts || {})),
       h('dl.at-funnel.result',
         h('div', h('dt', 'Price'), h('dd', money(r.price_usd))),
         h('div', h('dt', 'Mass'), h('dd', `${Math.round(r.mass_kg)} kg`)),
-        S.route ? h('div', h('dt', 'Route'), h('dd', `${metres()} m`), h('small', `dock → ${stops()} stops${goesOut() ? ' → out' : ''}`)) : null,
+        S.route ? h('div', h('dt', 'Route'), h('dd', `${metres()} m`), h('small', `dock → ${stopsText()}${goesOut() ? ' → out' : ''}`)) : null,
         S.taskList.length ? h('div', h('dt', 'Tasks'), h('dd', `${planned} of ${S.taskList.length}`), h('small', 'planned')) : null),
       notYet.length ? h('p.at-note', `Not yet verified: ${notYet.join('; ')}.`) : null,
       r.snapshot ? h('div.at-actions', go, r.room ? h('a.at-link', { href: `${agentBase}/room.html?run=${encodeURIComponent(r.run)}`, target: '_blank', rel: 'noopener' }, 'See it in the real room (3D) ↗') : null)

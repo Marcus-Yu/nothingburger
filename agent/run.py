@@ -9,6 +9,10 @@ Exit code 0 only when every file written validates against contracts/.
 When intake has questions for the person, the run stops there (exit code 3) and writes them to intake.json.
 Run again with `--answers answers.json` ([{"question", "answer"}]) to go on, or with `--proceed` to go on
 without answers; the unanswered questions then stay on record as open.
+
+The person can steer the design search: `--exclude '[{"arm": "xarm7"}]'` leaves out candidates matching any
+pattern, `--require '{"base": "go2"}'` keeps only candidates with those parts, `--max-price 30000` drops dearer
+ones. A run where nothing is left ends infeasible, its binding checks naming the limit.
 """
 from __future__ import annotations
 
@@ -88,7 +92,7 @@ def pipeline(state: dict) -> dict:
     # A task with no standoff means the arm on that lift does not reach, so that lift-and-arm pair is ruled out.
     # A task whose arm path still fails after pathing's own fixes counts the same way. If the fixes run out,
     # the attempt with the fewest tasks stuck, then the fewest failed arm paths, then the lowest price is kept.
-    state = {**state, "excluded": [], "robot_fixes": []}
+    state = {**state, "excluded": list(state.get("exclude") or []), "robot_fixes": []}  # the person's exclusions first
     best = None
     for attempt in range(MAX_ROBOT_FIXES + 1):
         state = observe.node("3-4 design and compose", design.step)(state)
@@ -96,7 +100,8 @@ def pipeline(state: dict) -> dict:
             break
         state = observe.node("5 pathing", pathing.step)(state)
         stuck = sorted({f["task"] for f in state["route"]["failures"] if f.get("task") and f.get("kind") in ("standoff", "no_standoff", None)}
-                       | {t["id"] for t in state["tasks"] if not any(s["task"] == t["id"] for s in state["route"]["standoffs"])})
+                       | {t["id"] for t in state["tasks"] if t["skill"] != "navigate"  # a navigate task has no standoff by design
+                          and not any(s["task"] == t["id"] for s in state["route"]["standoffs"])})
         bad_paths = [e for e in state["trajectory"]["tasks"] if e.get("failure")]
         no_path = sorted({e["task"] for e in bad_paths} - set(stuck))
         score = (len(stuck), len(bad_paths), state["design"]["price_usd"])
@@ -129,7 +134,7 @@ def pipeline(state: dict) -> dict:
         if pr.get("planning"):  # the model worked in the workspace: show its plan and notes
             observe.emit("workspace", **pr["planning"], contents=state["workspace"]["files"])
         if state.get("walkthrough"):  # film the plan: the robot driving the route and running each arm motion
-            film = viz.walkthrough(state["world"], state["robot_xml"], state["build"], state["route"], state["trajectory"])
+            film = viz.walkthrough(state["world"], state["robot_xml"], state["build"], state["route"], state["trajectory"], state["tasks"])
             if film:
                 observe.emit("walkthrough", **film)
             if state["world"].get("tour"):  # the world is a traced Matterport tour: export the robot to draw inside it
@@ -193,6 +198,21 @@ def validate_run(out: Path) -> list:
     return results
 
 
+def _stops(names: list) -> list:
+    """Route stop names for the summary line, with a navigate task's waypoints ("t1.1", "t1.2", ...) as one entry."""
+    out = []
+    for n in names:
+        tid, dot, k = str(n).rpartition(".")
+        if dot and k.isdigit():
+            if out and out[-1][0] == tid:
+                out[-1][1] += 1
+            else:
+                out.append([tid, 1])
+        else:
+            out.append(n)
+    return [f"{x[0]} ({x[1]} waypoints)" if isinstance(x, list) else x for x in out]
+
+
 def summary(state: dict) -> list:
     """The lines printed at the end of a run."""
     d, lines = state.get("design") or {}, []
@@ -224,6 +244,10 @@ def summary(state: dict) -> list:
         route, traj = state["route"], state["trajectory"]
         for t in state["tasks"]:
             mine = [s for s in route["standoffs"] if s["task"] == t["id"]]
+            if t["skill"] == "navigate":
+                n = sum(1 for l in route["legs"] if str(l["to"]).startswith(t["id"] + "."))
+                lines.append(f"{t['id']} navigate: {n} of {len(t.get('waypoints') or [])} waypoints reached")
+                continue
             if not mine:
                 lines.append(f"{t['id']} {t['skill']}: no standoff")
             for s in mine:
@@ -235,7 +259,7 @@ def summary(state: dict) -> list:
                              + (f" [{s['covers']}]" if "covers" in s else "") + f"; trajectory {arm}")
         legs = route["legs"]
         lines.append(f"route: {len(legs)} legs, {round(sum(l.get('length_m') or 0 for l in legs), 2)} m: "
-                     + " > ".join([legs[0]["from"]] + [l["to"] for l in legs] if legs else []))
+                     + " > ".join(_stops([legs[0]["from"]] + [l["to"] for l in legs]) if legs else []))
     for f in state.get("robot_fixes", []):
         lines.append(f"robot fix {f['n']}: {f['why']}; was ${f['was']['price_usd']}")
     if not state["infeasible"] and state.get("program"):
@@ -269,7 +293,26 @@ def summary(state: dict) -> list:
     return lines
 
 
-def main(argv=None) -> int:
+STEER_SLOTS = ("base", "lift", "arm", "gripper", "lidar", "lidar_mount", "wrist_cam", "ego_cam")
+
+
+def _json_arg(ap, flag: str, text: str | None, kind: type):
+    if text is None:
+        return None
+    try:
+        value = json.loads(text)
+    except json.JSONDecodeError as e:
+        ap.error(f"{flag} is not JSON: {e}")
+    if not isinstance(value, kind):
+        ap.error(f"{flag} must be a JSON {'list' if kind is list else 'object'}")
+    pats = value if kind is list else [value]
+    for pat in pats:
+        if not isinstance(pat, dict) or not pat or set(pat) - set(STEER_SLOTS):
+            ap.error(f"{flag}: each pattern is a non-empty object of slots ({', '.join(STEER_SLOTS)}), got {pat!r}")
+    return value
+
+
+def parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="python -m agent.run", description=__doc__.split("\n")[0])
     ap.add_argument("--world", required=True)
     ap.add_argument("--tasks", help="a task list in JSON; not needed with --job")
@@ -288,16 +331,31 @@ def main(argv=None) -> int:
                                         "(default: the first task whose skill the demo's motion shows, else the first task)")
     ap.add_argument("--radius", type=float, default=prepass.DEFAULT_RADIUS_M,
                     help="pre-pass disc radius in metres: half the narrowest base width in the catalog")
+    ap.add_argument("--exclude", help='part patterns to leave out of the design search, a JSON list: [{"arm": "xarm7"}, ...]')
+    ap.add_argument("--require", help='parts every candidate must have, a JSON object: {"base": "go2", ...}')
+    ap.add_argument("--max-price", type=float, help="the most the robot may cost, in USD")
     ap.add_argument("--out", required=True)
+    return ap
+
+
+def steering(ap: argparse.ArgumentParser, a) -> dict:
+    """{"exclude", "require", "max_price_usd"} from the command line (each None when not given)."""
+    return {"exclude": _json_arg(ap, "--exclude", a.exclude, list), "require": _json_arg(ap, "--require", a.require, dict),
+            "max_price_usd": a.max_price}
+
+
+def main(argv=None) -> int:
+    ap = parser()
     a = ap.parse_args(argv)
 
     t0 = time.perf_counter()
     trace.reset()
     if not a.tasks and not a.job:
         ap.error("give --tasks or --job")
+    steer = steering(ap, a)
     if a.no_model:
         __import__("os").environ["AGENT_NO_MODEL"] = "1"
-    state = {"world": json.loads(Path(a.world).read_text()), "tasks_file": a.tasks, "prepass_radius_m": a.radius,
+    state = {**steer, "world": json.loads(Path(a.world).read_text()), "tasks_file": a.tasks, "prepass_radius_m": a.radius,
              "job": a.job, "use_model": not a.no_model, "walkthrough": a.walkthrough, "proceed": a.proceed,
              "answers": json.loads(Path(a.answers).read_text()) if a.answers else []}
     state["demo_task"] = a.demo_task
@@ -310,6 +368,8 @@ def main(argv=None) -> int:
     out = Path(a.out)
     observe.start_events(out, frames=a.frames)
     observe.emit("run_start", job=a.job, tasks_file=a.tasks, world=state["world"], model_steps=bool(state["use_model"]))
+    if any(v is not None for v in steer.values()):
+        observe.emit("steer", **steer)
 
     @observe.span("design and pathing run", "chain", outputs=lambda s: {"summary": summary(s)})
     def traced_run(world: str, job: str, out: str):

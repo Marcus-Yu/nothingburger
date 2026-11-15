@@ -59,9 +59,14 @@ class DesignWorkflow:
         self.latest_recording = latest_recording
         self.graph = build_graph(**graph_options)
 
-    def start(self, world: str | None = None) -> Step:
-        """`world` is the studio's space id; the design step designs and paths the robot in it."""
-        return self._run({"world": world} if world else {}, str(uuid.uuid4()))
+    def start(self, world: str | None = None, options: dict | None = None) -> Step:
+        """`world` is the studio's space id; the design step designs and paths the robot in it.
+        `options` steers the design search: {"exclude": [{slot: part}], "require": {slot: part},
+        "max_price_usd": number}; the design step passes them to the designer as request["options"]."""
+        state = {"world": world} if world else {}
+        if options:
+            state["options"] = options
+        return self._run(state, str(uuid.uuid4()))
 
     def reply(self, session_id: str, answer: Any = None) -> Step:
         waiting = self._waiting_for(session_id)

@@ -105,9 +105,10 @@ $('#askBtn').addEventListener('click',()=>{showPrompt();input.focus();});
 /* suggested jobs under the prompt: the apartment's chores, or the building jobs from the backend's list */
 const chips=$('#chips');
 const SIM_CHIPS=['Fix the dripping faucet','Change the light bulb','Wipe down the table','Take out the trash'];
-function setChips(kind){
+function setChips(kind,jobs){
   chips.replaceChildren(); chips.classList.remove('all');
   const add=(t,cls)=>{const b=document.createElement('button');b.type='button';b.textContent=t;if(cls)b.className=cls;b.addEventListener('click',()=>{input.value=t;input.focus();});chips.appendChild(b);return b;};
+  if(jobs&&jobs.length){ jobs.forEach(t=>add(t)); input.placeholder=`Describe a job, like “${jobs[0].toLowerCase()}”`; return; }   // a space that lists its own jobs (an outdoor lot)
   if(kind==='sim'){ SIM_CHIPS.forEach(t=>add(t)); input.placeholder='Describe a task, like “fix the dripping kitchen faucet”'; return; }
   TASKS[0][1].forEach(t=>add(t));
   for(const [group,items] of TASKS.slice(1)){ const g=document.createElement('span');g.className='chip-group k';g.textContent=group;chips.appendChild(g); items.forEach(t=>add(t,'more-chip')); }
@@ -153,7 +154,7 @@ promptEl.addEventListener('submit',e=>{
 });
 
 /* spaces and the plan panel */
-onSpaceChange(s=>{ setChips(s.kind); if(s.kind==='scan'){card.classList.remove('show');API.select(null,false);} });
+onSpaceChange(s=>{ setChips(s.kind,s.jobs); if(s.kind==='scan'){card.classList.remove('show');API.select(null,false);} });
 initFlow({
   canSim:plan=>root.classList.contains('no-webgl')?null:matchTask(plan.job),
   runSim:(act,text,ui)=>API.run(act,text,ui),

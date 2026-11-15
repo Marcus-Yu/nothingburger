@@ -15,6 +15,8 @@ SLOT_CHECKS = {
     "wrist_cam": ["wrist camera"],
     "ego_cam": ["ego camera"],
 }
+
+
 NOTE = ("composer.api.design returns only the winner: the cheapest candidate that passes every check (price, then "
         "mass). It does not give a price per part or why each other option lost, so price_usd is the whole "
         "robot's and catalog_alternatives lists the slot's other values in composer.api.candidates(), not ranked.")
@@ -43,8 +45,8 @@ def decisions(design: dict, candidates: list) -> list:
 
 
 def step(state: dict) -> dict:
-    """Reads state["requirements"]. Writes state["design"], ["decisions"], ["infeasible"], and when feasible
-    ["robot_xml"] and ["build"]."""
+    """Reads state["requirements"], and the person's limits state["require"] and ["max_price_usd"] when set.
+    Writes state["design"], ["decisions"], ["infeasible"], and when feasible ["robot_xml"] and ["build"]."""
     requirements = state["requirements"]
     shown = set()
 
@@ -67,7 +69,9 @@ def step(state: dict) -> dict:
         observe.emit("candidate", parts=parts, price_usd=p["price_usd"], mass_kg=p["mass_kg"], feasible=p["feasible"],
                      failed=fails, frame=frame)
 
-    design = composer.design(requirements, on_candidate=progress, exclude=state.get("excluded") or None)
+    # the person's limits (agent.run --require, --max-price), if any, go to the search with the loop's exclusions
+    design = composer.design(requirements, on_candidate=progress, exclude=state.get("excluded") or None,
+                             require=state.get("require") or None, max_price_usd=state.get("max_price_usd"))
     out = {**state, "design": design, "infeasible": design.get("parts") is None}
     out["decisions"] = decisions(design, [] if out["infeasible"] else composer.candidates())
     if not out["infeasible"]:
