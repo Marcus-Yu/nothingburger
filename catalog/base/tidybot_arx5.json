@@ -1,0 +1,84 @@
+{
+  "id": "tidybot_arx5",
+  "slot": "base",
+  "name": "TidyBot++ mobile base, ARX5 variant",
+  "kind": "wheeled",
+  "holonomic": true,
+  "mesh": "parts/base/arx5_mm.stl",
+  "mesh_scale": 0.001,
+  "outline_m": {
+    "x": [
+      -0.224,
+      0.224
+    ],
+    "y": [
+      -0.204,
+      0.204
+    ],
+    "z": [
+      0.081,
+      0.385
+    ]
+  },
+  "mass_kg": 45.0,
+  "payload_kg": 60.0,
+  "step_max_m": 0.015,
+  "support_inset_m": 0.07,
+  "price_usd": 5000,
+  "mounts": {
+    "top": [
+      0.0,
+      0.0,
+      0.385
+    ],
+    "front": [
+      0.164,
+      0.0,
+      0.385
+    ]
+  },
+  "src": "geometry: STEP; mass, payload, step, price: assumed",
+  "confidence": {
+    "outline_m": "cad",
+    "mass_kg": "assumed",
+    "payload_kg": "assumed",
+    "step_max_m": "assumed",
+    "price_usd": "assumed",
+    "support_inset_m": "assumed",
+    "holonomic": "design: four powered casters",
+    "casters": "cad (mesh); positions measured from the base mesh's corner plates"
+  },
+  "notes": "Mesh: STEP from github.com/jimmyyhwu/tidybot2-resources, meshed with gmsh (catalog/fetch_assets.py). support_inset_m: the wheel contacts are taken to sit this far inside the outline. Mount 'top' takes a lift or an arm; 'front' takes a lidar or the ego camera. casters: the TidyBot++ powered caster module (STEP from the same repository, tessellated with OpenCascade), drawn at the four corner plates as [x, y, yaw in degrees]; they are for looks only: no mass, no collision, and the checks still use outline_m and support_inset_m.",
+  "casters": {
+    "mesh": "parts/base/caster_mm.stl",
+    "mesh_scale": 0.001,
+    "upright_quat": [
+      0.70711,
+      0.70711,
+      0.0,
+      0.0
+    ],
+    "at": [
+      [
+        0.125,
+        0.115,
+        0
+      ],
+      [
+        -0.125,
+        0.115,
+        90
+      ],
+      [
+        -0.125,
+        -0.115,
+        180
+      ],
+      [
+        0.125,
+        -0.115,
+        -90
+      ]
+    ]
+  }
+}

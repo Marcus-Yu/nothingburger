@@ -1,0 +1,18 @@
+{
+  "id": "iiwa14",
+  "slot": "arm",
+  "name": "KUKA LBR iiwa 14 R820",
+  "model": "menagerie/kuka_iiwa_14/iiwa14.xml",
+  "flange_site": "attachment_site",
+  "payload_kg": 14.0,
+  "reach_m": 0.82,
+  "price_usd": 70000,
+  "src": "KUKA figures from memory (14 kg, 820 mm); price assumed",
+  "confidence": {
+    "payload_kg": "unverified",
+    "reach_m": "unverified",
+    "price_usd": "assumed",
+    "mass_kg": "model"
+  },
+  "notes": "Geometry, joint limits and mass: the MuJoCo Menagerie model (meshes derived from vendor CAD). reach_m and payload_kg are the rated figures; the composer measures the real envelope from the composed model."
+}

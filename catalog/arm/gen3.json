@@ -1,0 +1,18 @@
+{
+  "id": "gen3",
+  "slot": "arm",
+  "name": "Kinova Gen3 (7 joints)",
+  "model": "menagerie/kinova_gen3/gen3.xml",
+  "flange_site": "pinch_site",
+  "payload_kg": 4.0,
+  "reach_m": 0.902,
+  "price_usd": 35000,
+  "src": "Kinova figures from memory (4 kg, 902 mm); price assumed",
+  "confidence": {
+    "payload_kg": "unverified",
+    "reach_m": "unverified",
+    "price_usd": "assumed",
+    "mass_kg": "model"
+  },
+  "notes": "Geometry, joint limits and mass: the MuJoCo Menagerie model (meshes derived from vendor CAD). reach_m and payload_kg are the rated figures; the composer measures the real envelope from the composed model."
+}

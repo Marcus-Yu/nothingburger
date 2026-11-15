@@ -1,0 +1,38 @@
+{
+  "schema": "build/1",
+  "parts": {"base": "tidybot_arx5", "lift": "liftkit_500", "arm": "xarm7", "gripper": "xarm_gripper",
+            "lidar": "rplidar_s2", "lidar_mount": "stage_rear", "wrist_cam": true, "ego_cam": "stage_front"},
+  "robot_xml": "robot.xml",
+  "mass_kg": 80.1,
+  "price_usd": 23800,
+  "base": {"kind": "wheeled", "holonomic": true, "step_max_m": 0.015,
+           "footprint": [[-0.224, -0.204], [0.224, -0.204], [0.224, 0.204], [-0.224, 0.204]],
+           "inscribed_radius_m": 0.204, "circumscribed_radius_m": 0.303,
+           "support": [[-0.154, -0.134], [0.154, -0.134], [0.154, 0.134], [-0.154, 0.134]]},
+  "stowed": {"width_m": 0.429, "length_m": 0.62, "height_m": 1.262, "qpos": {"lift": 0.0, "arm/joint1": 0.0}},
+  "reach_envelope": [
+    {"height_m": 0.5, "min_distance_m": 0.25, "max_distance_m": 0.70},
+    {"height_m": 1.0, "min_distance_m": 0.0, "max_distance_m": 0.85},
+    {"height_m": 2.0, "min_distance_m": 0.0, "max_distance_m": 0.60}
+  ],
+  "joints": [
+    {"name": "joint_x", "type": "slide", "range": null},
+    {"name": "joint_y", "type": "slide", "range": null},
+    {"name": "joint_th", "type": "hinge", "range": null},
+    {"name": "lift", "type": "slide", "range": [0.0, 0.5]},
+    {"name": "arm/joint1", "type": "hinge", "range": [-6.283, 6.283]}
+  ],
+  "arm_joints": ["lift", "arm/joint1"],
+  "tool_site": "tool",
+  "sensors": [
+    {"kind": "lidar", "part": "rplidar_s2", "site": "lidar", "mount": "stage_rear"},
+    {"kind": "depth_camera", "part": "d435i", "site": "ego", "mount": "stage_front"},
+    {"kind": "depth_camera", "part": "d435i", "site": "wrist", "mount": "wrist"}
+  ],
+  "assembly": [
+    {"step": 1, "part": "tidybot_arx5", "onto": "floor"},
+    {"step": 2, "part": "liftkit_500", "onto": "tidybot_arx5:top"},
+    {"step": 3, "part": "xarm7", "onto": "liftkit_500:stage"},
+    {"step": 4, "part": "xarm_gripper", "onto": "xarm7:flange"}
+  ]
+}

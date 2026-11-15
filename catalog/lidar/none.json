@@ -1,0 +1,10 @@
+{
+  "id": "none",
+  "slot": "lidar",
+  "name": "no lidar",
+  "dim": null,
+  "mass_kg": 0.0,
+  "price_usd": 0,
+  "src": "-",
+  "confidence": {}
+}

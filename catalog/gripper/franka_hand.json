@@ -1,0 +1,34 @@
+{
+  "id": "franka_hand",
+  "slot": "gripper",
+  "name": "Franka Hand",
+  "model": "menagerie/franka_emika_panda/hand.xml",
+  "tool_offset_m": 0.1034,
+  "mass_kg": 0.73,
+  "stroke_m": 0.08,
+  "force_n": [
+    30.0,
+    70.0
+  ],
+  "force_control": true,
+  "payload_kg": 3.0,
+  "hold": [
+    "pinch",
+    "hook"
+  ],
+  "fits_arms": [
+    "fr3"
+  ],
+  "price_usd": 3500,
+  "src": "Franka figures from memory (0.73 kg, 80 mm, 70 N continuous), unverified; payload and price assumed",
+  "confidence": {
+    "mass_kg": "unverified",
+    "stroke_m": "unverified",
+    "force_n": "unverified",
+    "payload_kg": "assumed",
+    "price_usd": "assumed",
+    "tool_offset_m": "unverified",
+    "hold": "assumed"
+  },
+  "notes": "mass_kg is the figure the Payload check charges against the arm; the composed model uses the simulator model's own mass. force_n is the range of grip force it can hold. hold says how it carries an object. The tool point is tool_offset_m out from the arm's flange along its z axis. It runs from the Franka controller, so it is listed for the fr3 only."
+}

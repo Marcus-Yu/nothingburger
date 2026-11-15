@@ -1,0 +1,20 @@
+{
+ "note": "the same job as factory.job.txt, for runs without a model",
+ "tasks": [
+  {
+   "id": "t1",
+   "skill": "wipe",
+   "anchor": "table_top",
+   "object": "cloth",
+   "carries": false
+  },
+  {
+   "id": "t2",
+   "skill": "pick",
+   "anchor": "finished_part",
+   "object": "machined_part",
+   "carries": true,
+   "deliver_to": "way_out"
+  }
+ ]
+}

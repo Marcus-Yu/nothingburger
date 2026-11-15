@@ -1,0 +1,387 @@
+{
+ "schema": "world/1",
+ "id": "seniorcare",
+ "frame": "metres, Z up, right handed",
+ "source": "hand-written scenario, not a scan: a one-bedroom apartment for an older resident, with a narrow bathroom door",
+ "mesh": null,
+ "floors": [
+  {
+   "id": "f0",
+   "z": 0.0
+  }
+ ],
+ "rooms": [
+  {
+   "id": "hall",
+   "type": "hallway",
+   "floor": "f0",
+   "polygon": [
+    [
+     0,
+     0
+    ],
+    [
+     7,
+     0
+    ],
+    [
+     7,
+     1.0
+    ],
+    [
+     0,
+     1.0
+    ]
+   ],
+   "ceiling_m": 2.44,
+   "source": "manual",
+   "width_m": 1.0
+  },
+  {
+   "id": "bedroom",
+   "type": "bedroom",
+   "floor": "f0",
+   "polygon": [
+    [
+     0,
+     1.0
+    ],
+    [
+     3.2,
+     1.0
+    ],
+    [
+     3.2,
+     4.6
+    ],
+    [
+     0,
+     4.6
+    ]
+   ],
+   "ceiling_m": 2.44,
+   "source": "manual"
+  },
+  {
+   "id": "kitchen",
+   "type": "kitchen",
+   "floor": "f0",
+   "polygon": [
+    [
+     3.2,
+     1.0
+    ],
+    [
+     6.0,
+     1.0
+    ],
+    [
+     6.0,
+     4.0
+    ],
+    [
+     3.2,
+     4.0
+    ]
+   ],
+   "ceiling_m": 2.44,
+   "source": "manual"
+  },
+  {
+   "id": "bathroom",
+   "type": "bathroom",
+   "floor": "f0",
+   "polygon": [
+    [
+     6.0,
+     1.0
+    ],
+    [
+     7.8,
+     1.0
+    ],
+    [
+     7.8,
+     3.2
+    ],
+    [
+     6.0,
+     3.2
+    ]
+   ],
+   "ceiling_m": 2.44,
+   "source": "manual"
+  }
+ ],
+ "doorways": [
+  {
+   "id": "d_entry",
+   "rooms": [
+    "outside",
+    "hall"
+   ],
+   "position": [
+    0,
+    0.5
+   ],
+   "along": [
+    0,
+    1
+   ],
+   "width_m": 0.81,
+   "header_m": 2.03,
+   "step_m": 0.0,
+   "source": "manual"
+  },
+  {
+   "id": "d_bed",
+   "rooms": [
+    "hall",
+    "bedroom"
+   ],
+   "position": [
+    1.6,
+    1.0
+   ],
+   "along": [
+    1,
+    0
+   ],
+   "width_m": 0.76,
+   "header_m": 2.03,
+   "step_m": 0.0,
+   "source": "manual"
+  },
+  {
+   "id": "d_kitchen",
+   "rooms": [
+    "hall",
+    "kitchen"
+   ],
+   "position": [
+    4.6,
+    1.0
+   ],
+   "along": [
+    1,
+    0
+   ],
+   "width_m": 0.71,
+   "header_m": 2.03,
+   "step_m": 0.0,
+   "source": "manual"
+  },
+  {
+   "id": "d_bath",
+   "rooms": [
+    "hall",
+    "bathroom"
+   ],
+   "position": [
+    6.5,
+    1.0
+   ],
+   "along": [
+    1,
+    0
+   ],
+   "width_m": 0.61,
+   "header_m": 2.03,
+   "step_m": 0.0,
+   "source": "manual"
+  }
+ ],
+ "obstacles": [
+  {
+   "id": "bed",
+   "room": "bedroom",
+   "box": {
+    "min": [
+     0.2,
+     2.4,
+     0.0
+    ],
+    "max": [
+     1.7,
+     4.4,
+     0.55
+    ]
+   }
+  },
+  {
+   "id": "bedside_table",
+   "room": "bedroom",
+   "box": {
+    "min": [
+     1.8,
+     3.9,
+     0.0
+    ],
+    "max": [
+     2.3,
+     4.4,
+     0.6
+    ]
+   }
+  },
+  {
+   "id": "counter",
+   "room": "kitchen",
+   "box": {
+    "min": [
+     5.4,
+     1.6,
+     0.0
+    ],
+    "max": [
+     6.0,
+     3.6,
+     0.92
+    ]
+   }
+  },
+  {
+   "id": "vanity",
+   "room": "bathroom",
+   "box": {
+    "min": [
+     7.2,
+     1.4,
+     0.0
+    ],
+    "max": [
+     7.8,
+     2.4,
+     0.85
+    ]
+   }
+  },
+  {
+   "id": "footstool",
+   "room": "bedroom",
+   "box": {
+    "min": [
+     2.2,
+     2.4,
+     0.0
+    ],
+    "max": [
+     2.6,
+     2.8,
+     0.3
+    ]
+   }
+  },
+  {
+   "id": "bath_edge",
+   "room": "bathroom",
+   "box": {
+    "min": [
+     6.0,
+     2.6,
+     0.0
+    ],
+    "max": [
+     7.8,
+     3.2,
+     0.5
+    ]
+   }
+  }
+ ],
+ "dock": {
+  "room": "hall",
+  "pose": [
+   0.6,
+   0.5,
+   0.0
+  ]
+ },
+ "way_out": {
+  "doorway": "d_entry"
+ },
+ "anchors": [
+  {
+   "id": "remote_on_footstool",
+   "room": "bedroom",
+   "kind": "low_item",
+   "point": [
+    2.4,
+    2.5,
+    0.34
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual"
+  },
+  {
+   "id": "pill_organiser",
+   "room": "kitchen",
+   "kind": "counter_item",
+   "point": [
+    5.5,
+    2.4,
+    0.95
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual"
+  },
+  {
+   "id": "bedside_top",
+   "room": "bedroom",
+   "kind": "surface",
+   "point": [
+    2.05,
+    4.15,
+    0.6
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual",
+   "extent": [
+    [
+     1.8,
+     3.9
+    ],
+    [
+     2.3,
+     3.9
+    ],
+    [
+     2.3,
+     4.4
+    ],
+    [
+     1.8,
+     4.4
+    ]
+   ]
+  },
+  {
+   "id": "towel_on_bath_edge",
+   "room": "bathroom",
+   "kind": "low_item",
+   "point": [
+    6.6,
+    2.7,
+    0.54
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual"
+  }
+ ]
+}

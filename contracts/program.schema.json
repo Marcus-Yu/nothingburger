@@ -1,372 +1,114 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.robots.invalid/program.schema.json",
-  "title": "program.json: the task program for deployment",
-  "description": "What a deployment engineer (FDE) loads and tunes: each task as an ordered list of skill calls tied to the route and trajectory, the controllers with starting gains from simulation, the safety limits, and the acceptance tests. Simulation runs it first (sim.api.run); results land in verdict.json. Written by A (agent.program). Read by B (sim) and the export package.",
-  "type": "object",
-  "required": [
-    "header",
-    "program_id",
-    "build_id",
-    "route_id",
-    "trajectory_id",
-    "tasks",
-    "controllers",
-    "safety",
-    "tests"
-  ],
-  "properties": {
-    "header": {
-      "$ref": "common.schema.json#/$defs/header"
-    },
-    "program_id": {
-      "$ref": "common.schema.json#/$defs/id"
-    },
-    "build_id": {
-      "$ref": "common.schema.json#/$defs/id"
-    },
-    "route_id": {
-      "$ref": "common.schema.json#/$defs/id"
-    },
-    "trajectory_id": {
-      "$ref": "common.schema.json#/$defs/id"
-    },
-    "tasks": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": [
-          "task_id",
-          "steps"
-        ],
-        "properties": {
-          "task_id": {
-            "$ref": "common.schema.json#/$defs/id"
-          },
-          "schedule": {
-            "type": "string",
-            "description": "e.g. weekly, on request."
-          },
-          "steps": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "object",
-              "required": [
-                "step_id",
-                "skill",
-                "controller_id",
-                "timeout_s",
-                "on_failure",
-                "postconditions"
-              ],
-              "properties": {
-                "step_id": {
-                  "$ref": "common.schema.json#/$defs/id"
-                },
-                "skill": {
-                  "$ref": "common.schema.json#/$defs/skill"
-                },
-                "params": {
-                  "type": "object"
-                },
-                "waypoint_id": {
-                  "$ref": "common.schema.json#/$defs/id",
-                  "description": "For navigate steps: route.json waypoint to reach."
-                },
-                "segment_id": {
-                  "$ref": "common.schema.json#/$defs/id",
-                  "description": "For arm steps: trajectory.json segment to play."
-                },
-                "controller_id": {
-                  "$ref": "common.schema.json#/$defs/id"
-                },
-                "force": {
-                  "type": "object",
-                  "required": [
-                    "band",
-                    "ref"
-                  ],
-                  "description": "Force to hold. Always measured_at_home in newtons for a deployable program; a raw_adc band only replays on the demo glove.",
-                  "properties": {
-                    "band": {
-                      "$ref": "common.schema.json#/$defs/force_band"
-                    },
-                    "ref": {
-                      "$ref": "common.schema.json#/$defs/ref"
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                "preconditions": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/$defs/condition"
-                  }
-                },
-                "postconditions": {
-                  "type": "array",
-                  "minItems": 1,
-                  "items": {
-                    "$ref": "#/$defs/condition"
-                  },
-                  "description": "action_done = the robot did it. outcome_confirmed = a sensor shows the world changed. Both are listed so neither is mistaken for the other."
-                },
-                "timeout_s": {
-                  "type": "number",
-                  "exclusiveMinimum": 0
-                },
-                "on_failure": {
-                  "enum": [
-                    "retry",
-                    "abort",
-                    "ask_human"
-                  ]
-                },
-                "max_retries": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "inspection": {
-                  "$ref": "common.schema.json#/$defs/inspection"
-                }
-              },
-              "additionalProperties": false,
-              "if": {
-                "properties": {
-                  "skill": {
-                    "const": "inspect"
-                  }
-                },
-                "required": [
-                  "skill"
-                ]
-              },
-              "then": {
-                "required": [
-                  "inspection"
-                ]
-              }
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "controllers": {
-      "type": "array",
-      "minItems": 1,
-      "description": "Every controller the program uses. Gains are starting points from simulation; tune_on_hardware says which ones the FDE must retune.",
-      "items": {
-        "type": "object",
-        "required": [
-          "controller_id",
-          "kind",
-          "joints",
-          "rate_hz",
-          "gains",
-          "tune_on_hardware"
-        ],
-        "properties": {
-          "controller_id": {
-            "$ref": "common.schema.json#/$defs/id"
-          },
-          "kind": {
-            "enum": [
-              "joint_position_pid",
-              "joint_impedance",
-              "cartesian_impedance",
-              "force_pi",
-              "gripper_force",
-              "base_velocity"
-            ]
-          },
-          "joints": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "minItems": 1
-          },
-          "rate_hz": {
-            "type": "number",
-            "exclusiveMinimum": 0
-          },
-          "gains": {
-            "type": "object",
-            "description": "kind-specific, e.g. {\"kp\": [..], \"kd\": [..]} or {\"stiffness_N_per_m\": .., \"damping_ratio\": ..}."
-          },
-          "gains_source": {
-            "enum": [
-              "simulated",
-              "catalog",
-              "default"
-            ]
-          },
-          "tune_on_hardware": {
-            "type": "boolean"
-          },
-          "tuning_notes": {
-            "type": "string",
-            "description": "What to watch when tuning, e.g. bulb slips below 2 N."
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "safety": {
-      "type": "object",
-      "required": [
-        "max_base_speed_mps",
-        "max_ee_speed_mps",
-        "max_contact_force_N",
-        "estop",
-        "refuse_when"
-      ],
-      "properties": {
-        "max_base_speed_mps": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "max_ee_speed_mps": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "max_contact_force_N": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "estop": {
-          "type": "string",
-          "description": "e.g. hardware button on base + wireless."
-        },
-        "refuse_when": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Conditions where the robot stops and says why, e.g. person within 0.5 m."
-        }
-      },
-      "additionalProperties": false
-    },
-    "tests": {
-      "type": "array",
-      "minItems": 1,
-      "description": "Acceptance tests: the run's own checks first (kind sim), then the same checks on a bench and on site.",
-      "items": {
-        "type": "object",
-        "required": [
-          "test_id",
-          "kind",
-          "task_id",
-          "description",
-          "metric",
-          "aggregate",
-          "op",
-          "threshold"
-        ],
-        "properties": {
-          "test_id": {
-            "$ref": "common.schema.json#/$defs/id"
-          },
-          "kind": {
-            "enum": [
-              "sim",
-              "bench",
-              "site"
-            ]
-          },
-          "task_id": {
-            "$ref": "common.schema.json#/$defs/id"
-          },
-          "step_id": {
-            "$ref": "common.schema.json#/$defs/id"
-          },
-          "description": {
-            "type": "string"
-          },
-          "metric": {
-            "type": "string",
-            "description": "Signal name in signals.json."
-          },
-          "op": {
-            "enum": [
-              "<",
-              "<=",
-              "==",
-              ">=",
-              ">",
-              "within"
-            ]
-          },
-          "threshold": {
-            "type": [
-              "number",
-              "array"
-            ]
-          },
-          "criterion": {
-            "$ref": "common.schema.json#/$defs/ref",
-            "description": "The requirements success criterion it checks."
-          },
-          "procedure": {
-            "type": "string",
-            "description": "For bench and site tests: how to run it by hand."
-          },
-          "aggregate": {
-            "$ref": "common.schema.json#/$defs/aggregate"
-          }
-        },
-        "additionalProperties": false,
-        "description": "Window is step_id if given, else the whole task."
-      }
-    }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "program",
+ "type": "object",
+ "required": [
+  "schema",
+  "source",
+  "steps"
+ ],
+ "properties": {
+  "schema": {
+   "const": "program/1"
   },
-  "additionalProperties": false,
-  "$defs": {
-    "condition": {
-      "type": "object",
-      "required": [
-        "kind",
-        "metric",
-        "aggregate",
-        "op",
-        "value"
+  "source": {
+   "enum": [
+    "model",
+    "rule"
+   ]
+  },
+  "model": {
+   "type": "string"
+  },
+  "model_rejected": {
+   "type": "object",
+   "required": [
+    "problems"
+   ]
+  },
+  "steps": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "n",
+     "primitive",
+     "task",
+     "leg",
+     "standoff",
+     "force_n",
+     "press_n",
+     "turns",
+     "requirements",
+     "note"
+    ],
+    "properties": {
+     "n": {
+      "type": "integer"
+     },
+     "primitive": {
+      "enum": [
+       "approach",
+       "grasp",
+       "lift",
+       "move_base",
+       "place",
+       "release",
+       "retreat",
+       "twist",
+       "wipe"
+      ]
+     },
+     "task": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "leg": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "standoff": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "force_n": {
+      "type": [
+       "array",
+       "null"
       ],
-      "properties": {
-        "kind": {
-          "enum": [
-            "action_done",
-            "outcome_confirmed"
-          ]
-        },
-        "metric": {
-          "type": "string"
-        },
-        "op": {
-          "enum": [
-            "<",
-            "<=",
-            "==",
-            ">=",
-            ">",
-            "within"
-          ]
-        },
-        "value": {
-          "type": [
-            "number",
-            "boolean",
-            "array"
-          ]
-        },
-        "aggregate": {
-          "$ref": "common.schema.json#/$defs/aggregate"
-        }
-      },
-      "additionalProperties": false
+      "items": {
+       "type": "number"
+      }
+     },
+     "press_n": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "turns": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "requirements": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "note": {
+      "type": "string"
+     }
     }
+   }
   }
+ }
 }

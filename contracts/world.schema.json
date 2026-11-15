@@ -1,0 +1,175 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "world",
+ "type": "object",
+ "required": [
+  "schema",
+  "id",
+  "frame",
+  "mesh",
+  "floors",
+  "rooms",
+  "doorways",
+  "obstacles",
+  "dock",
+  "way_out",
+  "anchors"
+ ],
+ "properties": {
+  "schema": {
+   "const": "world/1"
+  },
+  "mesh": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "rooms": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "type",
+     "floor",
+     "polygon",
+     "ceiling_m",
+     "source"
+    ],
+    "properties": {}
+   }
+  },
+  "doorways": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "rooms",
+     "position",
+     "along",
+     "width_m",
+     "header_m",
+     "step_m",
+     "source"
+    ],
+    "properties": {
+     "rooms": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "minItems": 2,
+      "maxItems": 2
+     },
+     "source": {
+      "enum": [
+       "api",
+       "mesh",
+       "manual",
+       "closed",
+       "dropped"
+      ]
+     }
+    }
+   }
+  },
+  "obstacles": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "box"
+    ],
+    "properties": {}
+   }
+  },
+  "dock": {
+   "type": "object",
+   "required": [
+    "room",
+    "pose"
+   ],
+   "properties": {}
+  },
+  "way_out": {
+   "type": "object",
+   "required": [
+    "doorway"
+   ],
+   "properties": {}
+  },
+  "anchors": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "room",
+     "kind",
+     "point",
+     "normal",
+     "source"
+    ],
+    "properties": {
+     "point": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+     },
+     "normal": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+     },
+     "source": {
+      "enum": [
+       "panorama-agent",
+       "manual",
+       "assumed-normal"
+      ]
+     }
+    }
+   }
+  },
+  "tour": {
+   "type": "object",
+   "description": "A Matterport tour of this place and how this world's frame maps onto it, for web/viewer/tour.html.",
+   "required": [
+    "matterport",
+    "to_model"
+   ],
+   "properties": {
+    "matterport": {
+     "type": "string",
+     "description": "the tour's model id"
+    },
+    "to_model": {
+     "type": "array",
+     "minItems": 3,
+     "maxItems": 3,
+     "items": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+       "type": "number"
+      }
+     },
+     "description": "3 x 4 matrix taking a point [X, Y, Z] in this world (metres, Z up) to the tour's frame (metres, Y up)"
+    },
+    "note": {
+     "type": "string"
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,61 @@
+{
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "job": "My mother lives alone and can't bend down any more. The TV remote is on the low footstool by her bed and there is a towel on the edge of the bath, please pick both up. Fetch her pill organiser from the kitchen counter and wipe her bedside table.",
+  "understood_as": "Your mother can't bend down, so the robot should pick up the TV remote from the low footstool and the towel from the bath edge, bring her pill organiser from the kitchen counter, and wipe her bedside table.",
+  "steps": [
+    "Wipe the bedside table with a cloth.",
+    "Pick up the TV remote from the low footstool by the bed.",
+    "Pick up the towel from the edge of the bath.",
+    "Fetch the pill organiser from the kitchen counter and bring it to your mother."
+  ],
+  "demos": [
+    {
+      "chore": "wipe bedside table",
+      "kind": "path",
+      "why": "Shows the stroke pattern and how far to reach across the bedside table."
+    },
+    {
+      "chore": "hold cloth",
+      "kind": "squeeze",
+      "why": "Sets how firmly to hold the cloth so it does not slip out while pressing and wiping."
+    },
+    {
+      "chore": "pick up remote",
+      "kind": "path",
+      "why": "Shows how the hand approaches and lifts the remote from the low footstool."
+    },
+    {
+      "chore": "pick up remote",
+      "kind": "squeeze",
+      "why": "Sets a grip firm enough that the smooth remote does not slip but does not press its buttons."
+    },
+    {
+      "chore": "pick up towel",
+      "kind": "path",
+      "why": "Shows how to gather the towel from the bath edge without dragging it into the bath."
+    },
+    {
+      "chore": "pick up towel",
+      "kind": "squeeze",
+      "why": "Sets a grip that holds the soft towel without it sliding out of the fingers."
+    },
+    {
+      "chore": "fetch pill organiser",
+      "kind": "path",
+      "why": "Shows how to lift the pill organiser off the counter and carry it level."
+    },
+    {
+      "chore": "fetch pill organiser",
+      "kind": "squeeze",
+      "why": "Sets a gentle grip so the organiser is not cracked and its little lids do not pop open and spill pills."
+    }
+  ],
+  "questions": [
+    "Where should the TV remote be put once it is picked up (for example on the bedside table or the bed)? No drop-off spot has been located in the bedroom yet.",
+    "Where should the towel go after it is picked up (towel rail, laundry basket)? That spot has not been located yet.",
+    "Where exactly should the pill organiser be left for your mother? The robot's only known surface in her room is the bedside table; please confirm that is the right place.",
+    "The towel card we have describes a hand towel bunched on the floor; is the towel on the bath edge a hand towel of similar size, or a larger bath towel that would need its own card?",
+    "Where is the cloth kept for wiping the bedside table, and is the table surface fine with a damp cloth or should it be wiped dry?"
+  ]
+}

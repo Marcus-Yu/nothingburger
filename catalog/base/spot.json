@@ -1,0 +1,24 @@
+{
+  "id": "spot",
+  "slot": "base",
+  "name": "Boston Dynamics Spot",
+  "kind": "legged",
+  "holonomic": true,
+  "model": "menagerie/boston_dynamics_spot/spot.xml",
+  "keyframe": "home",
+  "payload_kg": 14.0,
+  "step_max_m": 0.3,
+  "price_usd": 75000,
+  "front_inset_m": 0.1,
+  "src": "14 kg payload and $75,000 from comparison sites; 30 cm step unverified",
+  "confidence": {
+    "payload_kg": "comparison sites",
+    "step_max_m": "unverified",
+    "price_usd": "comparison sites",
+    "holonomic": "assumed",
+    "outline_m": "model",
+    "mass_kg": "model",
+    "support": "model"
+  },
+  "notes": "MuJoCo Menagerie simulator model (no open CAD). Outline, mass, standing height, the support rectangle (the feet) and the mounts ('top' on the trunk, 'front' front_inset_m behind the trunk's nose) are read from the model in its 'home' keyframe when the composer loads the card. Treated as holonomic (assumed): a quadruped can sidestep and turn in place, so it need not swing its length through a turn."
+}

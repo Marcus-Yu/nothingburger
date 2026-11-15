@@ -1,0 +1,174 @@
+{
+ "schema": "world/1",
+ "id": "factory",
+ "frame": "metres, Z up, right handed",
+ "source": "hand-written scenario, not a scan: a CNC machining cell with a roller door",
+ "mesh": null,
+ "floors": [
+  {
+   "id": "f0",
+   "z": 0.0
+  }
+ ],
+ "rooms": [
+  {
+   "id": "cell",
+   "type": "workshop",
+   "floor": "f0",
+   "polygon": [
+    [
+     0,
+     0
+    ],
+    [
+     8,
+     0
+    ],
+    [
+     8,
+     6
+    ],
+    [
+     0,
+     6
+    ]
+   ],
+   "ceiling_m": 4.0,
+   "source": "manual"
+  }
+ ],
+ "doorways": [
+  {
+   "id": "d_roller",
+   "rooms": [
+    "outside",
+    "cell"
+   ],
+   "position": [
+    0,
+    2.0
+   ],
+   "along": [
+    0,
+    1
+   ],
+   "width_m": 1.5,
+   "header_m": 2.4,
+   "step_m": 0.0,
+   "source": "manual"
+  }
+ ],
+ "obstacles": [
+  {
+   "id": "cnc",
+   "room": "cell",
+   "box": {
+    "min": [
+     5.2,
+     2.6,
+     0.0
+    ],
+    "max": [
+     7.4,
+     5.0,
+     1.9
+    ]
+   }
+  },
+  {
+   "id": "fixture_table",
+   "room": "cell",
+   "box": {
+    "min": [
+     2.6,
+     5.55,
+     0.0
+    ],
+    "max": [
+     3.8,
+     6.0,
+     0.9
+    ]
+   }
+  },
+  {
+   "id": "pallet",
+   "room": "cell",
+   "box": {
+    "min": [
+     0.6,
+     4.6,
+     0.0
+    ],
+    "max": [
+     1.6,
+     5.6,
+     0.15
+    ]
+   }
+  }
+ ],
+ "dock": {
+  "room": "cell",
+  "pose": [
+   1.0,
+   1.0,
+   0.0
+  ]
+ },
+ "way_out": {
+  "doorway": "d_roller"
+ },
+ "anchors": [
+  {
+   "id": "finished_part",
+   "room": "cell",
+   "kind": "part",
+   "point": [
+    3.2,
+    5.7,
+    0.96
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual"
+  },
+  {
+   "id": "table_top",
+   "room": "cell",
+   "kind": "surface",
+   "point": [
+    3.2,
+    5.775,
+    0.9
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual",
+   "extent": [
+    [
+     2.6,
+     5.55
+    ],
+    [
+     3.8,
+     5.55
+    ],
+    [
+     3.8,
+     6.0
+    ],
+    [
+     2.6,
+     6.0
+    ]
+   ]
+  }
+ ]
+}

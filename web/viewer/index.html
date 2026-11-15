@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot design run</title>
+<style>
+:root {
+  --bg: #f4f2ee; --panel: #fffdf9; --ink: #1d1b18; --muted: #6f6a62; --line: #e2ddd3; --soft: #ece8df;
+  --accent: #1f6f78; --accent-soft: #d9ecee; --ok: #2f7d4f; --ok-soft: #dcefe2; --bad: #b3452f; --bad-soft: #f6dfd9;
+  --warn: #9a6a12; --warn-soft: #f5e9cf; --stage: #ebe7de;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #151614; --panel: #1d1f1c; --ink: #ecebe6; --muted: #9a988f; --line: #2e312c; --soft: #262925;
+    --accent: #6cc3cc; --accent-soft: #17383c; --ok: #7cc89a; --ok-soft: #1a3325; --bad: #ee8f78; --bad-soft: #3d201a;
+    --warn: #e0b45c; --warn-soft: #3a2f16; --stage: #23261f; }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.45 -apple-system, "Segoe UI", Inter, Roboto, sans-serif; display: flex; flex-direction: column; }
+button, input, select { font: inherit; color: inherit; }
+header { display: flex; gap: 12px; align-items: center; padding: 10px 18px; border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+header h1 { font-size: 15px; margin: 0 6px 0 0; font-weight: 650; letter-spacing: -.01em; white-space: nowrap; }
+#job { flex: 1 1 320px; min-width: 200px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+#job:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--panel); font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: default; }
+select { padding: 7px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); max-width: 250px; }
+label.chk { display: flex; gap: 5px; align-items: center; color: var(--muted); white-space: nowrap; }
+.pill { padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; background: var(--soft); color: var(--muted); white-space: nowrap; }
+.pill.live { background: var(--accent-soft); color: var(--accent); }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 6px; animation: pulse 1.2s infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+a { color: var(--accent); }
+
+#steps { display: flex; gap: 0; padding: 10px 18px 8px; overflow-x: auto; background: var(--panel); border-bottom: 1px solid var(--line); }
+.step { flex: 1 1 0; min-width: 120px; padding: 2px 10px 2px 0; position: relative; }
+.step .bar { height: 4px; border-radius: 2px; background: var(--soft); margin-bottom: 6px; overflow: hidden; }
+.step .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .4s; }
+.step.done .bar i { width: 100%; background: var(--ok); }
+.step.active .bar i { width: 100%; animation: sweep 1.4s infinite; }
+.step.failed .bar i { width: 100%; background: var(--bad); }
+@keyframes sweep { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} }
+.step b { font-size: 12.5px; font-weight: 600; display: block; }
+.step span { font-size: 11.5px; color: var(--muted); font-family: var(--mono); }
+.step.pending b { color: var(--muted); font-weight: 500; }
+
+main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(330px, 1fr); gap: 14px; padding: 14px 18px; }
+.stage { display: grid; grid-template-columns: minmax(280px, .82fr) minmax(320px, 1.18fr); gap: 14px; align-items: start; }
+.col { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-bottom: 20px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.card > h2 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0; padding: 11px 14px 0; font-weight: 600; display: flex; justify-content: space-between; gap: 10px; }
+.card > h2 em { font-style: normal; text-transform: none; letter-spacing: 0; font-weight: 500; }
+
+#robot { display: grid; grid-template-columns: 1fr; gap: 0; padding: 8px 14px 14px; }
+#shot { background: radial-gradient(circle at 50% 80%, var(--panel) 0, var(--stage) 65%); border-radius: 10px; aspect-ratio: 1/.92; display: grid; place-items: center; overflow: hidden; position: relative; margin-bottom: 10px; }
+#shot img { width: 100%; height: 100%; object-fit: contain; }
+#shot .tag { position: absolute; left: 8px; top: 8px; }
+#shot .empty { color: var(--muted); font-size: 13px; padding: 20px; text-align: center; }
+#verdict { font-size: 15px; font-weight: 600; margin: 4px 0 2px; }
+#verdict.fail { color: var(--bad); } #verdict.pass { color: var(--ok); }
+#why { color: var(--muted); min-height: 2.9em; font-size: 13px; }
+.nums { display: flex; gap: 18px; margin: 8px 0 10px; flex-wrap: wrap; }
+.nums div b { display: block; font: 600 17px/1.15 var(--mono); letter-spacing: -.02em; white-space: nowrap; }
+.nums div span { font-size: 11.5px; color: var(--muted); }
+table.slots { width: 100%; border-collapse: collapse; }
+table.slots td { padding: 4px 0; border-top: 1px solid var(--line); vertical-align: top; }
+table.slots td:first-child { color: var(--muted); width: 92px; font-size: 12.5px; }
+table.slots td b { font-weight: 600; } table.slots td small { color: var(--muted); display: block; }
+.changed { animation: flash 1.1s; } @keyframes flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
+#cands { grid-column: 1 / -1; display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.cand { border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; font-size: 11.5px; cursor: pointer; background: var(--bg); text-align: left; line-height: 1.3; }
+.cand b { font-family: var(--mono); font-weight: 600; }
+.cand.fail b::before { content: "✕ "; color: var(--bad); } .cand.pass b::before { content: "✓ "; color: var(--ok); }
+.cand.pass { border-color: var(--ok); background: var(--ok-soft); }
+.cand.sel { outline: 2px solid var(--accent); }
+.cand small { display: block; color: var(--muted); }
+#funnel { grid-column: 1 / -1; color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+#funnel b { color: var(--ink); font-family: var(--mono); }
+
+#plan { padding: 6px 10px 10px; }
+#walk { padding: 6px 10px 12px; } #walk video { width: 100%; display: block; border-radius: 8px; background: #000; }
+#walknow { font-weight: 600; margin: 8px 2px 6px; min-height: 1.4em; }
+#walkchapters { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.chap { font: inherit; font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); cursor: pointer; }
+.chap.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+#plan svg { width: 100%; height: auto; display: block; max-height: 58vh; }
+#plan svg.photo { max-height: 78vh; }
+.room { fill: var(--stage); stroke: var(--ink); stroke-width: .045; }
+.room.on { fill: var(--accent-soft); }
+svg.photo .room, svg.photo .room.on { fill: none; stroke: none; }
+svg.photo .obst { fill: none; stroke: none; }
+svg.photo .so { fill: none; stroke-width: .025; }
+svg.photo text { paint-order: stroke; stroke: var(--panel); stroke-width: .06px; stroke-linejoin: round; }
+svg.photo .route { stroke-width: .05; opacity: 1; filter: drop-shadow(0 0 .02px #000); }
+svg.photo .roomlabel { font-size: .17px; } svg.photo .obstlabel { font-size: .15px; fill: var(--ink); } svg.photo .dock { fill: none; } svg.photo .anchorlabel { font-size: .16px; } svg.photo .sonum { font-size: .2px; }
+.roomlabel { font-size: .2px; fill: var(--muted); }
+.obstlabel { font-size: .18px; fill: var(--muted); text-anchor: middle; }
+.door { stroke: var(--panel); stroke-width: .11; } .doormark { stroke: var(--accent); stroke-width: .05; }
+.door.tight + .doormark, .doormark.tight { stroke: var(--bad); }
+.doorlabel { font-size: .19px; fill: var(--accent); font-family: var(--mono); text-anchor: middle; }
+.doorlabel.tight { fill: var(--bad); font-weight: 700; }
+.obst { fill: var(--line); stroke: var(--muted); stroke-width: .02; }
+.anchor { fill: var(--warn); } .anchorlabel { font-size: .2px; fill: var(--ink); paint-order: stroke; stroke: var(--panel); stroke-width: .05; }
+.dock { fill: none; stroke: var(--muted); stroke-width: .03; stroke-dasharray: .06 .05; }
+.route { fill: none; stroke: var(--accent); stroke-width: .06; stroke-linejoin: round; stroke-linecap: round; opacity: .85; }
+.route.carry { stroke: var(--warn); stroke-dasharray: .12 .08; }
+.so { fill: var(--panel); stroke: var(--accent); stroke-width: .04; } .so.new { animation: pop .5s; }
+.sohead { stroke: var(--accent); stroke-width: .04; }
+.sonum { font-size: .2px; text-anchor: middle; fill: var(--accent); font-weight: 700; font-family: var(--mono); }
+@keyframes pop { 0% { transform: scale(2.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); padding: 4px 4px 0; }
+.legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+
+.rows { padding: 8px 14px 12px; overflow-x: auto; }
+.rows table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.rows th { text-align: left; color: var(--muted); font-weight: 500; padding: 3px 8px 3px 0; white-space: nowrap; }
+.rows td { padding: 3px 8px 3px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.rows td.n, .mono { font-family: var(--mono); }
+.src { font-size: 11px; padding: 1px 6px; border-radius: 99px; background: var(--soft); color: var(--muted); white-space: nowrap; }
+.src.assumed { background: var(--warn-soft); color: var(--warn); }
+.prog { counter-reset: p; list-style: none; margin: 0; padding: 0; }
+.prog li { display: grid; grid-template-columns: 26px 92px 1fr; gap: 6px; padding: 3px 0; border-top: 1px solid var(--line); font-size: 12.5px; }
+.prog li > i { color: var(--muted); font: normal 11.5px var(--mono); padding-top: 1px; }
+.prog li b { font-family: var(--mono); font-weight: 600; }
+.prog li small { color: var(--muted); }
+
+#trace { padding: 6px 0 10px; }
+.tgroup > h3 { margin: 0; padding: 10px 14px 4px; font-size: 13px; font-weight: 650; display: flex; justify-content: space-between; }
+.tgroup > h3 span { color: var(--muted); font: 500 11.5px var(--mono); }
+.ev { padding: 5px 14px 5px 30px; position: relative; font-size: 13px; }
+.ev::before { content: ""; position: absolute; left: 16px; top: 11px; width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+.ev.say::before { background: var(--accent); } .ev.good::before { background: var(--ok); } .ev.bad::before { background: var(--bad); }
+.ev small { color: var(--muted); }
+.ev .t { float: right; color: var(--muted); font: 11px var(--mono); margin-left: 8px; }
+.ev.tool { color: var(--muted); font-size: 12px; padding-top: 2px; padding-bottom: 2px; }
+.ev.tool b { color: var(--ink); font: 500 12px var(--mono); }
+.ev.tool details summary { cursor: pointer; list-style: none; } .ev.tool details summary::-webkit-details-marker { display: none; }
+.ev.tool details div { padding: 2px 0 2px 10px; border-left: 2px solid var(--line); margin: 3px 0; }
+.llm { margin: 6px 14px 6px 30px; border: 1px solid var(--accent); border-radius: 10px; padding: 9px 11px; background: var(--accent-soft); font-size: 13px; }
+.llm h4 { margin: 0 0 4px; font-size: 12px; display: flex; justify-content: space-between; gap: 8px; color: var(--accent); }
+.llm h4 span { font: 500 11px var(--mono); }
+.llm p { margin: 4px 0; } .llm ul { margin: 4px 0; padding-left: 18px; } .llm li { margin: 2px 0; }
+.llm .q { color: var(--warn); }
+.thinking { display: inline-block; } .thinking::after { content: "…"; animation: pulse 1s infinite; }
+#scrub { display: flex; gap: 10px; align-items: center; padding: 8px 18px; border-top: 1px solid var(--line); background: var(--panel); }
+#scrub input { flex: 1; accent-color: var(--accent); } #scrub span { font: 12px var(--mono); color: var(--muted); min-width: 110px; text-align: right; }
+.hint { color: var(--muted); padding: 30px 14px; text-align: center; }
+@media (max-width: 1100px) { .stage { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; overflow-y: auto; } .col { overflow: visible; } body { height: auto; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Robot design run</h1>
+  <input id="job" placeholder="Describe the job, e.g. “swap the living room bulb, wipe the kitchen counter, take the trash out”" aria-label="Job in words">
+  <label class="chk"><input type="checkbox" id="useModel" checked> model steps</label>
+  <button class="btn" id="go">Run</button>
+  <select id="runs" aria-label="Past runs"></select>
+  <span class="pill" id="status">no run</span>
+  <a id="ls" href="#" target="_blank" rel="noopener" hidden>LangSmith trace ↗</a>
+</header>
+<div id="steps"></div>
+<main>
+  <div class="col">
+   <div class="stage">
+    <section class="card"><h2>Robot <em id="robotnote"></em></h2>
+      <div id="robot">
+        <div id="shot"><div class="empty">The robot appears here as candidates are composed and checked.</div></div>
+        <div>
+          <div id="verdict">Waiting for the design step</div>
+          <div id="why"></div>
+          <div class="nums"><div><b id="price">–</b><span>price</span></div><div><b id="mass">–</b><span>mass</span></div><div><b id="stow">–</b><span>stowed w × h</span></div></div>
+          <table class="slots" id="slots"></table>
+        </div>
+        <div id="funnel"></div>
+        <div id="cands"></div>
+      </div>
+    </section>
+    <section class="card"><h2>Building and route <em id="plannote"></em></h2>
+      <div id="plan"></div>
+    </section>
+    <section class="card" id="walkcard" hidden><h2>Watch it work <em id="walknote"></em></h2>
+      <div id="walk"><video id="walkvideo" controls muted playsinline preload="metadata"></video>
+        <div id="walknow"></div><a class="btn ghost" id="walktour" hidden target="_blank" rel="noopener" style="display:inline-block;margin:0 0 8px;text-decoration:none">Watch it in the real room (Matterport scan)</a><div id="walkchapters"></div><div class="hint" id="walkhint"></div></div>
+    </section>
+   </div>
+    <section class="card" id="reqcard" hidden><h2>Requirements ledger <em id="reqnote"></em></h2><div class="rows" id="reqs"></div></section>
+    <section class="card" id="progcard" hidden><h2>Program <em id="prognote"></em></h2><div class="rows"><ol class="prog" id="prog"></ol></div></section>
+  </div>
+  <div class="col">
+    <section class="card"><h2>Agent trace <em id="tracenote"></em></h2><div id="trace"><div class="hint">Start a run, or pick a past one, to watch the agent work.</div></div></section>
+  </div>
+</main>
+<div id="scrub" hidden>
+  <button class="btn ghost" id="play">Replay</button>
+  <input type="range" id="pos" min="0" max="0" value="0" aria-label="Position in the run">
+  <span id="clock"></span>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const STEPS = [["0 intake","Intake","words to tasks"],["1 building pre-pass","Building","what it demands"],["2 requirements ledger","Requirements","numbers with sources"],
+  ["3-4 design and compose","Design","enumerate, check, rank"],["5 pathing","Pathing","standoffs, route, arm"],["5d program","Program","ordered primitives"]];
+const SLOTS = [["base","Base"],["lift","Lift"],["arm","Arm"],["gripper","Gripper"],["lidar","Lidar"],["wrist_cam","Wrist camera"],["ego_cam","Forward camera"]];
+const NAMES = {tidybot_arx5:"Wheeled: TidyBot++ base, small",tidybot_kinova:"Wheeled: TidyBot++ base, medium",tidybot_franka:"Wheeled: TidyBot++ base, large",go2:"Legged: Unitree Go2",spot:"Legged: Boston Dynamics Spot",
+  none:"none",liftkit_500:"Lift column, 0.5 m",liftkit_900:"Lift column, 0.9 m",liftkit_1400:"Lift column, 1.4 m",lite6:"UFACTORY Lite 6",xarm7:"UFACTORY xArm 7",ur5e:"Universal Robots UR5e",piper:"AgileX PiPER",vx300s:"Trossen ViperX 300 S",z1:"Unitree Z1",fr3:"Franka Research 3",gen3:"Kinova Gen3",crx5ia:"FANUC CRX-5iA",ur10e:"Universal Robots UR10e",iiwa14:"KUKA LBR iiwa 14",
+  franka_hand:"Franka Hand",piper_gripper:"PiPER gripper (built in)",vx300s_gripper:"ViperX gripper (built in)",z1_gripper:"Z1 gripper (built in)",
+  robotiq_2f85:"Robotiq 2F-85",xarm_gripper:"xArm gripper",lite6_gripper:"Lite 6 gripper",rplidar_s2:"RPLIDAR S2 (2D)",vlp16:"Velodyne VLP-16 (3D)",base_front:"on the base, front",stage_rear:"on the lift stage",stage_front:"on the lift stage"};
+const nm = k => NAMES[k] || k;
+const money = v => v == null ? "–" : "$" + Number(v).toLocaleString("en-US");
+let run = null, events = [], shown = 0, timer = null, playing = null, follow = true, pick = null, prevParts = {};
+
+function partsLine(p) { return [p.base, p.lift, p.arm, p.gripper].filter(x => x && x !== "none").map(x => nm(x).replace(/,.*$/, "").replace("TidyBot++ base","TidyBot++").replace("Lift column","lift")).join(" + "); }
+function failLine(f) {
+  const where = f.task ? ` for ${f.task}` : "";
+  const nums = f.value != null && f.limit != null && typeof f.value !== "object" ? `: ${f.value} against ${typeof f.limit === "object" ? JSON.stringify(f.limit) : f.limit}${f.unit ? " " + f.unit : ""}` : "";
+  return `${f.check}${where}${nums}`;
+}
+
+/* ---------- reduce events into what is on screen ---------- */
+function reduce(upto) {
+  const S = {steps: {}, trace: [], cands: [], standoffs: [], arm: [], order: []};
+  let cur = null;
+  const group = name => { let g = S.trace.find(x => x.step === name); if (!g) { g = {step: name, items: []}; S.trace.push(g); } return g; };
+  const add = (it) => group(cur || "run").items.push(it);
+  for (let i = 0; i < upto; i++) {
+    const e = events[i];
+    switch (e.kind) {
+      case "run_start": S.world = e.world; S.job = e.job; S.tasksFile = e.tasks_file; S.model = e.model_steps; break;
+      case "trace": S.url = e.url; break;
+      case "step_start": cur = e.step; S.steps[e.step] = {status: "active", t0: e.t}; group(e.step); break;
+      case "step_end": S.steps[e.step] = {status: e.error ? "failed" : "done", seconds: e.seconds}; if (e.error) add({cls: "bad", html: `Step failed: ${esc(e.error)}`, t: e.t}); cur = null; break;
+      case "llm_start": add({llmWait: e.name, model: e.model, t: e.t}); break;
+      case "llm": { const g = group(cur || "run"); const w = g.items.findIndex(x => x.llmWait === e.name); if (w >= 0) g.items.splice(w, 1); add({llm: e, t: e.t}); break; }
+      case "tasks": S.tasks = e.tasks; S.intake = e.intake;
+        cur = cur || "0 intake"; group("0 intake").items.push({cls: "say", t: e.t, html: `<b>${e.tasks.length} tasks</b>: ` + e.tasks.map(t => `${esc(t.id)} ${esc(t.skill.replace("_"," "))} at ${esc(t.anchor)}`).join("; ")
+          + (e.intake && e.intake.source === "file" ? ` <small>(read from a file, no model)</small>` : "")}); cur = null; break;
+      case "room_view": S.roomView = e; break;
+      case "building": S.demands = e.demands; S.corridors = e.corridors;
+        group("1 building pre-pass").items.push({cls: "say", t: e.t, html: `Narrowest passage on any trip is <b>${e.demands.narrowest_m} m</b> at ${esc(e.demands.narrowest_doorway)}; lowest door header ${e.demands.lowest_header_m} m; tallest step ${e.demands.tallest_step_m} m; tightest turn ${e.demands.tightest_turn_m} m.`}); break;
+      case "requirements": S.reqs = e.rows; S.conflicts = e.conflicts;
+        group("2 requirements ledger").items.push({cls: "say", t: e.t, html: `<b>${e.rows.length} requirements</b> written, ${e.rows.filter(r => r.source === "assumed").length} of them assumed.` + (e.conflicts.length ? ` ${e.conflicts.length} conflict(s).` : "")}); break;
+      case "candidates": S.funnel = e;
+        add({cls: "say", t: e.t, html: `<b>${e.considered.toLocaleString()}</b> part combinations; card arithmetic leaves <b>${e.passed_arithmetic}</b>. Most common knock-outs: ${Object.entries(e.eliminated_by).slice(0, 4).map(([k, v]) => `${esc(k)} (${v})`).join(", ")}.`}); break;
+      case "candidate": S.cands.push(e); S.last = {type: "cand", i: S.cands.length - 1};
+        add({cls: e.feasible ? "good" : "bad", t: e.t, html: `Candidate ${S.cands.length}: ${esc(partsLine(e.parts))}, ${money(e.price_usd)}. ` + (e.feasible ? "<b>Passes every check.</b>" : `Fails ${esc(e.failed.map(failLine).join("; "))}.`)}); break;
+      case "design": S.design = e; S.last = {type: "design"};
+        add({cls: "good", t: e.t, html: `<b>Chosen:</b> ${esc(partsLine(e.parts))} at ${money(e.price_usd)}, ${e.mass_kg} kg. Folded it is ${e.stowed.width_m} m wide and ${e.stowed.height_m} m tall.`}); break;
+      case "infeasible": S.infeasible = e; add({cls: "bad", t: e.t, html: `<b>No robot in the catalog passes.</b> Binding: ${esc((e.binding_checks || []).map(failLine).join("; "))}.`}); break;
+      case "robot_fix": S.walk = null; S.tour = null; S.fixes = (S.fixes || 0) + 1; S.standoffs = []; S.route = null; S.arm = []; S.design = null;
+        group("5 pathing").items.push({cls: "bad", t: e.t, html: `<b>Redesign ${e.n}:</b> ${esc(e.why)}. That arm-and-lift pair is ruled out and the design step runs again.`}); break;
+      case "standoff": S.standoffs.push(e); S.last = {type: "so", i: S.standoffs.length - 1};
+        add({cls: "good", t: e.t, html: `${esc(e.task)} ${esc(e.skill.replace("_"," "))}: parks at (${e.pose[0].toFixed(2)}, ${e.pose[1].toFixed(2)})${e.covers ? ", " + esc(e.covers) : ""}; tip-over ratio ${e.tip_ratio}.`}); break;
+      case "standoff_failed": add({cls: "bad", t: e.t, html: `${esc(e.task)} ${esc(e.skill)}: no standoff. ${esc(e.reason || "")}`}); break;
+      case "route": S.route = e; add({cls: "say", t: e.t, html: `${e.replanned ? "Route replanned" : "Route planned"}: ${e.legs.length} legs, ${e.legs.reduce((a, l) => a + (l.length_m || 0), 0).toFixed(1)} m.`}); break;
+      case "arm_path": S.arm.push(e);
+        add({cls: e.ok ? "good" : "bad", t: e.t, html: `${esc(e.task)} arm path ${e.ok ? "built" : "failed"}: ` + (e.ok ? e.segments.map(s => `${esc(s.kind.replace("_"," "))} ${s.seconds}s`).join(", ") : esc(e.why || "")) + (e.rejected ? ` <small>(after ${e.rejected} rejected pose${e.rejected > 1 ? "s" : ""})</small>` : "")}); break;
+      case "walkthrough": S.walk = e; break;
+      case "tour": S.tour = e; break;
+      case "program": S.program = e; group("5d program").items.push({cls: e.source === "model" ? "say" : "", t: e.t, html: `<b>${e.steps.length} steps</b>, written by ${e.source === "model" ? "the model and accepted by the checker" : "rule"}` + (e.rejected ? `. The model's version was rejected: ${esc(e.rejected.problems.slice(0, 2).join("; "))}` : ".")}); break;
+      case "tool": { if (e.name === "composer.compose" && cur === "3-4 design and compose") break;  // drawn as the robot, not as a row
+        const g = group(cur || "run"), last = g.items[g.items.length - 1];
+        if (last && last.tool === e.name) { last.calls.push(e); } else g.items.push({tool: e.name, calls: [e], t: e.t}); break; }
+      case "note": add({cls: "", t: e.t, html: `<small>${esc(e.text)}</small>`}); break;
+      case "run_end": S.end = e; break;
+    }
+  }
+  return S;
+}
+
+/* ---------- drawing ---------- */
+function drawSteps(S) {
+  $("steps").innerHTML = STEPS.map(([key, name, sub]) => {
+    const st = S.steps[key] || {status: "pending"};
+    return `<div class="step ${st.status}"><div class="bar"><i></i></div><b>${name}</b><span>${st.status === "done" || st.status === "failed" ? st.seconds + " s" : st.status === "active" ? "running" : sub}</span></div>`;
+  }).join("");
+}
+function drawRobot(S) {
+  let view = pick && S.cands[pick.i] ? pick : S.last;
+  let parts = null, frame = null, verdict = "Waiting for the design step", cls = "", why = "", price = null, mass = null, stow = "–", tag = "";
+  if (view && view.type === "cand" && S.cands[view.i]) { const c = S.cands[view.i]; parts = c.parts; frame = c.frame || lastFrame(S.cands, view.i); price = c.price_usd; mass = c.mass_kg;
+    verdict = `Candidate ${view.i + 1} of ${S.funnel ? S.funnel.passed_arithmetic : "?"}: ${c.feasible ? "passes" : "rejected"}`; cls = c.feasible ? "pass" : "fail";
+    why = c.feasible ? "Passes every check it can be assessed on." : "Fails " + c.failed.map(failLine).join("; ") + "."; tag = c.feasible ? "ok" : "bad"; }
+  else if (view && view.type === "design" && S.design) { const d = S.design; parts = d.parts; frame = d.frame; price = d.price_usd; mass = d.mass_kg; stow = `${d.stowed.width_m} × ${d.stowed.height_m} m`;
+    verdict = "Chosen design"; cls = "pass"; why = "The cheapest combination that passes every check." + (d.labels && d.labels.length ? " Not verified: " + d.labels.join("; ") + "." : ""); tag = "ok"; }
+  else if (view && view.type === "so" && S.standoffs[view.i]) { const s = S.standoffs[view.i], d = S.design || {}; parts = d.parts; frame = s.frame || d.frame; price = d.price_usd; mass = d.mass_kg; if (d.stowed) stow = `${d.stowed.width_m} × ${d.stowed.height_m} m`;
+    verdict = `Reaching for ${s.task}: ${s.skill.replace("_", " ")} at ${s.anchor}`; cls = "pass"; why = `Parked at (${s.pose[0].toFixed(2)}, ${s.pose[1].toFixed(2)})${s.covers ? ", " + s.covers : ""}. Tip-over ratio ${s.tip_ratio} (needs 1.5).`; tag = "live"; }
+  if (S.infeasible && !S.design) { verdict = "No robot passes"; cls = "fail"; why = "Binding checks: " + (S.infeasible.binding_checks || []).map(failLine).join("; "); }
+  const shot = $("shot");
+  if (frame) { const src = `/runs/${run.replace(/^runs\//, "")}/${frame}`; let img = shot.querySelector("img");
+    if (!img) { shot.innerHTML = `<img alt="Render of the robot"><span class="pill tag"></span>`; img = shot.querySelector("img"); }
+    if (img.getAttribute("src") !== src) img.src = src;
+    const t = shot.querySelector(".tag"); t.className = "pill tag " + tag; t.textContent = tag === "bad" ? "rejected" : tag === "live" ? "at work" : tag === "ok" && view.type === "design" ? "chosen" : tag === "ok" ? "passes" : ""; t.hidden = !tag; }
+  else if (!shot.querySelector(".empty")) shot.innerHTML = `<div class="empty">The robot appears here as candidates are composed and checked.</div>`;
+  $("verdict").textContent = verdict; $("verdict").className = cls; $("why").textContent = why;
+  $("price").textContent = money(price); $("mass").textContent = mass == null ? "–" : mass + " kg"; $("stow").textContent = stow;
+  $("slots").innerHTML = SLOTS.map(([k, label]) => { let v = "–", sub = "";
+    if (parts) { if (k === "lidar") { v = nm(parts.lidar); sub = parts.lidar !== "none" ? nm(parts.lidar_mount) : ""; } else if (k === "wrist_cam") v = parts.wrist_cam ? "RealSense D435i" : "none";
+      else if (k === "ego_cam") { v = parts.ego_cam === "none" ? "none" : "RealSense D435i"; sub = parts.ego_cam === "none" ? "" : nm(parts.ego_cam); } else v = nm(parts[k]); }
+    const ch = parts && prevParts[k] !== undefined && prevParts[k] !== v + sub; if (parts) prevParts[k] = v + sub;
+    return `<tr class="${ch ? "changed" : ""}"><td>${label}</td><td><b>${esc(v)}</b>${sub ? `<small>${esc(sub)}</small>` : ""}</td></tr>`; }).join("");
+  $("funnel").innerHTML = S.funnel ? `<b>${S.funnel.considered.toLocaleString()}</b> combinations → <b>${S.funnel.passed_arithmetic}</b> pass the card arithmetic → <b>${S.cands.length}</b> composed and checked${S.design ? " → <b>1</b> chosen" : ""}${S.fixes ? ` · <b>${S.fixes}</b> redesign${S.fixes > 1 ? "s" : ""} after pathing failed` : ""}` : "";
+  $("cands").innerHTML = S.cands.map((c, i) => `<button class="cand ${c.feasible ? "pass" : "fail"} ${view && view.type === "cand" && view.i === i ? "sel" : ""}" data-i="${i}" title="${esc(c.feasible ? "passes" : c.failed.map(failLine).join("; "))}"><b>${money(c.price_usd)}</b><small>${esc(c.feasible ? "passes" : (c.failed[0] ? c.failed[0].check + (c.failed[0].task ? " " + c.failed[0].task : "") : "fails"))}</small></button>`).join("")
+    + (S.design && S.cands.length ? `<button class="cand ${view && view.type !== "cand" ? "sel" : ""}" data-i="-1"><b>latest</b><small>follow the run</small></button>` : "");
+  $("robotnote").textContent = S.cands.length ? "click a candidate to inspect it" : "";
+}
+function lastFrame(cands, i) { for (let k = i; k >= 0; k--) { const c = cands[k], a = cands[i]; if (c.frame && c.parts.base === a.parts.base && c.parts.lift === a.parts.lift && c.parts.arm === a.parts.arm && c.parts.gripper === a.parts.gripper) return c.frame; } return null; }
+
+function drawWalk(S) {
+  const w = S.walk, card = $("walkcard"), v = $("walkvideo"); card.hidden = !w; if (!w) { if (v.dataset.src) { v.removeAttribute("src"); v.dataset.src = ""; v.load(); } return; }
+  const src = `/runs/${run.replace(/^runs\//, "")}/${w.video}`;
+  if (v.dataset.src !== src) { v.dataset.src = src; v.src = src;
+    $("walkchapters").innerHTML = w.chapters.map((c, i) => `<button class="chap" data-t="${c.t}" data-i="${i}">${esc(c.label)}</button>`).join("");
+    $("walkchapters").querySelectorAll(".chap").forEach(b => b.onclick = () => { v.currentTime = +b.dataset.t + .01; v.play(); });
+    v.ontimeupdate = () => { let k = 0; w.chapters.forEach((c, i) => { if (v.currentTime >= c.t) k = i; });
+      $("walknow").textContent = w.chapters[k] ? w.chapters[k].label : "";
+      $("walkchapters").querySelectorAll(".chap").forEach((b, i) => b.classList.toggle("on", i === k)); }; }
+  $("walktour").hidden = !S.tour; if (S.tour) $("walktour").href = `http://localhost:${location.port}/tour.html?run=${encodeURIComponent(run)}`;
+  $("walknote").textContent = `${w.seconds} s`; $("walkhint").textContent = w.note || "";
+}
+function drawPlan(S) {
+  const w = S.world; if (!w) { $("plan").innerHTML = `<div class="hint">The floor plan appears when a run starts.</div>`; return; }
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  w.rooms.forEach(r => r.polygon.forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
+  const pad = S.roomView ? .3 : .75, Y = y => y1 - y + y0;  // flip so +Y is up
+  const onRooms = new Set(), tight = S.demands ? S.demands.narrowest_doorway : null;
+  (S.corridors || []).forEach(c => (c.rooms || []).forEach(r => onRooms.add(r)));
+  const pts = poly => poly.map(([x, y]) => `${x},${Y(y)}`).join(" ");
+  // with a rendered top view the picture is the room: the drawing on top keeps only labels, doors, the route and the stops
+  const rv = S.roomView, src = f => `/runs/${run.replace(/^runs\//, "")}/${f}`;
+  const layer = f => rv && f ? `<image href="${src(f)}" x="${rv.extent[0]}" y="${Y(rv.extent[3])}" width="${rv.extent[2] - rv.extent[0]}" height="${rv.extent[3] - rv.extent[1]}" preserveAspectRatio="none"/>` : "";
+  let h = `<svg class="${rv ? "photo" : ""}" viewBox="${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}" role="img" aria-label="The rooms from above with the robot's route">` + layer(rv && rv.frame);
+  w.rooms.forEach(r => { const rx = Math.max(...r.polygon.map(p => p[0])), ty = Math.max(...r.polygon.map(p => p[1])), by = Math.min(...r.polygon.map(p => p[1])), hall = r.type === "hallway";
+    h += `<polygon class="room ${onRooms.has(r.id) ? "on" : ""}" points="${pts(r.polygon)}"/><text class="roomlabel" text-anchor="end" x="${rx - .12}" y="${hall ? Y(by) - .1 : Y(ty) + .27}">${esc(r.id.replace(/_/g, " "))}${rv ? "" : ` · ${r.ceiling_m} m ceiling`}</text>`; });
+  (w.obstacles || []).forEach(o => { const a = o.box.min, b = o.box.max, tall = (b[1] - a[1]) > (b[0] - a[0]) * 1.5, cx = (a[0] + b[0]) / 2, cy = Y((a[1] + b[1]) / 2);
+    h += `<rect class="obst" x="${a[0]}" y="${Y(b[1])}" width="${b[0] - a[0]}" height="${b[1] - a[1]}"/><text class="obstlabel" x="${cx}" y="${cy + .05}" ${tall ? `transform="rotate(-90 ${cx} ${cy})"` : ""}>${esc(o.id)}</text>`; });
+  w.doorways.forEach(d => { const [px, py] = d.position, [ax, ay] = d.along, k = d.width_m / 2, t = d.id === tight;
+    h += `<line class="door" x1="${px - ax * k}" y1="${Y(py - ay * k)}" x2="${px + ax * k}" y2="${Y(py + ay * k)}"/><line class="doormark ${t ? "tight" : ""}" x1="${px - ax * k}" y1="${Y(py - ay * k)}" x2="${px + ax * k}" y2="${Y(py + ay * k)}" stroke-dasharray=".05 .05"/>`
+      + `<text class="doorlabel ${t ? "tight" : ""}" x="${px + (ay ? (px <= x0 + .01 ? -.36 : .36) : 0)}" y="${Y(py) + (ax ? -.14 : .06)}">${d.width_m} m</text>`; });
+  if (w.dock) h += `<circle class="dock" cx="${w.dock.pose[0]}" cy="${Y(w.dock.pose[1])}" r=".24"/><text class="obstlabel" x="${w.dock.pose[0]}" y="${Y(w.dock.pose[1]) - .3}">dock</text>`;
+  if (rv && S.design && S.design.top && !S.standoffs.length) h += layer(S.design.top);
+  if (rv) { const last = {}; S.standoffs.forEach(s => { last[s.task + "|" + s.pose.join(",")] = s.top; }); Object.values(last).forEach(f => { h += layer(f); }); }
+  if (S.route) S.route.legs.forEach(l => { if (l.waypoints && l.waypoints.length > 1) h += `<polyline class="route ${l.carrying ? "carry" : ""}" points="${l.waypoints.map(p => `${p[0]},${Y(p[1])}`).join(" ")}"/>`; });
+  w.anchors.forEach(a => { h += `<rect class="anchor" x="${a.point[0] - .07}" y="${Y(a.point[1]) - .07}" width=".14" height=".14" transform="rotate(45 ${a.point[0]} ${Y(a.point[1])})"/><text class="anchorlabel" x="${a.point[0] + (a.point[0] > (x0 + x1) / 2 + 1 ? -.16 : .16)}" y="${Y(a.point[1]) - .14}" text-anchor="${a.point[0] > (x0 + x1) / 2 + 1 ? "end" : "start"}">${esc(a.id.replace(/_/g, " "))}${rv ? "" : ` · ${a.point[2]} m up`}</text>`; });
+  S.standoffs.forEach((s, i) => { const [x, y, th] = s.pose, isNew = i === S.standoffs.length - 1 && !S.route;
+    h += `<g style="transform-origin:${x}px ${Y(y)}px" class="${isNew ? "so new" : ""}"><circle class="so" cx="${x}" cy="${Y(y)}" r=".19"/><line class="sohead" x1="${x}" y1="${Y(y)}" x2="${x + Math.cos(th) * .19}" y2="${Y(y + Math.sin(th) * .19)}"/></g>`; });
+  const seen = {}; S.standoffs.forEach(s => { if (seen[s.task]) return; seen[s.task] = 1; h += `<text class="sonum" x="${s.pose[0] - .33}" y="${Y(s.pose[1]) + .06}">${esc(s.task)}</text>`; });
+  h += `</svg><div class="legend"><span><i style="background:var(--accent)"></i>route</span><span><i style="background:var(--warn)"></i>carrying / target</span><span><i style="background:var(--bad)"></i>narrowest doorway</span>${rv ? "<span>rendered from the world file, seen from straight above; the robot is drawn at each stop in its reaching pose</span>" : '<span><i style="background:var(--accent-soft);height:10px"></i>rooms on a trip</span>'}</div>`;
+  $("plan").innerHTML = h;
+  $("plannote").textContent = S.route ? `${S.route.legs.length} legs, ${S.route.legs.reduce((a, l) => a + (l.length_m || 0), 0).toFixed(1)} m, ${S.standoffs.length} standoffs` : S.demands ? `narrowest passage ${S.demands.narrowest_m} m` : (w.id || "");
+}
+function drawTables(S) {
+  $("reqcard").hidden = !S.reqs;
+  if (S.reqs) { $("reqnote").textContent = `${S.reqs.length} rows`;
+    $("reqs").innerHTML = `<table><tr><th>task</th><th>quantity</th><th>value</th><th>source</th></tr>` + S.reqs.map(r => `<tr><td class="mono">${esc(r.task || "building")}</td><td>${esc(r.quantity.replace(/_/g, " "))}</td><td class="n">${esc(typeof r.value === "object" ? JSON.stringify(r.value) : r.value)} ${esc(r.unit === "pose" ? "" : r.unit || "")}</td><td><span class="src ${r.source === "assumed" ? "assumed" : ""}">${esc(r.source)}</span></td></tr>`).join("") + `</table>`; }
+  $("progcard").hidden = !S.program;
+  if (S.program) { $("prognote").textContent = S.program.source === "model" ? `written by ${S.program.model}, checked by code` : "built by rule";
+    $("prog").innerHTML = S.program.steps.map(s => `<li><i>${s.n}</i><b>${esc(s.primitive)}</b><span>${esc([s.task, s.leg != null ? "leg " + s.leg : null, s.force_n ? `${s.force_n[0]}–${s.force_n[1]} N` : null, s.turns != null ? s.turns + " turns" : null, s.press_n != null ? s.press_n + " N press" : null].filter(Boolean).join(" · "))} <small>${esc(s.note || "")}</small></span></li>`).join(""); }
+}
+function llmCard(e) {
+  const o = e.output || {}; let body = "";
+  if (e.error) body = `<p class="q">${esc(e.error)}</p>`;
+  else if (o.understood_as) body = `<p>${esc(o.understood_as)}</p><ul>${(o.steps || []).map(s => `<li>${esc(s)}</li>`).join("")}</ul>`
+    + ((o.demos || []).length ? `<p><b>Demonstrations to record:</b> ${o.demos.map(d => `${esc(d.chore)} (${esc(d.kind)})`).join(", ")}</p>` : "")
+    + ((o.questions || []).length ? `<p><b>It asked:</b></p><ul>${o.questions.map(q => `<li class="q">${esc(q)}</li>`).join("")}</ul>` : "");
+  else if (o.steps) { const notes = o.steps.filter(s => s.note && s.primitive !== "move_base").slice(0, 5);
+    body = `<p>Wrote ${o.steps.length} steps. Some of its notes for the field engineer:</p><ul>${notes.map(s => `<li><b>${esc(s.primitive)}${s.task ? " " + esc(s.task) : ""}:</b> ${esc(s.note)}</li>`).join("")}</ul>`; }
+  const u = e.usage ? `${e.usage.input_tokens.toLocaleString()} in / ${e.usage.output_tokens.toLocaleString()} out · ${e.seconds}s` : "";
+  return `<div class="llm"><h4>${esc(e.name)} <span>${esc(e.model || "")} ${u ? "· " + u : ""}</span></h4>${body}</div>`;
+}
+function drawTrace(S) {
+  if (!S.trace.length) { $("trace").innerHTML = `<div class="hint">Waiting for the first step.</div>`; return; }
+  const open = new Set([...document.querySelectorAll("#trace details[open]")].map(d => d.dataset.k));
+  $("trace").innerHTML = S.trace.filter(g => g.items.length || S.steps[g.step]).map(g => { const st = S.steps[g.step] || {}, label = (STEPS.find(s => s[0] === g.step) || [0, g.step])[1];
+    return `<div class="tgroup"><h3>${esc(label)} <span>${st.status === "done" ? st.seconds + " s" : st.status === "active" ? "running" : ""}</span></h3>` + g.items.map((it, n) => {
+      if (it.llm) return llmCard(it.llm);
+      if (it.llmWait) return `<div class="llm"><h4>${esc(it.llmWait)} <span>${esc(it.model)}</span></h4><span class="thinking">The model is working</span></div>`;
+      if (it.tool) { const secs = it.calls.reduce((a, c) => a + c.seconds, 0), k = g.step + n;
+        return it.calls.length === 1 ? `<div class="ev tool"><span class="t">${(secs * 1000).toFixed(0)} ms</span><b>${esc(it.tool)}</b> ${esc(it.calls[0].summary)}</div>`
+          : `<div class="ev tool"><details data-k="${esc(k)}" ${open.has(k) ? "open" : ""}><summary><span class="t">${secs.toFixed(1)} s</span><b>${esc(it.tool)}</b> × ${it.calls.length} <small>show</small></summary>${it.calls.slice(0, 60).map(c => `<div>${esc(c.summary)}</div>`).join("")}</details></div>`; }
+      return `<div class="ev ${it.cls}"><span class="t">${it.t.toFixed(1)}s</span>${it.html}</div>`; }).join("") + `</div>`; }).join("");
+  $("tracenote").textContent = `${events.slice(0, shown).filter(e => e.kind === "tool").length} tool calls` + (events.slice(0, shown).some(e => e.kind === "llm") ? `, ${events.slice(0, shown).filter(e => e.kind === "llm").length} model calls` : "");
+}
+function draw() {
+  const S = reduce(shown), live = !events.some(e => e.kind === "run_end");
+  drawSteps(S); drawRobot(S); drawPlan(S); drawWalk(S); drawTables(S); drawTrace(S);
+  const st = $("status"); const end = shown >= events.length ? S.end : null;
+  st.className = "pill " + (end ? (end.ok ? "ok" : "bad") : events.length ? "live" : ""); st.textContent = end ? (end.ok ? `finished in ${end.seconds} s` : "failed") : events.length ? (live ? "running" : "replaying") : "starting";
+  $("ls").hidden = !S.url; if (S.url) $("ls").href = S.url;
+  if (S.job && document.activeElement !== $("job")) $("job").value = S.job;
+  $("scrub").hidden = !events.length; $("pos").max = events.length; $("pos").value = shown;
+  $("clock").textContent = events.length ? `${(events[Math.max(0, shown - 1)] || {t: 0}).t.toFixed(1)} s · event ${shown}/${events.length}` : "";
+  if (follow && live) { const c = document.querySelectorAll(".col")[1]; c.scrollTop = c.scrollHeight; }
+}
+
+/* ---------- loading, live follow, replay ---------- */
+async function poll() {
+  if (!run) return;
+  try { const r = await fetch(`/runs/${run.replace(/^runs\//, "")}/events.jsonl`, {cache: "no-store"}); if (r.ok) {
+      const lines = (await r.text()).split("\n").filter(Boolean); const fresh = [];
+      for (const l of lines) { try { fresh.push(JSON.parse(l)); } catch (e) { break; } }
+      if (fresh.length !== events.length) { const atEnd = shown >= events.length; events = fresh; if (atEnd && !playing) shown = events.length; draw(); } } } catch (e) {}
+  if (!events.some(e => e.kind === "run_end")) timer = setTimeout(poll, 600);
+}
+function open(r) { clearTimeout(timer); clearInterval(playing); playing = null; run = r; events = []; shown = 0; pick = null; prevParts = {}; follow = true; history.replaceState(null, "", "?run=" + encodeURIComponent(r)); draw(); poll(); }
+async function loadRuns(select) {
+  const list = await (await fetch("/api/runs")).json();
+  $("runs").innerHTML = `<option value="">Past runs (${list.length})</option>` + list.map(r => `<option value="${esc(r.run)}" ${r.run === run ? "selected" : ""}>${esc(new Date(r.modified * 1000).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}))} · ${esc((r.run.startsWith("runs/gallery/") ? r.run.slice(13) + ": " : "") + (r.job || r.run)).slice(0, 52)}${r.finished ? "" : " · running"}</option>`).join("");
+  if (select && !run && list.length) open(list[0].run);
+}
+$("runs").onchange = e => e.target.value && open(e.target.value);
+$("go").onclick = async () => { $("go").disabled = true;
+  try { const r = await (await fetch("/api/run", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({job: $("job").value, model: $("useModel").checked})})).json(); open(r.run); setTimeout(() => loadRuns(false), 1500); }
+  finally { setTimeout(() => { $("go").disabled = false; }, 2000); } };
+$("job").onkeydown = e => { if (e.key === "Enter") $("go").click(); };
+$("pos").oninput = e => { clearInterval(playing); playing = null; $("play").textContent = "Replay"; shown = +e.target.value; pick = null; follow = false; draw(); };
+$("play").onclick = () => { if (playing) { clearInterval(playing); playing = null; $("play").textContent = "Replay"; return; }
+  if (shown >= events.length) shown = 0; pick = null; prevParts = {}; $("play").textContent = "Pause"; follow = true;
+  const total = events.length ? events[events.length - 1].t : 0, speed = Math.max(1, total / 28); let clock = shown ? events[shown - 1].t : 0;
+  playing = setInterval(() => { clock += .12 * speed; let moved = false; while (shown < events.length && events[shown].t <= clock) { shown++; moved = true; }
+    if (moved) { draw(); const c = document.querySelectorAll(".col")[1]; c.scrollTop = c.scrollHeight; }
+    if (shown >= events.length) { clearInterval(playing); playing = null; $("play").textContent = "Replay"; draw(); } }, 120); };
+$("cands").onclick = e => { const b = e.target.closest(".cand"); if (!b) return; const i = +b.dataset.i; pick = i < 0 ? null : {type: "cand", i}; draw(); };
+const q = new URLSearchParams(location.search).get("run");
+draw(); if (q) open(q); loadRuns(!q);
+</script>
+</body>
+</html>

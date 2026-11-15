@@ -1,0 +1,140 @@
+{
+  "schema": "program/1",
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Drive 7.4 m from dock to the t1 standoff; the 0.15 m step limit is assumed, not scanned, so watch for thresholds.",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor",
+        "r_t1_opening"
+      ],
+      "note": "Gripper opens at start; the reach pose is assumed and the free floor edge is only 0.126 m away, so check base clearance.",
+      "n": 1
+    },
+    {
+      "primitive": "grasp",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_opening",
+        "r_t1_payload"
+      ],
+      "note": "Grip force is not established because the ledger has no force band for the sample bottle, so close gently and verify hold.",
+      "n": 2
+    },
+    {
+      "primitive": "lift",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "note": "Lift 0.15 m with a 0.55 kg payload taken from the card; watch for the bottle slipping.",
+      "n": 3
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Retreat while holding the bottle; keep the arm clear of the shelf edge.",
+      "n": 4
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Drive 9.0 m to way_out carrying the bottle; take the assumed 0.15 m steps slowly to avoid shaking it loose.",
+      "n": 5
+    },
+    {
+      "primitive": "place",
+      "task": "t1",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "note": "Set the bottle down at the gate on a flat surface before opening the gripper.",
+      "n": 6
+    },
+    {
+      "primitive": "release",
+      "task": "t1",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [],
+      "note": "Open the gripper only once the bottle is resting stably.",
+      "n": 7
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Return 1.6 m to dock empty-handed.",
+      "n": 8
+    }
+  ]
+}

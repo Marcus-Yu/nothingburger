@@ -1,0 +1,18 @@
+{
+  "id": "crx5ia",
+  "slot": "arm",
+  "name": "FANUC CRX-5iA",
+  "model": "menagerie/fanuc_crx5ia/crx5ia.xml",
+  "flange_site": "attachment_site",
+  "payload_kg": 5.0,
+  "reach_m": 0.994,
+  "price_usd": 32000,
+  "src": "FANUC figures from memory (5 kg, 994 mm); price assumed",
+  "confidence": {
+    "payload_kg": "unverified",
+    "reach_m": "unverified",
+    "price_usd": "assumed",
+    "mass_kg": "model"
+  },
+  "notes": "Geometry, joint limits and mass: the MuJoCo Menagerie model (meshes derived from vendor CAD). reach_m and payload_kg are the rated figures; the composer measures the real envelope from the composed model."
+}

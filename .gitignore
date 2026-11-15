@@ -1,7 +1,11 @@
-.board.local
 __pycache__/
 *.pyc
 .venv/
 .env
 docs/probe/out/
 docs/probe/models_index.csv
+catalog/_assets/
+runs/scratch/
+MUJOCO_LOG.TXT
+.claude/launch.json
+web/_vendor/

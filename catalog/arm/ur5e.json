@@ -1,0 +1,18 @@
+{
+  "id": "ur5e",
+  "slot": "arm",
+  "name": "Universal Robots UR5e",
+  "model": "menagerie/universal_robots_ur5e/ur5e.xml",
+  "flange_site": "attachment_site",
+  "payload_kg": 5.0,
+  "reach_m": 0.85,
+  "price_usd": 35000,
+  "src": "UR datasheet figures from memory, unverified; price assumed",
+  "confidence": {
+    "payload_kg": "unverified",
+    "reach_m": "unverified",
+    "price_usd": "assumed",
+    "mass_kg": "model"
+  },
+  "notes": "Geometry, joint limits and mass: the MuJoCo Menagerie model (meshes derived from vendor CAD). reach_m and payload_kg are the rated figures; the composer measures the real envelope from the composed model."
+}

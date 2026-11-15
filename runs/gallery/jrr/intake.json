@@ -1,0 +1,39 @@
+{
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "job": "The hackathon in the Rabinowitz atrium is over. Wipe down the table in the middle of the room and the one in the south row, then pick up the bottle left on the table by the east corridor and take it out through the south door.",
+  "understood_as": "After the hackathon in the Rabinowitz atrium, wipe the middle table and the south-row table, then pick up the bottle left on the east-corridor table and carry it out through the south door.",
+  "steps": [
+    "Wipe the table in the middle of the atrium (C6) with a cloth.",
+    "Wipe the table in the south row (S3) with a cloth.",
+    "Pick up the bottle left on the table by the east corridor (E2).",
+    "Carry the bottle out of the building."
+  ],
+  "demos": [
+    {
+      "chore": "wipe table",
+      "kind": "path",
+      "why": "Shows the stroke pattern and pressure used to wipe a table top with the cloth."
+    },
+    {
+      "chore": "hold cloth",
+      "kind": "squeeze",
+      "why": "Sets how firmly to grip the cloth so it does not slip out of the gripper while pressing and stroking."
+    },
+    {
+      "chore": "pick up bottle",
+      "kind": "path",
+      "why": "Shows how the hand approaches, grasps and lifts the bottle off the table."
+    },
+    {
+      "chore": "grip bottle",
+      "kind": "squeeze",
+      "why": "Sets a grip firm enough that the bottle does not slip while carried, without crushing it."
+    }
+  ],
+  "questions": [
+    "The only bottle card I have is a 500 ml water sample bottle (0.55 kg). Is the bottle left on the east-corridor table like that? If it is a different size or weight, please tell me.",
+    "The plan carries the bottle to the building's located way out. Please confirm that this is the south door. If it is not, the south door needs to be added as a location.",
+    "I assumed table C6 is the one in the middle of the room and table S3 is the one in the south row. Please confirm these are the right tables."
+  ]
+}

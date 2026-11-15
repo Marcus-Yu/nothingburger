@@ -1,0 +1,874 @@
+{
+  "schema": "design/1",
+  "parts": {
+    "base": "tidybot_arx5",
+    "lift": "liftkit_900",
+    "arm": "ur5e",
+    "gripper": "xarm_gripper",
+    "lidar": "rplidar_s2",
+    "lidar_mount": "stage_rear",
+    "wrist_cam": true,
+    "ego_cam": "base_front"
+  },
+  "price_usd": 49580,
+  "mass_kg": 91.18,
+  "checks": [
+    {
+      "check": "doorway",
+      "task": null,
+      "status": "pass",
+      "value": 0.623,
+      "limit": 1.7,
+      "unit": "m",
+      "requirements": [
+        "r_width"
+      ],
+      "why": "width of the whole robot with the arm stowed"
+    },
+    {
+      "check": "turn",
+      "task": null,
+      "status": "pass",
+      "value": 0.458,
+      "limit": 2.84,
+      "unit": "m",
+      "requirements": [
+        "r_length"
+      ],
+      "why": "holonomic base: it moves sideways, so it need not turn in the hallway"
+    },
+    {
+      "check": "door header",
+      "task": null,
+      "status": "pass",
+      "value": 1.372,
+      "limit": 2.05,
+      "unit": "m",
+      "requirements": [
+        "r_header"
+      ],
+      "why": "height with the lift down and the arm stowed"
+    },
+    {
+      "check": "steps",
+      "task": null,
+      "status": "pass",
+      "value": 0.015,
+      "limit": 0.0,
+      "unit": "m",
+      "requirements": [
+        "r_step"
+      ],
+      "why": "value is the tallest step the base climbs; limit is the tallest step on the corridors"
+    },
+    {
+      "check": "base payload",
+      "task": null,
+      "status": "pass",
+      "value": 46.73,
+      "limit": 60.0,
+      "unit": "kg",
+      "requirements": [
+        "r_t1_payload",
+        "r_t2_payload",
+        "r_t3_payload"
+      ],
+      "why": "value is everything the base carries (lift, arm, gripper, sensors, heaviest object); limit is the base's rating"
+    },
+    {
+      "check": "lidar present",
+      "task": null,
+      "status": "pass",
+      "value": "2d",
+      "limit": "2d",
+      "requirements": [
+        "r_step"
+      ]
+    },
+    {
+      "check": "lidar view",
+      "task": null,
+      "status": "pass",
+      "value": 0.76,
+      "limit": 0.75,
+      "unit": "fraction",
+      "requirements": [],
+      "why": "share of the horizontal circle the lidar sees past the robot's own body, arm stowed, mount stage_rear"
+    },
+    {
+      "check": "wrist camera",
+      "task": null,
+      "status": "pass",
+      "requirements": [
+        "r_t3_opening"
+      ],
+      "why": "a grasp needs a close view; the ego camera's depth stops working under 0.3 m"
+    },
+    {
+      "check": "ego camera",
+      "task": null,
+      "status": "pass",
+      "requirements": [],
+      "why": "needed to see the floor ahead and each target before reaching"
+    },
+    {
+      "check": "reach",
+      "task": "t1",
+      "status": "pass",
+      "value": 0.9,
+      "limit": 0.604,
+      "unit": "m",
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "why": "target 5 at 0.74 m, tool down: the tool reaches 0.13 to 0.90 m from the base centre; the base centre can stand 0.60 m away or more (free floor 0.40 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 48 targets)",
+      "target": 5,
+      "targets": [
+        {
+          "target": 0,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 1,
+          "status": "pass",
+          "needed_m": 0.319,
+          "reach_m": 0.9
+        },
+        {
+          "target": 2,
+          "status": "pass",
+          "needed_m": 0.469,
+          "reach_m": 0.9
+        },
+        {
+          "target": 3,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 4,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 5,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 6,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 7,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 8,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 9,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 10,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 11,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 12,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 13,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 14,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 15,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 16,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 17,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 18,
+          "status": "pass",
+          "needed_m": 0.589,
+          "reach_m": 0.9
+        },
+        {
+          "target": 19,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 20,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 21,
+          "status": "pass",
+          "needed_m": 0.439,
+          "reach_m": 0.9
+        },
+        {
+          "target": 22,
+          "status": "pass",
+          "needed_m": 0.289,
+          "reach_m": 0.9
+        },
+        {
+          "target": 23,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 24,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 25,
+          "status": "pass",
+          "needed_m": 0.319,
+          "reach_m": 0.9
+        },
+        {
+          "target": 26,
+          "status": "pass",
+          "needed_m": 0.469,
+          "reach_m": 0.9
+        },
+        {
+          "target": 27,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 28,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 29,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 30,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 31,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 32,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 33,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 34,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 35,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 36,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 37,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 38,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 39,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 40,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 41,
+          "status": "pass",
+          "needed_m": 0.604,
+          "reach_m": 0.9
+        },
+        {
+          "target": 42,
+          "status": "pass",
+          "needed_m": 0.589,
+          "reach_m": 0.9
+        },
+        {
+          "target": 43,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 44,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        },
+        {
+          "target": 45,
+          "status": "pass",
+          "needed_m": 0.439,
+          "reach_m": 0.9
+        },
+        {
+          "target": 46,
+          "status": "pass",
+          "needed_m": 0.289,
+          "reach_m": 0.9
+        },
+        {
+          "target": 47,
+          "status": "pass",
+          "needed_m": 0.249,
+          "reach_m": 0.9
+        }
+      ]
+    },
+    {
+      "check": "reach",
+      "task": "t2",
+      "status": "pass",
+      "value": 0.9,
+      "limit": 0.644,
+      "unit": "m",
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "why": "target 6 at 0.74 m, tool down: the tool reaches 0.13 to 0.90 m from the base centre; the base centre can stand 0.64 m away or more (free floor 0.44 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 48 targets)",
+      "target": 6,
+      "targets": [
+        {
+          "target": 0,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 1,
+          "status": "pass",
+          "needed_m": 0.339,
+          "reach_m": 0.9
+        },
+        {
+          "target": 2,
+          "status": "pass",
+          "needed_m": 0.489,
+          "reach_m": 0.9
+        },
+        {
+          "target": 3,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 4,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 5,
+          "status": "pass",
+          "needed_m": 0.639,
+          "reach_m": 0.9
+        },
+        {
+          "target": 6,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 7,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 8,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 9,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 10,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 11,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 12,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 13,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 14,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 15,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 16,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 17,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 18,
+          "status": "pass",
+          "needed_m": 0.619,
+          "reach_m": 0.9
+        },
+        {
+          "target": 19,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 20,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 21,
+          "status": "pass",
+          "needed_m": 0.469,
+          "reach_m": 0.9
+        },
+        {
+          "target": 22,
+          "status": "pass",
+          "needed_m": 0.319,
+          "reach_m": 0.9
+        },
+        {
+          "target": 23,
+          "status": "pass",
+          "needed_m": 0.239,
+          "reach_m": 0.9
+        },
+        {
+          "target": 24,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 25,
+          "status": "pass",
+          "needed_m": 0.339,
+          "reach_m": 0.9
+        },
+        {
+          "target": 26,
+          "status": "pass",
+          "needed_m": 0.489,
+          "reach_m": 0.9
+        },
+        {
+          "target": 27,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 28,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 29,
+          "status": "pass",
+          "needed_m": 0.639,
+          "reach_m": 0.9
+        },
+        {
+          "target": 30,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 31,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 32,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 33,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 34,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 35,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 36,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 37,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 38,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 39,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 40,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 41,
+          "status": "pass",
+          "needed_m": 0.644,
+          "reach_m": 0.9
+        },
+        {
+          "target": 42,
+          "status": "pass",
+          "needed_m": 0.619,
+          "reach_m": 0.9
+        },
+        {
+          "target": 43,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 44,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        },
+        {
+          "target": 45,
+          "status": "pass",
+          "needed_m": 0.469,
+          "reach_m": 0.9
+        },
+        {
+          "target": 46,
+          "status": "pass",
+          "needed_m": 0.319,
+          "reach_m": 0.9
+        },
+        {
+          "target": 47,
+          "status": "pass",
+          "needed_m": 0.259,
+          "reach_m": 0.9
+        }
+      ]
+    },
+    {
+      "check": "reach",
+      "task": "t3",
+      "status": "pass",
+      "value": 0.9,
+      "limit": 0.35,
+      "unit": "m",
+      "requirements": [
+        "r_t3_reach",
+        "r_t3_floor"
+      ],
+      "why": "target 0 at 0.84 m, tool down: the tool reaches 0.13 to 0.90 m from the base centre; the base centre can stand 0.35 m away or more (free floor 0.15 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "target": 0,
+      "targets": [
+        {
+          "target": 0,
+          "status": "pass",
+          "needed_m": 0.35,
+          "reach_m": 0.9
+        }
+      ]
+    },
+    {
+      "check": "tip-over",
+      "task": "t1",
+      "status": "pass",
+      "value": 3.36,
+      "limit": 1.5,
+      "unit": "ratio",
+      "requirements": [
+        "r_t1_payload",
+        "r_t1_press",
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "why": "worst case: reaching target 18 (0.60 m out at 0.74 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
+    },
+    {
+      "check": "tip-over",
+      "task": "t2",
+      "status": "pass",
+      "value": 5.63,
+      "limit": 1.5,
+      "unit": "ratio",
+      "requirements": [
+        "r_t2_payload",
+        "r_t2_press",
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "why": "worst case: reaching target 2 (0.50 m out at 0.74 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
+    },
+    {
+      "check": "tip-over",
+      "task": "t3",
+      "status": "pass",
+      "value": 10.09,
+      "limit": 1.5,
+      "unit": "ratio",
+      "requirements": [
+        "r_t3_payload",
+        "r_t3_reach",
+        "r_t3_floor"
+      ],
+      "why": "worst case: stowed, carrying; payload 0.55 kg, press 0.0 N; static, against the support polygon"
+    },
+    {
+      "check": "payload",
+      "task": "t1",
+      "status": "pass",
+      "value": 1.0,
+      "limit": 5.0,
+      "unit": "kg",
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "why": "arm carries object 0.1 + gripper 0.8 + wrist camera 0.1 kg against its 5.0 kg rating; gripper rated 1.5 kg for the 0.1 kg object"
+    },
+    {
+      "check": "payload",
+      "task": "t2",
+      "status": "pass",
+      "value": 1.0,
+      "limit": 5.0,
+      "unit": "kg",
+      "requirements": [
+        "r_t2_payload"
+      ],
+      "why": "arm carries object 0.1 + gripper 0.8 + wrist camera 0.1 kg against its 5.0 kg rating; gripper rated 1.5 kg for the 0.1 kg object"
+    },
+    {
+      "check": "payload",
+      "task": "t3",
+      "status": "pass",
+      "value": 1.45,
+      "limit": 5.0,
+      "unit": "kg",
+      "requirements": [
+        "r_t3_payload"
+      ],
+      "why": "arm carries object 0.55 + gripper 0.8 + wrist camera 0.1 kg against its 5.0 kg rating; gripper rated 1.5 kg for the 0.55 kg object"
+    },
+    {
+      "check": "opening",
+      "task": "t3",
+      "status": "pass",
+      "value": 0.086,
+      "limit": 0.08,
+      "unit": "m",
+      "requirements": [
+        "r_t3_opening"
+      ]
+    },
+    {
+      "check": "force",
+      "task": "t3",
+      "status": "not_assessable",
+      "requirements": [],
+      "why": "no force_band requirement in the ledger for this pick task"
+    },
+    {
+      "check": "press",
+      "task": "t1",
+      "status": "not_assessable",
+      "value": 49.1,
+      "limit": 12.0,
+      "unit": "N",
+      "requirements": [
+        "r_t1_press"
+      ],
+      "why": "press force is assumed"
+    },
+    {
+      "check": "press",
+      "task": "t2",
+      "status": "not_assessable",
+      "value": 49.1,
+      "limit": 12.0,
+      "unit": "N",
+      "requirements": [
+        "r_t2_press"
+      ],
+      "why": "press force is assumed"
+    }
+  ],
+  "labels": [
+    "force not verified: t3",
+    "press not verified: t1, t2"
+  ],
+  "considered": 7140,
+  "passed_arithmetic": 860,
+  "composed_and_checked": 84
+}

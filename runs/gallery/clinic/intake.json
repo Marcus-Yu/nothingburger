@@ -1,0 +1,29 @@
+{
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "job": "Between patients, wipe down the high-touch ledges in the clinic: the corridor window sill and the ledge at the reception desk in the waiting room.",
+  "understood_as": "Between patient visits, wipe down two high-touch surfaces in the clinic: the corridor window sill and the reception desk ledge in the waiting room.",
+  "steps": [
+    "Take the wiping cloth.",
+    "Wipe the corridor window sill.",
+    "Move to the waiting room and wipe the reception desk ledge.",
+    "Repeat between patients."
+  ],
+  "demos": [
+    {
+      "chore": "wipe ledge",
+      "kind": "path",
+      "why": "Shows the stroke pattern and how firmly to press when wiping a narrow ledge or sill."
+    },
+    {
+      "chore": "hold cloth",
+      "kind": "squeeze",
+      "why": "Shows how hard to grip the cloth so it does not slip or bunch up while pressing and wiping."
+    }
+  ],
+  "questions": [
+    "Should the cloth be wet with disinfectant? The robot can only wipe with a cloth. It cannot spray or apply cleaning product, so someone would need to prepare or swap the cloth.",
+    "Where will the clean cloth be kept, and who swaps it for a fresh one between patients? No spot for the cloth has been located in the building.",
+    "How will the robot know a patient has left? Nothing in the current setup detects this, so please say whether staff will start each run or it should run on a fixed schedule."
+  ]
+}

@@ -52,12 +52,11 @@ Never cut: the contact-force run, room geometry from the API, the two-building c
 
 ## [Still open](PLAN_REVISED.md#still-open)
 
-The two buildings, calibrating the gloves, stream C's workload, and a cost comparison against a person.
+The two buildings, calibrating the gloves, and a cost comparison against a person.
 
 ## Unchanged from the original plan
 
 - [Parts catalog](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=9): base, reach and gripper cards. The checks are code and the model never overrides them.
 - [Observability](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=11): one trace per run, a decision record per choice.
-- [Folders and owners](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=14): three streams; the live rules are in [`AGENTS.md`](../AGENTS.md).
-- [Contracts](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=16): the run-folder files. Replaced by the draft schemas in [`contracts/`](../contracts/README.md).
+- [Contracts](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=16): the run-folder files. These will change and have not been re-agreed yet.
 - [Risks](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=20) and [sources](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=21).

@@ -1,0 +1,17 @@
+{
+  "schema": "route/1",
+  "world": "example-flat",
+  "standoffs": [
+    {"task": "t1", "pose": [2.0, 3.0, 0.0], "task_yaw_rad": 0.0, "reach_ok": true, "tip_ratio": 55.6, "spares": [[2.1, 3.0, 0.0], [2.0, 2.9, 1.57]]},
+    {"task": "t2", "pose": [5.9, 1.0, 0.0], "task_yaw_rad": 0.0, "reach_ok": true, "tip_ratio": 5.3, "covers": "strokes 0-3", "spares": []},
+    {"task": "t2", "pose": [5.9, 2.0, 0.0], "task_yaw_rad": 0.0, "reach_ok": true, "tip_ratio": 5.3, "covers": "strokes 4-7", "spares": []}
+  ],
+  "legs": [
+    {"from": "dock", "to": "t1", "carrying": false, "length_m": 4.1,
+     "waypoints": [[0.6, 0.5, 0.0], [2.0, 0.5, 1.57], [2.0, 3.0, 0.0]]}
+  ],
+  "door_clearances": [
+    {"doorway": "d_living", "clear_width_m": 0.76, "robot_width_m": 0.429, "margin_m": 0.165}
+  ],
+  "failures": []
+}

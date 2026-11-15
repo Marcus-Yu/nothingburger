@@ -1,0 +1,21 @@
+{
+  "id": "d435i",
+  "slot": "camera",
+  "name": "Intel RealSense D435i",
+  "model": "menagerie/realsense_d435i/d435i.xml",
+  "mass_kg": 0.1,
+  "range_m": [
+    0.3,
+    3.0
+  ],
+  "hfov_deg": 87.0,
+  "price_usd": 350,
+  "src": "Intel RealSense D435i: range and field of view from memory; price assumed",
+  "confidence": {
+    "range_m": "unverified",
+    "hfov_deg": "unverified",
+    "price_usd": "assumed",
+    "mass_kg": "assumed"
+  },
+  "notes": "One depth camera type, used at the wrist and as the ego camera (base_front, or stage_front when there is a lift). Geometry: Menagerie realsense_d435i. mass_kg is what the Payload check charges for a wrist camera; the composed model uses the simulator model's mass."
+}

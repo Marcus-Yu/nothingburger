@@ -1,0 +1,373 @@
+{
+  "schema": "route/1",
+  "world": "factory",
+  "standoffs": [
+    {
+      "task": "t1",
+      "pose": [
+        2.675,
+        5.175,
+        1.5708
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 3.68,
+      "spares": [],
+      "q": {
+        "lift": 0.5,
+        "arm/J1": -2.83071,
+        "arm/J2": -1.52617,
+        "arm/J3": 3.19705,
+        "arm/J4": -3.14392,
+        "arm/J5": 0.01084,
+        "arm/J6": 0.17055
+      },
+      "why": "all 6 targets reached, worst tip ratio 3.68",
+      "covers_targets": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "covers": "strokes 0-2 of 8"
+    },
+    {
+      "task": "t1",
+      "pose": [
+        3.125,
+        5.175,
+        1.5708
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 3.72,
+      "spares": [],
+      "q": {
+        "lift": 0.15843,
+        "arm/J1": -2.97304,
+        "arm/J2": -1.23121,
+        "arm/J3": 2.41048,
+        "arm/J4": -3.14158,
+        "arm/J5": -1.07067,
+        "arm/J6": 0.17055
+      },
+      "why": "all 6 targets reached, worst tip ratio 3.72",
+      "covers_targets": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "covers": "strokes 3-5 of 8"
+    },
+    {
+      "task": "t1",
+      "pose": [
+        3.575,
+        5.175,
+        1.5708
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 3.77,
+      "spares": [],
+      "q": {
+        "lift": 0.5,
+        "arm/J1": -2.83071,
+        "arm/J2": -1.52617,
+        "arm/J3": 3.19705,
+        "arm/J4": -3.14392,
+        "arm/J5": 0.01084,
+        "arm/J6": 0.17055
+      },
+      "why": "all 4 targets reached, worst tip ratio 3.77",
+      "covers_targets": [
+        12,
+        13,
+        14,
+        15
+      ],
+      "covers": "strokes 6-7 of 8"
+    },
+    {
+      "task": "t2",
+      "pose": [
+        3.2,
+        5.15,
+        1.5708
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 5.44,
+      "spares": [
+        [
+          3.2,
+          5.1,
+          1.5708
+        ],
+        [
+          3.045,
+          5.12,
+          2.8798
+        ]
+      ],
+      "q": {
+        "lift": 0.25606,
+        "arm/J1": -0.23863,
+        "arm/J2": 2.66184,
+        "arm/J3": 3.30085,
+        "arm/J4": -3.14159,
+        "arm/J5": 2.2098,
+        "arm/J6": -3.66321
+      },
+      "why": "all 1 targets reached, worst tip ratio 5.44"
+    }
+  ],
+  "legs": [
+    {
+      "from": "dock",
+      "to": "t1",
+      "carrying": false,
+      "length_m": 4.498,
+      "waypoints": [
+        [
+          1.0,
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.1893
+        ],
+        [
+          2.619,
+          5.036,
+          1.1893
+        ],
+        [
+          2.619,
+          5.036,
+          1.5708
+        ],
+        [
+          2.675,
+          5.175,
+          1.5708
+        ],
+        [
+          2.675,
+          5.175,
+          1.5708
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 0
+    },
+    {
+      "from": "t1",
+      "to": "t1",
+      "carrying": false,
+      "length_m": 0.45,
+      "waypoints": [
+        [
+          2.675,
+          5.175,
+          1.5708
+        ],
+        [
+          3.125,
+          5.175,
+          1.5708
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 1
+    },
+    {
+      "from": "t1",
+      "to": "t1",
+      "carrying": false,
+      "length_m": 0.45,
+      "waypoints": [
+        [
+          3.125,
+          5.175,
+          1.5708
+        ],
+        [
+          3.575,
+          5.175,
+          1.5708
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 2
+    },
+    {
+      "from": "t1",
+      "to": "t2",
+      "carrying": false,
+      "length_m": 0.376,
+      "waypoints": [
+        [
+          3.575,
+          5.175,
+          1.5708
+        ],
+        [
+          3.2,
+          5.15,
+          1.5708
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 3
+    },
+    {
+      "from": "t2",
+      "to": "way_out",
+      "carrying": true,
+      "length_m": 4.971,
+      "waypoints": [
+        [
+          3.2,
+          5.15,
+          1.5708
+        ],
+        [
+          3.163,
+          5.117,
+          1.5708
+        ],
+        [
+          3.163,
+          5.117,
+          -2.8798
+        ],
+        [
+          3.127,
+          5.084,
+          -2.8798
+        ],
+        [
+          3.127,
+          5.084,
+          -2.7686
+        ],
+        [
+          3.09,
+          5.05,
+          -2.7686
+        ],
+        [
+          3.09,
+          5.05,
+          -2.4049
+        ],
+        [
+          0.195,
+          2.424,
+          -2.4049
+        ],
+        [
+          0.195,
+          2.424,
+          -2.618
+        ],
+        [
+          -0.025,
+          2.225,
+          -2.618
+        ],
+        [
+          -0.025,
+          2.225,
+          -2.7686
+        ],
+        [
+          -0.6,
+          2.0,
+          -2.7686
+        ],
+        [
+          -0.6,
+          2.0,
+          3.1416
+        ]
+      ],
+      "footprint_ok": true
+    },
+    {
+      "from": "way_out",
+      "to": "dock",
+      "carrying": false,
+      "length_m": 1.942,
+      "waypoints": [
+        [
+          -0.6,
+          2.0,
+          3.1416
+        ],
+        [
+          -0.6,
+          2.0,
+          -0.2826
+        ],
+        [
+          0.175,
+          1.775,
+          -0.2826
+        ],
+        [
+          0.175,
+          1.775,
+          -0.588
+        ],
+        [
+          0.325,
+          1.675,
+          -0.588
+        ],
+        [
+          0.325,
+          1.675,
+          -0.7854
+        ],
+        [
+          0.925,
+          1.075,
+          -0.7854
+        ],
+        [
+          1.0,
+          1.0,
+          -0.7854
+        ],
+        [
+          1.0,
+          1.0,
+          0.0
+        ]
+      ],
+      "footprint_ok": true
+    }
+  ],
+  "door_clearances": [
+    {
+      "doorway": "d_roller",
+      "clear_width_m": 1.5,
+      "robot_width_m": 0.714,
+      "margin_m": 0.393,
+      "legs": [
+        "t2->way_out",
+        "way_out->dock"
+      ]
+    }
+  ],
+  "failures": []
+}

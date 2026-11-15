@@ -1,0 +1,15 @@
+{
+  "schema": "design/1",
+  "parts": {"base": "tidybot_arx5", "lift": "liftkit_500", "arm": "xarm7", "gripper": "xarm_gripper",
+            "lidar": "rplidar_s2", "lidar_mount": "stage_rear", "wrist_cam": true, "ego_cam": "stage_front"},
+  "price_usd": 23800,
+  "mass_kg": 80.1,
+  "checks": [
+    {"check": "doorway", "task": null, "status": "pass", "value": 0.429, "limit": 0.61, "unit": "m", "requirements": ["r_width"]},
+    {"check": "force", "task": "t1", "status": "pass", "value": [5.0, 30.0], "limit": [4.0, 18.0], "unit": "N", "requirements": ["r_t1_force"]},
+    {"check": "press", "task": "t2", "status": "not_assessable", "why": "press force is assumed", "requirements": ["r_t2_press"]}
+  ],
+  "labels": ["force not verified: t3"],
+  "considered": 300,
+  "feasible": 12
+}

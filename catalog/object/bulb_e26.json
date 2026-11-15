@@ -1,0 +1,17 @@
+{
+  "id": "bulb_e26",
+  "slot": "object",
+  "name": "E26 light bulb (A19)",
+  "mass_kg": 0.05,
+  "width_m": 0.06,
+  "hold": "pinch",
+  "turns_to_remove": 3,
+  "anchor_point": "centre of the socket face",
+  "src": "mass and width: typical A19 LED bulb, from memory; turns to remove: assumed",
+  "confidence": {
+    "mass_kg": "unverified",
+    "width_m": "unverified",
+    "turns_to_remove": "assumed"
+  },
+  "notes": "The building's anchor for a bulb is placed at anchor_point, with its axis along the socket. No simulator model yet (a screw joint; gap G12)."
+}

@@ -1,0 +1,20 @@
+{
+ "note": "the same job as datacenter.job.txt, for runs without a model",
+ "tasks": [
+  {
+   "id": "t1",
+   "skill": "pick",
+   "anchor": "bay_a_u40",
+   "object": "drive_sled",
+   "carries": false
+  },
+  {
+   "id": "t2",
+   "skill": "pick",
+   "anchor": "bay_b_u10",
+   "object": "drive_sled",
+   "carries": true,
+   "deliver_to": "way_out"
+  }
+ ]
+}

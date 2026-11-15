@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "sample_bottle",
+      "object": "sample_bottle",
+      "demo": "pick sample bottle",
+      "carries": true,
+      "why": "The job is to collect the sample bottle from its shelf and bring it out of the building to the gate.",
+      "deliver_to": "way_out"
+    }
+  ]
+}

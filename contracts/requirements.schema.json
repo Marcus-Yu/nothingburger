@@ -1,522 +1,80 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.robots.invalid/requirements.schema.json",
-  "title": "requirements.json: the agreed plan",
-  "description": "What the LLM and the user agreed: the tasks in the user's words, each broken into primitive steps, and the envelope the robot has to fit. Written by A (agent.requirements) after the user approves. Read by the design workflow (A, B) and the pathing workflow (C). The LLM proposes every field; a person approves; checks are code.",
-  "type": "object",
-  "required": [
-    "header",
-    "scenario",
-    "tasks",
-    "design_spec",
-    "open_questions",
-    "approval"
-  ],
-  "properties": {
-    "header": {
-      "$ref": "common.schema.json#/$defs/header"
-    },
-    "scenario": {
-      "type": "object",
-      "required": [
-        "building_model_id",
-        "world"
-      ],
-      "properties": {
-        "building_model_id": {
-          "type": "string",
-          "description": "Matterport model id from models_index.csv."
-        },
-        "label": {
-          "type": "string"
-        },
-        "world": {
-          "$ref": "common.schema.json#/$defs/ref"
-        }
-      },
-      "additionalProperties": false
-    },
-    "conversation": {
-      "type": "object",
-      "properties": {
-        "transcript": {
-          "$ref": "common.schema.json#/$defs/file_ref"
-        },
-        "summary": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "tasks": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "#/$defs/task"
-      }
-    },
-    "design_spec": {
-      "$ref": "#/$defs/design_spec"
-    },
-    "open_questions": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "question_id",
-          "text",
-          "blocking",
-          "answer"
-        ],
-        "properties": {
-          "question_id": {
-            "$ref": "common.schema.json#/$defs/id"
-          },
-          "text": {
-            "type": "string"
-          },
-          "blocking": {
-            "type": "boolean",
-            "description": "true = the design workflow may not start until it is answered."
-          },
-          "task_id": {
-            "$ref": "common.schema.json#/$defs/id"
-          },
-          "answer": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "answered_by": {
-            "enum": [
-              "user",
-              "demo",
-              "agent",
-              null
-            ]
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "approval": {
-      "type": "object",
-      "required": [
-        "status"
-      ],
-      "properties": {
-        "status": {
-          "enum": [
-            "draft",
-            "approved",
-            "rejected"
-          ]
-        },
-        "approved_by": {
-          "type": "string"
-        },
-        "approved_at": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "notes": {
-          "type": "string"
-        }
-      },
-      "if": {
-        "properties": {
-          "status": {
-            "const": "approved"
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "approved_by",
-          "approved_at"
-        ]
-      },
-      "additionalProperties": false
-    }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "requirements",
+ "type": "object",
+ "required": [
+  "schema",
+  "world",
+  "tasks",
+  "corridors",
+  "requirements",
+  "conflicts"
+ ],
+ "properties": {
+  "schema": {
+   "const": "requirements/1"
   },
-  "additionalProperties": false,
-  "$defs": {
-    "task": {
-      "type": "object",
-      "required": [
-        "task_id",
-        "request_text",
-        "job",
-        "target",
-        "steps",
-        "success_criteria",
-        "demo"
-      ],
-      "properties": {
-        "task_id": {
-          "$ref": "common.schema.json#/$defs/id"
-        },
-        "request_text": {
-          "type": "string",
-          "description": "The user's words, verbatim."
-        },
-        "job": {
-          "$ref": "common.schema.json#/$defs/job"
-        },
-        "job_label": {
-          "type": "string",
-          "description": "Required when job is other."
-        },
-        "priority": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "frequency": {
-          "type": "string",
-          "description": "e.g. weekly, on request."
-        },
-        "target": {
-          "type": "object",
-          "required": [
-            "object_class",
-            "room_id"
-          ],
-          "properties": {
-            "object_class": {
-              "type": "string",
-              "description": "e.g. trash_bag, a19_bulb, countertop"
-            },
-            "object_id": {
-              "type": "string",
-              "description": "Fixture id in world.json, once placed."
-            },
-            "room_id": {
-              "type": "string"
-            },
-            "destination": {
-              "type": "string",
-              "description": "Where it ends up, e.g. the bin by the exit, for carry tasks."
-            },
-            "world": {
-              "$ref": "common.schema.json#/$defs/ref"
-            }
-          },
-          "additionalProperties": false
-        },
-        "steps": {
-          "type": "array",
-          "minItems": 1,
-          "description": "The task in order, each step in plain language and mapped to one primitive skill.",
-          "items": {
-            "type": "object",
-            "required": [
-              "step_id",
-              "text",
-              "skill"
-            ],
-            "properties": {
-              "step_id": {
-                "$ref": "common.schema.json#/$defs/id"
-              },
-              "text": {
-                "type": "string"
-              },
-              "skill": {
-                "$ref": "common.schema.json#/$defs/skill"
-              },
-              "needs_demo": {
-                "type": "boolean",
-                "default": false
-              },
-              "params": {
-                "type": "object",
-                "description": "Skill-specific, e.g. {\"turns\": 3, \"direction\": \"ccw\"} for twist."
-              },
-              "inspection": {
-                "$ref": "common.schema.json#/$defs/inspection"
-              }
-            },
-            "additionalProperties": false,
-            "if": {
-              "properties": {
-                "skill": {
-                  "const": "inspect"
-                }
-              },
-              "required": [
-                "skill"
-              ]
-            },
-            "then": {
-              "required": [
-                "inspection"
-              ]
-            }
-          }
-        },
-        "success_criteria": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": [
-              "criterion_id",
-              "text",
-              "metric",
-              "op",
-              "value"
-            ],
-            "properties": {
-              "criterion_id": {
-                "$ref": "common.schema.json#/$defs/id"
-              },
-              "text": {
-                "type": "string"
-              },
-              "metric": {
-                "type": "string",
-                "description": "A signal name in signals.json, e.g. grip_force_N, bag_slip_m, wiped_area_fraction."
-              },
-              "op": {
-                "enum": [
-                  "<",
-                  "<=",
-                  "==",
-                  ">=",
-                  ">",
-                  "within"
-                ]
-              },
-              "value": {
-                "type": [
-                  "number",
-                  "array"
-                ]
-              },
-              "kind": {
-                "enum": [
-                  "action_done",
-                  "outcome_confirmed"
-                ],
-                "default": "action_done"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "demo": {
-          "type": "object",
-          "required": [
-            "required"
-          ],
-          "properties": {
-            "required": {
-              "type": "boolean"
-            },
-            "reason": {
-              "type": "string",
-              "description": "Why a demo is or is not needed."
-            },
-            "demo_id": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "description": "Set once demo.json is recorded."
-            },
-            "grip_id": {
-              "type": [
-                "string",
-                "null"
-              ]
-            }
-          },
-          "if": {
-            "properties": {
-              "required": {
-                "const": true
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "required",
-              "reason",
-              "demo_id",
-              "grip_id"
-            ]
-          },
-          "additionalProperties": false
-        }
-      },
-      "if": {
-        "properties": {
-          "job": {
-            "const": "other"
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "job_label"
-        ]
-      },
-      "additionalProperties": false
-    },
-    "design_spec": {
-      "type": "object",
-      "description": "The envelope the robot must fit. Every number says where it came from. A building number has provenance building_scan and a ref into world.json.",
-      "required": [
-        "base",
-        "reach",
-        "payload_kg",
-        "gripper",
-        "environment"
-      ],
-      "properties": {
-        "base": {
-          "type": "object",
-          "required": [
-            "max_width_m",
-            "max_length_m",
-            "max_height_stowed_m",
-            "mobility",
-            "max_step_m"
-          ],
-          "properties": {
-            "max_width_m": {
-              "$ref": "common.schema.json#/$defs/measured",
-              "description": "Narrowest passage on any route, minus clearance."
-            },
-            "max_length_m": {
-              "$ref": "common.schema.json#/$defs/measured"
-            },
-            "max_height_stowed_m": {
-              "$ref": "common.schema.json#/$defs/measured"
-            },
-            "min_turn_width_m": {
-              "$ref": "common.schema.json#/$defs/measured",
-              "description": "Narrowest hallway where the robot must turn."
-            },
-            "mobility": {
-              "enum": [
-                "wheeled",
-                "tracked",
-                "legged"
-              ]
-            },
-            "max_step_m": {
-              "$ref": "common.schema.json#/$defs/measured"
-            }
-          },
-          "additionalProperties": false
-        },
-        "reach": {
-          "type": "object",
-          "required": [
-            "min_height_m",
-            "max_height_m",
-            "max_horizontal_m"
-          ],
-          "properties": {
-            "min_height_m": {
-              "$ref": "common.schema.json#/$defs/measured"
-            },
-            "max_height_m": {
-              "$ref": "common.schema.json#/$defs/measured",
-              "description": "Highest target, e.g. the ceiling fixture."
-            },
-            "max_horizontal_m": {
-              "$ref": "common.schema.json#/$defs/measured",
-              "description": "From the base edge to the farthest target."
-            }
-          },
-          "additionalProperties": false
-        },
-        "payload_kg": {
-          "$ref": "common.schema.json#/$defs/measured"
-        },
-        "gripper": {
-          "type": "object",
-          "required": [
-            "min_aperture_m",
-            "max_aperture_m",
-            "force_bands",
-            "wrist_roll_turns"
-          ],
-          "properties": {
-            "min_aperture_m": {
-              "$ref": "common.schema.json#/$defs/measured"
-            },
-            "max_aperture_m": {
-              "$ref": "common.schema.json#/$defs/measured"
-            },
-            "wrist_roll_turns": {
-              "type": "number",
-              "minimum": 0,
-              "description": "Continuous turns the wrist must make, e.g. 3 for a bulb."
-            },
-            "force_bands": {
-              "type": "array",
-              "description": "One per task step that needs force. The design workflow rejects raw_adc bands for sizing.",
-              "items": {
-                "type": "object",
-                "required": [
-                  "task_id",
-                  "step_id",
-                  "band",
-                  "ref"
-                ],
-                "properties": {
-                  "task_id": {
-                    "$ref": "common.schema.json#/$defs/id"
-                  },
-                  "step_id": {
-                    "$ref": "common.schema.json#/$defs/id"
-                  },
-                  "band": {
-                    "$ref": "common.schema.json#/$defs/force_band"
-                  },
-                  "ref": {
-                    "$ref": "common.schema.json#/$defs/ref"
-                  }
-                },
-                "additionalProperties": false
-              }
-            }
-          },
-          "additionalProperties": false
-        },
-        "environment": {
-          "type": "object",
-          "required": [
-            "floors"
-          ],
-          "properties": {
-            "floors": {
-              "enum": [
-                "single",
-                "multi"
-              ]
-            },
-            "ceiling_height_m": {
-              "$ref": "common.schema.json#/$defs/measured"
-            },
-            "notes": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
-        },
-        "runtime_min": {
-          "$ref": "common.schema.json#/$defs/measured"
-        },
-        "budget_usd": {
-          "$ref": "common.schema.json#/$defs/measured"
-        }
-      },
-      "additionalProperties": false
+  "tasks": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "skill",
+     "anchor",
+     "object",
+     "carries"
+    ],
+    "properties": {
+     "skill": {
+      "enum": [
+       "twist_out",
+       "twist_in",
+       "wipe",
+       "pick",
+       "carry",
+       "place",
+       "navigate"
+      ]
+     }
     }
+   }
+  },
+  "corridors": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "trip",
+     "rooms",
+     "doorways",
+     "bottleneck"
+    ],
+    "properties": {}
+   }
+  },
+  "requirements": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "task",
+     "quantity",
+     "value",
+     "unit",
+     "tolerance",
+     "source"
+    ],
+    "properties": {
+     "task": {
+      "type": [
+       "string",
+       "null"
+      ]
+     }
+    }
+   }
   }
+ }
 }

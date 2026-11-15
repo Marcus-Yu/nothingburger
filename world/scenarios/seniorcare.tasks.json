@@ -1,0 +1,33 @@
+{
+ "note": "the same job as seniorcare.job.txt, for runs without a model",
+ "tasks": [
+  {
+   "id": "t1",
+   "skill": "pick",
+   "anchor": "remote_on_footstool",
+   "object": "tv_remote",
+   "carries": false
+  },
+  {
+   "id": "t2",
+   "skill": "pick",
+   "anchor": "pill_organiser",
+   "object": "pill_organiser",
+   "carries": false
+  },
+  {
+   "id": "t3",
+   "skill": "wipe",
+   "anchor": "bedside_top",
+   "object": "cloth",
+   "carries": false
+  },
+  {
+   "id": "t4",
+   "skill": "pick",
+   "anchor": "towel_on_bath_edge",
+   "object": "hand_towel",
+   "carries": false
+  }
+ ]
+}

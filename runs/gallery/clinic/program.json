@@ -1,0 +1,756 @@
+{
+  "schema": "program/1",
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "3.3 m from dock to the sill; the zero step limit is assumed, so stop if any threshold appears.",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Only 0.066 m of free floor at the sill edge, so check the base pose before the arm moves.",
+      "n": 1
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_payload"
+      ],
+      "note": "The 10 N press force is assumed rather than measured, and 5 strokes are planned against a 'strokes 0-2' coverage label.",
+      "n": 2
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 3
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Shift 0.45 m along the sill close to its edge.",
+      "n": 4
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Reach targets are assumed poses, not measured ones.",
+      "n": 5
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_payload"
+      ],
+      "note": "Press force of 10 N is assumed and uncalibrated.",
+      "n": 6
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 7
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Shift 0.45 m along the sill.",
+      "n": 8
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 2,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Reach targets are assumed poses.",
+      "n": 9
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 2,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_payload"
+      ],
+      "note": "Press force of 10 N is assumed and uncalibrated.",
+      "n": 10
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 2,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 11
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 3,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Shift 0.45 m along the sill.",
+      "n": 12
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 3,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Reach targets are assumed poses.",
+      "n": 13
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 3,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_payload"
+      ],
+      "note": "Press force of 10 N is assumed and uncalibrated.",
+      "n": 14
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 3,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 15
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 4,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Shift 0.45 m along the sill.",
+      "n": 16
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 4,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Reach targets are assumed poses.",
+      "n": 17
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 4,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_payload"
+      ],
+      "note": "Press force of 10 N is assumed and uncalibrated.",
+      "n": 18
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 4,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 19
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 5,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Shift 0.45 m along the sill.",
+      "n": 20
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 5,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Reach targets are assumed poses.",
+      "n": 21
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 5,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_payload"
+      ],
+      "note": "Press force of 10 N is assumed and uncalibrated.",
+      "n": 22
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 5,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 23
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 6,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Final 0.45 m shift to the end of the sill.",
+      "n": 24
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 6,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "This is the last sill section and its reach targets are assumed.",
+      "n": 25
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 6,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_payload"
+      ],
+      "note": "3 strokes are planned to finish strokes 18-19, at an assumed 10 N press.",
+      "n": 26
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 6,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Back off 0.1 m and stow before the long transit.",
+      "n": 27
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 7,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "7.3 m transit to the reception desk; the arm must stay stowed under the 2.05 m header.",
+      "n": 28
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 7,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "Only 0.056 m of free floor at the desk, and the 12.6 s approach is long, so watch for clipping the desk.",
+      "n": 29
+    },
+    {
+      "primitive": "wipe",
+      "task": "t2",
+      "leg": null,
+      "standoff": 7,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t2_press",
+        "r_t2_payload"
+      ],
+      "note": "Press force of 10 N is assumed and uncalibrated.",
+      "n": 30
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 7,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 31
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 8,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Shift 0.45 m along the desk ledge.",
+      "n": 32
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 8,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "Reach targets are assumed poses.",
+      "n": 33
+    },
+    {
+      "primitive": "wipe",
+      "task": "t2",
+      "leg": null,
+      "standoff": 8,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t2_press",
+        "r_t2_payload"
+      ],
+      "note": "Press force of 10 N is assumed and uncalibrated.",
+      "n": 34
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 8,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 35
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 9,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Shift 0.45 m along the desk ledge.",
+      "n": 36
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 9,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "Reach targets are assumed poses.",
+      "n": 37
+    },
+    {
+      "primitive": "wipe",
+      "task": "t2",
+      "leg": null,
+      "standoff": 9,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t2_press",
+        "r_t2_payload"
+      ],
+      "note": "Press force of 10 N is assumed and uncalibrated.",
+      "n": 38
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 9,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 39
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 10,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Shift 0.45 m along the desk ledge.",
+      "n": 40
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 10,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "Reach targets are assumed poses.",
+      "n": 41
+    },
+    {
+      "primitive": "wipe",
+      "task": "t2",
+      "leg": null,
+      "standoff": 10,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t2_press",
+        "r_t2_payload"
+      ],
+      "note": "Press force of 10 N is assumed and uncalibrated.",
+      "n": 42
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 10,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "Back off 0.1 m before driving on.",
+      "n": 43
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 11,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Final 0.45 m shift to the end of the ledge.",
+      "n": 44
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 11,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "An 8.3 s approach for a single stroke, near the end of the ledge.",
+      "n": 45
+    },
+    {
+      "primitive": "wipe",
+      "task": "t2",
+      "leg": null,
+      "standoff": 11,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t2_press",
+        "r_t2_payload"
+      ],
+      "note": "One closing stroke at an assumed 10 N press.",
+      "n": 46
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 11,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "Back off 0.1 m and stow before returning to dock.",
+      "n": 47
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 12,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "5.9 m return to dock with the arm stowed under the header.",
+      "n": 48
+    }
+  ]
+}

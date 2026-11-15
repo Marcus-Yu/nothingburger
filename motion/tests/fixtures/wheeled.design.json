@@ -1,0 +1,1 @@
+{"base":"arx5","lift":"liftkit_500","arm":"xarm7","gripper":"xarm_gripper","lidar":"rplidar_s2","lidar_mount":"stage_rear","wrist_cam":true,"ego_cam":"stage_front"}

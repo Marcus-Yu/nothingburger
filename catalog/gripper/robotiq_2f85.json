@@ -1,0 +1,39 @@
+{
+  "id": "robotiq_2f85",
+  "slot": "gripper",
+  "name": "Robotiq 2F-85",
+  "model": "menagerie/robotiq_2f85/2f85.xml",
+  "tool_site": "pinch",
+  "mass_kg": 0.9,
+  "stroke_m": 0.085,
+  "force_n": [
+    20.0,
+    235.0
+  ],
+  "force_control": true,
+  "payload_kg": 5.0,
+  "hold": [
+    "pinch",
+    "hook"
+  ],
+  "fits_arms": [
+    "xarm7",
+    "ur5e",
+    "fr3",
+    "gen3",
+    "crx5ia",
+    "ur10e",
+    "iiwa14"
+  ],
+  "price_usd": 4900,
+  "src": "Robotiq figures from memory, unverified; price assumed",
+  "confidence": {
+    "mass_kg": "unverified",
+    "stroke_m": "unverified",
+    "force_n": "unverified",
+    "payload_kg": "unverified",
+    "price_usd": "assumed",
+    "hold": "assumed"
+  },
+  "notes": "mass_kg is the figure the Payload check charges against the arm; the composed model uses the simulator model's own mass. force_n is the range of grip force it can hold. hold says how it carries an object. fits_arms: arms with an ISO 9409-1-50 flange or a vendor adapter kit (assumed for all but the UR arms)."
+}

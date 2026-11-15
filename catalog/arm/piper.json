@@ -1,0 +1,37 @@
+{
+  "id": "piper",
+  "slot": "arm",
+  "name": "AgileX PiPER (with its gripper)",
+  "model": "menagerie/agilex_piper/piper.xml",
+  "integrated_gripper": "piper_gripper",
+  "tool_frame": {
+    "body": "link6",
+    "pos": [
+      0.0,
+      0.0,
+      0.135
+    ],
+    "quat": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "finger_joints": [
+    "joint7",
+    "joint8"
+  ],
+  "payload_kg": 1.5,
+  "reach_m": 0.626,
+  "price_usd": 2499,
+  "src": "AgileX figures from memory (1.5 kg, 626 mm, $2,499), unverified",
+  "confidence": {
+    "payload_kg": "unverified",
+    "reach_m": "unverified",
+    "price_usd": "unverified",
+    "mass_kg": "model",
+    "tool_frame": "measured from the model's finger meshes"
+  },
+  "notes": "Geometry, joint limits and mass: the MuJoCo Menagerie model (meshes derived from vendor CAD). reach_m and payload_kg are the rated figures; the composer measures the real envelope from the composed model. tool_frame is the tool point in the named body's frame; its z axis is the approach direction. finger_joints are left out of the arm's joints."
+}

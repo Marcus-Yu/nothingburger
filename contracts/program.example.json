@@ -1,0 +1,16 @@
+{
+  "schema": "program/1",
+  "source": "rule",
+  "steps": [
+    {"n": 0, "primitive": "move_base", "task": null, "leg": 0, "standoff": null, "force_n": null, "press_n": null, "turns": null,
+     "requirements": ["r_width", "r_header", "r_step"], "note": "dock to t1"},
+    {"n": 1, "primitive": "approach", "task": "t1", "leg": null, "standoff": 0, "force_n": null, "press_n": null, "turns": null,
+     "requirements": ["r_t1_reach", "r_t1_floor"], "note": ""},
+    {"n": 2, "primitive": "grasp", "task": "t1", "leg": null, "standoff": 0, "force_n": [4.0, 18.0], "press_n": null, "turns": null,
+     "requirements": ["r_t1_force", "r_t1_opening"], "note": "band from demo:home"},
+    {"n": 3, "primitive": "twist", "task": "t1", "leg": null, "standoff": 0, "force_n": null, "press_n": null, "turns": 3.0,
+     "requirements": ["r_t1_roll"], "note": "1 regrasps planned"},
+    {"n": 4, "primitive": "retreat", "task": "t1", "leg": null, "standoff": 0, "force_n": null, "press_n": null, "turns": null,
+     "requirements": [], "note": ""}
+  ]
+}

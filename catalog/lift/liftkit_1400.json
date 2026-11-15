@@ -1,0 +1,21 @@
+{
+  "id": "liftkit_1400",
+  "slot": "lift",
+  "name": "Ewellix LIFTKIT-0S, 1400 mm stroke",
+  "stroke_m": 1.4,
+  "retracted_m": 0.975,
+  "mass_kg": 25.8,
+  "push_load_n": 1500.0,
+  "price_usd": 7400,
+  "geometry": "stand-in",
+  "src": "Ewellix datasheet; price assumed",
+  "confidence": {
+    "stroke_m": "datasheet",
+    "retracted_m": "datasheet",
+    "mass_kg": "datasheet",
+    "push_load_n": "datasheet",
+    "price_usd": "assumed",
+    "geometry": "stand-in boxes"
+  },
+  "notes": "STAND-IN geometry (two boxes: a fixed outer column and a moving stage). Numbers from the Ewellix LIFTKIT-0S datasheet: retracted = stroke/2 + 0.275 m, 21 kg at zero stroke + 1.7 kg per 0.5 m, 1500 N push load. No CAD in hand. Mounts onto a base's 'top'; its 'stage' takes an arm, and 'stage_rear' / 'stage_front' take a lidar / the ego camera."
+}

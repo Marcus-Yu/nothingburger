@@ -1,634 +1,97 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.robots.invalid/build.schema.json",
-  "title": "build.json: the manufacturing package",
-  "description": "Everything a manufacturer, integrator or parts buyer needs to quote and build the robot: model files, a sourced bill of materials with CAD per line, the joint and actuator table, mount points, and the assembly order. Wiring, fasteners and firmware are out of scope and listed as such, so this is a starting point for a quote. Written by B (composer.compose). Read by C (build view, export) and the export package.",
-  "type": "object",
-  "required": [
-    "header",
-    "build_id",
-    "design_id",
-    "robot_name",
-    "source_of_truth",
-    "artifacts",
-    "envelope",
-    "bom",
-    "joints",
-    "mount_points",
-    "assembly",
-    "out_of_scope"
-  ],
-  "properties": {
-    "header": {
-      "$ref": "common.schema.json#/$defs/header"
-    },
-    "build_id": {
-      "$ref": "common.schema.json#/$defs/id"
-    },
-    "design_id": {
-      "$ref": "common.schema.json#/$defs/id"
-    },
-    "robot_name": {
-      "type": "string"
-    },
-    "revision": {
-      "type": "string",
-      "description": "e.g. A, B. Bumped when the BOM changes."
-    },
-    "source_of_truth": {
-      "const": "mjcf",
-      "description": "robot.xml (MuJoCo MJCF) is the source. URDF, the STEP assembly and OpenUSD are generated from it for manufacturers and ROS users."
-    },
-    "artifacts": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": [
-          "kind",
-          "file",
-          "generated_from"
-        ],
-        "properties": {
-          "kind": {
-            "enum": [
-              "mjcf",
-              "urdf",
-              "step_assembly",
-              "openusd",
-              "bom_csv",
-              "assembly_pdf",
-              "drawing_pdf"
-            ]
-          },
-          "file": {
-            "$ref": "common.schema.json#/$defs/file_ref"
-          },
-          "generated_from": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "description": "kind of the artifact it was generated from; null for the source of truth."
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "envelope": {
-      "type": "object",
-      "description": "The built robot's measured numbers, from the composed model. design.json checks compare these to requirements.",
-      "required": [
-        "stowed_width_m",
-        "stowed_length_m",
-        "stowed_height_m",
-        "mass_kg",
-        "max_reach_height_m",
-        "min_reach_height_m",
-        "max_horizontal_reach_m",
-        "payload_kg",
-        "max_grip_force_N",
-        "max_step_m"
-      ],
-      "properties": {
-        "stowed_width_m": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "stowed_length_m": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "stowed_height_m": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "turning_width_m": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "mass_kg": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "max_reach_height_m": {
-          "type": "number"
-        },
-        "min_reach_height_m": {
-          "type": "number"
-        },
-        "max_horizontal_reach_m": {
-          "type": "number"
-        },
-        "payload_kg": {
-          "type": "number",
-          "minimum": 0
-        },
-        "max_grip_force_N": {
-          "type": "number",
-          "minimum": 0
-        },
-        "max_step_m": {
-          "type": "number",
-          "minimum": 0
-        },
-        "battery_runtime_min": {
-          "type": "number",
-          "minimum": 0
-        }
-      },
-      "additionalProperties": false
-    },
-    "bom": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "#/$defs/bom_line"
-      }
-    },
-    "cost_summary": {
-      "type": "object",
-      "properties": {
-        "parts_usd": {
-          "type": "number",
-          "minimum": 0
-        },
-        "longest_lead_time_days": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "placeholder_lines": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Lines whose sourcing is not verified. A quote needs this at 0."
-        }
-      },
-      "additionalProperties": false
-    },
-    "joints": {
-      "type": "array",
-      "minItems": 1,
-      "description": "Every joint in the model, with its actuator. Names match the model file and trajectory.json.",
-      "items": {
-        "type": "object",
-        "required": [
-          "name",
-          "type",
-          "parent_link",
-          "child_link",
-          "axis",
-          "limits",
-          "actuator"
-        ],
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "type": {
-            "enum": [
-              "revolute",
-              "continuous",
-              "prismatic",
-              "fixed"
-            ]
-          },
-          "parent_link": {
-            "type": "string"
-          },
-          "child_link": {
-            "type": "string"
-          },
-          "axis": {
-            "$ref": "common.schema.json#/$defs/vec3_m"
-          },
-          "limits": {
-            "type": "object",
-            "required": [
-              "lower",
-              "upper",
-              "velocity",
-              "effort"
-            ],
-            "properties": {
-              "lower": {
-                "type": [
-                  "number",
-                  "null"
-                ],
-                "description": "rad or m; null for continuous."
-              },
-              "upper": {
-                "type": [
-                  "number",
-                  "null"
-                ]
-              },
-              "velocity": {
-                "type": "number",
-                "minimum": 0,
-                "description": "rad/s or m/s."
-              },
-              "effort": {
-                "type": "number",
-                "minimum": 0,
-                "description": "N·m or N."
-              }
-            },
-            "additionalProperties": false
-          },
-          "actuator": {
-            "type": [
-              "object",
-              "null"
-            ],
-            "required": [
-              "bom_line",
-              "gear_ratio",
-              "encoder"
-            ],
-            "properties": {
-              "bom_line": {
-                "type": "integer",
-                "minimum": 1
-              },
-              "gear_ratio": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              "encoder": {
-                "type": "string",
-                "description": "e.g. 14-bit absolute."
-              },
-              "torque_sensing": {
-                "enum": [
-                  "none",
-                  "current",
-                  "joint_torque_sensor"
-                ]
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "sensors": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "name",
-          "kind",
-          "link",
-          "bom_line"
-        ],
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "kind": {
-            "enum": [
-              "fingertip_force",
-              "wrist_ft",
-              "depth_camera",
-              "rgb_camera",
-              "lidar",
-              "imu",
-              "bumper"
-            ]
-          },
-          "link": {
-            "type": "string"
-          },
-          "bom_line": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "rate_hz": {
-            "type": "number",
-            "exclusiveMinimum": 0
-          },
-          "range": {
-            "type": "string",
-            "description": "e.g. 0-20 N, 0.2-10 m."
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "mount_points": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": [
-          "name",
-          "parent_bom_line",
-          "child_bom_line",
-          "transform"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "The catalog mount point name, e.g. base.top_plate."
-          },
-          "parent_bom_line": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "child_bom_line": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "transform": {
-            "$ref": "common.schema.json#/$defs/pose",
-            "description": "Child frame in the parent part's frame (frame robot:<parent link>)."
-          },
-          "interface": {
-            "type": "string",
-            "description": "e.g. ISO 9409-1-50-4-M6 flange, 4x M5 on 80 mm square."
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "assembly": {
-      "type": "array",
-      "minItems": 1,
-      "description": "Assembly order, one step per mount point or sub-assembly.",
-      "items": {
-        "type": "object",
-        "required": [
-          "step",
-          "title",
-          "bom_lines",
-          "instructions"
-        ],
-        "properties": {
-          "step": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "title": {
-            "type": "string"
-          },
-          "bom_lines": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "minItems": 1
-          },
-          "mount_point": {
-            "type": "string"
-          },
-          "instructions": {
-            "type": "string"
-          },
-          "tools": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "verify": {
-            "type": "string",
-            "description": "What to check before the next step, e.g. joint rotates freely across its limits."
-          },
-          "figure": {
-            "$ref": "common.schema.json#/$defs/file_ref"
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "out_of_scope": {
-      "type": "array",
-      "items": {
-        "enum": [
-          "wiring",
-          "fasteners",
-          "firmware",
-          "power_electronics",
-          "enclosures",
-          "certification"
-        ]
-      },
-      "minItems": 1,
-      "description": "What this package does not specify. Listed, never left blank or guessed."
-    }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "build",
+ "type": "object",
+ "required": [
+  "schema",
+  "parts",
+  "robot_xml",
+  "mass_kg",
+  "price_usd",
+  "base",
+  "stowed",
+  "reach_envelope",
+  "joints",
+  "arm_joints",
+  "tool_site",
+  "sensors",
+  "assembly"
+ ],
+ "properties": {
+  "schema": {
+   "const": "build/1"
   },
-  "additionalProperties": false,
-  "$defs": {
-    "bom_line": {
-      "type": "object",
-      "required": [
-        "line",
-        "part_id",
-        "description",
-        "category",
-        "quantity",
-        "make_or_buy",
-        "sourcing_status",
-        "mass_kg",
-        "cad"
-      ],
-      "properties": {
-        "line": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "part_id": {
-          "type": "string",
-          "description": "Catalog card id, or <card>/<sub-part>."
-        },
-        "description": {
-          "type": "string"
-        },
-        "category": {
-          "enum": [
-            "base",
-            "reach",
-            "wrist",
-            "gripper",
-            "actuator",
-            "sensor",
-            "compute",
-            "power",
-            "structure"
-          ]
-        },
-        "quantity": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "make_or_buy": {
-          "enum": [
-            "buy",
-            "make",
-            "modify"
-          ]
-        },
-        "sourcing_status": {
-          "enum": [
-            "verified",
-            "placeholder"
-          ],
-          "description": "verified = manufacturer, MPN, price and lead time checked against a supplier on sourced_at. placeholder = not yet; do not order."
-        },
-        "manufacturer": {
-          "type": "string"
-        },
-        "mpn": {
-          "type": "string",
-          "description": "Manufacturer part number."
-        },
-        "supplier": {
-          "type": "object",
-          "required": [
-            "name"
-          ],
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "sku": {
-              "type": "string"
-            },
-            "url": {
-              "type": "string",
-              "format": "uri"
-            }
-          },
-          "additionalProperties": false
-        },
-        "unit_cost_usd": {
-          "type": "number",
-          "minimum": 0
-        },
-        "lead_time_days": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "sourced_at": {
-          "type": "string",
-          "format": "date"
-        },
-        "mass_kg": {
-          "type": "number",
-          "minimum": 0
-        },
-        "cad": {
-          "type": "object",
-          "required": [
-            "file",
-            "format",
-            "units"
-          ],
-          "properties": {
-            "file": {
-              "$ref": "common.schema.json#/$defs/file_ref"
-            },
-            "format": {
-              "enum": [
-                "step",
-                "stl",
-                "obj"
-              ]
-            },
-            "units": {
-              "enum": [
-                "mm",
-                "m"
-              ]
-            },
-            "origin": {
-              "type": "string",
-              "description": "Where the CAD origin sits, e.g. center of mounting face."
-            }
-          },
-          "additionalProperties": false
-        },
-        "fabrication": {
-          "type": "object",
-          "description": "For make or modify lines.",
-          "required": [
-            "process",
-            "material"
-          ],
-          "properties": {
-            "process": {
-              "enum": [
-                "cnc",
-                "sheet_metal",
-                "3d_print_fdm",
-                "3d_print_sla",
-                "laser_cut",
-                "extrusion_cut"
-              ]
-            },
-            "material": {
-              "type": "string",
-              "description": "e.g. 6061-T6 aluminium, PETG."
-            },
-            "drawing": {
-              "$ref": "common.schema.json#/$defs/file_ref"
-            },
-            "tolerance_mm": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            }
-          },
-          "additionalProperties": false
-        },
-        "notes": {
-          "type": "string"
-        }
-      },
-      "allOf": [
-        {
-          "if": {
-            "properties": {
-              "sourcing_status": {
-                "const": "verified"
-              },
-              "make_or_buy": {
-                "const": "buy"
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "manufacturer",
-              "mpn",
-              "supplier",
-              "unit_cost_usd",
-              "lead_time_days",
-              "sourced_at"
-            ]
-          }
-        },
-        {
-          "if": {
-            "properties": {
-              "make_or_buy": {
-                "enum": [
-                  "make",
-                  "modify"
-                ]
-              }
-            }
-          },
-          "then": {
-            "required": [
-              "fabrication"
-            ]
-          }
-        }
-      ],
-      "additionalProperties": false
+  "parts": {
+   "type": "object",
+   "required": [
+    "base",
+    "lift",
+    "arm",
+    "gripper",
+    "lidar",
+    "lidar_mount",
+    "wrist_cam",
+    "ego_cam"
+   ],
+   "properties": {
+    "wrist_cam": {
+     "type": "boolean"
     }
+   }
+  },
+  "base": {
+   "type": "object",
+   "required": [
+    "kind",
+    "holonomic",
+    "step_max_m",
+    "footprint",
+    "inscribed_radius_m",
+    "circumscribed_radius_m",
+    "support"
+   ],
+   "properties": {
+    "kind": {
+     "enum": [
+      "wheeled",
+      "legged"
+     ]
+    }
+   }
+  },
+  "stowed": {
+   "type": "object",
+   "required": [
+    "width_m",
+    "length_m",
+    "height_m",
+    "qpos"
+   ],
+   "properties": {}
+  },
+  "reach_envelope": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "height_m",
+     "min_distance_m",
+     "max_distance_m"
+    ],
+    "properties": {}
+   }
+  },
+  "joints": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "type",
+     "range"
+    ],
+    "properties": {}
+   }
   }
+ }
 }

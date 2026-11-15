@@ -10,6 +10,9 @@ dependencies = [
   "mink",      # TODO pin
   "langgraph", # TODO pin
   "langsmith", # TODO pin
+  "numpy",
+  "anthropic",
+  "jsonschema",
 ]
 
 [dependency-groups]

@@ -1,0 +1,13 @@
+{
+  "id": "hand_towel",
+  "slot": "object",
+  "name": "Hand towel, bunched on the floor",
+  "mass_kg": 0.3,
+  "width_m": 0.06,
+  "hold": "pinch",
+  "src": "assumed; cloth is grasped by a fold about 6 cm across",
+  "confidence": {
+    "mass_kg": "assumed",
+    "width_m": "assumed"
+  }
+}

@@ -1,93 +1,30 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://contracts.robots.invalid/grip.schema.json",
-  "title": "grip.json: one demonstration's fingertip forces",
-  "description": "Fingertip pressure-sensor readings from the gloves during the demo in demo.json, plus the force bands derived per phase. Raw counts are always kept. Newtons appear only with a calibration. Every force here is measured_at_home: it describes the object at home, not the one in the building. Written by C (capture). Read by A (requirements, program) and B (motion, sim).",
-  "type": "object",
-  "required": ["header", "grip_id", "demo_id", "glove_id", "calibration_id", "sensors", "samples", "bands", "summary"],
-  "properties": {
-    "header": { "$ref": "common.schema.json#/$defs/header" },
-    "grip_id": { "$ref": "common.schema.json#/$defs/id" },
-    "demo_id": { "$ref": "common.schema.json#/$defs/id" },
-    "glove_id": { "$ref": "common.schema.json#/$defs/id" },
-    "calibration_id": { "type": ["string", "null"], "description": "calibration.json id, or null if this glove is not calibrated yet. Null means no newtons anywhere in this file." },
-    "provenance": { "const": "measured_at_home" },
-    "sensors": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["sensor_id", "hand", "finger", "joint"],
-        "properties": {
-          "sensor_id": { "$ref": "common.schema.json#/$defs/id" },
-          "hand": { "enum": ["left", "right"] },
-          "finger": { "enum": ["thumb", "index", "middle", "ring", "pinky", "palm"] },
-          "joint": { "type": "string", "description": "The demo.json joint it sits on, e.g. index-finger-tip." },
-          "adc_bits": { "const": 12 }
-        },
-        "additionalProperties": false
-      }
-    },
-    "samples": {
-      "type": "object",
-      "required": ["rate_hz", "clock", "t_s", "raw"],
-      "properties": {
-        "rate_hz": { "type": "number", "exclusiveMinimum": 0 },
-        "clock": { "const": "glove", "description": "Convert with demo.json sync.glove_offset_s." },
-        "t_s": { "type": "array", "items": { "type": "number", "minimum": 0 } },
-        "raw": {
-          "type": "array",
-          "description": "One row per t_s, one column per sensor in sensors order. Counts 0-4095.",
-          "items": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 4095 } }
-        },
-        "force_N": {
-          "type": "array",
-          "description": "Same shape as raw, after calibration. Absent when calibration_id is null.",
-          "items": { "type": "array", "items": { "type": ["number", "null"], "minimum": 0 } }
-        },
-        "saturated": {
-          "type": "array",
-          "description": "Same shape as raw. true where the reading is above the sensor's calibrated range, so force_N is a floor, not a value.",
-          "items": { "type": "array", "items": { "type": "boolean" } }
-        }
-      },
-      "additionalProperties": false
-    },
-    "bands": {
-      "type": "array",
-      "minItems": 1,
-      "description": "The force to reproduce, per demo phase. hold is the steady band; peak is the largest seen.",
-      "items": {
-        "type": "object",
-        "required": ["phase_id", "sensor_ids", "hold", "peak"],
-        "properties": {
-          "phase_id": { "$ref": "common.schema.json#/$defs/id" },
-          "sensor_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/id" }, "minItems": 1, "description": "Sensors summed into this band." },
-          "hold": { "$ref": "common.schema.json#/$defs/force_band" },
-          "peak": { "$ref": "common.schema.json#/$defs/force_band" },
-          "hold_duration_s": { "type": "number", "minimum": 0 },
-          "slip_detected": { "type": "boolean" }
-        },
-        "additionalProperties": false
-      }
-    },
-    "summary": {
-      "type": "object",
-      "required": ["grip_type", "contact_fingers"],
-      "properties": {
-        "grip_type": { "enum": ["pinch", "tripod", "power", "press", "hook"] },
-        "contact_fingers": { "type": "array", "items": { "enum": ["thumb", "index", "middle", "ring", "pinky", "palm"] }, "minItems": 1 },
-        "notes": { "type": "string" }
-      },
-      "additionalProperties": false
-    }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "grip",
+ "type": "object",
+ "required": [
+  "schema",
+  "source",
+  "force_n"
+ ],
+ "properties": {
+  "schema": {
+   "const": "capture.grip/1"
   },
-  "if": { "properties": { "calibration_id": { "type": "null" } } },
-  "then": {
-    "properties": {
-      "samples": { "not": { "required": ["force_N"] } },
-      "bands": { "items": { "properties": { "hold": { "properties": { "units": { "const": "raw_adc" } } }, "peak": { "properties": { "units": { "const": "raw_adc" } } } } } }
-    }
+  "source": {
+   "enum": [
+    "glove",
+    "travel"
+   ]
   },
-  "additionalProperties": false
+  "force_n": {
+   "type": "object",
+   "required": [
+    "min",
+    "max",
+    "peak"
+   ],
+   "properties": {}
+  }
+ }
 }

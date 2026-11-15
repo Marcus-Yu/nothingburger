@@ -1,0 +1,15 @@
+{
+  "schema": "trajectory/1",
+  "robot": "robot.xml",
+  "joints": ["lift", "arm/joint1", "arm/joint2"],
+  "tasks": [
+    {"task": "t1", "standoff": [2.0, 3.0, 0.0],
+     "segments": [
+       {"phase": "approach", "kind": "follow_path", "samples": [{"t": 0.0, "q": [0.0, 0.0, 0.0]}, {"t": 1.0, "q": [0.35, 0.1, -0.4]}]},
+       {"phase": "work", "kind": "twist", "turns": 3.0, "regrasps": 5, "samples": [{"t": 1.0, "q": [0.35, 0.1, -0.4]}, {"t": 2.0, "q": [0.35, 0.1, -0.4]}]},
+       {"phase": "retreat", "kind": "follow_path", "samples": [{"t": 2.0, "q": [0.35, 0.1, -0.4]}, {"t": 3.0, "q": [0.0, 0.0, 0.0]}]}
+     ],
+     "max_position_error_m": 0.004, "collisions": 0}
+  ],
+  "failures": []
+}

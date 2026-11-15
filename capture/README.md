@@ -1,7 +1,5 @@
 # capture/
 
-Owner: Stream C. See AGENTS.md for scope and rules.
-
 Films a person doing a chore with the Quest and turns it into `demo.json` and `grip.json`.
 Exposes `api.py`: `latest(kind)`.
 

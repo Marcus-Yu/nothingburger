@@ -1,0 +1,253 @@
+{
+  "schema": "design/1",
+  "parts": {
+    "base": "tidybot_arx5",
+    "lift": "liftkit_900",
+    "arm": "ur5e",
+    "gripper": "xarm_gripper",
+    "lidar": "rplidar_s2",
+    "lidar_mount": "stage_rear",
+    "wrist_cam": true,
+    "ego_cam": "base_front"
+  },
+  "price_usd": 49580,
+  "mass_kg": 91.18,
+  "checks": [
+    {
+      "check": "doorway",
+      "task": null,
+      "status": "pass",
+      "value": 0.623,
+      "limit": 0.81,
+      "unit": "m",
+      "requirements": [
+        "r_width"
+      ],
+      "why": "width of the whole robot with the arm stowed"
+    },
+    {
+      "check": "turn",
+      "task": null,
+      "status": "pass",
+      "value": 0.458,
+      "limit": 1.9,
+      "unit": "m",
+      "requirements": [
+        "r_length"
+      ],
+      "why": "holonomic base: it moves sideways, so it need not turn in the hallway"
+    },
+    {
+      "check": "door header",
+      "task": null,
+      "status": "pass",
+      "value": 1.372,
+      "limit": 2.05,
+      "unit": "m",
+      "requirements": [
+        "r_header"
+      ],
+      "why": "height with the lift down and the arm stowed"
+    },
+    {
+      "check": "steps",
+      "task": null,
+      "status": "pass",
+      "value": 0.015,
+      "limit": 0.0,
+      "unit": "m",
+      "requirements": [
+        "r_step"
+      ],
+      "why": "value is the tallest step the base climbs; limit is the tallest step on the corridors"
+    },
+    {
+      "check": "base payload",
+      "task": null,
+      "status": "pass",
+      "value": 46.93,
+      "limit": 60.0,
+      "unit": "kg",
+      "requirements": [
+        "r_t1_payload",
+        "r_t2_payload"
+      ],
+      "why": "value is everything the base carries (lift, arm, gripper, sensors, heaviest object); limit is the base's rating"
+    },
+    {
+      "check": "lidar present",
+      "task": null,
+      "status": "pass",
+      "value": "2d",
+      "limit": "2d",
+      "requirements": [
+        "r_step"
+      ]
+    },
+    {
+      "check": "lidar view",
+      "task": null,
+      "status": "pass",
+      "value": 0.76,
+      "limit": 0.75,
+      "unit": "fraction",
+      "requirements": [],
+      "why": "share of the horizontal circle the lidar sees past the robot's own body, arm stowed, mount stage_rear"
+    },
+    {
+      "check": "wrist camera",
+      "task": null,
+      "status": "pass",
+      "requirements": [
+        "r_t1_opening",
+        "r_t2_opening"
+      ],
+      "why": "a grasp needs a close view; the ego camera's depth stops working under 0.3 m"
+    },
+    {
+      "check": "ego camera",
+      "task": null,
+      "status": "pass",
+      "requirements": [],
+      "why": "needed to see the floor ahead and each target before reaching"
+    },
+    {
+      "check": "reach",
+      "task": "t1",
+      "status": "pass",
+      "value": 1.25,
+      "limit": 0.211,
+      "unit": "m",
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "why": "target 0 at 1.85 m, tool side: the tool reaches 0.00 to 1.25 m from the base centre; the base centre can stand 0.21 m away or more (free floor 0.01 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "target": 0,
+      "targets": [
+        {
+          "target": 0,
+          "status": "pass",
+          "needed_m": 0.211,
+          "reach_m": 1.25
+        }
+      ]
+    },
+    {
+      "check": "reach",
+      "task": "t2",
+      "status": "pass",
+      "value": 0.912,
+      "limit": 0.0,
+      "unit": "m",
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "why": "target 0 at 0.50 m, tool side: the tool reaches 0.01 to 0.91 m from the base centre; the base centre can stand 0.00 m away or more (free floor 0.00 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "target": 0,
+      "targets": [
+        {
+          "target": 0,
+          "status": "pass",
+          "needed_m": 0.0,
+          "reach_m": 0.912
+        }
+      ]
+    },
+    {
+      "check": "tip-over",
+      "task": "t1",
+      "status": "pass",
+      "value": 3.77,
+      "limit": 1.5,
+      "unit": "ratio",
+      "requirements": [
+        "r_t1_payload",
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "why": "worst case: reaching target 0 (0.25 m out at 1.85 m, the nearest the base can stand to it); payload 0.75 kg, press 0.0 N; static, against the support polygon"
+    },
+    {
+      "check": "tip-over",
+      "task": "t2",
+      "status": "pass",
+      "value": 9.68,
+      "limit": 1.5,
+      "unit": "ratio",
+      "requirements": [
+        "r_t2_payload",
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "why": "worst case: reaching target 0 (0.01 m out at 0.50 m, the nearest the base can stand to it); payload 0.75 kg, press 0.0 N; static, against the support polygon"
+    },
+    {
+      "check": "payload",
+      "task": "t1",
+      "status": "pass",
+      "value": 1.65,
+      "limit": 5.0,
+      "unit": "kg",
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "why": "arm carries object 0.75 + gripper 0.8 + wrist camera 0.1 kg against its 5.0 kg rating; gripper rated 1.5 kg for the 0.75 kg object"
+    },
+    {
+      "check": "payload",
+      "task": "t2",
+      "status": "pass",
+      "value": 1.65,
+      "limit": 5.0,
+      "unit": "kg",
+      "requirements": [
+        "r_t2_payload"
+      ],
+      "why": "arm carries object 0.75 + gripper 0.8 + wrist camera 0.1 kg against its 5.0 kg rating; gripper rated 1.5 kg for the 0.75 kg object"
+    },
+    {
+      "check": "opening",
+      "task": "t1",
+      "status": "pass",
+      "value": 0.086,
+      "limit": 0.04,
+      "unit": "m",
+      "requirements": [
+        "r_t1_opening"
+      ]
+    },
+    {
+      "check": "opening",
+      "task": "t2",
+      "status": "pass",
+      "value": 0.086,
+      "limit": 0.04,
+      "unit": "m",
+      "requirements": [
+        "r_t2_opening"
+      ]
+    },
+    {
+      "check": "force",
+      "task": "t1",
+      "status": "not_assessable",
+      "requirements": [],
+      "why": "no force_band requirement in the ledger for this pick task"
+    },
+    {
+      "check": "force",
+      "task": "t2",
+      "status": "not_assessable",
+      "requirements": [],
+      "why": "no force_band requirement in the ledger for this pick task"
+    }
+  ],
+  "labels": [
+    "force not verified: t1, t2"
+  ],
+  "considered": 7140,
+  "passed_arithmetic": 901,
+  "composed_and_checked": 80
+}

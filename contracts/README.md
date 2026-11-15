@@ -1,8 +1,12 @@
 # contracts/
 
-Owner: Stream A (merges all changes). See AGENTS.md for scope and rules.
+One JSON schema per run file plus a hand-written example of each.
 
-One JSON Schema (draft 2020-12) per run file, plus a worked example of each in [`examples/`](examples/). The examples are one run: removing a hallway ceiling bulb in a unit with a 0.71 m doorway and a 2.62 m ceiling, then inspecting the empty socket. They are written by [`examples/make_examples.py`](examples/make_examples.py); edit the values there and rerun it, not the JSON. Changes are posted on the board with both other owners tagged.
+## Draft full spec (not wired yet)
+
+The schemas and examples above are what the pipeline writes and `validate.py` checks. A fuller draft of the run-folder spec (calibration, constraints, signals, verdict, shared types, and a worked bulb-change run in [`examples/`](examples/)) is kept alongside for the next contract pass. Where it and the files above disagree, the files above win; `validate.py` does not check `examples/`.
+
+One JSON Schema (draft 2020-12) per run file, plus a worked example of each in [`examples/`](examples/). The examples are one run: removing a hallway ceiling bulb in a unit with a 0.71 m doorway and a 2.62 m ceiling, then inspecting the empty socket. They are written by [`examples/make_examples.py`](examples/make_examples.py); edit the values there and rerun it, not the JSON.
 
 ```bash
 python contracts/validate.py
