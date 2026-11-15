@@ -99,7 +99,18 @@
    "required": [
     "doorway"
    ],
-   "properties": {}
+   "properties": {
+    "doorway": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "the doorway that leads out of the building; null when the scan has none, and then nothing can be carried out"
+    },
+    "note": {
+     "type": "string"
+    }
+   }
   },
   "anchors": {
    "type": "array",
@@ -134,7 +145,8 @@
       "enum": [
        "panorama-agent",
        "manual",
-       "assumed-normal"
+       "assumed-normal",
+       "mesh"
       ]
      }
     }

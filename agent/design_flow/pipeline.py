@@ -32,7 +32,7 @@ RUNS = REPO / "runs" / "studio"
 EXPORT = REPO / "frontend" / "robot-design" / "data" / "export.py"
 
 # Studio space id (web/worlds.json) -> scenario in world/scenarios/
-WORLDS = {"rabinowitz-hall": "jrr"}
+WORLDS = {"rabinowitz-hall": "jrr", "la-mirada": "la_mirada"}
 
 
 # Session (LangGraph thread id) -> its run folder, relative to the repo, set as soon as the run starts,
