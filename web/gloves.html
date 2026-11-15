@@ -31,6 +31,7 @@
         <option value="8">8 s</option><option value="12" selected>12 s</option><option value="20">20 s</option>
       </select>
     </label>
+    <button id="carry">Ask the headset for the carry</button>
     <button id="stop" class="tab">Stop recording</button>
     <label style="margin:0">Window
       <select id="window" style="display:inline-block;width:auto;margin:0 0 0 6px">
@@ -136,20 +137,33 @@ async function tick() {
 const $ = (id) => document.getElementById(id);
 let take = null, takes = 0;
 
-async function ask() {
-  const note = $("note"), seconds = +$("length").value;
+// The two takes: a squeeze measures the grip and runs for the time picked; a carry measures where
+// the thing goes and runs until the wearer's done pinch, half a minute at most.
+const KINDS = {
+  squeeze: { chore: "hold trash can", kind: "squeeze", seconds: () => +$("length").value,
+             how: (s) => `then records ${s} s` },
+  carry: { chore: "carry trash can out", kind: "path", seconds: () => 30,
+           how: () => "then records until you pinch thumb and middle finger (30 s at most)" },
+};
+let lastKind = "squeeze";
+
+async function ask(which) {
+  if (typeof which !== "string") which = lastKind;
+  lastKind = which;
+  const what = KINDS[which];
+  const note = $("note"), seconds = what.seconds();
   try {
     const r = await fetch("/demos/request", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ chore: "hold container", kind: "squeeze", max_seconds: seconds }) });
+      body: JSON.stringify({ chore: what.chore, kind: what.kind, max_seconds: seconds }) });
     if (!r.ok) { note.textContent = `Could not send: HTTP ${r.status}`; return; }
-    take = { id: (await r.json()).id, asked: Date.now(), seconds, done: false };
+    take = { id: (await r.json()).id, asked: Date.now(), seconds, done: false, which };
     takes += 1;
     note.textContent = "";
     $("take").hidden = false;
-    $("take-title").textContent = `Take ${takes}`;
+    $("take-title").textContent = `Take ${takes}: ${which}`;
     $("take-peaks").innerHTML = ""; $("take-read").textContent = "";
     $("redo").disabled = $("keep").disabled = true;
-    $("take-state").textContent = `sent: the headset shows the task, counts down from 8, then records ${seconds} s`;
+    $("take-state").textContent = `sent: the headset shows the task, counts down from 8, ${what.how(seconds)}`;
     watch(take);
   } catch (e) { note.textContent = `Could not send: ${e.message}`; }
 }
@@ -182,8 +196,9 @@ async function watch(mine) {
 }
 
 function show(d) {
-  const short = d.duration_s < take.seconds - 1.5;
-  $("take-state").textContent = `recorded ${d.duration_s.toFixed(1)} s of ${take.seconds} s` + (short ? " (ended early)" : "");
+  const carry = take.which === "carry", short = !carry && d.duration_s < take.seconds - 1.5;
+  $("take-state").textContent = carry ? `recorded ${d.duration_s.toFixed(1)} s` :
+    `recorded ${d.duration_s.toFixed(1)} s of ${take.seconds} s` + (short ? " (ended early)" : "");
   const hands = Object.entries(d.glove_peaks || {});
   $("take-peaks").innerHTML = hands.length ? hands.map(([hand, peaks]) =>
     `<span class="note">${hand} peaks</span>` + FINGERS.map((f, k) =>
@@ -191,14 +206,20 @@ function show(d) {
     `<span class="note">No glove readings in this take.</span>`;
   const flat = hands.flatMap(([, peaks]) => FINGERS.filter((f) => peaks[f] < 82));
   const grip = d.read_as && d.read_as.grip, band = grip && grip.glove_raw;
-  $("take-read").textContent =
+  const m = d.read_as && d.read_as.motion;
+  const moved = !carry ? "" : !m ? "The movement could not be read from this take. " :
+    `Read as: ${m.kind}` + (m.kind === "carry" ? "" : " (not a carry)") +
+    `. Lifted ${(100 * m.lift_m).toFixed(0)} cm, hand travelled ${m.travel_m.toFixed(2)} m, ended ${m.distance_m.toFixed(2)} m from where it started` +
+    (m.put_back ? " (put back where it was)" : "") + `, ${d.read_as.two_handed ? "two hands" : "one hand"}. `;
+  $("take-read").textContent = moved +
     (band ? `Grip read: ${band.raw.min} to ${band.raw.max} raw on the ${band.hand} hand, peak ${band.raw.peak}` +
             (band.near_ceiling ? " (near the sensor's ceiling). " : ". ") : "No grip could be read from this take. ") +
     (hands.length && flat.length ? `No pressure on: ${flat.join(", ")}.` : "");
   $("redo").disabled = $("keep").disabled = false;
 }
 
-$("ask").onclick = ask;
+$("ask").onclick = () => ask("squeeze");
+$("carry").onclick = () => ask("carry");
 $("redo").onclick = async () => {
   if (take && take.done) await fetch(`/demos/${take.id}/discard`, { method: "POST" });
   ask();
