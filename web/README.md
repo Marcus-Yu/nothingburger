@@ -39,7 +39,20 @@ This changes the picture only. The planner never saw the chairs and still does n
 
 A world read from a Matterport model by `python -m world.matterport <model id> <name>` gets the same files from the model's own mesh in that one step, with nothing to capture or stitch.
 
-With the mesh on disk, a world that names it (`scan` in `world.json`) is drawn with the real room in the top view and the film, and `room.html?run=...` plays the job inside it: drag to look around, scroll to move, and Enter VR on a headset. Without it everything falls back to drawn boxes. The mesh is for looks only; planning uses the world's `obstacles`. `world/_scans/` is not committed: the mesh is Matterport's, taken from the public tour for this demo, and is not theirs to hand on. The sanctioned source is the scan's MatterPak or splat from its owner.
+With the mesh on disk, a world that names it (`scan` in `world.json`) is drawn with the real room in the top view and the film, and `room.html?run=...` plays the job inside it. Without it everything falls back to drawn boxes. The mesh is for looks only; planning uses the world's `obstacles`. `world/_scans/` is not committed: the mesh is Matterport's, taken from the public tour for this demo, and is not theirs to hand on. The sanctioned source is the scan's MatterPak or splat from its owner.
+
+**The room page (`room.html`).** Matterport's logo sits top left and opens the tour; it is the logo file from their SDK bundle (`web/_vendor`, fetched by `web/fetch_sdk.py`), and falls back to the name in text without it. Six buttons sit bottom left, above the playback bar:
+
+| Button | Does |
+| :-- | :-- |
+| View dollhouse | The building from outside, every floor the scan has. Walls facing you are not drawn; the rest are thin from far off and fill in as you move closer. Drag to turn, scroll to zoom, right-drag to slide |
+| View floorplan | One floor from straight above, cut off above head height and below the floor. Drag to slide, scroll to zoom |
+| Explore 3D space | First person at eye height: drag to look, W A S D or the arrows to walk (a tap is a step), click the floor to go there. You stay inside the rooms. With Follow on, you walk along with the robot |
+| Choose the floor | The world's floors, any floor the scan caught above them (marked partly scanned), and All floors for the dollhouse |
+| Measurements | Dimension lines on the floor: each doorway's width and height, each wall's length, the gaps between tables and from a table to the wall. ≈ marks a length traced by eye; the tables are measured on the scan |
+| Hide furniture | Takes out the tables and what stands outside the rooms, and swaps in the floor without the tables' shadows |
+
+The three views are one at a time. A partly scanned floor can be seen in the dollhouse and the floorplan but not walked: close up it is only what the scanner saw from below. What the page needs beyond the mesh is in `world/_scans/<id>/scan.json`, written by the stitch: `levels` (name, height, `partial`), and each piece's `layer` (`furniture`, or `bare` for the shadow-free floor); in `room.glb` those pieces' names end `_furn` and `_bare`.
 
 ## Kept runs
 

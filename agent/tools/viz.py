@@ -239,7 +239,7 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True, trails: tup
         root, listing = scan
         seen = {}
         for i, t in enumerate(listing["tiles"]):
-            if top and t["part"] != "lo":  # from above, only what is below head height, or the upper floors hide the room
+            if top and t["part"] != "lo" or t.get("layer") == "bare":  # from above, only what is below head height, or the upper floors hide the room; never the floor meant for when the furniture is hidden
                 continue
             if t.get("layer") == "bare" or _too_small(root / t["mesh"]):  # the floor shown when furniture is hidden; a sliver the simulator will not load
                 continue
@@ -451,15 +451,21 @@ PROPS = {"towel": {"box": (0.30, 0.22, 0.012), "rgb": (0.93, 0.96, 0.99)},
          "bottle": {"cylinder": (0.035, 0.20), "rgb": (0.62, 0.80, 0.93)}}  # radius, height: a 500 ml bottle
 
 
-def _prop_tracks(robot_xml: str, build: dict, frames) -> dict:
+def _picks_bottle(tasks) -> bool:
+    """Whether the job picks up a bottle: the one picked thing the film has a shape for."""
+    return any(t.get("skill") == "pick" and "bottle" in str(t.get("object", "")) for t in tasks or [])
+
+
+def _prop_tracks(robot_xml: str, build: dict, frames, bottle: bool = False) -> dict:
     """Where each handled thing is in every film frame: {name: [n, 7]} (x y z, quaternion w x y z).
 
     The wiping cloth lies on the surface where the first stroke starts until the tool gets there, is pressed under
     the fingertips while wiping, hangs from them between stops, and is left where the last stroke ends. A picked
-    thing stands where the gripper will close on it, and from then on moves rigidly with the hand."""
+    bottle (`bottle`: the job picks one up) stands where the gripper will close on it, and from then on moves rigidly
+    with the hand."""
     kinds = [f[2] for f in frames]
     wipes = [i for i, k in enumerate(kinds) if k == "wipe"]
-    grasp = next((i for i, k in enumerate(kinds) if k == "carry"), None)
+    grasp = next((i for i, k in enumerate(kinds) if k == "carry"), None) if bottle else None
     if not wipes and grasp is None:
         return {}
     m = mujoco.MjModel.from_xml_string(robot_xml)
@@ -710,7 +716,8 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
         view = (world.get("ground") or {}).get("view") or {}  # a world on surveyed ground says which side to film from
         cam.azimuth, cam.elevation, cam.distance = (float(view.get(k, v)) for k, v in (("azimuth", cam.azimuth), ("elevation", cam.elevation), ("distance", cam.distance)))
         look = np.array([frames[0][0][0], frames[0][0][1], 0.5])
-        tracks = {m.body_mocapid[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, name)]: track for name, track in _prop_tracks(robot_xml, build, frames).items()}
+        handled = _prop_tracks(robot_xml, build, frames, bottle=not carried and _picks_bottle(tasks))
+        tracks = {m.body_mocapid[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, name)]: track for name, track in handled.items()}
         room = np.zeros(mujoco.mjNGROUP, dtype=np.uint8)
         room[SCAN_GROUP] = 1
         hit, far = np.zeros(1, dtype=np.int32), float(cam.distance)
@@ -736,7 +743,7 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
             back = -np.array([np.cos(el) * np.cos(az), np.cos(el) * np.sin(az), np.sin(el)])
             seen_from = np.array([pose[0], pose[1], 1.0])
             blocked = mujoco.mj_ray(m, d, seen_from, back, room, 1, -1, hit)
-            limit = far if blocked < 0 else float(np.clip(blocked - 0.3, 1.6, far))
+            limit = far if blocked < 0 else float(np.clip(blocked - 0.3, min(1.6, far), far))
             reach = min(limit, reach + 0.04)
             cam.distance = reach
             r.update_scene(d, cam)
@@ -795,7 +802,7 @@ def _geom_mesh(m, g):
     return mesh
 
 
-def tour_export(robot_xml: str, build: dict, route: dict, trajectory: dict) -> dict | None:
+def tour_export(robot_xml: str, build: dict, route: dict, trajectory: dict, tasks: list | None = None) -> dict | None:
     """What the tour page needs to draw the robot inside the real scan: frames/tour_robot.glb (one node per
     body, meshes in the body's frame, metres, Z up) and frames/tour_frames.bin (float32, per film frame and
     per body: position x y z and quaternion w x y z in the world frame). Same timeline as walkthrough().
@@ -821,7 +828,7 @@ def tour_export(robot_xml: str, build: dict, route: dict, trajectory: dict) -> d
             bodies.append(b)
         frames, chapters = _timeline(build, route, trajectory)
         frames = _gripped(robot_xml, build, frames)
-        tracks = _prop_tracks(robot_xml, build, frames)
+        tracks = _prop_tracks(robot_xml, build, frames, bottle=_picks_bottle(tasks))
         for k, prop_name in enumerate(tracks):  # each handled thing goes in as one more body, after the robot's
             name, prop = f"body{len(bodies) + k}", PROPS[prop_name]
             scene.graph.update(frame_to=name, frame_from=scene.graph.base_frame, matrix=np.eye(4))

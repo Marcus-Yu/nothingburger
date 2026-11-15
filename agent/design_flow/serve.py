@@ -311,11 +311,18 @@ def make_handler(sessions: Sessions, standin: bool):
                 return self._send(200, read_events(folder / "events.jsonl", int((q.get("from") or ["0"])[0])))
             if path == "/room.html":  # the real-room 3D page (web/viewer/room.html), for a studio run
                 return self._send(200, (REPO / "web" / "viewer" / "room.html").read_bytes(), "text/html; charset=utf-8")
-            if path.startswith("/scans/") and path.endswith("/room.glb"):  # the scanned room's mesh (world/_scans, not committed)
-                file = (REPO / "world" / "_scans" / path[len("/scans/"):]).resolve()
-                if file.is_file() and file.name == "room.glb":
-                    return self._send(200, file.read_bytes(), "model/gltf-binary")
+            if path.startswith("/scans/") and path.endswith(("/room.glb", "/scan.json")):  # the scanned room's mesh and its listing
+                scans = (REPO / "world" / "_scans").resolve()
+                file = (scans / path[len("/scans/"):]).resolve()
+                if file.is_relative_to(scans) and file.is_file():
+                    return self._send(200, file.read_bytes(), "model/gltf-binary" if file.suffix == ".glb" else "application/json")
                 return self._send(404, {"detail": "no room mesh on this machine"})
+            if path.startswith("/mp/images/"):  # Matterport's logo for the room page, from the SDK bundle (web/fetch_sdk.py)
+                vendor = (REPO / "web" / "_vendor").resolve()
+                file = (vendor / path[len("/mp/"):]).resolve()
+                if file.is_relative_to(vendor) and file.is_file():
+                    return self._send(200, file.read_bytes(), "image/svg+xml" if file.suffix == ".svg" else "application/octet-stream")
+                return self._send(404, {"detail": "not found"})
             if path.startswith("/runs/studio/"):  # a studio run's files: snapshot, events, world, the robot export
                 file = (REPO / path.lstrip("/")).resolve()
                 if file.is_relative_to(RUNS.resolve()) and file.is_file():

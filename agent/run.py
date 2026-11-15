@@ -138,7 +138,7 @@ def pipeline(state: dict) -> dict:
             if film:
                 observe.emit("walkthrough", **film)
             if state["world"].get("tour"):  # the world is a traced Matterport tour: export the robot to draw inside it
-                real = viz.tour_export(state["robot_xml"], state["build"], state["route"], state["trajectory"])
+                real = viz.tour_export(state["robot_xml"], state["build"], state["route"], state["trajectory"], state["tasks"])
                 if real:
                     observe.emit("tour", **real, matterport=state["world"]["tour"].get("matterport"))
     return state

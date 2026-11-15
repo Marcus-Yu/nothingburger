@@ -31,7 +31,8 @@ def export(out: Path) -> dict | None:
     (out / "frames").mkdir(exist_ok=True)
     observe._events.update(path=events, t0=time.perf_counter() - last_t, frames=out / "frames", n_frames=0)
     real = viz.tour_export((out / "robot.xml").read_text(), json.loads((out / "build.json").read_text()),
-                           json.loads((out / "route.json").read_text()), json.loads((out / "trajectory.json").read_text()))
+                           json.loads((out / "route.json").read_text()), json.loads((out / "trajectory.json").read_text()),
+                           json.loads((out / "tasks.json").read_text()).get("tasks") if (out / "tasks.json").exists() else None)
     if real:
         observe.emit("tour", **real, matterport=world["tour"].get("matterport"))
     observe._events.update(path=None, frames=None)
