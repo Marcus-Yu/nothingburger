@@ -27,6 +27,9 @@ QUANTITY = {"reach": "reach_targets", "payload": "payload", "opening": "gripper_
             "press": "press_force", "twist": "wrist_roll_turns"}
 ORDER = ["doorway", "turn", "door header", "steps", "base payload", "lidar present", "lidar view", "wrist camera",
          "ego camera", "reach", "tip-over", "payload", "opening", "force", "press", "twist"]
+STROKE_MARGIN_M = 0.10               # a stroke's far end must be this far inside the envelope: the envelope is sampled
+                                     # without the furniture, and over a table the elbow needs room to stay above it
+MOUNT_BELOW_M = 0.05                 # the arm's mount may be at most this far below a surface it wipes
 SIDE_SIN = np.sin(np.radians(15.0))  # and as level ("side") within this of horizontal
 AXIS_COS = np.cos(np.radians(30.0))  # a target's tool axis counts as up or down within this of vertical
 
@@ -205,6 +208,7 @@ def measured(parts: dict, L: Ledger) -> list:
     B = robot.B
     o = B["outline_m"]
     inscribed = min(-o["x"][0], o["x"][1], -o["y"][0], o["y"][1])
+    lift = P.card("lift", parts["lift"])
     out = []
 
     w_lim, w_ids = L.number("base_width_max", None, min)
@@ -286,6 +290,46 @@ def measured(parts: dict, L: Ledger) -> list:
             cand[2]["target"] = i
             if worst is None or cand[:2] > worst[:2]:
                 worst = cand
+        # a wipe stroke (targets 2k and 2k+1 of a row that says how many strokes it has) is done from one
+        # parked pose, so both its ends must be in reach from the same place. Estimate: stand on the nearest
+        # free floor to one end (its edge_distance_m along its `side`) and measure to the other end.
+        at = 0
+        for r in reach_rows:
+            vals = r["value"]
+            for k in range(int(r.get("strokes") or 0)):
+                ga, gb = vals[2 * k], vals[2 * k + 1]
+                axis = _axis_name(ga.get("tool_axis", [0, 0, -1]))
+                entries = robot.envelope_at(axis, float(ga["point"][2])) if axis else None
+                if not entries or any(g.get("edge_distance_m") is None or g.get("side") is None for g in (ga, gb)):
+                    continue
+                far = entries[-1][0]
+                span = []
+                for g, other in ((ga, gb), (gb, ga)):
+                    stand = np.asarray(g["point"][:2], dtype=float) + np.asarray(g["side"], dtype=float) * (float(g["edge_distance_m"]) + inscribed)
+                    span.append(float(np.linalg.norm(stand - np.asarray(other["point"][:2], dtype=float))))
+                need = min(span)
+                if need > far - STROKE_MARGIN_M:
+                    length = float(np.linalg.norm(np.asarray(ga["point"][:2]) - np.asarray(gb["point"][:2])))
+                    cand = (2, need - far, _res(
+                        "reach", tid, "fail", _r(far), _r(need), "m", reach_ids,
+                        f"stroke {k} ({length:.2f} m long, targets {at + 2 * k} and {at + 2 * k + 1}): one parked pose must reach both ends; from the "
+                        f"nearest free floor to either end the other end is {need:.2f} m from the base centre, and the tool reaches {far:.2f} m at that height (less {STROKE_MARGIN_M} m of margin)"))
+                    cand[2]["target"] = at + 2 * k + 1
+                    if worst is None or cand[:2] > worst[:2]:
+                        worst = cand
+            at += len(vals)
+            # wiping a surface from a mount well below it means draping the arm over the surface's edge
+            if int(r.get("strokes") or 0) and vals:
+                h = max(float(g["point"][2]) for g in vals)
+                mount = o["z"][1] + (lift["retracted_m"] + lift["stroke_m"] if lift["stroke_m"] > 0 else 0.0)
+                if _axis_name(vals[0].get("tool_axis", [0, 0, -1])) == "down" and mount < h - MOUNT_BELOW_M:
+                    cand = (2, h - mount, _res(
+                        "reach", tid, "fail", _r(mount), _r(h - MOUNT_BELOW_M), "m", reach_ids,
+                        f"the arm's mount gets no higher than {mount:.2f} m and the surface to wipe is at {h:.2f} m: "
+                        f"from below, the elbow and forearm have to cross the surface's edge to reach onto it"))
+                    cand[2]["target"] = 0
+                    if worst is None or cand[:2] > worst[:2]:
+                        worst = cand
         if worst is not None:
             if len(targets) > 1:
                 bad = [p["target"] for p in per_target if p["status"] == "fail"]

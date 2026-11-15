@@ -5,35 +5,50 @@
     {
       "task": "t1",
       "pose": [
-        5.091,
-        2.408,
-        -0.2618
+        5.225,
+        2.46,
+        -2.0944
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 45.87,
-      "spares": [
-        [
-          5.0,
-          2.37,
-          -0.0
-        ],
-        [
-          4.909,
-          2.408,
-          0.2618
-        ]
-      ],
+      "tip_ratio": 8.51,
+      "spares": [],
       "q": {
         "lift": 0.9,
-        "arm/shoulder_pan_joint": 4.39948,
-        "arm/shoulder_lift_joint": 2.54773,
-        "arm/elbow_joint": -2.58429,
-        "arm/wrist_1_joint": 0.03655,
-        "arm/wrist_2_joint": -2.14551,
+        "arm/shoulder_pan_joint": 5.61809,
+        "arm/shoulder_lift_joint": 3.37301,
+        "arm/elbow_joint": -2.41366,
+        "arm/wrist_1_joint": -0.95934,
+        "arm/wrist_2_joint": -2.7595,
         "arm/wrist_3_joint": -2.89924
       },
-      "why": "all 1 targets reached, worst tip ratio 45.87"
+      "why": "all 1 targets reached, worst tip ratio 8.51",
+      "rejected": [
+        {
+          "pose": [
+            5.0,
+            2.37,
+            -0.0
+          ],
+          "why": "the joint-space move puts the arm into the base, lift, floor or furniture at 121 of 310 samples"
+        },
+        {
+          "pose": [
+            4.909,
+            2.408,
+            0.2618
+          ],
+          "why": "the joint-space move puts the arm into the base, lift, floor or furniture at 123 of 311 samples"
+        },
+        {
+          "pose": [
+            5.091,
+            2.408,
+            -0.2618
+          ],
+          "why": "the joint-space move puts the arm into the base, lift, floor or furniture at 121 of 318 samples"
+        }
+      ]
     },
     {
       "task": "t2",
@@ -63,7 +78,7 @@
       "from": "dock",
       "to": "t1",
       "carrying": false,
-      "length_m": 5.562,
+      "length_m": 5.683,
       "waypoints": [
         [
           1.0,
@@ -103,52 +118,27 @@
         [
           3.175,
           2.925,
-          -0.1974
+          -0.1832
         ],
         [
           3.275,
           2.825,
-          -0.1974
+          -0.1832
         ],
         [
           3.525,
           2.775,
-          -0.1974
+          -0.1832
         ],
         [
-          3.525,
-          2.775,
-          -0.2302
+          5.225,
+          2.46,
+          -0.1832
         ],
         [
-          4.901,
-          2.452,
-          -0.2302
-        ],
-        [
-          4.901,
-          2.452,
-          -0.0357
-        ],
-        [
-          5.044,
-          2.419,
-          -0.0357
-        ],
-        [
-          5.044,
-          2.419,
-          0.0
-        ],
-        [
-          5.091,
-          2.408,
-          0.0
-        ],
-        [
-          5.091,
-          2.408,
-          -0.2618
+          5.225,
+          2.46,
+          -2.0944
         ]
       ],
       "footprint_ok": true,
@@ -158,32 +148,22 @@
       "from": "t1",
       "to": "t2",
       "carrying": false,
-      "length_m": 1.749,
+      "length_m": 1.606,
       "waypoints": [
         [
-          5.091,
-          2.408,
-          -0.2618
+          5.225,
+          2.46,
+          -2.0944
         ],
         [
-          5.091,
-          2.408,
-          0.0
-        ],
-        [
-          5.235,
-          2.448,
-          0.0
-        ],
-        [
-          5.235,
-          2.448,
-          0.2733
+          5.225,
+          2.46,
+          0.2646
         ],
         [
           6.775,
           2.88,
-          0.2733
+          0.2646
         ],
         [
           6.775,

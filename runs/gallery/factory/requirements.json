@@ -9,7 +9,7 @@
       "object": "cloth",
       "demo": "wipe coolant off table",
       "carries": false,
-      "why": "Cleaning the coolant off the fixture table comes first, so the part is lifted off a clean, less slippery surface."
+      "why": "Clear the coolant off the fixture table first, as asked."
     },
     {
       "id": "t2",
@@ -18,7 +18,7 @@
       "object": "machined_part",
       "demo": "lift housing off table",
       "carries": true,
-      "why": "The finished housing has to be taken off the table and carried out by the roller door. Carrying it out is the last step, and the weight given is about 3.5 kg.",
+      "why": "The finished housing has to come off the table and be taken out towards the roller door. You gave its weight as about 3.5 kg.",
       "deliver_to": "way_out",
       "object_mass_kg": 3.5
     }

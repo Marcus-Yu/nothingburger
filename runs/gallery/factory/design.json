@@ -329,7 +329,7 @@
     "force not verified: t2",
     "press not verified: t1"
   ],
-  "considered": 6960,
-  "passed_arithmetic": 264,
-  "composed_and_checked": 10
+  "considered": 7140,
+  "passed_arithmetic": 276,
+  "composed_and_checked": 16
 }

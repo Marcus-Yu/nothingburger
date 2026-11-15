@@ -90,7 +90,7 @@ def compose_spec(parts: dict):
                 mujoco.mju_mulQuat(q, np.array([np.cos(np.radians(yaw) / 2), 0, 0, np.sin(np.radians(yaw) / 2)]),
                                    np.array(cs["upright_quat"], dtype=float))
                 base.add_geom(name=f"base_caster_{i}", type=mujoco.mjtGeom.mjGEOM_MESH, meshname="caster_mesh", pos=[x, y, 0],
-                              quat=q, contype=0, conaffinity=0, mass=0, rgba=[0.16, 0.17, 0.19, 1])
+                              quat=q, contype=0, conaffinity=0, mass=0, rgba=[0.10, 0.10, 0.11, 1])
     else:
         base.add_geom(name="base_dummy", type=mujoco.mjtGeom.mjGEOM_SPHERE, size=[0.001], pos=[0, 0, B["stand_m"]], mass=0,
                       contype=0, conaffinity=0, rgba=[0, 0, 0, 0])

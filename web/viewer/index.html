@@ -83,6 +83,11 @@ table.slots td b { font-weight: 600; } table.slots td small { color: var(--muted
 #funnel b { color: var(--ink); font-family: var(--mono); }
 
 #plan { padding: 6px 10px 10px; }
+#walk { padding: 6px 10px 12px; } #walk video { width: 100%; display: block; border-radius: 8px; background: #000; }
+#walknow { font-weight: 600; margin: 8px 2px 6px; min-height: 1.4em; }
+#walkchapters { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.chap { font: inherit; font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); cursor: pointer; }
+.chap.on { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 #plan svg { width: 100%; height: auto; display: block; max-height: 58vh; }
 #plan svg.photo { max-height: 78vh; }
 .room { fill: var(--stage); stroke: var(--ink); stroke-width: .045; }
@@ -179,6 +184,10 @@ svg.photo .roomlabel { font-size: .17px; } svg.photo .obstlabel { font-size: .15
     <section class="card"><h2>Building and route <em id="plannote"></em></h2>
       <div id="plan"></div>
     </section>
+    <section class="card" id="walkcard" hidden><h2>Watch it work <em id="walknote"></em></h2>
+      <div id="walk"><video id="walkvideo" controls muted playsinline preload="metadata"></video>
+        <div id="walknow"></div><a class="btn ghost" id="walktour" hidden target="_blank" rel="noopener" style="display:inline-block;margin:0 0 8px;text-decoration:none">Watch it in the real room (Matterport scan)</a><div id="walkchapters"></div><div class="hint" id="walkhint"></div></div>
+    </section>
    </div>
     <section class="card" id="reqcard" hidden><h2>Requirements ledger <em id="reqnote"></em></h2><div class="rows" id="reqs"></div></section>
     <section class="card" id="progcard" hidden><h2>Program <em id="prognote"></em></h2><div class="rows"><ol class="prog" id="prog"></ol></div></section>
@@ -243,7 +252,7 @@ function reduce(upto) {
       case "design": S.design = e; S.last = {type: "design"};
         add({cls: "good", t: e.t, html: `<b>Chosen:</b> ${esc(partsLine(e.parts))} at ${money(e.price_usd)}, ${e.mass_kg} kg. Folded it is ${e.stowed.width_m} m wide and ${e.stowed.height_m} m tall.`}); break;
       case "infeasible": S.infeasible = e; add({cls: "bad", t: e.t, html: `<b>No robot in the catalog passes.</b> Binding: ${esc((e.binding_checks || []).map(failLine).join("; "))}.`}); break;
-      case "robot_fix": S.fixes = (S.fixes || 0) + 1; S.standoffs = []; S.route = null; S.arm = []; S.design = null;
+      case "robot_fix": S.walk = null; S.tour = null; S.fixes = (S.fixes || 0) + 1; S.standoffs = []; S.route = null; S.arm = []; S.design = null;
         group("5 pathing").items.push({cls: "bad", t: e.t, html: `<b>Redesign ${e.n}:</b> ${esc(e.why)}. That arm-and-lift pair is ruled out and the design step runs again.`}); break;
       case "standoff": S.standoffs.push(e); S.last = {type: "so", i: S.standoffs.length - 1};
         add({cls: "good", t: e.t, html: `${esc(e.task)} ${esc(e.skill.replace("_"," "))}: parks at (${e.pose[0].toFixed(2)}, ${e.pose[1].toFixed(2)})${e.covers ? ", " + esc(e.covers) : ""}; tip-over ratio ${e.tip_ratio}.`}); break;
@@ -251,6 +260,8 @@ function reduce(upto) {
       case "route": S.route = e; add({cls: "say", t: e.t, html: `${e.replanned ? "Route replanned" : "Route planned"}: ${e.legs.length} legs, ${e.legs.reduce((a, l) => a + (l.length_m || 0), 0).toFixed(1)} m.`}); break;
       case "arm_path": S.arm.push(e);
         add({cls: e.ok ? "good" : "bad", t: e.t, html: `${esc(e.task)} arm path ${e.ok ? "built" : "failed"}: ` + (e.ok ? e.segments.map(s => `${esc(s.kind.replace("_"," "))} ${s.seconds}s`).join(", ") : esc(e.why || "")) + (e.rejected ? ` <small>(after ${e.rejected} rejected pose${e.rejected > 1 ? "s" : ""})</small>` : "")}); break;
+      case "walkthrough": S.walk = e; break;
+      case "tour": S.tour = e; break;
       case "program": S.program = e; group("5d program").items.push({cls: e.source === "model" ? "say" : "", t: e.t, html: `<b>${e.steps.length} steps</b>, written by ${e.source === "model" ? "the model and accepted by the checker" : "rule"}` + (e.rejected ? `. The model's version was rejected: ${esc(e.rejected.problems.slice(0, 2).join("; "))}` : ".")}); break;
       case "tool": { if (e.name === "composer.compose" && cur === "3-4 design and compose") break;  // drawn as the robot, not as a row
         const g = group(cur || "run"), last = g.items[g.items.length - 1];
@@ -301,6 +312,18 @@ function drawRobot(S) {
 }
 function lastFrame(cands, i) { for (let k = i; k >= 0; k--) { const c = cands[k], a = cands[i]; if (c.frame && c.parts.base === a.parts.base && c.parts.lift === a.parts.lift && c.parts.arm === a.parts.arm && c.parts.gripper === a.parts.gripper) return c.frame; } return null; }
 
+function drawWalk(S) {
+  const w = S.walk, card = $("walkcard"), v = $("walkvideo"); card.hidden = !w; if (!w) { if (v.dataset.src) { v.removeAttribute("src"); v.dataset.src = ""; v.load(); } return; }
+  const src = `/runs/${run.replace(/^runs\//, "")}/${w.video}`;
+  if (v.dataset.src !== src) { v.dataset.src = src; v.src = src;
+    $("walkchapters").innerHTML = w.chapters.map((c, i) => `<button class="chap" data-t="${c.t}" data-i="${i}">${esc(c.label)}</button>`).join("");
+    $("walkchapters").querySelectorAll(".chap").forEach(b => b.onclick = () => { v.currentTime = +b.dataset.t + .01; v.play(); });
+    v.ontimeupdate = () => { let k = 0; w.chapters.forEach((c, i) => { if (v.currentTime >= c.t) k = i; });
+      $("walknow").textContent = w.chapters[k] ? w.chapters[k].label : "";
+      $("walkchapters").querySelectorAll(".chap").forEach((b, i) => b.classList.toggle("on", i === k)); }; }
+  $("walktour").hidden = !S.tour; if (S.tour) $("walktour").href = `http://localhost:${location.port}/tour.html?run=${encodeURIComponent(run)}`;
+  $("walknote").textContent = `${w.seconds} s`; $("walkhint").textContent = w.note || "";
+}
 function drawPlan(S) {
   const w = S.world; if (!w) { $("plan").innerHTML = `<div class="hint">The floor plan appears when a run starts.</div>`; return; }
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
@@ -366,7 +389,7 @@ function drawTrace(S) {
 }
 function draw() {
   const S = reduce(shown), live = !events.some(e => e.kind === "run_end");
-  drawSteps(S); drawRobot(S); drawPlan(S); drawTables(S); drawTrace(S);
+  drawSteps(S); drawRobot(S); drawPlan(S); drawWalk(S); drawTables(S); drawTrace(S);
   const st = $("status"); const end = shown >= events.length ? S.end : null;
   st.className = "pill " + (end ? (end.waiting ? "live" : end.ok ? "ok" : "bad") : events.length ? "live" : ""); st.textContent = end ? (end.waiting ? "waiting for your answers" : end.ok ? `finished in ${end.seconds} s` : "failed") : events.length ? (live ? "running" : "replaying") : "starting";
   $("ls").hidden = !S.url; if (S.url) $("ls").href = S.url;

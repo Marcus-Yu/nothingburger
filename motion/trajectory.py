@@ -16,6 +16,8 @@ import numpy as np
 from .ik import AXIS_TOL_DEG, POS_TOL, RESTARTS, Arm, unit
 
 DT = 0.05  # s between samples: 20 a second
+WIPE_SHORT_M = 0.06  # a wipe stroke may stop this far before its end when the arm runs out of reach there (recorded as short_m)
+RAISE_M = 0.25  # the unfold goes by a point this far above the pre-approach when the direct move is blocked
 SPEED = 0.1  # m/s, tool speed on a line
 PRE_APPROACH = 0.10  # m back along the tool axis
 PICK_LIFT = 0.15  # m straight up after closing on a pick
@@ -103,11 +105,14 @@ class _Builder:
         if self.collisions > before:
             hit = self.collisions - before
             self.collisions = before
-            raise _Fail(f"the joint-space move puts the arm into the base, lift or floor at {hit} of {n} samples")
+            raise _Fail(f"the joint-space move puts the arm into the base, lift, floor or furniture at {hit} of {n} samples")
         return qs
 
-    def line(self, q_from, p0, p1, a0, a1, *, locked=None, steps: int | None = None) -> list[np.ndarray]:
-        """Tool on the straight line p0 -> p1, tool axis turning a0 -> a1 (None: axis free)."""
+    def line(self, q_from, p0, p1, a0, a1, *, locked=None, steps: int | None = None, short_ok: float = 0.0) -> list[np.ndarray]:
+        """Tool on the straight line p0 -> p1, tool axis turning a0 -> a1 (None: axis free). With `short_ok`
+        (metres), a line the arm cannot finish may stop up to that far before p1; `self.short` then holds how
+        far short it stopped."""
+        self.short = 0.0
         p0, p1 = np.asarray(p0, dtype=float), np.asarray(p1, dtype=float)
         n = steps or max(1, math.ceil(float(np.linalg.norm(p1 - p0)) / (SPEED * DT)))
         q, qs = np.asarray(q_from, dtype=float), []
@@ -117,6 +122,10 @@ class _Builder:
             axis = None if a0 is None else unit((1 - s) * a0 + s * a1)
             q_new, pe, ae = self.arm.solve(p0 + (p1 - p0) * s, axis, q, iters=LINE_ITERS, locked=locked)
             if pe > self.pos_tol or ae > AXIS_TOL_DEG:
+                left = float(np.linalg.norm(p1 - p0)) * (n - k + 1) / n
+                if qs and left <= short_ok:
+                    self.short = left
+                    break
                 raise _Fail(f"IK lost the path at sample {k} of {n}: {pe * 1000:.0f} mm, {ae:.0f} deg off")
             if float(np.max(np.abs(q_new - q)[~self.slide], initial=0.0)) > JUMP_MAX:
                 raise _Fail(f"IK changed branch at sample {k} of {n}")
@@ -125,7 +134,7 @@ class _Builder:
             q = q_new
             qs.append(q)
         if self.collisions > before:
-            raise _Fail(f"the arm is in the base, lift or floor at {self.collisions - before} of {n} samples")
+            raise _Fail(f"the arm is in the base, lift, floor or furniture at {self.collisions - before} of {n} samples")
         return qs
 
 
@@ -155,12 +164,12 @@ def _axis(target):
     return unit(target["tool_axis"]) if "tool_axis" in target["held_axes"] and target.get("tool_axis") else None
 
 
-def retarget(demo, robot: str, *, build: dict, task: dict, standoff, requirements) -> dict:
+def retarget(demo, robot: str, *, build: dict, task: dict, standoff, requirements, obstacles=None) -> dict:
     pose = [float(v) for v in (standoff["pose"] if isinstance(standoff, dict) else standoff)]
     entry = {"task": task["id"], "standoff": pose, "segments": [], "max_position_error_m": 0.0, "collisions": 0}
     skill = task["skill"]
     try:
-        arm = Arm(robot, build)
+        arm = Arm(robot, build, obstacles)
         arm.set_base(pose)
         targets, pos_tol, turns, press = _task_inputs(demo, task, requirements)
         why = None
@@ -171,7 +180,7 @@ def retarget(demo, robot: str, *, build: dict, task: dict, standoff, requirement
         elif skill.startswith("twist") and not turns:
             why = f"task {task['id']} has no wrist_roll_turns requirement"
         elif arm.collides():  # a new Arm sits at the stowed pose
-            why = "the stowed pose itself puts the arm into the base, lift or floor"
+            why = "the stowed pose itself puts the arm into the base, lift, floor or furniture"
     except (ValueError, KeyError) as e:
         why = f"bad input: {e}"
     if why:
@@ -224,7 +233,16 @@ def _attempt(b: _Builder, seed, skill: str, targets: list, turns, press) -> None
         back = a_in if a_in is not None else arm.tool_axis()  # axis free: back off along where the tool points
         out = b.line(q_at, p_first, p_first - PRE_APPROACH * back, a_in, a_in)  # solved backwards from the grasp, played forwards
         q_pre = out[-1]
-        move = b.transit(arm.q_stowed, q_pre)
+        try:
+            move = b.transit(arm.q_stowed, q_pre)
+        except _Fail as blocked:  # the direct unfold crosses something: go by a point straight above the pre-approach
+            arm.set(q_pre)
+            up = dict(first, point=list(arm.tool_pos() + np.array([0.0, 0.0, RAISE_M])))
+            q_up, _ = arm.reach(up, seeds=[q_pre], restarts=0, pos_tol=b.pos_tol, defaults=False)
+            if q_up is None:
+                raise blocked
+            b.collisions = 0
+            move = b.transit(arm.q_stowed, q_up) + b.transit(q_up, q_pre)
         seg = b.begin("approach", "follow_path", transit="joint")
         if skill != "wipe":
             b.event(seg, "open")
@@ -244,7 +262,9 @@ def _attempt(b: _Builder, seed, skill: str, targets: list, turns, press) -> None
                 a0, a1 = _axis(t0), _axis(t1)
                 if a0 is None or a1 is None:
                     a0 = a1 = None
-                b.emit(seg, b.line(b.q, t0["point"], t1["point"], a0, a1))
+                b.emit(seg, b.line(b.q, t0["point"], t1["point"], a0, a1, short_ok=WIPE_SHORT_M))
+                if b.short:  # the arm ran out of reach just before the end of this stroke
+                    seg["short_m"] = round(max(seg.get("short_m", 0.0), b.short), 3)
             if len(targets) == 1:
                 b.emit(seg, [b.q] * round(DWELL / DT))
         else:  # pick: descend, close, lift
@@ -263,7 +283,19 @@ def _attempt(b: _Builder, seed, skill: str, targets: list, turns, press) -> None
             p_now = arm.tool_pos()
             a_now = _axis(targets[-1]) if skill == "wipe" else a_in
             away = a_now if a_now is not None else arm.tool_axis()
-            b.emit(seg, b.line(b.q, p_now, p_now - PRE_APPROACH * away, a_now, a_now))
+            # Back straight off the work before folding. At the edge of the arm's reach the full distance may
+            # not exist along that line, so take the longest of full, half and a quarter that does; with none,
+            # fold from where it is (the joint-space move is still checked for collisions).
+            seg["back_off_m"], clean = 0.0, b.collisions
+            for frac in (1.0, 0.5, 0.25):
+                try:
+                    back_off = b.line(b.q, p_now, p_now - frac * PRE_APPROACH * away, a_now, a_now)
+                except _Fail:
+                    b.collisions = clean
+                    continue
+                b.emit(seg, back_off)
+                seg["back_off_m"] = round(frac * PRE_APPROACH, 3)
+                break
         try:
             b.emit(seg, b.transit(b.q, arm.q_stowed))
         except _Fail:  # direct way home is blocked: go by the pre-approach pose, whose way home is known clear

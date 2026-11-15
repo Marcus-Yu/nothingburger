@@ -14,7 +14,7 @@ SPARES = 2
 MORE_TRIES = 8         # further proposals tried when the arm path fails from the picked pose and every spare
 PROPOSALS = 36         # asked of nav.propose; the envelope filter then orders them
 ENVELOPE_MARGIN_M = 0.025
-COVER_TRIES = 80       # further motion.reachable calls spent on covering a wipe (each on one stroke's two ends)
+COVER_TRIES = 240      # further motion.reachable calls spent on covering a wipe (each on one stroke's two ends)
 COVER_PER_STROKE = 3   # poses tried for one uncovered stroke before it is given up
 
 
@@ -85,7 +85,7 @@ def _cover(state, task, targets, loads):
     """Greedy cover of a wipe's strokes (targets 2k, 2k+1) by several standoffs, in order along the surface:
     for the first uncovered stroke, propose poses around its middle, check its two ends at the nearest few,
     and at each pose that reaches them see how long a run of the following strokes it also reaches; keep the
-    longest run, repeat. Returns (standoffs, uncovered stroke indices, notes)."""
+    longest run whose arm path can be built, repeat. Returns (standoffs, uncovered stroke indices, notes)."""
     build, xml = state["build"], state["robot_xml"]
     payload, press = loads
     n_strokes = len(targets) // 2
@@ -94,12 +94,12 @@ def _cover(state, task, targets, loads):
         k = uncovered[0]
         ends = [targets[2 * k], targets[2 * k + 1]]
         mid = [(ends[0]["point"][i] + ends[1]["point"][i]) / 2 for i in (0, 1)]
-        best, first_why = None, None
+        best, first_why, passing = None, None, []
         for pose in _propose_at(state, task, mid, 12)[:COVER_PER_STROKE]:
             if calls >= COVER_TRIES:
                 break
             calls += 1
-            res = motion.reachable(xml, pose, ends, build=build, payload_kg=payload, tool_force_z_n=press)
+            res = motion.reachable(xml, pose, ends, build=build, payload_kg=payload, tool_force_z_n=press, obstacles=state["world"].get("obstacles"))
             if not res["ok"]:
                 if first_why is None:  # keep the reason from the nearest pose
                     first_why = "; ".join(f"target {2 * k + i}: {w.split(': ', 1)[-1]}" if w.startswith("target ") else w
@@ -110,15 +110,24 @@ def _cover(state, task, targets, loads):
             while k + len(run) in uncovered:
                 nxt = k + len(run)
                 more = motion.reachable(xml, pose, [targets[2 * nxt], targets[2 * nxt + 1]], build=build,
-                                        payload_kg=payload, tool_force_z_n=press)
+                                        payload_kg=payload, tool_force_z_n=press, obstacles=state["world"].get("obstacles"))
                 calls += 1
                 if not more["ok"]:
                     break
                 run.append(nxt)
             idx = [i for s in run for i in (2 * s, 2 * s + 1)]
-            res = motion.reachable(xml, pose, [targets[i] for i in idx], build=build, payload_kg=payload, tool_force_z_n=press)
-            if res["ok"] and (best is None or (len(run), res["tip_ratio"]) > (len(best[1]), best[3]["tip_ratio"])):
-                best = (pose, run, idx, res)
+            res = motion.reachable(xml, pose, [targets[i] for i in idx], build=build, payload_kg=payload, tool_force_z_n=press, obstacles=state["world"].get("obstacles"))
+            if res["ok"]:
+                passing.append((pose, run, idx, res))
+        # the longest run first; among the poses that reach, take the first whose arm path can actually be built
+        passing.sort(key=lambda c: (-len(c[1]), -c[3]["tip_ratio"]))
+        for cand in passing:
+            trial = _retarget(state, task, _standoff(task, cand[0], cand[3], [], covers=cand[2], n_targets=len(targets)))
+            if not trial.get("failure"):
+                best = cand
+                break
+        if best is None and passing:
+            best = passing[0]  # none builds: keep the best reach and let the arm-path step report why
         if best is None:
             given_up.append(k)
             uncovered.remove(k)
@@ -148,7 +157,7 @@ def pick_standoffs(state: dict, task: dict) -> tuple[list, list]:
     ordered = sorted(proposals, key=lambda p: not _envelope_ok(build, p, targets))
     tried = {}
     for pose in ordered[:MAX_TRIES]:
-        tried[tuple(pose)] = motion.reachable(xml, pose, targets, build=build, payload_kg=loads[0], tool_force_z_n=loads[1])
+        tried[tuple(pose)] = motion.reachable(xml, pose, targets, build=build, payload_kg=loads[0], tool_force_z_n=loads[1], obstacles=state["world"].get("obstacles"))
     passing = sorted((p for p, r in tried.items() if r["ok"]), key=lambda p: -tried[p]["tip_ratio"])
     if passing:
         best = passing[0]
@@ -183,7 +192,7 @@ def _retarget(state, task, standoff):
     ledger = requirements if "covers_targets" not in standoff else _only_targets(requirements, task["id"], standoff["covers_targets"])
     try:
         entry = motion.retarget((state.get("demos") or {}).get(task["id"]), state["robot_xml"], build=state["build"],
-                                task=task, standoff=standoff, requirements=ledger)
+                                task=task, standoff=standoff, requirements=ledger, obstacles=state["world"].get("obstacles"))
     except Exception as e:
         entry = {"task": task["id"], "standoff": standoff["pose"], "segments": [],
                  "failure": {"segment": "approach", "why": f"motion.retarget raised {type(e).__name__}: {e}"}}
@@ -214,7 +223,7 @@ def _further(state, task, s):
             continue
         if tries >= MORE_TRIES:
             break
-        check = motion.reachable(state["robot_xml"], pose, targets, build=build, payload_kg=payload, tool_force_z_n=press)
+        check = motion.reachable(state["robot_xml"], pose, targets, build=build, payload_kg=payload, tool_force_z_n=press, obstacles=state["world"].get("obstacles"))
         if not check["ok"]:
             continue
         tries += 1

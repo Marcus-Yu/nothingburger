@@ -17,7 +17,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Dock to row A (5.56 m); the zero step limit is assumed, not scanned, so stop if any threshold or cable ramp appears.",
+      "note": "Dock to t1 standoff, 5.7 m; step limit of 0.0 m is assumed, not scanned, so watch for thresholds.",
       "n": 0
     },
     {
@@ -32,7 +32,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reaching high to U40 at 1.85 m with only 7 mm floor-edge margin at the standoff, and the reach pose is assumed, not measured.",
+      "note": "Reach target at U40 (1.85 m) is assumed and the free floor edge is only 7 mm away, so check standoff clearance.",
       "n": 1
     },
     {
@@ -44,10 +44,9 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_opening",
-        "r_t1_payload"
+        "r_t1_opening"
       ],
-      "note": "Grip force is not established because the ledger has no force band for t1, so watch for sled slip or bezel damage.",
+      "note": "Grip force is not established because the ledger has no force band for t1, so verify it on the first sled.",
       "n": 2
     },
     {
@@ -61,7 +60,7 @@
       "requirements": [
         "r_t1_payload"
       ],
-      "note": "Planned 0.15 m pull of a 0.75 kg card-rated sled; confirm the sled clears its rails before the arm moves away.",
+      "note": "Pulls the 0.75 kg sled (card value) 0.15 m to unseat it; stop if it binds in the bay.",
       "n": 3
     },
     {
@@ -73,9 +72,9 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach"
+        "r_t1_floor"
       ],
-      "note": "The t1 sled is not carried and the plan has no set-down step for it, so confirm where it goes before the t2 approach reopens the gripper.",
+      "note": "The plan has no release for t1, so confirm the pulled sled is left in its slot and the gripper is empty before driving on.",
       "n": 4
     },
     {
@@ -92,7 +91,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Short 1.75 m hop from row A to row B within the 0.81 m width limit.",
+      "note": "Short 1.6 m hop to row B; the 0.81 m width limit is tight between rows.",
       "n": 5
     },
     {
@@ -107,7 +106,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "The t2 floor data shows a zero edge distance and a zero side vector, which looks degenerate, so verify standoff clearance by eye.",
+      "note": "Reach target at U10 (0.5 m) is assumed, not measured, so confirm the bay position.",
       "n": 6
     },
     {
@@ -119,10 +118,9 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t2_opening",
-        "r_t2_payload"
+        "r_t2_opening"
       ],
-      "note": "Grip force is not established because the ledger has no force band for t2, and this grip must hold for the whole 8.4 m carry.",
+      "note": "Grip force is not established because the ledger has no force band for t2, and this sled must be held for the whole carry.",
       "n": 7
     },
     {
@@ -136,7 +134,7 @@
       "requirements": [
         "r_t2_payload"
       ],
-      "note": "Planned 0.15 m pull from low position U10 at 0.5 m height, with a 0.75 kg payload from the card.",
+      "note": "Lifts the 0.75 kg sled (card value) 0.15 m clear of the bay.",
       "n": 8
     },
     {
@@ -148,14 +146,14 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t2_reach"
+        "r_t2_floor"
       ],
-      "note": "Retreat while holding the sled, so check the stowed arm plus sled stays under the 2.05 m header and inside the base footprint.",
+      "note": "Retreat while holding the sled; watch that it does not snag on the rack edge.",
       "n": 9
     },
     {
       "primitive": "move_base",
-      "task": null,
+      "task": "t2",
       "leg": 2,
       "standoff": null,
       "force_n": null,
@@ -168,7 +166,7 @@
         "r_step",
         "r_t2_payload"
       ],
-      "note": "Longest leg (8.45 m) carrying the sled on an uncalibrated grip, so drive gently and watch for drops.",
+      "note": "8.4 m carry to the staging bench with an unverified grip force, so drive gently and check stowed height with the sled under the 2.05 m header.",
       "n": 10
     },
     {
@@ -182,7 +180,7 @@
       "requirements": [
         "r_t2_payload"
       ],
-      "note": "Set the sled down at way_out toward the staging bench; the place pose is not planned in detail, so confirm the surface is clear.",
+      "note": "Set the sled on the staging bench outside the hall; the bench pose was not measured.",
       "n": 11
     },
     {
@@ -196,7 +194,7 @@
       "requirements": [
         "r_t2_opening"
       ],
-      "note": "Open the gripper only once the sled is resting stably.",
+      "note": "Open the gripper and confirm the sled rests stably on the bench before leaving.",
       "n": 12
     },
     {

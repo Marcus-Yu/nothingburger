@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot in the tour</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #eee; font: 14px/1.4 -apple-system, "Segoe UI", Inter, sans-serif; }
+  #f { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; }
+  #bar { position: fixed; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+         background: rgba(15, 16, 15, .86); border: 1px solid #333; border-radius: 12px; padding: 8px 10px; }
+  #bar button, #bar select { font: inherit; color: #eee; background: #262925; border: 1px solid #3a3d38; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+  #bar button.on { border-color: #6cc3cc; color: #6cc3cc; }
+  #seek { flex: 1 1 200px; accent-color: #6cc3cc; }
+  #now { flex: 1 1 100%; font-weight: 600; min-height: 1.3em; }
+  #msg { flex: 1 1 100%; color: #9a988f; font-size: 12px; }
+  #time { font-variant-numeric: tabular-nums; color: #9a988f; }
+</style>
+<iframe id="f" allow="xr-spatial-tracking; fullscreen"></iframe>
+<div id="bar">
+  <div id="now">Loading the tour</div>
+  <button id="play">Play</button>
+  <input id="seek" type="range" min="0" max="1" value="0" step="1" aria-label="Position in the job">
+  <span id="time">0:00</span>
+  <select id="speed" aria-label="Speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+  <select id="chapter" aria-label="Jump to a step"></select>
+  <button id="follow" class="on" title="Move the viewpoint to the scan position nearest the robot and look at it">Follow</button>
+  <button id="doll" title="Switch between standing inside the scan and the dollhouse view">Dollhouse</button>
+  <div id="msg"></div>
+</div>
+<script>
+// The planned job played inside the real Matterport scan. The page loads Matterport's SDK bundle from /mp/ (web/_vendor,
+// fetched by web/fetch_sdk.py), adds the robot as a glTF model to the tour's own three.js scene, and each frame sets every
+// robot body's pose from frames/tour_frames.bin. Nothing is simulated. Keys: I J K L shift the robot 5 cm, U O turn it 1 degree
+// (for lining the traced plan up with the scan); the offsets show in the address bar so they can be kept.
+const $ = id => document.getElementById(id), q = new URLSearchParams(location.search);
+const run = (q.get("run") || "runs/gallery/jrr").replace(/^runs\//, ""), base = `/runs/${run}/`;
+const say = t => { $("msg").textContent = t; };
+const nudge = { dx: +(q.get("dx") || 0), dz: +(q.get("dz") || 0), rot: +(q.get("rot") || 0) };
+let sdk, meta, frames, bodies = [], rootNode, three, frame = 0, playing = false, follow = true, sweeps = [], pose = null, lastMove = 0, mode = "inside", toModel;
+
+function placeRoot() {  // world (metres, Z up) -> the scan's frame (Y up), then the hand nudge about the vertical
+  if (!rootNode || !three) return;
+  const M = new three.Matrix4().set(...toModel[0], ...toModel[1], ...toModel[2], 0, 0, 0, 1);
+  const N = new three.Matrix4().makeRotationY(nudge.rot * Math.PI / 180); N.setPosition(nudge.dx, 0, nudge.dz);
+  rootNode.matrixAutoUpdate = false; rootNode.matrix.copy(N.multiply(M)); rootNode.matrixWorldNeedsUpdate = true;
+}
+function robotInModel() {  // the base's position in the scan's frame
+  const o = Math.floor(frame) * bodies.length * 7, p = new three.Vector3(frames[o], frames[o + 1], frames[o + 2]);
+  return p.applyMatrix4(rootNode.matrix);
+}
+function show(i) {
+  frame = Math.max(0, Math.min(meta.n - 1, i)); const k = Math.floor(frame) * bodies.length * 7;
+  bodies.forEach((b, j) => { if (!b) return; const o = k + j * 7;
+    b.position.set(frames[o], frames[o + 1], frames[o + 2]); b.quaternion.set(frames[o + 4], frames[o + 5], frames[o + 6], frames[o + 3]); });
+  const t = frame / meta.fps; $("seek").value = Math.floor(frame); $("time").textContent = `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+  let c = 0; meta.chapters.forEach((ch, n) => { if (t >= ch.t) c = n; });
+  $("now").textContent = meta.chapters[c] ? meta.chapters[c].label : ""; if ($("chapter").selectedIndex !== c) $("chapter").selectedIndex = c;
+}
+async function lookAtRobot(force) {
+  // Keep the robot in view: turn to face it from where we stand when it is 1.5 to 5 m away, otherwise fly to the scan
+  // position nearest to 2.5 m from it. The tour only lets you stand where the scanner stood.
+  if (!follow || mode !== "inside" || !sweeps.length || !pose || (!force && performance.now() - lastMove < 1200)) return;
+  const p = robotInModel(); lastMove = performance.now();
+  const aim = from => { const dx = p.x - from.x, dz = p.z - from.z, dy = (p.y + 0.8) - from.y;
+    return { x: Math.atan2(dy, Math.hypot(dx, dz)) * 180 / Math.PI, y: Math.atan2(-dx, -dz) * 180 / Math.PI }; };
+  const here = Math.hypot(pose.position.x - p.x, pose.position.z - p.z);
+  try {
+    if (here > 1.5 && here < 5 && Math.abs(pose.position.y - 1.4 - p.y) < 1.2) return await sdk.Camera.setRotation(aim(pose.position), { speed: 90 });
+    let best = null;
+    sweeps.forEach(s => { const d = Math.hypot(s.position.x - p.x, s.position.z - p.z), cost = Math.abs(d - 2.5);
+      if (Math.abs(s.position.y - 1.4 - p.y) < 1.2 && d > 1.5 && (!best || cost < best.cost)) best = { s, cost }; });
+    if (best) await sdk.Sweep.moveTo(best.s.id || best.s.sid, { rotation: aim(best.s.position), transition: sdk.Sweep.Transition.FLY, transitionTime: 900 });
+  } catch (e) { /* a move was already under way; the next call tries again */ }
+}
+
+(async () => {
+  const cfg = await (await fetch("/api/tour")).json();
+  if (!cfg.bundle) return say("Matterport's SDK bundle is not here: run  python web/fetch_sdk.py");
+  if (!cfg.sdk_key) return say("MATTERPORT_SDK_KEY is not set in .env");
+  if (location.hostname !== "localhost") return location.replace(location.href.replace(location.hostname, "localhost"));  // the key only works from localhost
+  const events = (await (await fetch(base + "events.jsonl")).text()).split("\n").filter(Boolean).map(l => JSON.parse(l));
+  meta = events.filter(e => e.kind === "tour").pop();
+  const world = await (await fetch(base + "world.json")).json();
+  if (!meta) return say("This run has no tour export: rerun it with --frames --walkthrough");
+  if (!world.tour) return say("This world has no Matterport tour and no alignment to one (world.json has no `tour`)");
+  toModel = world.tour.to_model;
+  frames = new Float32Array(await (await fetch(base + meta.frames)).arrayBuffer());
+  $("seek").max = meta.n - 1;
+  $("chapter").innerHTML = meta.chapters.map((c, i) => `<option value="${i}">${c.label.replace(/</g, "&lt;")}</option>`).join("");
+  const f = $("f"); f.src = `/mp/showcase.html?m=${world.tour.matterport}&applicationKey=${cfg.sdk_key}&play=1&qs=1&title=0&brand=0`;
+  await new Promise(r => f.onload = r);
+  sdk = await f.contentWindow.MP_SDK.connect(f.contentWindow);
+  sdk.Sweep.data.subscribe({ onCollectionUpdated: c => { sweeps = Object.values(c); } });
+  sdk.Camera.pose.subscribe(p => { pose = p; });
+  sdk.Mode.current.subscribe(m => { mode = m === sdk.Mode.Mode.INSIDE ? "inside" : "other"; });
+
+  // a component that owns the animation: the tour's renderer calls onTick every frame
+  let player;
+  await sdk.Scene.register("robots.player", () => player = {
+    inputs: { root: null }, outputs: {},
+    onInit() { three = this.context.three; },
+    onInputsUpdated() { },
+    onTick(dt) {
+      const root = this.inputs.root; if (!root) return;
+      if (!bodies.length) { rootNode = root; placeRoot(); bodies = Array.from({ length: meta.bodies }, (_, i) => root.getObjectByName(`body${i}`));
+        if (!bodies[0]) { bodies = []; return; }
+        root.traverse(o => { if (o.isMesh) o.frustumCulled = false; }); show(0); $("now").textContent = meta.chapters[0].label; say(world.tour.note || ""); lookAtRobot(true); }
+      if (playing) { show(frame + dt / 1000 * meta.fps * (+$("speed").value) * (world.tour.playback_rate || 1)); if (frame >= meta.n - 1) { playing = false; $("play").textContent = "Play"; } lookAtRobot(false); }
+    },
+    onDestroy() { },
+  });
+  const [obj] = await sdk.Scene.createObjects(1);
+  const lights = obj.addNode();
+  lights.addComponent("mp.ambientLight", { intensity: 0.75, color: { r: 1, g: 1, b: 1 } });
+  lights.addComponent("mp.directionalLight", { intensity: 0.9, position: { x: 3, y: 8, z: 2 }, target: { x: 0, y: 0, z: 0 } });
+  const node = obj.addNode();
+  const loader = node.addComponent("mp.gltfLoader", { url: location.origin + base + meta.glb, localScale: { x: 1, y: 1, z: 1 } });
+  const comp = node.addComponent("robots.player");
+  comp.bind("root", loader, "objectRoot");
+  obj.start();
+  window.tour = { sdk, get frame() { return frame; }, get ready() { return bodies.length > 0; }, robot: () => robotInModel(), nudge };
+})().catch(e => say("Could not start: " + (e && e.message || e)));
+
+$("play").onclick = () => { if (!bodies.length) return; if (frame >= meta.n - 1) show(0); playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; lookAtRobot(true); };
+$("seek").oninput = e => { if (bodies.length) { show(+e.target.value); lastMove = 0; lookAtRobot(true); } };
+$("chapter").onchange = e => { if (bodies.length) { show(meta.chapters[+e.target.value].t * meta.fps + 1); lookAtRobot(true); } };
+$("follow").onclick = () => { follow = !follow; $("follow").classList.toggle("on", follow); lookAtRobot(true); };
+$("doll").onclick = async () => { if (!sdk) return; const to = mode === "inside" ? sdk.Mode.Mode.DOLLHOUSE : sdk.Mode.Mode.INSIDE; try { await sdk.Mode.moveTo(to); } catch (e) { } };
+addEventListener("keydown", e => {
+  const k = e.key.toLowerCase(), step = { i: [0, -.05, 0], k: [0, .05, 0], j: [-.05, 0, 0], l: [.05, 0, 0], u: [0, 0, -1], o: [0, 0, 1] }[k]; if (!step || !rootNode) return;
+  nudge.dx = +(nudge.dx + step[0]).toFixed(2); nudge.dz = +(nudge.dz + step[1]).toFixed(2); nudge.rot = +(nudge.rot + step[2]).toFixed(1); placeRoot();
+  q.set("dx", nudge.dx); q.set("dz", nudge.dz); q.set("rot", nudge.rot); history.replaceState(null, "", "?" + q); say(`nudge: ${nudge.dx} m east-west, ${nudge.dz} m north-south, ${nudge.rot} degrees`);
+});
+</script>
+</html>

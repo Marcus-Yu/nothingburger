@@ -11,18 +11,29 @@
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 2.41,
-      "spares": [],
+      "tip_ratio": 3.73,
+      "spares": [
+        [
+          2.65,
+          4.15,
+          3.1416
+        ],
+        [
+          2.05,
+          3.5,
+          1.5708
+        ]
+      ],
       "q": {
-        "arm/fr3_joint1": 2.02076,
-        "arm/fr3_joint2": -0.6784,
-        "arm/fr3_joint3": -1.54718,
-        "arm/fr3_joint4": -2.33226,
-        "arm/fr3_joint5": -0.82999,
-        "arm/fr3_joint6": 2.12525,
-        "arm/fr3_joint7": -1.05031
+        "lift": 0.0,
+        "arm/shoulder_pan_joint": 0.69381,
+        "arm/shoulder_lift_joint": -2.20047,
+        "arm/elbow_joint": -2.19118,
+        "arm/wrist_1_joint": -0.32074,
+        "arm/wrist_2_joint": -4.71239,
+        "arm/wrist_3_joint": -3.87663
       },
-      "why": "all 6 targets reached, worst tip ratio 2.41",
+      "why": "all 6 targets reached, worst tip ratio 3.73",
       "covers_targets": [
         0,
         1,
@@ -42,29 +53,29 @@
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 5.07,
+      "tip_ratio": 5.51,
       "spares": [
-        [
-          2.4,
-          2.0,
-          1.5708
-        ],
         [
           2.529,
           2.017,
           1.8326
+        ],
+        [
+          2.271,
+          2.017,
+          1.309
         ]
       ],
       "q": {
-        "arm/fr3_joint1": 2.16819,
-        "arm/fr3_joint2": -0.90312,
-        "arm/fr3_joint3": -2.3861,
-        "arm/fr3_joint4": -2.30633,
-        "arm/fr3_joint5": -1.43144,
-        "arm/fr3_joint6": 2.56676,
-        "arm/fr3_joint7": -1.05031
+        "lift": 0.0,
+        "arm/shoulder_pan_joint": 0.30236,
+        "arm/shoulder_lift_joint": -2.91811,
+        "arm/elbow_joint": -2.01245,
+        "arm/wrist_1_joint": 0.21817,
+        "arm/wrist_2_joint": -4.71239,
+        "arm/wrist_3_joint": -3.87663
       },
-      "why": "all 1 targets reached, worst tip ratio 5.07"
+      "why": "all 1 targets reached, worst tip ratio 5.51"
     },
     {
       "task": "t3",
@@ -75,7 +86,7 @@
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 6.64,
+      "tip_ratio": 7.42,
       "spares": [
         [
           6.471,
@@ -89,15 +100,15 @@
         ]
       ],
       "q": {
-        "arm/fr3_joint1": 1.56784,
-        "arm/fr3_joint2": -0.93942,
-        "arm/fr3_joint3": -1.5952,
-        "arm/fr3_joint4": -2.46484,
-        "arm/fr3_joint5": -1.15726,
-        "arm/fr3_joint6": 2.06279,
-        "arm/fr3_joint7": -1.05031
+        "lift": 0.0,
+        "arm/shoulder_pan_joint": 0.30236,
+        "arm/shoulder_lift_joint": -2.35032,
+        "arm/elbow_joint": -2.28332,
+        "arm/wrist_1_joint": -0.07875,
+        "arm/wrist_2_joint": -4.71239,
+        "arm/wrist_3_joint": -3.87663
       },
-      "why": "all 1 targets reached, worst tip ratio 6.64"
+      "why": "all 1 targets reached, worst tip ratio 7.42"
     },
     {
       "task": "t4",
@@ -108,29 +119,29 @@
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 7.59,
+      "tip_ratio": 13.17,
       "spares": [
+        [
+          5.017,
+          2.271,
+          0.2618
+        ],
         [
           5.017,
           2.529,
           -0.2618
-        ],
-        [
-          5.0,
-          2.4,
-          -0.0
         ]
       ],
       "q": {
-        "arm/fr3_joint1": 1.06478,
-        "arm/fr3_joint2": -0.47351,
-        "arm/fr3_joint3": -0.77499,
-        "arm/fr3_joint4": -1.76423,
-        "arm/fr3_joint5": -0.32854,
-        "arm/fr3_joint6": 1.42161,
-        "arm/fr3_joint7": -1.05031
+        "lift": 0.02794,
+        "arm/shoulder_pan_joint": 0.30238,
+        "arm/shoulder_lift_joint": -1.4759,
+        "arm/elbow_joint": -2.00375,
+        "arm/wrist_1_joint": -1.23272,
+        "arm/wrist_2_joint": -4.71237,
+        "arm/wrist_3_joint": -3.87663
       },
-      "why": "all 1 targets reached, worst tip ratio 7.59"
+      "why": "all 1 targets reached, worst tip ratio 13.17"
     }
   ],
   "legs": [
@@ -411,9 +422,9 @@
     },
     {
       "from": "t2",
-      "to": "t3",
-      "carrying": false,
-      "length_m": 8.148,
+      "to": "way_out",
+      "carrying": true,
+      "length_m": 3.836,
       "waypoints": [
         [
           2.4,
@@ -448,57 +459,86 @@
         [
           1.714,
           1.143,
-          -1.8326
+          -1.8491
         ],
         [
           1.625,
           1.025,
-          -1.8326
+          -1.8491
         ],
         [
-          1.625,
-          1.025,
-          -1.5708
+          1.525,
+          0.675,
+          -1.8491
         ],
         [
-          1.625,
-          0.725,
-          -1.5708
+          1.525,
+          0.675,
+          -2.3562
         ],
         [
-          1.625,
-          0.725,
-          -0.7854
-        ],
-        [
-          1.825,
+          1.375,
           0.525,
-          -0.7854
+          -2.3562
         ],
         [
-          1.825,
+          1.375,
           0.525,
-          0.0
+          -3.1289
         ],
         [
-          6.325,
-          0.525,
-          0.0
+          -0.6,
+          0.5,
+          -3.1289
         ],
         [
-          6.325,
-          0.525,
-          0.9273
+          -0.6,
+          0.5,
+          3.1416
+        ]
+      ],
+      "footprint_ok": true
+    },
+    {
+      "from": "way_out",
+      "to": "t3",
+      "carrying": false,
+      "length_m": 8.686,
+      "waypoints": [
+        [
+          -0.6,
+          0.5,
+          3.1416
+        ],
+        [
+          -0.6,
+          0.5,
+          0.0108
+        ],
+        [
+          6.375,
+          0.575,
+          0.0108
+        ],
+        [
+          6.375,
+          0.575,
+          0.9828
         ],
         [
           6.475,
           0.725,
-          0.9273
+          0.9828
+        ],
+        [
+          6.475,
+          0.725,
+          1.309
         ],
         [
           6.479,
           0.774,
-          0.9273
+          1.309
         ],
         [
           6.479,
@@ -521,9 +561,9 @@
     },
     {
       "from": "t3",
-      "to": "t4",
-      "carrying": false,
-      "length_m": 5.377,
+      "to": "way_out",
+      "carrying": true,
+      "length_m": 8.717,
       "waypoints": [
         [
           6.6,
@@ -568,57 +608,91 @@
         [
           6.325,
           0.525,
+          -3.138
+        ],
+        [
+          -0.6,
+          0.5,
+          -3.138
+        ],
+        [
+          -0.6,
+          0.5,
+          3.1416
+        ]
+      ],
+      "footprint_ok": true
+    },
+    {
+      "from": "way_out",
+      "to": "t4",
+      "carrying": false,
+      "length_m": 7.033,
+      "waypoints": [
+        [
+          -0.6,
+          0.5,
           3.1416
         ],
         [
-          4.775,
-          0.525,
-          3.1416
+          -0.6,
+          0.5,
+          0.0148
         ],
         [
-          4.775,
-          0.525,
-          2.3562
+          4.475,
+          0.575,
+          0.0148
         ],
         [
-          4.625,
+          4.475,
+          0.575,
+          0.7854
+        ],
+        [
+          4.575,
           0.675,
-          2.3562
+          0.7854
         ],
         [
-          4.625,
+          4.575,
           0.675,
-          1.5708
+          1.4659
         ],
         [
-          4.625,
-          1.525,
-          1.5708
+          4.675,
+          1.625,
+          1.4659
         ],
         [
-          4.625,
-          1.525,
-          1.1186
+          4.675,
+          1.625,
+          1.1201
         ],
         [
           5.008,
-          2.312,
-          1.1186
+          2.314,
+          1.1201
         ],
         [
           5.008,
-          2.312,
+          2.314,
           0.2618
         ],
         [
           5.029,
-          2.356,
+          2.357,
           0.2618
         ],
         [
           5.029,
-          2.356,
-          0.0
+          2.357,
+          0.0148
+        ],
+        [
+          5.05,
+          2.4,
+          0.0148
         ],
         [
           5.05,
@@ -746,7 +820,21 @@
       "margin_m": 0.091,
       "legs": [
         "dock->t1",
-        "t2->t3"
+        "t2->way_out"
+      ]
+    },
+    {
+      "doorway": "d_entry",
+      "clear_width_m": 0.81,
+      "robot_width_m": 0.415,
+      "margin_m": 0.198,
+      "legs": [
+        "t2->way_out",
+        "way_out->t3",
+        "t3->way_out",
+        "way_out->t4",
+        "t4->way_out",
+        "way_out->dock"
       ]
     },
     {
@@ -755,8 +843,8 @@
       "robot_width_m": 0.443,
       "margin_m": 0.083,
       "legs": [
-        "t2->t3",
-        "t3->t4"
+        "way_out->t3",
+        "t3->way_out"
       ]
     },
     {
@@ -765,18 +853,8 @@
       "robot_width_m": 0.517,
       "margin_m": 0.096,
       "legs": [
-        "t3->t4",
+        "way_out->t4",
         "t4->way_out"
-      ]
-    },
-    {
-      "doorway": "d_entry",
-      "clear_width_m": 0.81,
-      "robot_width_m": 0.41,
-      "margin_m": 0.2,
-      "legs": [
-        "t4->way_out",
-        "way_out->dock"
       ]
     }
   ],

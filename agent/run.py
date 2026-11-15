@@ -71,7 +71,10 @@ def pipeline(state: dict) -> dict:
                          conflicts=state["requirements"]["conflicts"])
     # The loop: a design that pathing cannot use becomes a new constraint, and the design step runs again.
     # A task with no standoff means the arm on that lift does not reach, so that lift-and-arm pair is ruled out.
+    # A task whose arm path still fails after pathing's own fixes counts the same way. If the fixes run out,
+    # the attempt with the fewest tasks stuck, then the fewest failed arm paths, then the lowest price is kept.
     state = {**state, "excluded": [], "robot_fixes": []}
+    best = None
     for attempt in range(MAX_ROBOT_FIXES + 1):
         state = observe.node("3-4 design and compose", design.step)(state)
         if state["infeasible"]:
@@ -79,20 +82,43 @@ def pipeline(state: dict) -> dict:
         state = observe.node("5 pathing", pathing.step)(state)
         stuck = sorted({f["task"] for f in state["route"]["failures"] if f.get("task") and f.get("kind") in ("standoff", "no_standoff", None)}
                        | {t["id"] for t in state["tasks"] if not any(s["task"] == t["id"] for s in state["route"]["standoffs"])})
-        if not stuck or attempt == MAX_ROBOT_FIXES:
+        bad_paths = [e for e in state["trajectory"]["tasks"] if e.get("failure")]
+        no_path = sorted({e["task"] for e in bad_paths} - set(stuck))
+        score = (len(stuck), len(bad_paths), state["design"]["price_usd"])
+        if best is None or score < best[0]:
+            best = (score, state)
+        if not (stuck or no_path) or attempt == MAX_ROBOT_FIXES:
             break
         p = state["design"]["parts"]
-        fix = {"n": attempt + 1, "tasks": stuck, "ruled_out": {"lift": p["lift"], "arm": p["arm"]},
-               "why": f"no standoff reaches {', '.join(stuck)} with {p['arm']} on lift {p['lift']}",
+        why = "; ".join(w for w in (f"no standoff reaches {', '.join(stuck)}" if stuck else "",
+                                    f"{len(bad_paths)} arm paths fail for {', '.join(sorted({e['task'] for e in bad_paths}))}" if bad_paths else "") if w)
+        fix = {"n": attempt + 1, "tasks": sorted(set(stuck) | set(no_path)), "ruled_out": {"lift": p["lift"], "arm": p["arm"]},
+               "why": f"{why} with {p['arm']} on lift {p['lift']}",
                "was": {"parts": p, "price_usd": state["design"]["price_usd"]}}
         state = {**state, "excluded": state["excluded"] + [fix["ruled_out"]], "robot_fixes": state["robot_fixes"] + [fix]}
         observe.emit("robot_fix", **fix)
+    if best is not None and not state["infeasible"] and best[1] is not state:
+        fixes = state["robot_fixes"]  # the last attempt was not the best one: go back to the best
+        state = {**best[1], "robot_fixes": fixes, "excluded": state["excluded"]}
+        observe.emit("design", parts=state["design"]["parts"], price_usd=state["design"]["price_usd"], mass_kg=state["design"]["mass_kg"],
+                     stowed=state["build"]["stowed"] | {"qpos": None}, labels=state["design"].get("labels", []), checks=[],
+                     kept="the best of the attempts: the redesigns ran out without a clean plan")
+    elif best is not None and state["infeasible"]:
+        state = {**best[1], "robot_fixes": state["robot_fixes"], "excluded": state["excluded"]}
     if state["robot_fixes"]:
         state["decisions"] = state["decisions"] + [{"slot": "loop", "robot_fix": f} for f in state["robot_fixes"]]
     if not state["infeasible"]:
         state = observe.node("5d program", program.step)(state)
         pr = state["program"]
         observe.emit("program", source=pr["source"], model=pr.get("model"), rejected=pr.get("model_rejected"), steps=pr["steps"])
+        if state.get("walkthrough"):  # film the plan: the robot driving the route and running each arm motion
+            film = viz.walkthrough(state["world"], state["robot_xml"], state["build"], state["route"], state["trajectory"])
+            if film:
+                observe.emit("walkthrough", **film)
+            if state["world"].get("tour"):  # the world is a traced Matterport tour: export the robot to draw inside it
+                real = viz.tour_export(state["robot_xml"], state["build"], state["route"], state["trajectory"])
+                if real:
+                    observe.emit("tour", **real, matterport=state["world"]["tour"].get("matterport"))
     return state
 
 
@@ -226,6 +252,8 @@ def main(argv=None) -> int:
     ap.add_argument("--tasks", help="a task list in JSON; not needed with --job")
     ap.add_argument("--job", help="the job in words; a model turns it into the task list (needs ANTHROPIC_API_KEY)")
     ap.add_argument("--frames", action="store_true", help="also render the robot as the run goes, for the live view in web/")
+    ap.add_argument("--walkthrough", action="store_true",
+                    help="with --frames: also film the robot driving the planned route and doing each task (needs ffmpeg)")
     ap.add_argument("--no-model", action="store_true", help="skip every model step; tasks come from --tasks, the program by rule")
     ap.add_argument("--answers", help='the person\'s answers to intake\'s questions: a JSON list of {"question", "answer"}')
     ap.add_argument("--proceed", action="store_true", help="do not stop when intake has questions; they stay on record as unanswered")
@@ -244,7 +272,7 @@ def main(argv=None) -> int:
     if a.no_model:
         __import__("os").environ["AGENT_NO_MODEL"] = "1"
     state = {"world": json.loads(Path(a.world).read_text()), "tasks_file": a.tasks, "prepass_radius_m": a.radius,
-             "job": a.job, "use_model": not a.no_model, "proceed": a.proceed,
+             "job": a.job, "use_model": not a.no_model, "walkthrough": a.walkthrough, "proceed": a.proceed,
              "answers": json.loads(Path(a.answers).read_text()) if a.answers else []}
     state["demo_task"] = a.demo_task
     if a.demo:

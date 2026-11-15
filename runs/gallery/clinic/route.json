@@ -220,24 +220,24 @@
     {
       "task": "t2",
       "pose": [
-        0.42,
+        0.47,
         3.1,
-        -1.5708
+        3.1416
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 19.79,
+      "tip_ratio": 19.77,
       "spares": [],
       "q": {
-        "lift": 0.5,
-        "arm/joint1": -1.57507,
-        "arm/joint2": 3.07521,
-        "arm/joint3": -1.50998,
-        "arm/joint4": -2e-05,
-        "arm/joint5": 0.09282,
-        "arm/joint6": 1.4175
+        "lift": 0.18703,
+        "arm/joint1": -0.00373,
+        "arm/joint2": 2.17988,
+        "arm/joint3": -1.31539,
+        "arm/joint4": -0.0,
+        "arm/joint5": 0.79355,
+        "arm/joint6": -0.0
       },
-      "why": "all 6 targets reached, worst tip ratio 19.79",
+      "why": "all 6 targets reached, worst tip ratio 19.77",
       "covers_targets": [
         0,
         1,
@@ -251,24 +251,24 @@
     {
       "task": "t2",
       "pose": [
-        0.42,
+        0.47,
         3.55,
-        -1.5708
+        3.1416
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 19.78,
+      "tip_ratio": 19.77,
       "spares": [],
       "q": {
-        "lift": 0.5,
-        "arm/joint1": -1.57461,
-        "arm/joint2": 3.11376,
-        "arm/joint3": -1.71578,
-        "arm/joint4": -1e-05,
-        "arm/joint5": 0.26006,
-        "arm/joint6": 1.4175
+        "lift": 0.22278,
+        "arm/joint1": -0.00337,
+        "arm/joint2": 2.36952,
+        "arm/joint3": -1.52112,
+        "arm/joint4": -0.0,
+        "arm/joint5": 0.80963,
+        "arm/joint6": 0.0
       },
-      "why": "all 6 targets reached, worst tip ratio 19.78",
+      "why": "all 6 targets reached, worst tip ratio 19.77",
       "covers_targets": [
         6,
         7,
@@ -282,24 +282,24 @@
     {
       "task": "t2",
       "pose": [
-        0.42,
+        0.47,
         4.0,
-        -1.5708
+        3.1416
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 19.79,
+      "tip_ratio": 19.77,
       "spares": [],
       "q": {
-        "lift": 0.5,
-        "arm/joint1": -1.57507,
-        "arm/joint2": 3.07521,
-        "arm/joint3": -1.50998,
-        "arm/joint4": -2e-05,
-        "arm/joint5": 0.09282,
-        "arm/joint6": 1.4175
+        "lift": 0.18703,
+        "arm/joint1": -0.00373,
+        "arm/joint2": 2.17988,
+        "arm/joint3": -1.31539,
+        "arm/joint4": -0.0,
+        "arm/joint5": 0.79355,
+        "arm/joint6": -0.0
       },
-      "why": "all 6 targets reached, worst tip ratio 19.79",
+      "why": "all 6 targets reached, worst tip ratio 19.77",
       "covers_targets": [
         12,
         13,
@@ -313,24 +313,24 @@
     {
       "task": "t2",
       "pose": [
-        0.42,
+        0.47,
         4.45,
-        -1.5708
+        3.1416
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 19.78,
+      "tip_ratio": 19.77,
       "spares": [],
       "q": {
-        "lift": 0.5,
-        "arm/joint1": -1.57461,
-        "arm/joint2": 3.11376,
-        "arm/joint3": -1.71578,
-        "arm/joint4": -1e-05,
-        "arm/joint5": 0.26006,
-        "arm/joint6": 1.4175
+        "lift": 0.22278,
+        "arm/joint1": -0.00337,
+        "arm/joint2": 2.36952,
+        "arm/joint3": -1.52112,
+        "arm/joint4": -0.0,
+        "arm/joint5": 0.80963,
+        "arm/joint6": 0.0
       },
-      "why": "all 6 targets reached, worst tip ratio 19.78",
+      "why": "all 6 targets reached, worst tip ratio 19.77",
       "covers_targets": [
         18,
         19,
@@ -344,24 +344,24 @@
     {
       "task": "t2",
       "pose": [
-        0.42,
+        0.47,
         4.9,
-        -1.5708
+        3.1416
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 19.83,
+      "tip_ratio": 19.77,
       "spares": [],
       "q": {
-        "lift": 0.5,
-        "arm/joint1": -1.57507,
-        "arm/joint2": 3.07521,
-        "arm/joint3": -1.50998,
-        "arm/joint4": -2e-05,
-        "arm/joint5": 0.09282,
-        "arm/joint6": 1.4175
+        "lift": 0.18703,
+        "arm/joint1": -0.00373,
+        "arm/joint2": 2.17988,
+        "arm/joint3": -1.31539,
+        "arm/joint4": -0.0,
+        "arm/joint5": 0.79355,
+        "arm/joint6": -0.0
       },
-      "why": "all 2 targets reached, worst tip ratio 19.83",
+      "why": "all 2 targets reached, worst tip ratio 19.77",
       "covers_targets": [
         24,
         25
@@ -529,7 +529,7 @@
       "from": "t1",
       "to": "t2",
       "carrying": false,
-      "length_m": 7.292,
+      "length_m": 7.251,
       "waypoints": [
         [
           6.775,
@@ -597,39 +597,34 @@
           2.3562
         ],
         [
-          1.875,
-          2.425,
+          1.825,
+          2.475,
           2.3562
         ],
         [
-          1.875,
-          2.425,
-          2.7072
+          1.825,
+          2.475,
+          2.7094
         ],
         [
-          0.552,
-          3.039,
-          2.7072
+          0.56,
+          3.058,
+          2.7094
         ],
         [
-          0.552,
-          3.039,
-          3.1416
+          0.56,
+          3.058,
+          2.9271
         ],
         [
-          0.464,
-          3.08,
-          3.1416
-        ],
-        [
-          0.464,
-          3.08,
-          -1.5708
-        ],
-        [
-          0.42,
+          0.47,
           3.1,
-          -1.5708
+          2.9271
+        ],
+        [
+          0.47,
+          3.1,
+          -3.1416
         ]
       ],
       "footprint_ok": true,
@@ -642,14 +637,24 @@
       "length_m": 0.45,
       "waypoints": [
         [
-          0.42,
+          0.47,
           3.1,
-          -1.5708
+          -3.1416
         ],
         [
-          0.42,
+          0.47,
+          3.1,
+          1.5708
+        ],
+        [
+          0.47,
           3.55,
-          -1.5708
+          1.5708
+        ],
+        [
+          0.47,
+          3.55,
+          -3.1416
         ]
       ],
       "footprint_ok": true,
@@ -662,14 +667,24 @@
       "length_m": 0.45,
       "waypoints": [
         [
-          0.42,
+          0.47,
           3.55,
-          -1.5708
+          -3.1416
         ],
         [
-          0.42,
+          0.47,
+          3.55,
+          1.5708
+        ],
+        [
+          0.47,
           4.0,
-          -1.5708
+          1.5708
+        ],
+        [
+          0.47,
+          4.0,
+          -3.1416
         ]
       ],
       "footprint_ok": true,
@@ -682,14 +697,24 @@
       "length_m": 0.45,
       "waypoints": [
         [
-          0.42,
+          0.47,
           4.0,
-          -1.5708
+          -3.1416
         ],
         [
-          0.42,
+          0.47,
+          4.0,
+          1.5708
+        ],
+        [
+          0.47,
           4.45,
-          -1.5708
+          1.5708
+        ],
+        [
+          0.47,
+          4.45,
+          -3.1416
         ]
       ],
       "footprint_ok": true,
@@ -702,14 +727,24 @@
       "length_m": 0.45,
       "waypoints": [
         [
-          0.42,
+          0.47,
           4.45,
-          -1.5708
+          -3.1416
         ],
         [
-          0.42,
+          0.47,
+          4.45,
+          1.5708
+        ],
+        [
+          0.47,
           4.9,
-          -1.5708
+          1.5708
+        ],
+        [
+          0.47,
+          4.9,
+          -3.1416
         ]
       ],
       "footprint_ok": true,
@@ -719,56 +754,46 @@
       "from": "t2",
       "to": "dock",
       "carrying": false,
-      "length_m": 5.917,
+      "length_m": 5.905,
       "waypoints": [
         [
-          0.42,
+          0.47,
+          4.9,
+          -3.1416
+        ],
+        [
+          0.47,
           4.9,
           -1.5708
         ],
         [
-          0.42,
-          4.9,
+          0.496,
+          4.857,
           -1.5708
         ],
         [
-          0.497,
-          4.773,
-          -1.5708
-        ],
-        [
-          0.497,
-          4.773,
+          0.496,
+          4.857,
           -1.309
         ],
         [
-          0.523,
-          4.731,
+          0.522,
+          4.815,
           -1.309
         ],
         [
-          0.523,
-          4.731,
-          -1.0239
-        ],
-        [
-          2.347,
-          1.736,
-          -1.0239
-        ],
-        [
-          2.347,
-          1.736,
-          -1.309
+          0.522,
+          4.815,
+          -1.0214
         ],
         [
           2.475,
-          1.525,
-          -1.309
+          1.625,
+          -1.0214
         ],
         [
           2.475,
-          1.525,
+          1.625,
           -1.5708
         ],
         [

@@ -20,8 +20,22 @@ from urllib.parse import unquote, urlparse
 REPO = Path(__file__).resolve().parents[1]
 VIEWER = REPO / "web" / "viewer"
 RUNS = REPO / "runs"
+VENDOR = REPO / "web" / "_vendor" / "matterport"  # Matterport's SDK bundle, fetched by web/fetch_sdk.py, not committed
 TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json",
-         ".jsonl": "application/x-ndjson", ".png": "image/png", ".svg": "image/svg+xml", ".xml": "text/xml", ".txt": "text/plain"}
+         ".jsonl": "application/x-ndjson", ".png": "image/png", ".svg": "image/svg+xml", ".xml": "text/xml", ".txt": "text/plain", ".mp4": "video/mp4"}
+
+
+def _env(name: str) -> str | None:
+    """A value from the environment or the repo's .env (KEY=VALUE lines)."""
+    if os.environ.get(name):
+        return os.environ[name]
+    env = REPO / ".env"
+    if env.exists():
+        for line in env.read_text().splitlines():
+            k, _, v = line.strip().partition("=")
+            if k == name and v:
+                return v.strip().strip('"').strip("'")
+    return None
 
 
 def list_runs() -> list:
@@ -102,7 +116,29 @@ class Handler(BaseHTTPRequestHandler):
         path = (root / rel).resolve()
         if root.resolve() not in path.parents and path != root.resolve() or not path.is_file():
             return self._send(404, b"not found", "text/plain")
-        self._send(200, path.read_bytes(), TYPES.get(path.suffix, "application/octet-stream"))
+        body, ctype = path.read_bytes(), TYPES.get(path.suffix, "application/octet-stream")
+        rng = self.headers.get("Range", "")
+        if rng.startswith("bytes=") and "," not in rng:  # a video player asks for parts of the file so it can seek
+            a, _, b = rng[6:].partition("-")
+            try:
+                start = int(a) if a else max(len(body) - int(b), 0)
+                end = min(int(b), len(body) - 1) if a and b else len(body) - 1
+            except ValueError:
+                start, end = 0, len(body) - 1
+            if start <= end < len(body):
+                self.send_response(206)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Range", f"bytes {start}-{end}/{len(body)}")
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Content-Length", str(end - start + 1))
+                self.end_headers()
+                self.wfile.write(body[start:end + 1])
+                return
+        if ctype == "application/octet-stream":
+            import mimetypes
+
+            ctype = mimetypes.guess_type(path.name)[0] or ctype
+        self._send(200, body, ctype)
 
     def do_GET(self):
         p = unquote(urlparse(self.path).path)
@@ -110,6 +146,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._file(VIEWER, "index.html")
         if p == "/api/runs":
             return self._json(list_runs())
+        if p == "/api/tour":  # what the tour page needs: the SDK key (it only works from localhost) and whether the bundle is here
+            return self._json({"sdk_key": _env("MATTERPORT_SDK_KEY"), "bundle": (VENDOR / "showcase.html").exists()})
+        if p.startswith("/mp/"):
+            return self._file(VENDOR, p[len("/mp/"):])
         if p.startswith("/runs/"):
             return self._file(RUNS, p[len("/runs/"):])
         return self._file(VIEWER, p.lstrip("/"))

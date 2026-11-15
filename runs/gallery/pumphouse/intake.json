@@ -2,26 +2,28 @@
   "source": "model",
   "model": "claude-opus-5-5",
   "job": "Collect today's water sample from the pump house: the bottle is on the sample shelf inside, past the kerb at the door. Bring it out to the gate.",
-  "understood_as": "Pick up today's water sample bottle from the sample shelf in the pump room, past the kerb at the door, and carry it out to the gate.",
+  "understood_as": "Pick up today's water sample bottle from the sample shelf in the pump room and carry it out of the building to the gate.",
   "steps": [
-    "Go into the pump house, crossing the kerb at the door.",
-    "Pick up the water sample bottle from the sample shelf.",
+    "Go into the pump house, over the kerb at the door.",
+    "Find the sample bottle on the sample shelf in the pump room.",
+    "Grip the bottle firmly and lift it off the shelf.",
     "Carry it back out over the kerb and bring it to the gate."
   ],
   "demos": [
     {
       "chore": "pick sample bottle",
       "kind": "path",
-      "why": "Shows how a hand reaches onto the sample shelf and lifts the bottle off it without knocking it over."
+      "why": "Shows how a hand reaches onto the shelf and lifts the bottle off cleanly without knocking it or anything next to it."
     },
     {
       "chore": "pick sample bottle",
       "kind": "squeeze",
-      "why": "Sets how hard to grip a full, possibly wet bottle so it doesn't slip during the carry and isn't squeezed hard enough to crack or leak."
+      "why": "Sets a grip firm enough that the smooth, possibly wet bottle won't slip, without squeezing hard enough to deform it or force out the sample."
     }
   ],
   "questions": [
-    "How high is the kerb at the pump house door? The robot has to be built to step over it with the bottle, so please measure it.",
-    "The plan can only deliver to the building's way out. Is the gate the same as the pump house exit, or is there a set spot at the gate where the bottle should be left?"
+    "How high is the kerb at the pump house door? The robot has to get over it twice, once going in and once coming out with the bottle.",
+    "The plan can only deliver to the building's way out. Is leaving the bottle just outside the pump house fine, or does it need to go further, to the gate itself? If so, where exactly at the gate should it be set down?",
+    "Is the sample bottle always on the same spot on the shelf, with its cap already closed and nothing else in front of it?"
   ]
 }

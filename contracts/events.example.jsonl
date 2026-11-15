@@ -15,6 +15,8 @@
 {"t": 46.0, "kind": "route", "legs": [{"from": "dock", "to": "t1", "carrying": false, "length_m": 3.88, "waypoints": [[0.6, 0.5, 0.0], [2.141, 3.141, -2.3562]]}], "door_clearances": []}
 {"t": 47.0, "kind": "arm_path", "task": "t1", "skill": "twist_out", "pose": [2.141, 3.141, -2.3562], "ok": true, "why": null, "rejected": 0, "segments": [{"phase": "approach", "kind": "follow_path", "samples": 359, "seconds": 17.9}]}
 {"t": 88.0, "kind": "program", "source": "model", "model": "claude-opus-5-5", "rejected": null, "steps": []}
+{"t": 61.0, "kind": "walkthrough", "video": "frames/walkthrough.mp4", "seconds": 73.8, "chapters": [{"t": 0.0, "label": "drive: dock to t1"}, {"t": 8.9, "label": "t1: reach in"}], "note": "the plan played back, not a physics simulation"}
+{"t": 62.0, "kind": "tour", "glb": "frames/tour_robot.glb", "frames": "frames/tour_frames.bin", "bodies": 19, "fps": 24, "n": 6777, "chapters": [{"t": 0.0, "label": "drive: dock to t1"}], "matterport": "2K7G7cdukZV"}
 {"t": 88.2, "kind": "run_end", "ok": true, "summary": ["design: ..."], "seconds": 88.2}
 {"t": 13.0, "kind": "awaiting_answers", "questions": ["Where should the bulb go once it is out?"], "demos": []}
 {"t": 13.1, "kind": "run_end", "ok": true, "waiting": true, "seconds": 13.1}

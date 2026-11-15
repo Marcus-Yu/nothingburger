@@ -2,30 +2,28 @@
   "source": "model",
   "model": "claude-opus-5-5",
   "job": "Two drives have failed in the data hall: one high up in row A at U40 and one low down in row B at U10. Pull both sled caddies and bring the last one out to the staging bench outside the hall.",
-  "understood_as": "Pull the failed drive sleds out of two drive bays in the data hall (row A at U40 and row B at U10) and carry the second one out of the hall toward the staging bench.",
+  "understood_as": "Pull the failed drive sleds from bay U40 in row A and bay U10 in row B of the data hall, and carry the second one out to the staging bench outside the hall.",
   "steps": [
-    "Go to row A, bay U40 (high up), grip the sled handle and pull the failed drive out.",
-    "Go to row B, bay U10 (low down), grip the sled handle and pull the failed drive out.",
-    "Carry that last sled out of the hall to the way out, toward the staging bench.",
-    "No replacement drives are fitted, because the job only asks to pull the failed ones."
+    "Go to row A and pull the drive sled from bay U40.",
+    "Go to row B and pull the drive sled from bay U10.",
+    "Carry that last sled out of the hall to the staging bench."
   ],
   "demos": [
     {
       "chore": "pull drive sled",
       "kind": "path",
-      "why": "Shows how the hand releases the sled latch (if any) and slides the sled straight out of the bay without catching on the rails."
+      "why": "Shows how the hand releases the sled latch or handle and slides the caddy straight out of the bay without catching it."
     },
     {
-      "chore": "grip sled handle",
+      "chore": "grip drive sled",
       "kind": "squeeze",
-      "why": "Sets how firmly to hold the narrow sled handle so a 0.75 kg drive does not slip out, without bending the handle or latch."
+      "why": "Shows how firmly to hold the sled handle so the drive does not slip or drop, without bending the handle or caddy."
     }
   ],
   "questions": [
-    "I read 'the last one' as the row B U10 drive, since it is listed second. Is that right, or should the U40 drive be the one taken out?",
-    "What should happen to the first sled once it is pulled? Should it be set down somewhere in the hall, or should both sleds go out? The robot can only take one out with the steps planned now.",
-    "The staging bench has not been located in the building scan, so the plan can only take the sled as far as the way out of the hall. Please have the bench added as a location if the sled must be placed on it.",
-    "Do these sleds have a latch or lever that must be released before pulling? There is no separate skill for working a latch, so please show it in the 'pull drive sled' demonstration.",
-    "You did not ask for new drives to be fitted. If you want them installed, please say so and confirm they come in the same type of sled."
+    "What should happen to the first sled pulled (row A, U40)? As written it is pulled but left in the hall. Should it also go to the staging bench?",
+    "The only exit the system knows is the general way out of the hall. Can you confirm the staging bench sits on that route, or have someone locate it as an anchor?",
+    "You did not mention fitting replacement drives, so none are planned. Should new sleds be inserted? Installing sleds is not a skill the planner has yet, so this would need a person.",
+    "Does pulling these sleds need a latch or release lever opened first? If so, please show that in the 'pull drive sled' demonstration."
   ]
 }

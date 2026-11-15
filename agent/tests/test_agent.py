@@ -310,7 +310,7 @@ def test_a_failed_arm_path_is_retried_from_a_spare(monkeypatch):
               "spares": [[2.0, 0.0, 0.0], [3.0, 0.0, 0.0]]}
     planned = []
 
-    def retarget(demo, robot, *, build, task, standoff, requirements):
+    def retarget(demo, robot, *, build, task, standoff, requirements, obstacles=None):
         entry = {"task": task["id"], "standoff": list(standoff["pose"]), "segments": []}
         if standoff["pose"][0] < 3.0:  # only the second spare works
             entry["failure"] = {"segment": "approach", "why": "first target: out of reach"}
@@ -342,7 +342,7 @@ def test_a_failed_arm_path_goes_on_down_the_proposals_after_the_spares(monkeypat
     requirements = {"tasks": [task], "requirements": [{"id": "r", "task": "t3", "quantity": "reach_targets", "value": [target]}]}
     picked = {"task": "t3", "pose": [1.0, 0.0, 0.0], "task_yaw_rad": 0.0, "reach_ok": True, "tip_ratio": 9.0, "spares": [[2.0, 0.0, 0.0]]}
 
-    def retarget(demo, robot, *, build, task, standoff, requirements):
+    def retarget(demo, robot, *, build, task, standoff, requirements, obstacles=None):
         entry = {"task": task["id"], "standoff": list(standoff["pose"]), "segments": []}
         if standoff["pose"][0] < 4.0:
             entry["failure"] = {"segment": "approach", "why": "the joint-space move puts the arm into the base"}
