@@ -32,7 +32,15 @@ RUNS = REPO / "runs" / "studio"
 EXPORT = REPO / "frontend" / "robot-design" / "data" / "export.py"
 
 # Studio space id (web/worlds.json) -> scenario in world/scenarios/
-WORLDS = {"rabinowitz-hall": "jrr"}
+WORLDS = {
+    "rabinowitz-hall": "jrr",
+    # outdoor lots traced on Vexcel aerial photos (world/scenarios/tools/aerial_worlds.py)
+    "lawn-palmetto": "lawn_palmetto",
+    "trash-palmetto": "trash_palmetto",
+    "pooldeck-lakes": "pooldeck_lakes",
+    "parcel-eastland": "parcel_eastland",
+    "lawn-sanpedro": "lawn_sanpedro",
+}
 
 
 # Session (LangGraph thread id) -> its run folder, relative to the repo, set as soon as the run starts,
@@ -68,12 +76,13 @@ def model_reads_jobs() -> bool:
 
 def can_plan(skill: str, task: str, world_id: str | None) -> str | None:
     """None when the job can be planned in this space, else why not (checked before asking for a demo).
-    With a model reading the job there is nothing to check up front."""
+    With a model reading the job there is nothing to check up front, except for mowing, whose tasks
+    always come by rule from the space's marked lawn."""
     try:
         _, world = world_for(world_id)
     except NoWorld as e:
         return str(e)
-    if model_reads_jobs():
+    if model_reads_jobs() and jobs.pipeline_skill(skill) != "navigate":
         return None
     return jobs.tasks_for(skill, task, world)[1]
 
@@ -85,6 +94,8 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
     if standin_tasks is None:
         standin_tasks = not model_reads_jobs()
     task = request["task"]
+    if jobs.pipeline_skill(request.get("skill") or task) == "navigate":
+        standin_tasks = True  # a coverage pattern is geometry (nav.api.cover); the model's intake does not write one
     out = runs / f"{time.strftime('%Y%m%d-%H%M%S')}-{slug(task)[:40]}"
     inputs = out / "inputs"
     inputs.mkdir(parents=True, exist_ok=True)

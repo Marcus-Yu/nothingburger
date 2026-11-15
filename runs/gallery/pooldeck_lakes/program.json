@@ -1,0 +1,192 @@
+{
+  "schema": "program/1",
+  "source": "rule",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "dock to t1",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "",
+      "n": 1
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_reach"
+      ],
+      "note": "strokes 0-10 of 11; press force is assumed",
+      "n": 2
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [],
+      "note": "",
+      "n": 3
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "t1 to t2",
+      "n": 4
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "",
+      "n": 5
+    },
+    {
+      "primitive": "grasp",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_opening",
+        "r_t2_payload"
+      ],
+      "note": "grip force not established",
+      "n": 6
+    },
+    {
+      "primitive": "lift",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_payload"
+      ],
+      "note": "",
+      "n": 7
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [],
+      "note": "",
+      "n": 8
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "t2 to way_out, carrying",
+      "n": 9
+    },
+    {
+      "primitive": "place",
+      "task": "t2",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [],
+      "note": "at the way out",
+      "n": 10
+    },
+    {
+      "primitive": "release",
+      "task": "t2",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [],
+      "note": "",
+      "n": 11
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 3,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "way_out to dock",
+      "n": 12
+    }
+  ]
+}

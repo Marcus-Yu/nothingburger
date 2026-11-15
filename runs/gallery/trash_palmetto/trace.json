@@ -1,0 +1,107 @@
+{
+  "calls": [
+    {
+      "n": 0,
+      "name": "nav.corridors",
+      "seconds": 0.0001,
+      "summary": "2 corridors; narrowest 0.9 m at d_front; header 2.05 m; step 0.0 m; turn None m"
+    },
+    {
+      "n": 1,
+      "name": "nav.free_floor",
+      "seconds": 0.0145,
+      "summary": "edge 0.226 m, side [0.0587, -0.9983]"
+    },
+    {
+      "n": 2,
+      "name": "composer.design",
+      "seconds": 5.156,
+      "summary": "tidybot_arx5+none+crx5ia+robotiq_2f85 $43000 69.62 kg"
+    },
+    {
+      "n": 3,
+      "name": "composer.compose",
+      "seconds": 1.7669,
+      "summary": "robot.xml 36545 chars; stowed 0.466 m wide, 1.36 m tall; 6 arm joints"
+    },
+    {
+      "n": 4,
+      "name": "composer.candidates",
+      "seconds": 0.0037,
+      "summary": "7140 candidates"
+    },
+    {
+      "n": 5,
+      "name": "composer.compose",
+      "seconds": 1.2262,
+      "summary": "robot.xml 36545 chars; stowed 0.466 m wide, 1.36 m tall; 6 arm joints"
+    },
+    {
+      "n": 6,
+      "name": "nav.propose",
+      "seconds": 0.0307,
+      "summary": "36 poses, first [-1.5, 9.15, -1.5708]"
+    },
+    {
+      "n": 7,
+      "name": "motion.reachable",
+      "seconds": 0.6948,
+      "summary": "ok=True tip 2.06 missed []"
+    },
+    {
+      "n": 8,
+      "name": "motion.reachable",
+      "seconds": 0.006,
+      "summary": "ok=True tip 2.06 missed []"
+    },
+    {
+      "n": 9,
+      "name": "motion.reachable",
+      "seconds": 0.0052,
+      "summary": "ok=True tip 2.06 missed []"
+    },
+    {
+      "n": 10,
+      "name": "motion.reachable",
+      "seconds": 0.0054,
+      "summary": "ok=True tip 1.65 missed []"
+    },
+    {
+      "n": 11,
+      "name": "motion.reachable",
+      "seconds": 0.0045,
+      "summary": "ok=True tip 1.74 missed []"
+    },
+    {
+      "n": 12,
+      "name": "motion.reachable",
+      "seconds": 0.0033,
+      "summary": "ok=True tip 1.74 missed []"
+    },
+    {
+      "n": 13,
+      "name": "motion.reachable",
+      "seconds": 0.006,
+      "summary": "ok=True tip 1.65 missed []"
+    },
+    {
+      "n": 14,
+      "name": "motion.reachable",
+      "seconds": 0.0032,
+      "summary": "ok=True tip 1.74 missed []"
+    },
+    {
+      "n": 15,
+      "name": "nav.plan",
+      "seconds": 0.4641,
+      "summary": "3 legs, 2 doors crossed, 0 failures"
+    },
+    {
+      "n": 16,
+      "name": "motion.retarget",
+      "seconds": 0.0914,
+      "summary": "t1: 3 segments, 1612 samples, max error 8e-05 m"
+    }
+  ],
+  "seconds": 9.482
+}

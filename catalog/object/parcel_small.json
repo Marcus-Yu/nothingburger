@@ -1,0 +1,14 @@
+{
+  "id": "parcel_small",
+  "slot": "object",
+  "name": "Small parcel, a 20 x 15 x 6 cm box standing on its long edge",
+  "mass_kg": 0.6,
+  "width_m": 0.06,
+  "hold": "pinch",
+  "anchor_point": "centre of the top edge",
+  "src": "assumed; a small carton, grasped from above across its 6 cm thickness",
+  "confidence": {
+    "mass_kg": "assumed",
+    "width_m": "assumed"
+  }
+}

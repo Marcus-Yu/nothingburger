@@ -1,0 +1,201 @@
+{
+ "schema": "world/1",
+ "id": "kerbside_palmetto",
+ "frame": "metres, Z up, right handed; x east, y north, origin at the fetched point",
+ "source": "measured from Vexcel's aerial survey (us-tx-cypress-2026, 0.0648 m a pixel) around 29.9049498, -95.4566954: nothing is traced: the ground the robot may use is every part of the three front yards where Vexcel's surface model stands less than 0.15 m above the bare ground, so the houses, trees, fences and the vehicles parked on the driveways block it as surveyed. The yards stop at the kerb line. Assumed, not in the photo: that a tied trash bag has been put out in front of each house, and where; the bags' height",
+ "mesh": null,
+ "ground": {
+  "image": "world/scenarios/aerial/palmetto.jpg",
+  "extent": [
+   -30.05,
+   -30.039,
+   30.048,
+   30.013
+  ],
+  "m_per_px": 0.0648,
+  "source": "Vexcel Imaging ortho photo and building footprints, collection us-tx-cypress-2026",
+  "lat": 29.9049498,
+  "lon": -95.4566954,
+  "height": "world/scenarios/aerial/palmetto.height.npz",
+  "height_source": "Vexcel Imaging surface model (DSM) minus terrain model (DTM), ground set to zero; open water from the photo's colour",
+  "dsm": {
+   "collection": "us-tx-cypress-2026",
+   "layer": "urban",
+   "captured": [
+    "Wed Dec 31 16:19:21 UTC 2025",
+    "Thu Jan 29 20:29:30 UTC 2026"
+   ]
+  },
+  "view": {
+   "azimuth": -118.0,
+   "elevation": -42.0,
+   "distance": 11.0
+  }
+ },
+ "floors": [
+  {
+   "id": "f0",
+   "z": 0.0
+  }
+ ],
+ "rooms": [
+  {
+   "id": "front_yards",
+   "type": "yard",
+   "floor": "f0",
+   "polygon": [
+    [
+     -26.0,
+     2.0
+    ],
+    [
+     26.0,
+     2.0
+    ],
+    [
+     26.0,
+     19.6
+    ],
+    [
+     -26.0,
+     19.6
+    ]
+   ],
+   "ceiling_m": 3.0,
+   "source": "manual"
+  }
+ ],
+ "doorways": [
+  {
+   "id": "d_kerb",
+   "rooms": [
+    "outside",
+    "front_yards"
+   ],
+   "position": [
+    3.6,
+    19.6
+   ],
+   "along": [
+    1,
+    0
+   ],
+   "width_m": 1.4,
+   "header_m": 9.0,
+   "step_m": 0.0,
+   "source": "manual"
+  }
+ ],
+ "obstacles": [
+  {
+   "id": "trash_bag_a_body",
+   "room": "front_yards",
+   "box": {
+    "min": [
+     -16.17,
+     9.43,
+     0.0
+    ],
+    "max": [
+     -15.83,
+     9.77,
+     0.5
+    ]
+   }
+  },
+  {
+   "id": "trash_bag_b_body",
+   "room": "front_yards",
+   "box": {
+    "min": [
+     -2.87,
+     11.83,
+     0.0
+    ],
+    "max": [
+     -2.5300000000000002,
+     12.17,
+     0.5
+    ]
+   }
+  },
+  {
+   "id": "trash_bag_c_body",
+   "room": "front_yards",
+   "box": {
+    "min": [
+     7.83,
+     7.33,
+     0.0
+    ],
+    "max": [
+     8.17,
+     7.67,
+     0.5
+    ]
+   }
+  }
+ ],
+ "dock": {
+  "room": "front_yards",
+  "pose": [
+   -5.5,
+   15.5,
+   0.0
+  ]
+ },
+ "way_out": {
+  "doorway": "d_kerb",
+  "note": "the kerb, beside the bins the survey shows there"
+ },
+ "anchors": [
+  {
+   "id": "trash_bag_a",
+   "room": "front_yards",
+   "kind": "low_item",
+   "point": [
+    -16.0,
+    9.6,
+    0.5
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual"
+  },
+  {
+   "id": "trash_bag_b",
+   "room": "front_yards",
+   "kind": "low_item",
+   "point": [
+    -2.7,
+    12.0,
+    0.5
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual"
+  },
+  {
+   "id": "trash_bag_c",
+   "room": "front_yards",
+   "kind": "low_item",
+   "point": [
+    8.0,
+    7.5,
+    0.5
+   ],
+   "normal": [
+    0,
+    0,
+    1
+   ],
+   "source": "manual"
+  }
+ ]
+}

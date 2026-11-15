@@ -329,7 +329,7 @@ function renderAgent(view, s, mine) {
   const outline = section(2, 'The outline');
   outline.querySelector('header').append(current.health.standin ? tag('Stand-in', 'var(--ink-2)') : tag('Agent', 'var(--ok)'));
   if (view.phase === 'classify' && view.status === 'working') outline.append(h('p.state.wait', h('i.spin'), ' Reading the job'));
-  else if (step.kind === 'task' && d.rejected) outline.append(h('p.state.warn', d.rejected.reason), h('p.txt', 'Try another job in the prompt bar.'));  else if (skill) outline.append(h('p.txt', `Skill: `, h('b', pretty(skill)), current.demos ? '. Not learned yet, so it needs a demonstration.' : '. Already learned from an earlier demonstration.'));
+  else if (step.kind === 'task' && d.rejected) outline.append(h('p.state.warn', d.rejected.reason), h('p.txt', 'Try another job in the prompt bar.'));  else if (skill) outline.append(h('p.txt', `Skill: `, h('b', pretty(skill)), current.demos ? '. Not learned yet, so it needs a demonstration.' : view.assessment && view.assessment.no_demo ? '. Needs no demonstration: the robot only drives a pattern over the ground.' : '. Already learned from an earlier demonstration.'));
   const by = (view.assessment && view.assessment.decided_by) || '';
   if (by && view.phase !== 'classify') outline.append(h('p.note', `Decided by ${by}`));
   kids.push(outline);

@@ -43,9 +43,10 @@ PORT = 8020
 
 # The --standin classifier: the first keyword group a task matches names its skill.
 STANDIN_SKILLS = [
+    (("mow", "cut the grass", "cut the lawn"), "mow_lawn", "Mow the lawn."),
     (("trash", "garbage"), "take_out_garbage", "Take the trash out."),
     (("wipe", "clean", "table", "counter", "surface"), "wipe_table", "Wipe the tables down."),
-    (("bottle", "pick", "carry", "take out", "move", "bin", "container"), "move_bin", "Pick it up and carry it out."),
+    (("bottle", "pick", "carry", "take out", "move", "bin", "container", "bring", "parcel", "towel", "deliver"), "move_bin", "Pick it up and carry it out."),
     (("bulb", "light", "lamp"), "change_bulb", "Change the light bulb."),
     (("open", "box", "lid"), "open_box", "Open it."),
 ]

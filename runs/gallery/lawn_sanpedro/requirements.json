@@ -1,0 +1,164 @@
+{
+  "schema": "requirements/1",
+  "world": "lawn_sanpedro",
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "navigate",
+      "anchor": null,
+      "object": null,
+      "carries": false,
+      "pattern": "coverage",
+      "area": "lawn",
+      "lane_m": 0.5,
+      "border_m": 0.7,
+      "waypoints": [
+        [
+          -12.1,
+          12.1,
+          1.5708
+        ],
+        [
+          -12.1,
+          21.1,
+          1.5708
+        ],
+        [
+          -11.6,
+          21.1,
+          -1.5708
+        ],
+        [
+          -11.6,
+          12.1,
+          -1.5708
+        ],
+        [
+          -11.1,
+          12.1,
+          1.5708
+        ],
+        [
+          -11.1,
+          21.1,
+          1.5708
+        ],
+        [
+          -10.6,
+          21.1,
+          -1.5708
+        ],
+        [
+          -10.6,
+          12.1,
+          -1.5708
+        ],
+        [
+          -10.1,
+          12.1,
+          1.5708
+        ],
+        [
+          -10.1,
+          21.1,
+          1.5708
+        ],
+        [
+          -9.6,
+          21.1,
+          -1.5708
+        ],
+        [
+          -9.6,
+          12.1,
+          -1.5708
+        ],
+        [
+          -9.1,
+          12.1,
+          1.5708
+        ],
+        [
+          -9.1,
+          21.1,
+          1.5708
+        ],
+        [
+          -8.6,
+          21.1,
+          -1.5708
+        ],
+        [
+          -8.6,
+          12.1,
+          -1.5708
+        ],
+        [
+          -8.1,
+          12.1,
+          1.5708
+        ],
+        [
+          -8.1,
+          21.1,
+          1.5708
+        ],
+        [
+          -7.6,
+          21.1,
+          -1.5708
+        ],
+        [
+          -7.6,
+          12.1,
+          -1.5708
+        ],
+        [
+          -7.1,
+          12.1,
+          1.5708
+        ],
+        [
+          -7.1,
+          19.2,
+          1.5708
+        ],
+        [
+          -6.6,
+          19.2,
+          -1.5708
+        ],
+        [
+          -6.6,
+          12.1,
+          -1.5708
+        ],
+        [
+          -6.1,
+          12.1,
+          1.5708
+        ],
+        [
+          -6.1,
+          19.2,
+          1.5708
+        ]
+      ],
+      "note": "13 lines 0.5 m apart, driven as 13 passes (a line that meets a keep-out is two), 111.3 m of cutting; a 0.7 m border is left for a trimmer. The catalog has no mowing deck: this plans where the base drives, and the deck is assumed."
+    }
+  ],
+  "corridors": [],
+  "requirements": [
+    {
+      "id": "r_step",
+      "task": null,
+      "quantity": "step_max",
+      "value": 0.0,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "assumed",
+      "from": "doorway records give 0.0 m; steps are not measured from a mesh, corridor assumed flat"
+    }
+  ],
+  "conflicts": []
+}

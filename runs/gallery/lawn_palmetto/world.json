@@ -1,0 +1,127 @@
+{
+  "schema": "world/1",
+  "id": "lawn_palmetto",
+  "frame": "metres, Z up, right handed; x east, y north, origin at the fetched point",
+  "source": "traced by eye on a Vexcel aerial photo (us-tx-cypress-2026, 0.0648 m a pixel) around 29.9049498, -95.4566954: the back lawn of the west house, its fence line on three sides and the house wall on the fourth, and the cluttered patio slab. Assumed, not in the photo: the patio clutter's height (0.6 m); that the ground is level",
+  "mesh": null,
+  "ground": {
+    "image": "world/scenarios/aerial/palmetto.jpg",
+    "extent": [
+      -30.05,
+      -30.039,
+      30.048,
+      30.013
+    ],
+    "m_per_px": 0.0648,
+    "source": "Vexcel Imaging ortho photo and building footprints, collection us-tx-cypress-2026",
+    "lat": 29.9049498,
+    "lon": -95.4566954
+  },
+  "floors": [
+    {
+      "id": "f0",
+      "z": 0.0
+    }
+  ],
+  "rooms": [
+    {
+      "id": "lawn",
+      "type": "lawn",
+      "floor": "f0",
+      "polygon": [
+        [
+          -22.6,
+          -17.9
+        ],
+        [
+          -7.2,
+          -17.9
+        ],
+        [
+          -7.2,
+          -6.0
+        ],
+        [
+          -18.6,
+          -6.0
+        ],
+        [
+          -18.6,
+          -5.2
+        ],
+        [
+          -22.6,
+          -5.2
+        ]
+      ],
+      "ceiling_m": 3.0,
+      "source": "manual"
+    }
+  ],
+  "doorways": [],
+  "obstacles": [
+    {
+      "id": "patio_clutter",
+      "room": "lawn",
+      "box": {
+        "min": [
+          -14.0,
+          -8.4,
+          0.0
+        ],
+        "max": [
+          -10.5,
+          -6.0,
+          0.6
+        ]
+      },
+      "seen": "photo"
+    }
+  ],
+  "dock": {
+    "room": "lawn",
+    "pose": [
+      -8.4,
+      -7.2,
+      3.141592653589793
+    ]
+  },
+  "way_out": {
+    "doorway": null,
+    "note": "the job stays on the lawn"
+  },
+  "anchors": [],
+  "areas": [
+    {
+      "id": "lawn",
+      "kind": "lawn",
+      "room": "lawn",
+      "polygon": [
+        [
+          -22.6,
+          -17.9
+        ],
+        [
+          -7.2,
+          -17.9
+        ],
+        [
+          -7.2,
+          -6.0
+        ],
+        [
+          -22.6,
+          -6.0
+        ]
+      ],
+      "keep_out": [
+        [
+          -14.75,
+          -9.15,
+          -9.75,
+          -5.0
+        ]
+      ]
+    }
+  ]
+}

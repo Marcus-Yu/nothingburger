@@ -47,8 +47,9 @@ def build_graph(
     """
     if classifier is None:  # SubQ Snap decides fast; Claude Sonnet takes what Snap can't settle (fast.py)
         classifier = default_classifier()
-    can_plan = None
+    can_plan = needs_demo = None
     if designer is None:  # the design and pathing pipeline; llm.make_designer() is the one-call alternative
+        from agent.design_flow.jobs import needs_demo
         from agent.design_flow.pipeline import can_plan, make_pipeline_designer
 
         designer = make_pipeline_designer()
@@ -56,7 +57,7 @@ def build_graph(
 
     graph = StateGraph(WorkflowState)
     graph.add_node("ask_task", ask_task)
-    graph.add_node("classify", make_classify(classifier, store, can_plan))
+    graph.add_node("classify", make_classify(classifier, store, can_plan, needs_demo))
     graph.add_node("request_demo", make_request_demo(store))
     graph.add_node("design", make_design(designer, store))
 

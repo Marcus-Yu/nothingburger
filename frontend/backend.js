@@ -105,6 +105,62 @@ const BUNDLED_WORLDS = [
     outside_label: '5836 La Mirada Ave',
     note: 'House from the hackathon set: Matterport mesh inside, Vexcel outside. Both load in the headset.',
   },
+  /* outdoor lots traced on Vexcel aerial photos: no tour, the studio shows the photo (aerial) */
+  {
+    id: 'lawn-palmetto',
+    name: 'Back lawn, Houston',
+    matterport: null,
+    aerial: 'assets/aerial/lawn-palmetto.jpg',
+    site: null,
+    outside: null,
+    outside_label: null,
+    jobs: ['Mow the lawn'],
+    note: 'A house’s fenced back lawn with a cluttered patio slab. Traced by eye on a Vexcel aerial photo (about 6 cm a pixel): the white outline is the ground the robot may use, the orange dot its dock. Heights, doors and anything under a roof are assumed.',
+  },
+  {
+    id: 'trash-palmetto',
+    name: 'House front and kerb, Houston',
+    matterport: null,
+    aerial: 'assets/aerial/trash-palmetto.jpg',
+    site: null,
+    outside: null,
+    outside_label: null,
+    jobs: ['Take out a trash bag'],
+    note: 'From an assumed kitchen out of the front door, past the vehicles on the driveway, to the bins at the kerb. Traced by eye on a Vexcel aerial photo (about 6 cm a pixel): the white outline is the ground the robot may use, the orange dot its dock. Heights, doors and anything under a roof are assumed.',
+  },
+  {
+    id: 'pooldeck-lakes',
+    name: 'Apartment pool deck, Houston',
+    matterport: null,
+    aerial: 'assets/aerial/pooldeck-lakes.jpg',
+    site: null,
+    outside: null,
+    outside_label: null,
+    jobs: ['Wipe a surface', 'Bring the towel to the clubhouse door'],
+    note: 'The deck north of the pool: a row of sun loungers, a daybed and the clubhouse wall. Traced by eye on a Vexcel aerial photo (about 6 cm a pixel): the white outline is the ground the robot may use, the orange dot its dock. Heights, doors and anything under a roof are assumed.',
+  },
+  {
+    id: 'parcel-eastland',
+    name: 'Driveway and kerb, Houston',
+    matterport: null,
+    aerial: 'assets/aerial/parcel-eastland.jpg',
+    site: null,
+    outside: null,
+    outside_label: null,
+    jobs: ['Bring the parcel to the front door'],
+    note: 'A concrete driveway from the house’s front wall to the street. Traced by eye on a Vexcel aerial photo (about 6 cm a pixel): the white outline is the ground the robot may use, the orange dot its dock. Heights, doors and anything under a roof are assumed.',
+  },
+  {
+    id: 'lawn-sanpedro',
+    name: 'Fenced lawn, Los Angeles',
+    matterport: null,
+    aerial: 'assets/aerial/lawn-sanpedro.jpg',
+    site: null,
+    outside: null,
+    outside_label: null,
+    jobs: ['Mow the lawn'],
+    note: 'A lawn between two houses with a patio slab in one corner. Traced by eye on a Vexcel aerial photo (about 6 cm a pixel): the white outline is the ground the robot may use, the orange dot its dock. Heights, doors and anything under a roof are assumed.',
+  },
 ];
 
 export const SAMPLE_SPACE = {
@@ -124,7 +180,7 @@ export async function loadSpaces() {
   }
   const live = Array.isArray(worlds) && worlds.length > 0;
   const scans = (live ? worlds : BUNDLED_WORLDS.map((w) => ({ ...w, in_headset: null, outside_mesh: null })))
-    .filter((w) => w && w.matterport)
+    .filter((w) => w && (w.matterport || w.aerial))   // a Matterport scan, or an outdoor lot shown as its aerial photo
     .map((w) => ({ ...w, kind: 'scan' }));
   return { spaces: [...scans, SAMPLE_SPACE], config: config || {}, live };
 }

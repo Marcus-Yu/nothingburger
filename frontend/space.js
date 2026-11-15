@@ -39,7 +39,7 @@ document.addEventListener('securitypolicyviolation', (e) => {
 });
 function syncBlocked() {
   const s = space.current;
-  const show = space.embedBlocked && !!s && s.kind === 'scan' && root.classList.contains('scan-on');
+  const show = space.embedBlocked && !!s && s.kind === 'scan' && !s.aerial && root.classList.contains('scan-on');
   els.blocked.hidden = !show;
   if (show) {
     els.tour.hidden = true;
@@ -99,7 +99,8 @@ function save(id) { try { localStorage.setItem('gb.space', id); } catch { /* pri
 function fillSelect() {
   const sel = els.select;
   sel.replaceChildren();
-  const scans = space.list.filter((s) => s.kind === 'scan');
+  const scans = space.list.filter((s) => s.kind === 'scan' && !s.aerial);
+  const lots = space.list.filter((s) => s.kind === 'scan' && s.aerial);
   const sims = space.list.filter((s) => s.kind === 'sim');
   const group = (label, items) => {
     const g = document.createElement('optgroup');
@@ -112,6 +113,7 @@ function fillSelect() {
     sel.append(g);
   };
   if (scans.length) group('Matterport scans', scans);
+  if (lots.length) group('Outdoor lots (Vexcel aerial)', lots);
   if (sims.length) group('Simulated', sims);
 }
 
@@ -123,7 +125,7 @@ export function setSpace(id, { quiet } = {}) {
   els.select.value = s.id;
   if (!quiet) save(s.id);
   root.classList.toggle('scan', s.kind === 'scan');
-  els.views.hidden = s.kind !== 'scan';
+  els.views.hidden = s.kind !== 'scan' || !!s.aerial;   // an outdoor lot has one view: its aerial photo
   const out = els.views.querySelector('[data-view="outside"]');
   out.disabled = !s.outside_mesh;
   out.title = s.outside_mesh ? `Vexcel aerial model of ${s.outside_label || 'the building'}` : 'No outside model on the backend for this space yet';
@@ -144,7 +146,7 @@ export function enterSpace(delay = 0) {
 export function preloadSpace() {
   const s = space.current;
   if (localTour(s)) { if (space.ready && !space.inStudio) ensurePano(s).load().catch(() => {}); return; }
-  if (!space.ready || space.inStudio || !s || s.kind !== 'scan' || els.tour.dataset.model === s.matterport) return;
+  if (!space.ready || space.inStudio || !s || s.kind !== 'scan' || s.aerial || els.tour.dataset.model === s.matterport) return;
   space.sdk = null;
   els.tour.dataset.model = s.matterport;
   els.tour.src = tourUrl(s);
@@ -177,6 +179,8 @@ function mount(delay) {
   const s = space.current;
   if (!s || s.kind !== 'scan') { unmount(); return; }
   const token = ++mountToken;
+  if (s.aerial) { mountAerial(s, token); return; }
+  if (els.outside.dataset.aerial) clearOutside();   // coming from an outdoor lot: its photo must not stay over the tour
   if (localTour(s)) {
     els.tour.hidden = true;
     if (els.tour.dataset.model) { els.tour.src = 'about:blank'; delete els.tour.dataset.model; space.sdk = null; }
@@ -211,6 +215,36 @@ function mount(delay) {
   if (delay > 0) mountTimer = setTimeout(go, delay); else go();
 }
 
+/* An outdoor lot: no tour to load, the space is its Vexcel aerial photo with the robot's ground outlined. */
+function mountAerial(s, token) {
+  if (pano) pano.hide();
+  els.tour.hidden = true;
+  if (els.tour.dataset.model) { els.tour.src = 'about:blank'; delete els.tour.dataset.model; space.sdk = null; }
+  els.modes.hidden = true;
+  els.loading.hidden = true;
+  els.blocked.hidden = true;
+  space.view = 'inside';
+  if (els.outside.dataset.aerial !== s.id) {
+    const img = Object.assign(document.createElement('img'), { className: 'aerial-photo', src: s.aerial, alt: `${s.name}, from above: a Vexcel aerial photo with the ground the robot may use outlined in white` });
+    const cap = Object.assign(document.createElement('p'), { className: 'aerial-cap', textContent: `${s.name} · Vexcel aerial photo · white outline: where the robot may drive · orange dot: its dock` });
+    els.outside.replaceChildren(img, cap);
+    els.outside.dataset.aerial = s.id;
+    delete els.outside.dataset.world;
+  }
+  els.outside.hidden = false;
+  root.classList.add('scan-on');
+  root.classList.remove('glide-on');
+  clearTimeout(coverTimer);
+  coverTimer = setTimeout(() => { if (token === mountToken) space.cover = true; }, 800);
+}
+
+function clearOutside() {
+  els.outside.hidden = true;
+  els.outside.replaceChildren();
+  delete els.outside.dataset.aerial;
+  delete els.outside.dataset.world;
+}
+
 function unmount() {
   clearTimeout(mountTimer);
   clearTimeout(coverTimer);
@@ -225,8 +259,7 @@ function unmount() {
     els.tour.src = 'about:blank';
     delete els.tour.dataset.model;
   }
-  els.outside.hidden = true;
-  els.outside.replaceChildren();
+  clearOutside();
   els.blocked.hidden = true;
 }
 

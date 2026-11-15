@@ -1,0 +1,28 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "trash_bag_a",
+      "object": "trash_bag",
+      "carries": true,
+      "deliver_to": "way_out"
+    },
+    {
+      "id": "t2",
+      "skill": "pick",
+      "anchor": "trash_bag_b",
+      "object": "trash_bag",
+      "carries": true,
+      "deliver_to": "way_out"
+    },
+    {
+      "id": "t3",
+      "skill": "pick",
+      "anchor": "trash_bag_c",
+      "object": "trash_bag",
+      "carries": true,
+      "deliver_to": "way_out"
+    }
+  ]
+}

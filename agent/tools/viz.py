@@ -77,21 +77,35 @@ _top: dict = {}
 WALK_W, WALK_H, WALK_FPS = 960, 540, 24
 DRIVE_MPS, TURN_RPS = 0.6, 1.2   # how fast the base is shown driving and turning (assumed; no card gives base speeds)
 DRIVE_X, ARM_X = 5.0, 10.0       # the film runs this many times faster than the motion, driving and arm work
+COVER_X = 15.0                   # ... and a coverage pattern (a navigate task's waypoints, e.g. mowing passes) this many times
+TRAIL_RGBA = (0.80, 0.93, 0.55, 0.42)  # the ground a coverage pass has been over, drawn on the film
+
+
+def _waypoint_leg(leg: dict) -> bool:
+    """True for a leg between two waypoints of the same navigate task (route stops named "<task>.<n>")."""
+    a, b = str(leg.get("from")).rpartition("."), str(leg.get("to")).rpartition(".")
+    return bool(a[0]) and a[0] == b[0] and a[2].isdigit() and b[2].isdigit()
+
+
+GROUND_MARGIN_M = 2.5  # a world drawn on an aerial photo shows this much of the photo around its rooms
 
 
 def top_extent(world: dict) -> list:
     """[x0, y0, x1, y1]: the square of floor the top view shows (the rooms plus a margin)."""
     pts = np.array([p for r in world["rooms"] for p in r["polygon"]], dtype=float)
     lo, hi = pts.min(0), pts.max(0)
-    c, half = (lo + hi) / 2, float((hi - lo).max()) / 2 + 0.6
+    c, half = (lo + hi) / 2, float((hi - lo).max()) / 2 + (GROUND_MARGIN_M if world.get("ground") else 0.6)
     return [float(c[0] - half), float(c[1] - half), float(c[0] + half), float(c[1] + half)]
+
+
+OPEN_AIR = ("yard", "lawn", "deck", "driveway")  # room types with no walls and, on an aerial photo, no drawn floor
 
 
 def _wall_runs(world: dict):
     """Wall segments [(x0, y0, x1, y1)]: every room edge, with a gap at each doorway on it."""
     out = []
     for room in world["rooms"]:
-        if room.get("type") == "yard":
+        if room.get("type") in OPEN_AIR:
             continue
         poly = [np.array(p, dtype=float) for p in room["polygon"]]
         for a, b in zip(poly, poly[1:] + poly[:1]):
@@ -127,11 +141,67 @@ def _scan(world: dict):
         return None
 
 
-def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
+def _ground(world: dict):
+    """(PNG path, [x0, y0, x1, y1]) of the aerial photo the world lies on (`ground` in world.json: an image
+    in the repo and the square of the world's frame it covers, north up), or None. MuJoCo reads PNG, so a
+    JPEG is converted once into the system's temp folder."""
+    import tempfile
+    from pathlib import Path
+
+    g = world.get("ground")
+    if not g:
+        return None
+    src = Path(__file__).resolve().parents[2] / g["image"]
+    try:
+        from PIL import Image
+
+        png = Path(tempfile.gettempdir()) / f"robots-ground-{src.stem}-{int(src.stat().st_mtime)}.png"
+        if not png.exists():
+            Image.open(src).convert("RGB").save(png)
+        return png, [float(v) for v in g["extent"]]
+    except Exception:  # no photo on disk, or no Pillow: the world is drawn without it
+        return None
+
+
+RELIEF_M = 0.2       # the surveyed ground is drawn as a surface with a vertex about this often
+RELIEF_FLAT_M = 0.12  # ... and anything lower than this is drawn flat, so the robot's wheels stand on it
+
+
+def _relief(world: dict):
+    """(vertices, faces, texture coordinates) of the surveyed ground as a surface, flat lists for MjSpec, or None
+    when the world has no height survey. Each vertex takes the highest value in its patch of the survey, so a
+    fence or a car keeps its height; the photo is draped over it by the same coordinates as the flat ground."""
+    try:
+        import nav.grid as G
+
+        got = G.ground_raster(world)
+    except Exception:
+        return None
+    if got is None:
+        return None
+    height, _, (x0, y0, x1, y1) = got
+    rows, cols = height.shape
+    step = max(1, int(round(RELIEF_M / ((x1 - x0) / cols))))
+    r, c = rows // step, cols // step
+    h = height[:r * step, :c * step].reshape(r, step, c, step).max(axis=(1, 3))
+    h = np.where((h > RELIEF_FLAT_M) & (h < 90), h, 0.0)   # 99 marks ground the survey does not cover
+    x = x0 + (np.arange(c) + 0.5) * step * (x1 - x0) / cols
+    y = y1 - (np.arange(r) + 0.5) * step * (y1 - y0) / rows
+    X, Y = np.meshgrid(x, y)
+    verts = np.stack([X, Y, h], axis=-1).reshape(-1, 3)
+    uv = np.stack([(X - x0) / (x1 - x0), (y1 - Y) / (y1 - y0)], axis=-1).reshape(-1, 2)
+    i, j = np.meshgrid(np.arange(r - 1), np.arange(c - 1), indexing="ij")
+    nw, ne, sw, se = i * c + j, i * c + j + 1, (i + 1) * c + j, (i + 1) * c + j + 1
+    faces = np.concatenate([np.stack([nw, sw, se], -1).reshape(-1, 3), np.stack([nw, se, ne], -1).reshape(-1, 3)])
+    return verts.ravel().tolist(), faces.ravel().tolist(), uv.ravel().tolist()
+
+
+def _top_scene(world: dict, robot_xml: str | None, top: bool = True, trails: tuple = (), props: tuple = ()):
     """(model, data, renderer, camera, robot geom mask) for the world seen from straight above (parallel
     projection), cached."""
     scan = _scan(world)
-    key = (world.get("id"), len(str(world)), hash(robot_xml), top, bool(scan))
+    ground = None if scan else _ground(world)
+    key = (world.get("id"), len(str(world)), hash(robot_xml), top, bool(scan), bool(ground), trails, props)
     if key in _top:
         return _top[key]
     spec = mujoco.MjSpec.from_string(robot_xml) if robot_xml else mujoco.MjSpec()
@@ -164,7 +234,29 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
                 seen[t["texture"]] = f"scan_m{i}"
             spec.add_mesh(name=f"scan_g{i}", file=str(root / t["mesh"]), inertia=mujoco.mjtMeshInertia.mjMESH_INERTIA_SHELL)
             wb.add_geom(type=mujoco.mjtGeom.mjGEOM_MESH, meshname=f"scan_g{i}", material=seen[t["texture"]], contype=0, conaffinity=0)
+    if ground:  # the aerial photo, laid flat at the world's scale; it is its own light, like the scan
+        spec.visual.headlight.ambient = [0.72, 0.72, 0.72]
+        spec.visual.headlight.diffuse = [0.12, 0.12, 0.12]
+        png, (gx0, gy0, gx1, gy1) = ground
+        spec.add_texture(name="ground_t", type=mujoco.mjtTexture.mjTEXTURE_2D, file=str(png))
+        mat = spec.add_material(name="ground_m", specular=0, shininess=0)
+        tex = [""] * int(mujoco.mjtTextureRole.mjNTEXROLE)
+        tex[int(mujoco.mjtTextureRole.mjTEXROLE_RGB)] = "ground_t"
+        mat.textures = tex
+        relief = _relief(world)
+        if relief:  # the survey's heights: houses, trees, fences and parked cars stand up out of the photo
+            spec.visual.headlight.ambient = [0.58, 0.58, 0.58]
+            spec.visual.headlight.diffuse = [0.30, 0.30, 0.30]
+            spec.add_mesh(name="ground_g", uservert=relief[0], userface=relief[1], usertexcoord=relief[2],
+                          inertia=mujoco.mjtMeshInertia.mjMESH_INERTIA_SHELL)
+        else:
+            spec.add_mesh(name="ground_g", uservert=[gx0, gy0, 0, gx1, gy0, 0, gx1, gy1, 0, gx0, gy1, 0, gx0, gy0, -0.02, gx1, gy1, -0.02],
+                          userface=[0, 1, 2, 0, 2, 3, 0, 4, 1, 2, 5, 3], usertexcoord=[0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0],
+                          inertia=mujoco.mjtMeshInertia.mjMESH_INERTIA_SHELL)
+        wb.add_geom(type=mujoco.mjtGeom.mjGEOM_MESH, meshname="ground_g", material="ground_m", pos=[0, 0, -0.012], contype=0, conaffinity=0)
     for r in [] if scan else world["rooms"]:
+        if ground and r.get("type") in OPEN_AIR:  # open ground is the photo itself
+            continue
         p = np.array(r["polygon"], dtype=float)
         lo, hi = p.min(0), p.max(0)
         rgb = FLOORS.get(r.get("type"), (0.74, 0.72, 0.68))
@@ -173,9 +265,15 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
         length, yaw = float(np.hypot(bx - ax, by - ay)), float(np.arctan2(by - ay, bx - ax))
         wb.add_geom(type=box, pos=[(ax + bx) / 2, (ay + by) / 2, WALL_H / 2], size=[length / 2 + WALL_T / 2, WALL_T / 2, WALL_H / 2],
                     quat=[np.cos(yaw / 2), 0, 0, np.sin(yaw / 2)], rgba=[0.93, 0.92, 0.89, 1], contype=0, conaffinity=0)
+    moved = {f"{name}_body" for name, *_ in props}  # the film moves these itself (a bag the robot carries off)
     for o in [] if scan else world.get("obstacles", []):
+        if o["id"] in moved:
+            continue
         lo, hi = np.array(o["box"]["min"], dtype=float), np.array(o["box"]["max"], dtype=float)
         rgb = next((c for k, c in FURNITURE if k in o["id"]), (0.60, 0.58, 0.55))
+        if ground and o.get("seen") == "photo":  # already in the photo: only its volume is shown, faintly
+            wb.add_geom(type=box, pos=list((lo + hi) / 2), size=list(np.maximum((hi - lo) / 2, 0.005)), rgba=[0.85, 0.87, 0.90, 0.28], contype=0, conaffinity=0)
+            continue
         if "table" in o["id"] and hi[2] - lo[2] > 0.5:  # a table is a top on four legs, not a solid block
             skirt = 0.30 if "cloth" in o["id"] else 0.04  # a tablecloth hangs part of the way down
             for sx in (-1, 1):
@@ -188,6 +286,12 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
     if not top and robot_xml:  # the wiping cloth, placed frame by frame by the film
         cloth = wb.add_body(name="towel", mocap=True, pos=[0, 0, -5])
         cloth.add_geom(type=box, size=[v / 2 for v in TOWEL], rgba=[*TOWEL_RGB, 1], contype=0, conaffinity=0)
+    for name, sx, sy, sz in props:  # one box a carried object, placed frame by frame by the film
+        body = wb.add_body(name=f"prop_{name}", mocap=True, pos=[0, 0, -5])
+        body.add_geom(type=box, size=[sx / 2, sy / 2, sz / 2], rgba=[*CARRIED_RGB, 1], contype=0, conaffinity=0)
+    for k, (tx, ty, yaw, half, wide) in enumerate(trails):  # a coverage pattern's tiles, invisible until the film reaches each
+        wb.add_geom(name=f"trail{k}", type=box, pos=[tx, ty, 0.004], size=[half, wide, 0.002], quat=[np.cos(yaw / 2), 0, 0, np.sin(yaw / 2)],
+                    rgba=[*TRAIL_RGBA[:3], 0.0], contype=0, conaffinity=0)
     if not top:  # the film looks across the floor, so there has to be something beyond the building
         wb.add_geom(type=box, pos=[(x0 + x1) / 2, (y0 + y1) / 2, -0.06], size=[x1 - x0 + 20, y1 - y0 + 20, 0.01], rgba=[0.20, 0.21, 0.22, 1],
                     contype=0, conaffinity=0)
@@ -287,7 +391,7 @@ def _timeline(build: dict, route: dict, trajectory: dict):
         for wp in leg["waypoints"]:
             wp = [float(v) for v in wp]
             dist, turn = float(np.hypot(wp[0] - pose[0], wp[1] - pose[1])), abs(wrap(wp[2] - pose[2]))
-            n = max(1, int(np.ceil(max(dist / DRIVE_MPS, turn / TURN_RPS) / DRIVE_X * WALK_FPS)))
+            n = max(1, int(np.ceil(max(dist / DRIVE_MPS, turn / TURN_RPS) / (COVER_X if _waypoint_leg(leg) else DRIVE_X) * WALK_FPS)))
             for k in range(1, n + 1):
                 f = k / n
                 frames.append(([pose[0] + (wp[0] - pose[0]) * f, pose[1] + (wp[1] - pose[1]) * f, pose[2] + wrap(wp[2] - pose[2]) * f], stowed, "drive"))
@@ -348,7 +452,86 @@ def _towel_track(robot_xml: str, build: dict, frames) -> np.ndarray | None:
     return out
 
 
-def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajectory: dict) -> dict | None:
+TRAIL_TILE_M = 0.5  # a coverage pass is drawn as tiles this long, each shown once the robot has been over it
+
+
+def _trail(route: dict, tasks, frames, chapters) -> tuple:
+    """The ground a coverage pattern has been over, as tiles for the film: ((x, y, yaw, half length, half width,
+    first frame shown), ...) in the order they appear. A pass is every odd-to-even waypoint leg of a navigate
+    task with a `lane_m` (waypoints 2k+1 and 2k+2 are the ends of pass k)."""
+    lanes = {t["id"]: float(t["lane_m"]) for t in tasks or [] if t.get("skill") == "navigate" and t.get("lane_m")}
+    starts = [i for i, label in chapters if label.startswith("drive:")] + [len(frames)]  # one drive chapter a leg, in order
+    out = []
+    for k, leg in enumerate(route.get("legs", [])):
+        tid, _, n = str(leg.get("from")).rpartition(".")
+        if not (_waypoint_leg(leg) and tid in lanes and int(n) % 2 == 1):
+            continue
+        a, b = np.array(leg["waypoints"][0][:2], dtype=float), np.array(leg["waypoints"][-1][:2], dtype=float)
+        length = float(np.linalg.norm(b - a))
+        if length < 1e-6:
+            continue
+        u, yaw = (b - a) / length, float(np.arctan2(b[1] - a[1], b[0] - a[0]))
+        along = [float((np.array(frames[i][0][:2]) - a) @ u) for i in range(starts[k], starts[k + 1])]
+        tiles = max(1, int(round(length / TRAIL_TILE_M)))
+        for j in range(tiles):
+            s0, s1 = length * j / tiles, length * (j + 1) / tiles
+            shown = next((starts[k] + i for i, v in enumerate(along) if v >= s1 - 1e-6), starts[k + 1])
+            c = a + u * (s0 + s1) / 2
+            out.append((round(float(c[0]), 3), round(float(c[1]), 3), round(yaw, 4), round((s1 - s0) / 2, 3), lanes[tid] / 2, shown))
+    return tuple(sorted(out, key=lambda t: t[5]))
+
+
+CARRIED_RGB = (0.14, 0.16, 0.15)  # a carried object (a tied trash bag) as the film draws it
+GRASP_M = 0.18                    # the tool this close to an object's anchor has hold of it
+
+
+def _carried(world: dict, robot_xml: str, build: dict, tasks, frames, chapters) -> list:
+    """What the robot carries off, for the film: [(anchor id, (sx, sy, sz), track [n, 3])], one for every carrying
+    task whose anchor has a `<anchor>_body` obstacle box. The box rests where the world puts it, hangs under the
+    tool from the frame the tool reaches its anchor until the carrying leg ends, and is left on the ground there
+    (each one a little further along, so they do not sit inside each other). Drawn for the viewer only."""
+    anchors = {a["id"]: a for a in world.get("anchors", [])}
+    bodies = {o["id"]: o["box"] for o in world.get("obstacles", [])}
+    carrying = [t for t in tasks or [] if t.get("carries") and f"{t.get('anchor')}_body" in bodies and t.get("anchor") in anchors]
+    if not carrying:
+        return []
+    m = mujoco.MjModel.from_xml_string(robot_xml)
+    d = mujoco.MjData(m)
+    site = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_SITE, build.get("tool_site") or "tool")
+    if site < 0:
+        return []
+    jadr = {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j): m.jnt_qposadr[j] for j in range(m.njnt)}
+    tool = np.zeros((len(frames), 3))
+    for i, (pose, q, _) in enumerate(frames):
+        mujoco.mj_resetData(m, d)
+        for name, v in {**q, "joint_x": pose[0], "joint_y": pose[1], "joint_th": pose[2]}.items():
+            if name in jadr:
+                d.qpos[jadr[name]] = v
+        mujoco.mj_kinematics(m, d)
+        tool[i] = d.site_xpos[site]
+    drives = [(i, label) for i, label in chapters if label.startswith("drive:")] + [(len(frames), "")]
+    out = []
+    for k, t in enumerate(carrying):
+        b = bodies[f"{t['anchor']}_body"]
+        lo, hi = np.array(b["min"], float), np.array(b["max"], float)
+        size, rest = hi - lo, (lo + hi) / 2
+        leg = next((n for n, (_, label) in enumerate(drives) if label.startswith(f"drive: {t['id']} to way_out")), None)
+        if leg is None:
+            continue
+        start, end = drives[leg][0], drives[leg + 1][0]          # the carrying leg's frames
+        arrive = drives[leg - 1][0] if leg else 0                  # the leg that brought the robot to the object
+        near = [i for i in range(arrive, start) if np.linalg.norm(tool[i] - np.array(anchors[t["anchor"]]["point"], float)) < GRASP_M]
+        hold = near[0] if near else start
+        track = np.tile(rest, (len(frames), 1))
+        track[hold:end] = tool[hold:end] - [0.0, 0.0, size[2] / 2]
+        track[hold:end, 2] = np.maximum(track[hold:end, 2], size[2] / 2)
+        yaw = frames[end - 1][0][2]
+        track[end:] = [tool[end - 1][0] + k * (size[0] + 0.08) * -np.sin(yaw), tool[end - 1][1] + k * (size[0] + 0.08) * np.cos(yaw), size[2] / 2]
+        out.append((t["anchor"], tuple(round(float(v), 3) for v in size), track))
+    return out
+
+
+def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajectory: dict, tasks: list | None = None) -> dict | None:
     """Film the planned job: the robot drives its route through the rendered rooms and runs each arm motion,
     with the camera following. Written as frames/walkthrough.mp4 (needs ffmpeg on the PATH). Returns
     {"video", "seconds", "chapters": [{"t", "label"}], "note"} or None when frames are off or it cannot be made.
@@ -365,13 +548,23 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
         frames, chapters = _timeline(build, route, trajectory)
         if not frames:
             raise RuntimeError("the route has no legs")
-        m, d, r, cam, _ = _top_scene(world, robot_xml, top=False)
+        trail = _trail(route, tasks, frames, chapters)
+        carried = _carried(world, robot_xml, build, tasks, frames, chapters)
+        m, d, r, cam, _ = _top_scene(world, robot_xml, top=False, trails=tuple(t[:5] for t in trail),
+                                     props=tuple((name, *size) for name, size, _ in carried))
+        prop_ids = [m.body_mocapid[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, f"prop_{name}")] for name, _, _ in carried]
+        strips = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, f"trail{k}") for k in range(len(trail))]
+        for g in strips:  # the cached scene may have been filmed before
+            m.geom_rgba[g][3] = 0.0
+        shown = 0
         jadr = {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j): m.jnt_qposadr[j] for j in range(m.njnt)}
         video = where[0].with_name("walkthrough.mp4")
         ff = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{WALK_W}x{WALK_H}",
                                "-r", str(WALK_FPS), "-i", "-", "-an", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "27",
                                "-movflags", "+faststart", str(video)], stdin=subprocess.PIPE)
-        cam.azimuth, cam.elevation, cam.distance = 62.0, -30.0, 4.6
+        cam.azimuth, cam.elevation, cam.distance = (62.0, -36.0, 6.0) if world.get("ground") else (62.0, -30.0, 4.6)
+        view = (world.get("ground") or {}).get("view") or {}  # a world on surveyed ground says which side to film from
+        cam.azimuth, cam.elevation, cam.distance = (float(view.get(k, v)) for k, v in (("azimuth", cam.azimuth), ("elevation", cam.elevation), ("distance", cam.distance)))
         look = np.array([frames[0][0][0], frames[0][0][1], 0.5])
         towel, tid = _towel_track(robot_xml, build, frames), m.body_mocapid[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, "towel")]
         for i, (pose, q, _) in enumerate(frames):
@@ -381,6 +574,11 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
                     d.qpos[jadr[name]] = v
             if towel is not None:
                 d.mocap_pos[tid], d.mocap_quat[tid] = towel[i, :3], towel[i, 3:]
+            for pid, (_, _, track) in zip(prop_ids, carried):
+                d.mocap_pos[pid] = track[i]
+            while shown < len(trail) and trail[shown][5] <= i:  # the tiles the robot has now been over
+                m.geom_rgba[strips[shown]][3] = TRAIL_RGBA[3]
+                shown += 1
             mujoco.mj_forward(m, d)
             look += 0.12 * (np.array([pose[0], pose[1], 0.5]) - look)  # the camera eases after the robot
             cam.lookat[:] = look
@@ -391,7 +589,8 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
             raise RuntimeError("ffmpeg failed")
         return {"video": f"frames/{video.name}", "seconds": round(len(frames) / WALK_FPS, 1),
                 "chapters": [{"t": round(i / WALK_FPS, 1), "label": label} for i, label in chapters],
-                "note": f"the plan played back, not a physics simulation; driving shown {DRIVE_X:g}x and arm work {ARM_X:g}x faster than planned"}
+                "note": f"the plan played back, not a physics simulation; driving shown {DRIVE_X:g}x and arm work {ARM_X:g}x faster than planned"
+                        + (f", coverage passes {COVER_X:g}x" if trail else "")}
     except Exception as e:
         observe.emit("note", text=f"walkthrough failed: {type(e).__name__}: {e}")
         return None

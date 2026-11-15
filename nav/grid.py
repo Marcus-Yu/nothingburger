@@ -166,8 +166,47 @@ def way_out_point(world: dict):
     return [float(g[0]), float(g[1]), float(math.atan2(n[1], n[0]))], door
 
 
-def from_world(world: dict, z_band=PREPASS_BAND_M, *, cell: float = CELL_M, pad_m: float = 1.5) -> Grid:
-    """Grid from room polygons, doorway gaps and the obstacle boxes overlapping z_band.
+GROUND_STEP_M = 0.15  # ground standing higher than this above the bare ground is not driven over (a kerb is about 0.12 m)
+_rasters: dict = {}
+
+
+def ground_raster(world: dict):
+    """(height, water, [x0, y0, x1, y1]) of the surveyed ground the world lies on, or None. `ground.height` in
+    world.json names an .npz in the repo: `height` in metres above the bare ground and `water` (open water),
+    one value per pixel of the aerial photo, row 0 at the north edge, covering `ground.extent`."""
+    from pathlib import Path
+
+    g = world.get("ground") or {}
+    if not g.get("height"):
+        return None
+    path = Path(__file__).resolve().parents[1] / g["height"]
+    key = (str(path), path.stat().st_mtime)
+    if key not in _rasters:
+        z = np.load(path)
+        _rasters.clear()
+        _rasters[key] = (z["height"].astype(np.float32), z["water"].astype(bool))
+    return (*_rasters[key], [float(v) for v in g["extent"]])
+
+
+def ground_blocked(world: dict, x, y) -> np.ndarray:
+    """True where the survey shows something standing on the ground at (x, y), or open water, or nothing at all
+    (outside the survey). The survey sees the top of things only: ground under a tree's canopy counts as blocked."""
+    got = ground_raster(world)
+    x, y = np.asarray(x, float), np.asarray(y, float)
+    if got is None:
+        return np.zeros(x.shape, bool)
+    height, water, (x0, y0, x1, y1) = got
+    rows, cols = height.shape
+    j = np.floor((x - x0) / (x1 - x0) * cols).astype(int)
+    i = np.floor((y1 - y) / (y1 - y0) * rows).astype(int)
+    inside = (i >= 0) & (i < rows) & (j >= 0) & (j < cols)
+    i, j = np.clip(i, 0, rows - 1), np.clip(j, 0, cols - 1)
+    return ~inside | (height[i, j] > GROUND_STEP_M) | water[i, j]
+
+
+def from_world(world: dict, z_band=PREPASS_BAND_M, *, cell: float = CELL_M, pad_m: float = 1.5, ground: bool = True) -> Grid:
+    """Grid from room polygons, doorway gaps and the obstacle boxes overlapping z_band, and, when the world lies
+    on surveyed ground (`ground.height`), whatever that survey shows standing on it (`ground=False` leaves it out).
 
     Everything outside every room is occupied, except a small apron beyond each
     doorway that leads outside (so the way out can be driven through). Every
@@ -228,6 +267,8 @@ def from_world(world: dict, z_band=PREPASS_BAND_M, *, cell: float = CELL_M, pad_
         if mn[2] < hi and mx[2] > lo:
             h = cell / 2 + 1e-9
             occ |= (cx >= mn[0] - h) & (cx <= mx[0] + h) & (cy >= mn[1] - h) & (cy <= mx[1] + h)
+    if ground and (world.get("ground") or {}).get("height"):
+        occ |= ground_blocked(world, cx, cy)
     grid.occ = occ
     return grid
 

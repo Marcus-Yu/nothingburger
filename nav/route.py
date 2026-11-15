@@ -323,6 +323,10 @@ def plan(world: dict, build: dict, *, requirements: dict, standoffs: list) -> di
     stops = [{"name": "dock", "pose": dock}]
     for t in (requirements or {}).get("tasks", []):
         mine = [(k, s) for k, s in enumerate(standoffs or []) if s.get("task") == t["id"]]
+        if t.get("skill") == "navigate":  # a route given as poses to drive through in order (a coverage pattern), no arm work
+            for k, w in enumerate(t.get("waypoints") or []):
+                stops.append({"name": f"{t['id']}.{k + 1}", "pose": [float(v) for v in w[:3]]})
+            continue
         if not mine:
             if t.get("skill") != "navigate":
                 a = anchors.get(t.get("anchor"))

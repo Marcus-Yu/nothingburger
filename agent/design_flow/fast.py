@@ -38,9 +38,10 @@ SEED_SKILLS = {
     "take_out_garbage": "Take a trash bag or bin out",
     "change_bulb": "Change or check a light bulb",
     "open_box": "Open a box, lid, drawer or door",
+    "mow_lawn": "Mow a lawn or cut grass",
 }
 OTHER = "other"
-NOT_A_CHORE = "That doesn't sound like a physical chore a robot could do in this building."
+NOT_A_CHORE = "That doesn't sound like a physical chore a robot could do here."
 NOT_KNOWN = "It sounds like a chore, but not one I know yet."
 
 
@@ -55,8 +56,9 @@ def snap_decide(task: str, options: dict[str, str | None], timeout: float = 15.0
         raise SnapError("SUBQ_API_KEY is not set")
     body = {"model": SNAP_MODEL, "state": task, "questions": {
         "is_chore": {"type": "noul",
-                     "instructions": "Is this a physical chore a wheeled robot with one arm and a gripper could do inside a building?",
-                     "criteria": {"true": "A physical task on objects or surfaces in a building",
+                     "instructions": "Is this a physical chore a mobile robot with one arm and a gripper could do inside a building "
+                                     "or outside on its grounds (a lawn, a driveway, a pool deck)?",
+                     "criteria": {"true": "A physical task on objects, surfaces or ground, in a building or on its grounds",
                                   "false": "Not physical, not a chore, or unsafe"}},
         "skill": {"type": "choice", "instructions": "Which skill is this chore?", "criteria": options},
     }}

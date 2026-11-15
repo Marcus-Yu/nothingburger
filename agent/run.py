@@ -95,7 +95,8 @@ def pipeline(state: dict) -> dict:
             break
         state = observe.node("5 pathing", pathing.step)(state)
         stuck = sorted({f["task"] for f in state["route"]["failures"] if f.get("task") and f.get("kind") in ("standoff", "no_standoff", None)}
-                       | {t["id"] for t in state["tasks"] if not any(s["task"] == t["id"] for s in state["route"]["standoffs"])})
+                       | {t["id"] for t in state["tasks"] if t["skill"] != "navigate"  # a navigate task has no standoff by design
+                          and not any(s["task"] == t["id"] for s in state["route"]["standoffs"])})
         bad_paths = [e for e in state["trajectory"]["tasks"] if e.get("failure")]
         no_path = sorted({e["task"] for e in bad_paths} - set(stuck))
         score = (len(stuck), len(bad_paths), state["design"]["price_usd"])
@@ -126,7 +127,7 @@ def pipeline(state: dict) -> dict:
         pr = state["program"]
         observe.emit("program", source=pr["source"], model=pr.get("model"), rejected=pr.get("model_rejected"), steps=pr["steps"])
         if state.get("walkthrough"):  # film the plan: the robot driving the route and running each arm motion
-            film = viz.walkthrough(state["world"], state["robot_xml"], state["build"], state["route"], state["trajectory"])
+            film = viz.walkthrough(state["world"], state["robot_xml"], state["build"], state["route"], state["trajectory"], state["tasks"])
             if film:
                 observe.emit("walkthrough", **film)
             if state["world"].get("tour"):  # the world is a traced Matterport tour: export the robot to draw inside it
@@ -188,6 +189,21 @@ def validate_run(out: Path) -> list:
     return results
 
 
+def _stops(names: list) -> list:
+    """Route stop names for the summary line, with a navigate task's waypoints ("t1.1", "t1.2", ...) as one entry."""
+    out = []
+    for n in names:
+        tid, dot, k = str(n).rpartition(".")
+        if dot and k.isdigit():
+            if out and out[-1][0] == tid:
+                out[-1][1] += 1
+            else:
+                out.append([tid, 1])
+        else:
+            out.append(n)
+    return [f"{x[0]} ({x[1]} waypoints)" if isinstance(x, list) else x for x in out]
+
+
 def summary(state: dict) -> list:
     """The lines printed at the end of a run."""
     d, lines = state.get("design") or {}, []
@@ -219,6 +235,10 @@ def summary(state: dict) -> list:
         route, traj = state["route"], state["trajectory"]
         for t in state["tasks"]:
             mine = [s for s in route["standoffs"] if s["task"] == t["id"]]
+            if t["skill"] == "navigate":
+                n = sum(1 for l in route["legs"] if str(l["to"]).startswith(t["id"] + "."))
+                lines.append(f"{t['id']} navigate: {n} of {len(t.get('waypoints') or [])} waypoints reached")
+                continue
             if not mine:
                 lines.append(f"{t['id']} {t['skill']}: no standoff")
             for s in mine:
@@ -230,7 +250,7 @@ def summary(state: dict) -> list:
                              + (f" [{s['covers']}]" if "covers" in s else "") + f"; trajectory {arm}")
         legs = route["legs"]
         lines.append(f"route: {len(legs)} legs, {round(sum(l.get('length_m') or 0 for l in legs), 2)} m: "
-                     + " > ".join([legs[0]["from"]] + [l["to"] for l in legs] if legs else []))
+                     + " > ".join(_stops([legs[0]["from"]] + [l["to"] for l in legs]) if legs else []))
     for f in state.get("robot_fixes", []):
         lines.append(f"robot fix {f['n']}: {f['why']}; was ${f['was']['price_usd']}")
     if not state["infeasible"] and state.get("program"):

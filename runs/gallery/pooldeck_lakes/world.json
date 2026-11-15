@@ -1,0 +1,305 @@
+{
+  "schema": "world/1",
+  "id": "pooldeck_lakes",
+  "frame": "metres, Z up, right handed; x east, y north, origin at the fetched point",
+  "source": "traced by eye on a Vexcel aerial photo (us-tx-houston-2026, 0.0649 m a pixel) around 29.670313, -95.4186077: the pool deck north of the pool: the clubhouse wall on the west, the fence on the north and east, the row of seven sun loungers, the lounger standing apart from them and the round daybed. Assumed, not in the photo: every height (lounger tops 0.35 m, daybed 0.45 m); the clubhouse door, which cannot be seen from above and is put on the west wall; that a towel has been left on the daybed",
+  "mesh": null,
+  "ground": {
+    "image": "world/scenarios/aerial/lakes610.jpg",
+    "extent": [
+      -30.022,
+      -30.022,
+      30.021,
+      30.04
+    ],
+    "m_per_px": 0.0649,
+    "source": "Vexcel Imaging ortho photo and building footprints, collection us-tx-houston-2026",
+    "lat": 29.670313,
+    "lon": -95.4186077
+  },
+  "floors": [
+    {
+      "id": "f0",
+      "z": 0.0
+    }
+  ],
+  "rooms": [
+    {
+      "id": "deck",
+      "type": "deck",
+      "floor": "f0",
+      "polygon": [
+        [
+          -10.5,
+          8.3
+        ],
+        [
+          -6.3,
+          8.3
+        ],
+        [
+          -6.3,
+          12.8
+        ],
+        [
+          -1.5,
+          12.8
+        ],
+        [
+          -1.5,
+          14.2
+        ],
+        [
+          -5.0,
+          19.85
+        ],
+        [
+          -10.5,
+          19.85
+        ]
+      ],
+      "ceiling_m": 3.0,
+      "source": "manual"
+    }
+  ],
+  "doorways": [
+    {
+      "id": "d_club",
+      "rooms": [
+        "outside",
+        "deck"
+      ],
+      "position": [
+        -10.5,
+        12.6
+      ],
+      "along": [
+        0,
+        1
+      ],
+      "width_m": 0.9,
+      "header_m": 2.05,
+      "step_m": 0.0,
+      "source": "manual"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "lounger_1",
+      "room": "deck",
+      "box": {
+        "min": [
+          -10.01,
+          14.1,
+          0.0
+        ],
+        "max": [
+          -9.389999999999999,
+          17.0,
+          0.35
+        ]
+      },
+      "seen": "photo"
+    },
+    {
+      "id": "lounger_2",
+      "room": "deck",
+      "box": {
+        "min": [
+          -9.26,
+          14.1,
+          0.0
+        ],
+        "max": [
+          -8.639999999999999,
+          17.0,
+          0.35
+        ]
+      },
+      "seen": "photo"
+    },
+    {
+      "id": "lounger_3",
+      "room": "deck",
+      "box": {
+        "min": [
+          -8.51,
+          14.1,
+          0.0
+        ],
+        "max": [
+          -7.89,
+          17.0,
+          0.35
+        ]
+      },
+      "seen": "photo"
+    },
+    {
+      "id": "lounger_4",
+      "room": "deck",
+      "box": {
+        "min": [
+          -7.76,
+          14.1,
+          0.0
+        ],
+        "max": [
+          -7.140000000000001,
+          17.0,
+          0.35
+        ]
+      },
+      "seen": "photo"
+    },
+    {
+      "id": "lounger_5",
+      "room": "deck",
+      "box": {
+        "min": [
+          -7.01,
+          14.1,
+          0.0
+        ],
+        "max": [
+          -6.390000000000001,
+          17.0,
+          0.35
+        ]
+      },
+      "seen": "photo"
+    },
+    {
+      "id": "lounger_6",
+      "room": "deck",
+      "box": {
+        "min": [
+          -6.26,
+          14.1,
+          0.0
+        ],
+        "max": [
+          -5.640000000000001,
+          17.0,
+          0.35
+        ]
+      },
+      "seen": "photo"
+    },
+    {
+      "id": "lounger_7",
+      "room": "deck",
+      "box": {
+        "min": [
+          -5.609999999999999,
+          14.1,
+          0.0
+        ],
+        "max": [
+          -4.99,
+          17.0,
+          0.35
+        ]
+      },
+      "seen": "photo"
+    },
+    {
+      "id": "lounger_end",
+      "room": "deck",
+      "box": {
+        "min": [
+          -4.02,
+          14.3,
+          0.0
+        ],
+        "max": [
+          -3.38,
+          16.9,
+          0.35
+        ]
+      },
+      "seen": "photo"
+    },
+    {
+      "id": "daybed",
+      "room": "deck",
+      "box": {
+        "min": [
+          -10.45,
+          9.0,
+          0.0
+        ],
+        "max": [
+          -8.7,
+          10.8,
+          0.45
+        ]
+      },
+      "seen": "photo"
+    }
+  ],
+  "dock": {
+    "room": "deck",
+    "pose": [
+      -9.6,
+      18.7,
+      -1.5707963267948966
+    ]
+  },
+  "way_out": {
+    "doorway": "d_club",
+    "note": "the clubhouse door (assumed position)"
+  },
+  "anchors": [
+    {
+      "id": "lounger_top",
+      "room": "deck",
+      "kind": "surface",
+      "point": [
+        -3.7,
+        15.2,
+        0.35
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "source": "manual",
+      "extent": [
+        [
+          -4.0,
+          14.35
+        ],
+        [
+          -3.4,
+          14.35
+        ],
+        [
+          -3.4,
+          16.05
+        ],
+        [
+          -4.0,
+          16.05
+        ]
+      ]
+    },
+    {
+      "id": "towel",
+      "room": "deck",
+      "kind": "low_item",
+      "point": [
+        -8.85,
+        9.9,
+        0.5
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "source": "manual"
+    }
+  ]
+}

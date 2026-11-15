@@ -57,7 +57,7 @@ Capture today keeps one wrist pose and one grip value per hand (`capture/README.
 | `twist_out`, `twist_in` (bulb) | the anchor's axis, the demo's twist | a path (`unscrew bulb`) and a squeeze (`hold bulb`) |
 | `wipe` (surface) | the surface's extent in the building, the demo's stroke and passes | a path (`wipe table`); the press force comes from it |
 | `pick`, `carry`, `place` (trash bag) | the bin anchor, the route out, the demo's lift and hold | a path (`lift trash bag`) and a squeeze (`hold trash bag`) |
-| `navigate` | the route | none |
+| `navigate` | the route; with `waypoints` on the task, those poses in order (a coverage pattern such as mowing passes) | none |
 
 Intake keeps producing the shape of the website's stand-in planner (`world/pathfinder/backend/server/flow.py` on the `stream-c/pathfinder-quest` branch): `understood_as`, `steps[]` and `demos[{chore, kind, why}]`, so the site keeps working when the agent replaces the lookup table. It adds the task list for the steps after it.
 

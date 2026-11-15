@@ -6,7 +6,8 @@ demonstration is asked for, to say early when a job cannot be planned in this sp
     tasks_for("wipe_table", "Wipe a surface", world)   -> ([{"id": "t1", "skill": "wipe", ...}], None)
     tasks_for("change_bulb", "Change a light bulb", w) -> (None, "There is no light fixture in this space's ...")
 
-The pipeline's skills are wipe, pick (with carries/deliver_to), twist_out and twist_in (agent/nodes/intake.py).
+The pipeline's skills are wipe, pick (with carries/deliver_to), twist_out and twist_in (agent/nodes/intake.py),
+and navigate over one of the world's `areas` (mowing: back-and-forth passes from nav.api.cover).
 A design-workflow skill maps onto one of them by its name; anything else is not plannable yet.
 """
 
@@ -21,12 +22,18 @@ OBJECT_CARDS = REPO / "catalog" / "object"
 
 # skill-name words -> pipeline skill, verbs before nouns ("pick_up_bottle_on_table" is a pick, not a wipe)
 KINDS = [
+    (("mow",), "navigate"),  # the verb only: "pick up the toys on the lawn" is a pick
     (("wipe", "clean", "dust", "polish", "scrub"), "wipe"),
     (("carry", "move", "take_out", "garbage", "trash", "bin", "bag", "bottle", "pick", "fetch", "container", "bring"), "pick"),
     (("bulb", "lamp", "light", "unscrew"), "twist_out"),
     (("surface", "table", "counter", "desk"), "wipe"),
 ]
-NOT_YET = "The robot pipeline can wipe, pick up and carry, and unscrew bulbs so far; “{job}” isn’t one of those yet."
+NOT_YET = "The robot pipeline can wipe, pick up and carry, unscrew bulbs and mow so far; “{job}” isn’t one of those yet."
+
+
+def needs_demo(skill: str) -> bool:
+    """False for a skill the robot does by driving alone (mowing): there is no hand motion or grip to show."""
+    return pipeline_skill(skill) != "navigate"
 
 
 def pipeline_skill(skill: str) -> str | None:
@@ -49,12 +56,12 @@ def _object_for(anchor: str) -> str | None:
 
 # words in a job that name a specific object card; a job naming none ("a container", "it") takes any item
 NAMED = {"trash": "trash_bag", "garbage": "trash_bag", "bag": "trash_bag", "bottle": "sample_bottle",
-         "remote": "tv_remote", "towel": "hand_towel", "pill": "pill_organiser", "drive": "drive_sled", "part": "machined_part"}
+         "remote": "tv_remote", "towel": "hand_towel", "pill": "pill_organiser", "drive": "drive_sled", "part": "machined_part", "parcel": "parcel_small"}
 
 
 def _named(job: str, skill: str) -> str | None:
-    text = f"{job} {skill}".lower()
-    return next((card for word, card in NAMED.items() if word in text), None)
+    text = f"{job} {skill}".lower().replace("_", " ")
+    return next((card for word, card in NAMED.items() if re.search(rf"\b{word}s?\b", text)), None)  # whole words: a driveway is not a drive
 
 
 def _wants_all(job: str) -> bool:
@@ -68,6 +75,14 @@ def tasks_for(skill: str, job: str, world: dict) -> tuple[list | None, str | Non
         return None, NOT_YET.format(job=job.strip().rstrip(".") or skill.replace("_", " "))
     anchors = world.get("anchors", [])
     place = "this space"
+    if kind == "navigate":
+        from agent.tools import nav  # nav.api.cover, reached the way every agent step reaches nav
+
+        lawns = [a for a in world.get("areas", []) if a.get("kind") == "lawn"]
+        if not lawns:
+            return None, f"There’s no lawn marked in {place}’s world file, so mowing can’t be planned here."
+        tasks = [t for t in (nav.cover(a, f"t{i + 1}") for i, a in enumerate(lawns if _wants_all(job) else lawns[:1])) if t]
+        return (tasks, None) if tasks else (None, f"The lawn in {place}’s world file is too small for a mowing pass.")
     if kind == "wipe":
         surfaces = [a for a in anchors if a.get("kind") == "surface"]
         if not surfaces:
@@ -91,7 +106,8 @@ def tasks_for(skill: str, job: str, world: dict) -> tuple[list | None, str | Non
             here = ", ".join(sorted({o.replace("_", " ") for _, o in items}))
             return None, f"There’s no {named.replace('_', ' ')} in {place}’s world file; what’s there to carry: {here}."
         items = matching
-    out = bool(re.search(r"\b(out|outside|away|take out|throw)\b", job.lower())) or "take_out" in skill or "garbage" in skill
+    out = (bool(re.search(r"\b(out|outside|away|take out|throw|deliver|to the (front )?(door|kerb|curb|bins?|gate|clubhouse))\b", job.lower()))
+           or "take_out" in skill or "garbage" in skill)
     chosen = items if _wants_all(job) else items[:1]
     return [{"id": f"t{i + 1}", "skill": "pick", "anchor": a["id"], "object": o, "carries": out,
              **({"deliver_to": "way_out"} if out else {})} for i, (a, o) in enumerate(chosen)], None
