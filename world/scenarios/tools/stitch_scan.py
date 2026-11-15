@@ -3,6 +3,8 @@ into the room mesh the pictures use: world/_scans/<id>/tiles (one OBJ and PNG pe
 room.glb for the 3D page, and scan.json listing them. Where the tour's detail levels overlap, the finest wins.
 It also measures the table tops on the mesh and writes world/scenarios/<id>.fit.json (the tour alignment and
 each table's footprint), which the trace script reads. Run from the repo root: python world/scenarios/tools/stitch_scan.py jrr
+The mesh is then cleaned for showing (scan_clean.py: people, chairs and loose things out, holes patched, baked light
+evened); pass --as-scanned to keep it as captured.
 world/_scans is not committed: the mesh is Matterport's, taken from the public tour for this demo."""
 import io
 import json
@@ -46,7 +48,25 @@ def finest(tiles: dict) -> dict:
         for lod, lo, hi in boxes:
             if lod > t["lod"]:
                 drop |= np.all((pts >= lo) & (pts <= hi), 2).any(1)
-        t["idx"] = t["idx"][~drop]
+        t["drop"] = drop
+    # The finest level is sometimes missing a piece of floor (a tile part that never loaded). Where it is, keep the
+    # next level's floor rather than leave a hole: level triangles near floor height with no finest floor under them.
+    top = max(t["lod"] for t in tiles.values())
+
+    def floor_cells(t, which):
+        tri = t["pos"][t["idx"]].astype(float)[which]
+        n = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+        level = (np.abs(n[:, 1]) > 0.9 * (np.linalg.norm(n, axis=1) + 1e-12)) & (np.abs(tri[:, :, 1]).max(1) < 0.35)
+        pts = np.einsum("kc,tcd->tkd", weights, tri)
+        return level, np.floor(pts[:, :, 0] / 0.25).astype(np.int64) * 100003 + np.floor(pts[:, :, 2] / 0.25).astype(np.int64)
+
+    have = np.unique(np.concatenate([c[lv].ravel() for t in tiles.values() if t["lod"] == top for lv, c in [floor_cells(t, ~t["drop"])]] or [np.zeros(0, np.int64)]))
+    for t in tiles.values():
+        if t["lod"] == top - 1 and t["drop"].any():
+            level, cells = floor_cells(t, slice(None))
+            t["drop"] &= ~(level & (np.isin(cells, have).mean(1) < 0.3))
+    for t in tiles.values():
+        t["idx"] = t["idx"][~t.pop("drop")]
     return {k: t for k, t in tiles.items() if len(t["idx"])}
 
 
@@ -82,7 +102,7 @@ def table_grid(tiles: dict, lo, hi):
     return grid, zs
 
 
-def main(wid: str) -> None:
+def main(wid: str, clean: bool = True) -> None:
     repo = Path(__file__).resolve().parents[3]
     scen, out = repo / "world" / "scenarios", repo / "world" / "_scans" / wid
     world = json.loads((scen / f"{wid}.json").read_text())
@@ -143,40 +163,63 @@ def main(wid: str) -> None:
     print(f"measured {len(fit)} of {len(tables)} tables -> world/scenarios/{wid}.fit.json")
 
     import trimesh
+
+    import scan_clean
+    px = {k: 1024 if t["lod"] >= 4 else 512 for k, t in tiles.items()}
+    images = {k: np.asarray(Image.open(out / "raw" / (k + ".jpg")).convert("RGB").resize((px[k], px[k]), Image.LANCZOS)) for k in tiles}
+    report = {}
+    if clean:  # after measuring: the tables are fitted on the scan as it was captured
+        # of the world's other obstacles, only the tall ones (a stair flight) are kept as scanned; low ones are a rail of
+        # glass, which scans as splinters, or equipment standing about. The planner still avoids all of them.
+        others = [(o["box"]["min"], o["box"]["max"]) for o in world.get("obstacles", []) if o["id"] not in fit and o["box"]["max"][2] >= 1.5]
+        floor_h = scan_clean.floor_height(tiles, lo, hi)
+        report = scan_clean.remove_clutter(tiles, fit, others, lo, hi, floor_h)
+        tiles = {k: t for k, t in tiles.items() if len(t["idx"])}
+        rooms = [(np.array(r["polygon"], float).min(0), np.array(r["polygon"], float).max(0)) for r in world["rooms"]]
+        patches, more = scan_clean.relight_and_patch(tiles, images, rooms, fit, lo, hi, floor_h)
+        report.update(more)
+        print("cleaned:", report)
+    else:
+        patches = []
     tdir = out / "tiles"
     tdir.mkdir(exist_ok=True)
     for old in tdir.iterdir():
         old.unlink()
     listing, scene, faces, per = [], trimesh.Scene(), 0, {}
+
+    def piece(name, texture, p, uv, f, img, part):
+        nonlocal faces
+        with open(tdir / f"{name}.obj", "w") as fh:
+            fh.write("".join(f"v {a:.4f} {b:.4f} {c:.4f}\n" for a, b, c in p))
+            fh.write("".join(f"vt {a:.5f} {b:.5f}\n" for a, b in uv))
+            fh.write("".join(f"f {a + 1}/{a + 1} {b + 1}/{b + 1} {c + 1}/{c + 1}\n" for a, b, c in f))
+        if not (tdir / f"{texture}.png").exists():
+            Image.fromarray(img).save(tdir / f"{texture}.png")
+        listing.append({"mesh": f"tiles/{name}.obj", "texture": f"tiles/{texture}.png", "part": part})
+        buf = io.BytesIO()
+        Image.fromarray(img).save(buf, "JPEG", quality=88)
+        mat = trimesh.visual.material.PBRMaterial(baseColorTexture=Image.open(io.BytesIO(buf.getvalue())), metallicFactor=0.0, roughnessFactor=1.0, doubleSided=True)
+        scene.add_geometry(trimesh.Trimesh(p, f, visual=trimesh.visual.TextureVisuals(uv=uv, material=mat), process=False), geom_name=name)
+        faces += len(f)
+
     for k, t in sorted(tiles.items()):
         tri = t["w"][t["idx"]]
         c = tri.mean(1)
         keep = np.all((c[:, :2] > lo) & (c[:, :2] < hi), 1) & (tri[:, :, 2].min(1) > -0.3)
-        img = Image.open(out / "raw" / (k + ".jpg")).convert("RGB")
-        px = 1024 if t["lod"] >= 4 else 512
         for part, sel in (("lo", keep & (tri[:, :, 2].max(1) < LOW_M)), ("hi", keep & (tri[:, :, 2].max(1) >= LOW_M) & (tri[:, :, 2].max(1) < HIGH_M))):
             if sel.sum() < 8:
                 continue
             p, uv, f = compact(t["w"], t["uv"], t["idx"][sel])
-            name = f"{k}_{part}"
-            with open(tdir / f"{name}.obj", "w") as fh:
-                fh.write("".join(f"v {a:.4f} {b:.4f} {c:.4f}\n" for a, b, c in p))
-                fh.write("".join(f"vt {a:.5f} {b:.5f}\n" for a, b in uv))
-                fh.write("".join(f"f {a + 1}/{a + 1} {b + 1}/{b + 1} {c + 1}/{c + 1}\n" for a, b, c in f))
-            if not (tdir / f"{k}.png").exists():
-                img.resize((px, px), Image.LANCZOS).save(tdir / f"{k}.png")
-            listing.append({"mesh": f"tiles/{name}.obj", "texture": f"tiles/{k}.png", "part": part})
-            buf = io.BytesIO()
-            img.resize((px, px), Image.LANCZOS).save(buf, "JPEG", quality=85)
-            mat = trimesh.visual.material.PBRMaterial(baseColorTexture=Image.open(io.BytesIO(buf.getvalue())), metallicFactor=0.0, roughnessFactor=1.0, doubleSided=True)
-            scene.add_geometry(trimesh.Trimesh(p, f, visual=trimesh.visual.TextureVisuals(uv=uv, material=mat), process=False), geom_name=name)
-            faces += len(f)
+            piece(f"{k}_{part}", k, p, uv, f, images[k], part)
             per[t["lod"]] = per.get(t["lod"], 0) + len(f)
+    for name, p, uv, f, img in patches:
+        piece(f"{name}_lo", name, p, uv, f, img, "lo")
     scene.export(out / "room.glb")
-    (out / "scan.json").write_text(json.dumps({"world": wid, "frame": "the world's (metres, Z up)", "to_model": M.round(3).tolist(), "low_m": LOW_M, "tiles": listing, "glb": "room.glb"}, indent=1))
+    (out / "scan.json").write_text(json.dumps({"world": wid, "frame": "the world's (metres, Z up)", "to_model": M.round(3).tolist(), "low_m": LOW_M,
+                                               "cleaned": report or None, "tiles": listing, "glb": "room.glb"}, indent=1))
     print("triangles kept per detail level:", dict(sorted(per.items())))
     print(f"{len(listing)} pieces, {faces} triangles, room.glb {(out / 'room.glb').stat().st_size / 1e6:.1f} MB")
 
-
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "jrr")
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    main(args[0] if args else "jrr", clean="--as-scanned" not in sys.argv)

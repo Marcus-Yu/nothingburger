@@ -26,6 +26,14 @@ The building panel is a picture, not a diagram: with `--frames` the run renders 
 2. Run `python world/scenarios/tools/stitch_scan.py jrr`. It keeps the finest tile everywhere, moves the mesh into the world's frame, writes `world/_scans/jrr/` (pieces for the pictures, `room.glb` for the 3D page) and measures the alignment and the table tops into `world/scenarios/jrr.fit.json`.
 3. Run `python world/scenarios/tools/trace_jrr.py` so the world uses those measurements, then run the job again.
 
+After measuring, the stitch cleans the mesh for showing (`world/scenarios/tools/scan_clean.py`; `--as-scanned` skips it):
+
+- **Cleared.** People, chairs, bags, equipment and things left on tables are taken out. What stays is the floor, walls and pillars (columns with scan all the way up), the stairs, and the table tops. Cloth sides and legs are redrawn in the cloth's colour, because the scanner fuses chairs into them.
+- **Patched.** A copy of the floor's own picture lies just under it and closes the gaps where things stood and the cracks between tiles.
+- **Evenly lit.** The photos' pools of sun and shade are divided out of the floor and the table tops; where the shade was too deep to hold colour, the floor is rebuilt from the room's floor colour and the boards' grain. Walls get a gentler correction.
+
+This changes the picture only. The planner never saw the chairs and still does not: a robot that drives where a chair stood in the scan is not shown hitting anything.
+
 With the mesh on disk, a world that names it (`scan` in `world.json`) is drawn with the real room in the top view and the film, and `room.html?run=...` plays the job inside it: drag to look around, scroll to move, and Enter VR on a headset. Without it everything falls back to drawn boxes. The mesh is for looks only; planning uses the world's `obstacles`. `world/_scans/` is not committed: the mesh is Matterport's, taken from the public tour for this demo, and is not theirs to hand on. The sanctioned source is the scan's MatterPak or splat from its owner.
 
 ## Kept runs
