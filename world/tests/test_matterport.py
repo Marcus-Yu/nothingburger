@@ -184,3 +184,36 @@ def test_furniture_from_mesh(model, tmp_path):
     assert max(o["box"]["max"][2] for o in table) == pytest.approx(0.75, abs=0.02)     # the arm may reach over it
     assert min(o["box"]["min"][0] for o in table) == pytest.approx(x0, abs=0.11)
     assert max(o["box"]["max"][0] for o in table) == pytest.approx(x1, abs=0.11)
+
+
+def test_the_scan_is_cut_for_the_pictures(model, tmp_path):
+    """A floor and a ceiling, each with its own texture: the top view gets the floor only, the 3D page both."""
+    from PIL import Image
+    from world import scan
+    pak = tmp_path / "pak"
+    pak.mkdir()
+    for name, colour in (("floor.jpg", (180, 120, 60)), ("ceiling.jpg", (240, 240, 240))):
+        Image.new("RGB", (64, 64), colour).save(pak / name)
+    (pak / "house.mtl").write_text("newmtl m_floor\nmap_Kd floor.jpg\n\nnewmtl m_ceiling\nmap_Kd ceiling.jpg\n")
+    lines = ["mtllib house.mtl", "vt 0 0", "vt 1 0", "vt 1 1", "vt 0 1"]
+    n = 0
+    for material, z, step in (("m_floor", 0.02, 1.0), ("m_ceiling", 2.52, 2.0)):
+        lines.append(f"usemtl {material}")
+        x = 0.0
+        while x < 8:      # strips of quads, so each piece has enough triangles to keep
+            lines += [f"v {x} 0 {z}", f"v {x + step} 0 {z}", f"v {x + step} 5 {z}", f"v {x} 5 {z}",
+                      f"f {n + 1}/1 {n + 2}/2 {n + 3}/3 {n + 4}/4"]
+            n, x = n + 4, x + step
+    (pak / "house.obj").write_text("\n".join(lines) + "\n")
+
+    world = matterport.build(model, name="test_house", mesh=pak / "house.obj")
+    out = tmp_path / "scan"
+    doc = scan.write(pak / "house.obj", out, world, lift=0.02)
+    assert json.loads((out / "scan.json").read_text()) == doc and doc["world"] == "test_house"
+    assert doc["low_m"] == pytest.approx(2.1)                       # under the 2.4 m ceiling assumed for the living room
+    assert {(t["mesh"], t["part"]) for t in doc["tiles"]} == {("tiles/floor_lo.obj", "lo"), ("tiles/ceiling_hi.obj", "hi")}
+    assert all((out / t["mesh"]).exists() and (out / t["texture"]).exists() for t in doc["tiles"])
+    floor = (out / "tiles" / "floor_lo.obj").read_text().splitlines()
+    assert floor[0].split()[3] == "0.0000"                          # heights are above the world's floor
+    assert Image.open(out / "tiles" / "floor.png").size == (scan.TEXTURE_PX, scan.TEXTURE_PX)
+    assert (out / "room.glb").stat().st_size > 1000

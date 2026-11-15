@@ -5,11 +5,13 @@ Stand-ins replace the two Claude calls and capture; the graph, checkpointer and 
     uv run python -m unittest discover -s agent/design_flow/tests -t .
 """
 
+import json
 import os
 import tempfile
 import unittest
 import unittest.mock
 from pathlib import Path
+from unittest import mock
 
 from langchain_core.runnables import RunnableLambda
 
@@ -252,6 +254,50 @@ class PipelineDesignerTest(unittest.TestCase):
             with self.assertRaises(NoWorld):
                 run_pipeline({"task": "wipe", "demo": {}, "world": "a-space-nobody-loaded"}, runs=Path(tmp))
             self.assertEqual(list(Path(tmp).iterdir()), [])
+
+
+class WorldForTest(unittest.TestCase):
+    """Any space resolves through one call: by hand for Rabinowitz, from its Matterport model for the rest."""
+
+    def setUp(self):
+        from agent.design_flow import pipeline
+        from agent.tools import world as worlds
+        self.pipeline, self.asked = pipeline, []
+        self.tmp = tempfile.TemporaryDirectory()
+        spaces = Path(self.tmp.name) / "worlds.json"
+        spaces.write_text(json.dumps([{"id": "corner-flat", "matterport": "AAAAAAAAAAA"}, {"id": "no-scan"}]))
+
+        def for_model(model, name):
+            self.asked.append((model, name))
+            if model == "BADBADBADBA":
+                raise ValueError("Matterport model BADBADBADBA could not be read: not found")
+            return {"id": name, "rooms": [], "anchors": []}
+        self.patches = [mock.patch.object(pipeline, "SPACES", spaces), mock.patch.object(worlds, "for_model", for_model)]
+        for p in self.patches:
+            p.start()
+
+    def tearDown(self):
+        for p in self.patches:
+            p.stop()
+        self.tmp.cleanup()
+
+    def test_a_listed_space_is_read_from_its_model(self):
+        self.assertEqual(self.pipeline.world_for("corner-flat")[0], "corner_flat")
+        self.assertEqual(self.asked, [("AAAAAAAAAAA", "corner_flat")])
+
+    def test_a_model_id_works_without_being_listed(self):
+        self.assertEqual(self.pipeline.world_for("zvKHR9DHNjJ")[0], "mp_zvKHR9DHNjJ")
+        self.assertEqual(self.asked, [("zvKHR9DHNjJ", "mp_zvKHR9DHNjJ")])
+
+    def test_the_hand_traced_world_never_asks_matterport(self):
+        self.assertEqual(self.pipeline.world_for("rabinowitz-hall")[0], "jrr")
+        self.assertEqual(self.asked, [])
+
+    def test_a_space_with_no_model_or_an_unreadable_one_is_refused_with_the_reason(self):
+        with self.assertRaisesRegex(self.pipeline.NoWorld, "no Matterport model"):
+            self.pipeline.world_for("no-scan")
+        with self.assertRaisesRegex(self.pipeline.NoWorld, "could not be read: not found"):
+            self.pipeline.world_for("BADBADBADBA")
 
 
 if __name__ == "__main__":

@@ -35,6 +35,8 @@ After measuring, the stitch cleans the mesh for showing (`world/scenarios/tools/
 
 This changes the picture only. The planner never saw the chairs and still does not: a robot that drives where a chair stood in the scan is not shown hitting anything.
 
+A world read from a Matterport model by `python -m world.matterport <model id> <name>` gets the same files from the model's own mesh in that one step, with nothing to capture or stitch.
+
 With the mesh on disk, a world that names it (`scan` in `world.json`) is drawn with the real room in the top view and the film, and `room.html?run=...` plays the job inside it: drag to look around, scroll to move, and Enter VR on a headset. Without it everything falls back to drawn boxes. The mesh is for looks only; planning uses the world's `obstacles`. `world/_scans/` is not committed: the mesh is Matterport's, taken from the public tour for this demo, and is not theirs to hand on. The sanctioned source is the scan's MatterPak or splat from its owner.
 
 ## Kept runs

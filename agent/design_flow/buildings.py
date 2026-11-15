@@ -145,11 +145,12 @@ def load(sid: str, timeout_s: int = 300) -> str:
         if card is None:
             raise LookupError(f"{sid} is not in the 3D database")
         name = _scenario_name(card)
-        done = subprocess.run([sys.executable, "-m", "world.matterport", sid, name], cwd=REPO, capture_output=True,
-                              text=True, timeout=timeout_s, env={**__import__("os").environ, "PYTHONPATH": str(REPO)})
-        if done.returncode != 0 or not (SCENARIOS / f"{name}.json").exists():
-            tail = (done.stderr or done.stdout).strip().splitlines()[-3:]
-            raise RuntimeError(f"Could not read {card['name']} from Matterport: {' '.join(tail) or 'no world written'}")
+        from agent.tools import world as worlds
+
+        try:
+            worlds.for_model(sid, name)  # reads the model, saves the world, cuts its mesh for the real-room views
+        except Exception as e:  # noqa: BLE001 - the key cannot read it, its MatterPak is locked, no floor plan
+            raise RuntimeError(f"Could not read {card['name']} from Matterport: {e}") from e
         return name
 
 

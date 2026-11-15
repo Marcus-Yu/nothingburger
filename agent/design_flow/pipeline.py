@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -42,10 +43,11 @@ EXPORT = REPO / "frontend" / "robot-design" / "data" / "export.py"
 # command line's default, agent/llm.py, is Opus). AGENT_MODEL in the environment overrides it.
 STUDIO_MODEL = "claude-sonnet-5-5"
 
-# Studio space id (web/worlds.json) -> scenario in world/scenarios/
+# Studio space id (web/worlds.json) -> scenario in world/scenarios/, for worlds that were not read from a
+# Matterport model: Rabinowitz (the key cannot read its tour, so it is traced by hand) and the Vexcel lots.
+# Every other space is read from its model the first time it is asked for: see world_for.
 WORLDS = {
     "rabinowitz-hall": "jrr",
-    "la-mirada": "la_mirada",  # read from its Matterport scan (world/matterport.py)
     # outdoor lots traced on Vexcel aerial photos (world/scenarios/tools/aerial_worlds.py)
     "lawn-palmetto": "lawn_palmetto",
     "trash-palmetto": "trash_palmetto",
@@ -53,6 +55,7 @@ WORLDS = {
     "parcel-eastland": "parcel_eastland",
     "lawn-sanpedro": "lawn_sanpedro",
 }
+SPACES = REPO / "web" / "worlds.json"
 
 
 # Session (LangGraph thread id) -> its run folder, relative to the repo, set as soon as the run starts,
@@ -181,19 +184,38 @@ def _tail(text: str, n: int = 12) -> str:
     return "\n".join(text.strip().splitlines()[-n:])
 
 
+def _model_for(world_id: str) -> str | None:
+    """The Matterport model behind a space: the one web/worlds.json lists for it, or the id itself when it is
+    a model id (11 letters and digits), so any model can be asked for without listing it first."""
+    try:
+        spaces = json.loads(SPACES.read_text())
+    except (OSError, ValueError):
+        spaces = []
+    listed = next((s.get("matterport") for s in spaces if s.get("id") == world_id), None)
+    return listed or (world_id if re.fullmatch(r"[A-Za-z0-9]{11}", world_id) else None)
+
+
 def world_for(world_id: str | None) -> tuple[str, dict]:
-    """(scenario, world dict) for a studio space, or NoWorld."""
+    """(scenario, world dict) for a studio space, or NoWorld. A space with a Matterport model is read from
+    it through world.api.for_model the first time, and from world/scenarios/ after that."""
     world_id = world_id or "rabinowitz-hall"
     scenario = WORLDS.get(world_id)
-    if scenario is None:  # a building from the 3D database: its world is the scenario carrying its model id
-        from agent.design_flow import buildings
+    if scenario is not None:
+        return scenario, json.loads((REPO / "world" / "scenarios" / f"{scenario}.json").read_text())
+    from agent.design_flow import buildings
+    from agent.tools import world as worlds
 
-        sid = buildings.sid_for_space(world_id)
-        scenario = buildings.scenario_for(sid) if sid else None
-    if scenario is None:
-        raise NoWorld(f"No world file for the space \"{world_id}\" yet, so the robot can't be designed or pathed there. "
-                      f"Spaces with one: {', '.join(sorted(WORLDS))}.")
-    return scenario, json.loads((REPO / "world" / "scenarios" / f"{scenario}.json").read_text())
+    # a space listed with a Matterport model, a bare model id, or a building from the 3D database (mp-<sid>)
+    model = buildings.sid_for_space(world_id) or _model_for(world_id)
+    if model is None:
+        raise NoWorld(f"The space \"{world_id}\" has no Matterport model in web/worlds.json, so there is no world to design "
+                      f"or path a robot in.")
+    listed = re.sub(r"[^a-z0-9]+", "_", world_id.lower()).strip("_") if model != world_id and not world_id.startswith("mp-") else f"mp_{model}"
+    scenario = buildings.scenario_for(model) or listed  # a world already read from this model keeps its name
+    try:
+        return scenario, worlds.for_model(model, scenario)
+    except ValueError as e:
+        raise NoWorld(f"The space \"{world_id}\" can't be used yet: {e}") from e
 
 
 def model_reads_jobs() -> bool:
