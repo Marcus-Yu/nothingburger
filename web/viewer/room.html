@@ -24,14 +24,14 @@
   <select id="chapter" aria-label="Jump to a step"></select>
   <button id="follow" class="on" title="Keep the view centred on the robot">Follow</button>
   <button id="eye" title="Stand next to the robot at eye height">Stand by it</button>
-  <button id="above" title="Look at the whole room from above">From above</button>
+  <button id="above" title="Look down on the robot from under the ceiling">From above</button>
   <button id="vr" hidden title="Stand in the room in a headset">Enter VR</button>
   <div id="msg"></div>
 </div>
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <script type="module">
-// The planned job played inside a mesh of the real room, seen from anywhere: drag to look around, scroll to move in and out,
-// right-drag to slide. The room is world/_scans/<world>/room.glb (stitched from the place's Matterport tour, not committed);
+// The planned job played inside a mesh of the real room, seen from anywhere inside it: drag to look around, scroll to move in
+// and out. The room is world/_scans/<world>/room.glb (stitched from the place's Matterport tour, not committed);
 // the robot and its motion are the run's frames/tour_robot.glb and tour_frames.bin. Positions are played back, not simulated.
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -40,14 +40,14 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 const $ = id => document.getElementById(id), q = new URLSearchParams(location.search);
 const run = (q.get("run") || "runs/gallery/jrr").replace(/^runs\//, ""), base = `/runs/${run}/`;
 const say = t => { $("msg").textContent = t; };
-let meta, frames, bodies = [], frame = 0, playing = false, follow = true;
+let meta, frames, bodies = [], frame = 0, playing = false, follow = true, rooms = [];
 
 const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.xr.enabled = true; document.body.prepend(renderer.domElement);
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x111111);
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 200);
 const rig = new THREE.Group(); rig.add(camera); scene.add(rig);  // in a headset the rig is where you stand
-const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.495; controls.minDistance = 0.6; controls.maxDistance = 40;
+const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.495; controls.minDistance = 0.6; controls.maxDistance = 14; controls.enablePan = false;
 scene.add(new THREE.HemisphereLight(0xffffff, 0x9a8f80, 1.6)); const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(3, 8, 2); scene.add(sun);
 const world = new THREE.Group(); world.rotation.x = -Math.PI / 2; scene.add(world);  // the plan's frame has Z up; three.js has Y up
 addEventListener("resize", () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
@@ -60,6 +60,19 @@ function show(i) {
   let c = 0; meta.chapters.forEach((ch, n) => { if (t >= ch.t) c = n; });
   $("now").textContent = meta.chapters[c] ? meta.chapters[c].label : ""; if ($("chapter").selectedIndex !== c) $("chapter").selectedIndex = c;
 }
+// The viewpoint stays inside the scanned rooms and under their ceilings: outside them there is nothing but the backs of walls.
+// Rooms are the world file's outlines (X east, Y north, in metres); on screen x = X and z = -Y.
+const WALL_GAP = 0.35, TOP = 5.5;
+function inRooms(x, z) {  // the nearest point to (x, z) that is inside a room, a little off its walls
+  let best = null;
+  for (const r of rooms) { const cx = Math.min(Math.max(x, r.x0 + WALL_GAP), r.x1 - WALL_GAP), cz = Math.min(Math.max(z, r.z0 + WALL_GAP), r.z1 - WALL_GAP), d = Math.hypot(cx - x, cz - z);
+    if (!best || d < best.d) best = { x: cx, z: cz, d, top: Math.min(r.top - 0.4, TOP) }; }
+  return best;
+}
+function keepInside() {
+  if (!rooms.length) return;
+  const p = camera.position, at = inRooms(p.x, p.z); p.x = at.x; p.z = at.z; p.y = Math.min(Math.max(p.y, 0.35), at.top);
+}
 function view(dist, height) {  // put the camera `dist` from the robot at `height`, on the side it is now
   const p = robotAt(), d = camera.position.clone().sub(controls.target).setY(0); if (d.lengthSq() < 1e-6) d.set(1, 0, 1);
   d.setLength(dist); controls.target.set(p.x, 0.8, p.z); camera.position.set(p.x + d.x, height, p.z + d.z);
@@ -70,6 +83,8 @@ function view(dist, height) {  // put the camera `dist` from the robot at `heigh
   meta = events.filter(e => e.kind === "tour").pop();
   if (!meta) return say("This run has no robot export: rerun it with --frames --walkthrough");
   const w = await (await fetch(base + "world.json")).json();
+  rooms = w.rooms.map(r => { const xs = r.polygon.map(p => p[0]), ys = r.polygon.map(p => p[1]);
+    return { x0: Math.min(...xs), x1: Math.max(...xs), z0: -Math.max(...ys), z1: -Math.min(...ys), top: r.ceiling_m || 3 }; });
   frames = new Float32Array(await (await fetch(base + meta.frames)).arrayBuffer());
   $("seek").max = meta.n - 1;
   $("chapter").innerHTML = meta.chapters.map((c, i) => `<option value="${i}">${c.label.replace(/</g, "&lt;")}</option>`).join("");
@@ -80,12 +95,13 @@ function view(dist, height) {  // put the camera `dist` from the robot at `heigh
   say("Loading the room");
   try {
     const room = await load(`/scans/${w.id}/room.glb`);
-    room.traverse(o => { if (o.isMesh) { const m = o.material; o.material = new THREE.MeshBasicMaterial({ map: m.map }); m.dispose(); } });  // the scan's colours already hold the room's light
-    world.add(room); say("The real room, from its Matterport scan. Drag to look around, scroll to move in and out, right-drag to slide. The motion is the plan played back, not a simulation.");
+    room.traverse(o => { if (o.isMesh) { const m = o.material; o.material = new THREE.MeshBasicMaterial({ map: m.map, side: THREE.DoubleSide }); m.dispose(); } });  // the scan's colours already hold the room's light
+    world.add(room); say("The real room, from its Matterport scan. Drag to look around, scroll to move in and out; the view stays inside the rooms. The motion is the plan played back, not a simulation.");
   } catch (e) { say("This world has no room mesh on this machine (world/_scans is not committed): see web/README.md for how to capture it"); }
   if (navigator.xr && await navigator.xr.isSessionSupported("immersive-vr").catch(() => false)) $("vr").hidden = false;
 })().catch(e => say("Could not start: " + (e && e.message || e)));
 
+window.room = { camera, controls, robotAt };  // for checking the view from the console
 let last = performance.now();
 renderer.setAnimationLoop(now => {
   const dt = Math.min(now - last, 100); last = now;
@@ -93,6 +109,7 @@ renderer.setAnimationLoop(now => {
     if (follow) { const d = robotAt().sub(before); controls.target.add(d); camera.position.add(d); if (renderer.xr.isPresenting) rig.position.add(d); }
     if (frame >= meta.n - 1) { playing = false; $("play").textContent = "Play"; } }
   if (!renderer.xr.isPresenting) controls.update();
+  if (!renderer.xr.isPresenting) keepInside();
   renderer.render(scene, camera);
 });
 
@@ -101,10 +118,10 @@ $("seek").oninput = e => { if (bodies.length) { show(+e.target.value); if (follo
 $("chapter").onchange = e => { if (bodies.length) { show(meta.chapters[+e.target.value].t * meta.fps + 1); if (follow) view(camera.position.distanceTo(controls.target), camera.position.y); } };
 $("follow").onclick = () => { follow = !follow; $("follow").classList.toggle("on", follow); };
 $("eye").onclick = () => bodies.length && view(2.2, 1.6);
-$("above").onclick = () => bodies.length && view(4, 14);
+$("above").onclick = () => bodies.length && view(2.5, TOP);
 $("vr").onclick = async () => {  // stand two metres from the robot, on the floor
   const s = await navigator.xr.requestSession("immersive-vr", { optionalFeatures: ["local-floor"] }); renderer.xr.setReferenceSpaceType("local-floor"); await renderer.xr.setSession(s);
-  const p = robotAt(); camera.position.set(0, 0, 0); rig.position.set(p.x + 2, 0, p.z); s.addEventListener("end", () => { rig.position.set(0, 0, 0); view(4.5, 2.4); });
+  const p = robotAt(); camera.position.set(0, 0, 0); const at = inRooms(p.x + 2, p.z); rig.position.set(at.x, 0, at.z); s.addEventListener("end", () => { rig.position.set(0, 0, 0); view(4.5, 2.4); });
 };
 </script>
 </html>
