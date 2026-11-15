@@ -4,7 +4,8 @@ The flow has three parties. Whoever wants a demonstration (the agent, or a perso
 laptop) asks for one with `POST /demos/request`. The headset polls `GET /demos/control`, shows
 the request to the wearer, records, and uploads the raw recording with `POST /demos`. It is
 saved as `<DATA_DIR>/demos/<id>.json`, which is the inbox `capture.api.latest()` reads, so a
-recorded demo keeps working with the headset off.
+recorded demo keeps working with the headset off. A take that went wrong is thrown away with
+`POST /demos/<id>/discard` and asked for again; the last take left in the inbox is the one kept.
 
 State is in memory and there is one headset: a single pending request and a single stop flag.
 """
@@ -28,6 +29,7 @@ router = APIRouter()
 
 SCHEMA = "capture.recording/1"
 MAX_SAMPLES = 30 * 60 * 5  # five minutes at 30 Hz
+_FINGERS = ("thumb", "index", "middle", "ring", "pinky")
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 
 _started: dict[str, float] = {}  # recording id -> laptop time the headset said it began
@@ -51,7 +53,9 @@ def gloves():
     return _hub or None
 
 
+PICKUP_S = 20.0  # a request the headset has not collected by then is dropped (it polls about once a second)
 _pending: dict[str, Any] | None = None
+_asked: dict[str, float] = {}  # request id -> when it was asked
 _active: str | None = None
 _stop: set[str] = set()
 
@@ -95,6 +99,18 @@ def _summary(recording: dict) -> dict | None:
         return None
 
 
+def _glove_peaks(recording: dict) -> dict:
+    """Per hand, each fingertip's highest raw reading in the recording, so a take can be judged
+    at a glance. Empty when no glove readings were merged in."""
+    out = {}
+    for hand in ("left", "right"):
+        rows = [s[hand]["glove_raw"] for s in recording.get("samples") or []
+                if isinstance(s.get(hand), dict) and s[hand].get("glove_raw")]  # fmt: skip
+        if rows:
+            out[hand] = {f: max(r[k] for r in rows) for k, f in enumerate(_FINGERS)}
+    return out
+
+
 @router.post("/demos/request")
 def request_demo(req: DemoRequest) -> dict:
     """Ask the wearer for a demonstration. Replaces a request the headset has not picked up."""
@@ -103,7 +119,8 @@ def request_demo(req: DemoRequest) -> dict:
         "id": f"demo-{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:4]}",
         **req.model_dump(),
     }
-    return _pending
+    _asked[_pending["id"]] = time.time()
+    return {**_pending, "expires_s": PICKUP_S}
 
 
 @router.get("/demos/control")
@@ -112,9 +129,19 @@ def control(active: str | None = None) -> dict:
     the recording named by `active` to end."""
     global _pending, _active
     request, _pending = _pending, None
+    if request is not None and time.time() - _asked.pop(request["id"], 0.0) > PICKUP_S:
+        request = None  # asked while the headset was off or asleep: not sprung on whoever puts it on next
     if request is not None:
         _active = request["id"]
     return {"request": request, "stop": bool(active and active in _stop)}
+
+
+@router.get("/demos/state")
+def state() -> dict:
+    """Where the one request stands, for the page that asked: `waiting` is the id not yet
+    collected by the headset, `active` the id the headset has collected and not yet uploaded."""
+    waiting = _pending["id"] if _pending and time.time() - _asked.get(_pending["id"], 0.0) <= PICKUP_S else None
+    return {"waiting": waiting, "active": _active}
 
 
 @router.post("/demos/stop")
@@ -236,4 +263,20 @@ def read_demo(demo_id: str) -> dict:
         else 0.0
     )
     return {"id": demo_id, "chore": recording.get("chore"), "kind": recording.get("kind"),
-            "duration_s": round(duration, 2), "read_as": _summary(recording)}  # fmt: skip
+            "duration_s": round(duration, 2), "samples": len(samples),
+            "glove_peaks": _glove_peaks(recording), "read_as": _summary(recording)}  # fmt: skip
+
+
+@router.post("/demos/{demo_id}/discard")
+def discard_demo(demo_id: str) -> dict:
+    """Throw a take away so it can be done again: the file moves to `demos/_discarded/`, out of
+    the inbox `capture.api.latest()` reads, and can be put back by hand."""
+    if not _ID.match(demo_id):
+        raise HTTPException(400, "invalid id")
+    path = folder() / f"{demo_id}.json"
+    if not path.is_file():
+        raise HTTPException(404, "no such recording")
+    bin_ = folder() / "_discarded"
+    bin_.mkdir(exist_ok=True)
+    path.replace(bin_ / path.name)
+    return {"id": demo_id, "discarded": True}
