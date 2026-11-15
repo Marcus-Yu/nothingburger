@@ -115,21 +115,21 @@
       "check": "reach",
       "task": "t1",
       "status": "pass",
-      "value": 1.25,
+      "value": 1.051,
       "limit": 0.211,
       "unit": "m",
       "requirements": [
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "why": "target 0 at 1.85 m, tool side: the tool reaches 0.00 to 1.25 m from the base centre; the base centre can stand 0.21 m away or more (free floor 0.01 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "why": "target 0 at 1.85 m, tool side: the tool reaches 0.00 to 1.05 m from the base centre; the base centre can stand 0.21 m away or more (free floor 0.01 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
       "target": 0,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.211,
-          "reach_m": 1.25
+          "reach_m": 1.051
         }
       ]
     },
@@ -137,21 +137,21 @@
       "check": "reach",
       "task": "t2",
       "status": "pass",
-      "value": 0.912,
+      "value": 0.654,
       "limit": 0.0,
       "unit": "m",
       "requirements": [
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "why": "target 0 at 0.50 m, tool side: the tool reaches 0.01 to 0.91 m from the base centre; the base centre can stand 0.00 m away or more (free floor 0.00 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "why": "target 0 at 0.50 m, tool side: the tool reaches 0.18 to 0.65 m from the base centre; the base centre can stand 0.00 m away or more (free floor 0.00 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
       "target": 0,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.0,
-          "reach_m": 0.912
+          "reach_m": 0.654
         }
       ]
     },
@@ -159,7 +159,7 @@
       "check": "tip-over",
       "task": "t1",
       "status": "pass",
-      "value": 3.77,
+      "value": 6.23,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -173,7 +173,7 @@
       "check": "tip-over",
       "task": "t2",
       "status": "pass",
-      "value": 9.68,
+      "value": 5.54,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -181,7 +181,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "why": "worst case: reaching target 0 (0.01 m out at 0.50 m, the nearest the base can stand to it); payload 0.75 kg, press 0.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 0 (0.18 m out at 0.50 m, the nearest the base can stand to it); payload 0.75 kg, press 0.0 N; static, against the support polygon"
     },
     {
       "check": "payload",

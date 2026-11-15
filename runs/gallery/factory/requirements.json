@@ -7,7 +7,7 @@
       "skill": "wipe",
       "anchor": "table_top",
       "object": "cloth",
-      "demo": "wipe coolant off table",
+      "demo": "wipe table",
       "carries": false,
       "why": "Clear the coolant off the fixture table first, as asked."
     },
@@ -16,9 +16,9 @@
       "skill": "pick",
       "anchor": "finished_part",
       "object": "machined_part",
-      "demo": "lift housing off table",
+      "demo": "lift housing",
       "carries": true,
-      "why": "The finished housing has to come off the table and be taken out towards the roller door. You gave its weight as about 3.5 kg.",
+      "why": "Take the finished housing off the table and carry it out; this comes last because it leaves the cell.",
       "deliver_to": "way_out",
       "object_mass_kg": 3.5
     }

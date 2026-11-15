@@ -230,9 +230,9 @@
                         <geom class="arm/visual" quat="1 0 0 0" material="arm/linkgray" mesh="arm/wrist3"/>
                         <geom class="arm/eef_collision" size="0.04 0.02" pos="0 0.08 0" quat="0.707107 0.707107 0 0"/>
                         <site name="arm/attachment_site" pos="0 0.1 0" quat="-0.707107 0.707107 0 0"/>
-                        <site name="tool" pos="0 0.444 0" quat="-0.707107 0.707107 0 0"/>
-                        <site name="wrist_mount" pos="0.12 0.204 0" quat="-0.707107 0.707107 0 0"/>
-                        <site name="wrist" pos="0.12 0.204 0" quat="-0.707107 0.707107 0 0"/>
+                        <site name="tool" pos="0 0.272 0" quat="-0.707107 0.707107 0 0"/>
+                        <site name="wrist_mount" pos="0.06 0.152 0" quat="-0.707107 0.707107 0 0"/>
+                        <site name="wrist" pos="0.06 0.152 0" quat="-0.707107 0.707107 0 0"/>
                         <frame pos="0 0.1 0" quat="-0.707107 0.707107 0 0">
                           <body name="grip/xarm_gripper_base_link" childclass="grip/xarm7_hand">
                             <inertial pos="-0.00065489 -0.0018497 0.048028" quat="0.997403 -0.0717512 -0.0061836 0.000477479" mass="0.54156" diaginertia="0.000471093 0.000332307 0.000254799"/>
@@ -273,7 +273,7 @@
                             </body>
                           </body>
                         </frame>
-                        <frame pos="0.12 0.204 0" quat="-0.707107 0.707107 0 0">
+                        <frame pos="0.06 0.152 0" quat="-0.707107 0.707107 0 0">
                           <body name="sens/wrist/d435i" childclass="sens/wrist/d435i">
                             <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0" material="sens/wrist/IR_Lens" mesh="sens/wrist/d435i_0"/>
                             <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0" material="sens/wrist/IR_Emitter_Lens" mesh="sens/wrist/d435i_1"/>

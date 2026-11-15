@@ -2,36 +2,40 @@
   "source": "model",
   "model": "claude-opus-5-5",
   "job": "In the CNC cell, wipe the coolant off the fixture table, then take the finished aluminium housing off the table and carry it out to the inspection cart by the roller door. The housing weighs about three and a half kilos.",
-  "understood_as": "In the CNC cell, wipe the coolant off the fixture table, then lift the finished aluminium housing (about 3.5 kg) off the table and carry it out towards the roller door.",
+  "answers": [],
+  "understood_as": "In the CNC cell, wipe the coolant off the fixture table, then lift the finished aluminium housing (about 3.5 kg) off the table and carry it out to the inspection cart by the roller door.",
   "steps": [
     "Wipe the coolant off the fixture table with a cloth.",
     "Pick up the finished aluminium housing from the table.",
-    "Carry the housing out of the cell to the way out by the roller door."
+    "Carry the housing out of the cell by the way out."
   ],
   "demos": [
     {
-      "chore": "wipe coolant off table",
+      "chore": "wipe table",
       "kind": "path",
-      "why": "Shows the stroke pattern and how hard to press the cloth so all the coolant on the fixture table is covered."
+      "why": "Shows the stroke pattern and pressure for wiping coolant off the fixture table."
     },
     {
-      "chore": "hold wiping cloth",
+      "chore": "wipe table",
       "kind": "squeeze",
-      "why": "Shows how firmly to hold a cloth wet with coolant so it does not slip out while pressing."
+      "why": "Shows how firmly to hold the cloth so it does not slip out while pressing on a wet, oily surface."
     },
     {
-      "chore": "lift housing off table",
+      "chore": "lift housing",
       "kind": "path",
-      "why": "Shows how the hand approaches the housing on the fixture and lifts it clear without knocking the table or fixture."
+      "why": "Shows how the hand approaches, grasps and lifts the housing clear of the fixture."
     },
     {
-      "chore": "grip housing",
+      "chore": "lift housing",
       "kind": "squeeze",
-      "why": "A 3.5 kg machined part, possibly slick with coolant, needs enough grip force not to slip, without marking the finished surfaces."
+      "why": "Shows how hard to grip a 3.5 kg housing with coolant on it so it does not slip, without marking the finished part."
     }
   ],
   "questions": [
-    "The inspection cart by the roller door has not been located in the scan, so the plan only takes the housing to the way out. Can you add the cart's position as a fixture if it should be set down on the cart itself?",
-    "Where should the coolant-soaked cloth go after wiping? Placing or discarding it is not in the plan yet."
-  ]
+    "The inspection cart by the roller door has not been located in the scan, so the robot can only carry the housing to the way out. Is leaving it at the way out acceptable, or can you mark the inspection cart's position so it can be added later?"
+  ],
+  "unmet": [
+    "Setting the housing down on the inspection cart by the roller door: the planner can only route to the way out, so the housing will be carried out but not placed on the cart."
+  ],
+  "proceeded_without_answers": true
 }

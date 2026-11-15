@@ -118,51 +118,51 @@
       "check": "reach",
       "task": "t1",
       "status": "pass",
-      "value": 0.901,
+      "value": 0.85,
       "limit": 0.633,
       "unit": "m",
       "requirements": [
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "why": "target 4 at 0.60 m, tool down: the tool reaches 0.13 to 0.90 m from the base centre; the base centre can stand 0.63 m away or more (free floor 0.43 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 6 targets)",
+      "why": "target 4 at 0.60 m, tool down: the tool reaches 0.14 to 0.85 m from the base centre; the base centre can stand 0.63 m away or more (free floor 0.43 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 6 targets)",
       "target": 4,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.338,
-          "reach_m": 0.901
+          "reach_m": 0.85
         },
         {
           "target": 1,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.901
+          "reach_m": 0.85
         },
         {
           "target": 2,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.901
+          "reach_m": 0.85
         },
         {
           "target": 3,
           "status": "pass",
           "needed_m": 0.485,
-          "reach_m": 0.901
+          "reach_m": 0.85
         },
         {
           "target": 4,
           "status": "pass",
           "needed_m": 0.633,
-          "reach_m": 0.901
+          "reach_m": 0.85
         },
         {
           "target": 5,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.901
+          "reach_m": 0.85
         }
       ]
     },
@@ -170,21 +170,21 @@
       "check": "reach",
       "task": "t2",
       "status": "pass",
-      "value": 0.85,
+      "value": 0.801,
       "limit": 0.33,
       "unit": "m",
       "requirements": [
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "why": "target 0 at 0.34 m, tool down: the tool reaches 0.15 to 0.85 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "why": "target 0 at 0.34 m, tool down: the tool reaches 0.25 to 0.80 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
       "target": 0,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.33,
-          "reach_m": 0.85
+          "reach_m": 0.801
         }
       ]
     },
@@ -192,21 +192,21 @@
       "check": "reach",
       "task": "t3",
       "status": "pass",
-      "value": 0.901,
+      "value": 0.85,
       "limit": 0.33,
       "unit": "m",
       "requirements": [
         "r_t3_reach",
         "r_t3_floor"
       ],
-      "why": "target 0 at 0.54 m, tool down: the tool reaches 0.13 to 0.90 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "why": "target 0 at 0.54 m, tool down: the tool reaches 0.14 to 0.85 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
       "target": 0,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.33,
-          "reach_m": 0.901
+          "reach_m": 0.85
         }
       ]
     },
@@ -236,7 +236,7 @@
       "check": "tip-over",
       "task": "t1",
       "status": "pass",
-      "value": 3.56,
+      "value": 3.16,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -251,7 +251,7 @@
       "check": "tip-over",
       "task": "t2",
       "status": "pass",
-      "value": 10.56,
+      "value": 6.03,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -265,7 +265,7 @@
       "check": "tip-over",
       "task": "t3",
       "status": "pass",
-      "value": 5.27,
+      "value": 5.94,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [

@@ -9,7 +9,7 @@
       "object": "cloth",
       "demo": "wipe bedside table",
       "carries": false,
-      "why": "Clean the bedside table first so the remote and pill organiser can go on a clean surface."
+      "why": "You asked for her bedside table to be wiped. It comes first so the table is clean before anything is brought to it."
     },
     {
       "id": "t2",
@@ -17,9 +17,8 @@
       "anchor": "remote_on_footstool",
       "object": "tv_remote",
       "demo": "pick up remote",
-      "carries": true,
-      "why": "The remote sits on a low footstool your mother can no longer reach; it is lifted to be put somewhere within her reach.",
-      "deliver_to": "way_out"
+      "carries": false,
+      "why": "The remote is on the low footstool, which she can no longer reach."
     },
     {
       "id": "t3",
@@ -27,19 +26,17 @@
       "anchor": "towel_on_bath_edge",
       "object": "hand_towel",
       "demo": "pick up towel",
-      "carries": true,
-      "why": "The towel on the bath edge is too low for her; it is picked up to be put away.",
-      "deliver_to": "way_out"
+      "carries": false,
+      "why": "The towel on the bath edge is too low for her to pick up."
     },
     {
       "id": "t4",
       "skill": "pick",
       "anchor": "pill_organiser",
       "object": "pill_organiser",
-      "demo": "fetch pill organiser",
-      "carries": true,
-      "why": "The pill organiser is brought from the kitchen counter to her; it stays in the home, so it is not taken out of the building.",
-      "deliver_to": "way_out"
+      "demo": "pick up pill organiser",
+      "carries": false,
+      "why": "You asked for her pill organiser to be fetched from the kitchen counter."
     }
   ],
   "corridors": [
@@ -92,32 +89,6 @@
       ]
     },
     {
-      "trip": "t2->way_out",
-      "rooms": [
-        "bedroom",
-        "hall",
-        "outside"
-      ],
-      "doorways": [
-        "d_bed",
-        "d_entry"
-      ],
-      "bottleneck": {
-        "doorway": "d_bed",
-        "width_m": 0.76
-      },
-      "header_m": 2.03,
-      "step_m": 0.0,
-      "changes_floor": false,
-      "turns": [
-        {
-          "hallway": "hall",
-          "doorway": "d_bed",
-          "width_m": 1.0
-        }
-      ]
-    },
-    {
       "trip": "dock->t3",
       "rooms": [
         "hall",
@@ -142,32 +113,6 @@
       ]
     },
     {
-      "trip": "t3->way_out",
-      "rooms": [
-        "bathroom",
-        "hall",
-        "outside"
-      ],
-      "doorways": [
-        "d_bath",
-        "d_entry"
-      ],
-      "bottleneck": {
-        "doorway": "d_bath",
-        "width_m": 0.61
-      },
-      "header_m": 2.03,
-      "step_m": 0.0,
-      "changes_floor": false,
-      "turns": [
-        {
-          "hallway": "hall",
-          "doorway": "d_bath",
-          "width_m": 1.0
-        }
-      ]
-    },
-    {
       "trip": "dock->t4",
       "rooms": [
         "hall",
@@ -175,32 +120,6 @@
       ],
       "doorways": [
         "d_kitchen"
-      ],
-      "bottleneck": {
-        "doorway": "d_kitchen",
-        "width_m": 0.71
-      },
-      "header_m": 2.03,
-      "step_m": 0.0,
-      "changes_floor": false,
-      "turns": [
-        {
-          "hallway": "hall",
-          "doorway": "d_kitchen",
-          "width_m": 1.0
-        }
-      ]
-    },
-    {
-      "trip": "t4->way_out",
-      "rooms": [
-        "kitchen",
-        "hall",
-        "outside"
-      ],
-      "doorways": [
-        "d_kitchen",
-        "d_entry"
       ],
       "bottleneck": {
         "doorway": "d_kitchen",
