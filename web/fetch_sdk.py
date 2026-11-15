@@ -15,14 +15,15 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-VERSION = "26.5.4_webgl-708-g332adb66f5"
+VERSION = "26.11.2_webgl-1884-ga0235e8eaf"
 URL = f"https://static.matterport.com/showcase-sdk/bundle/{VERSION}/showcase-bundle.zip"
 DEST = Path(__file__).resolve().parent / "_vendor" / "matterport"
 
 
 def main() -> int:
     print("fetching", URL)
-    data = urllib.request.urlopen(URL, timeout=120).read()
+    # the CDN refuses urllib's default User-Agent
+    data = urllib.request.urlopen(urllib.request.Request(URL, headers={"User-Agent": "fetch-sdk"}), timeout=120).read()
     DEST.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         for name in z.namelist():  # nothing may land outside DEST

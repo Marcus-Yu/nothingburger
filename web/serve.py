@@ -23,10 +23,10 @@ RUNS = REPO / "runs"
 SCANS = REPO / "world" / "_scans"  # the real place's mesh per world, captured from its tour (tour.html?capture=1), not committed
 VENDOR = REPO / "web" / "_vendor" / "matterport"  # Matterport's SDK bundle, fetched by web/fetch_sdk.py, not committed
 
-# The hackathon models carry a Gaussian splat of the outside of the building. This version of the SDK bundle starts
-# its splat renderer on it, the renderer throws, and the player then waits for it for ever: it stays on its loading
-# picture, the camera cannot move and no view can be changed. Until a bundle that draws these splats is pinned in
-# web/fetch_sdk.py, the player is told the model has none: the scan itself (inside, dollhouse, floor plan) is untouched.
+# The hackathon models carry a Gaussian splat of the outside of the building, which the dollhouse view shows round
+# the scan. SDK bundle 26.5.4 started its splat renderer on it, the renderer threw, and the player then waited for it
+# for ever (it stayed on its loading picture: no camera, no views). The bundle pinned in web/fetch_sdk.py since
+# 26.11.2 draws it. Should a bundle hang on a splat again, tour.html?...&splat=0 tells the player the model has none.
 NO_SPLAT = r"""<script>(function () {
   var real = window.fetch;
   window.fetch = async function (what) {
@@ -174,7 +174,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(list_runs())
         if p == "/api/tour":  # what the tour page needs: the SDK key (it only works from localhost) and whether the bundle is here
             return self._json({"sdk_key": _env("MATTERPORT_SDK_KEY"), "bundle": (VENDOR / "showcase.html").exists()})
-        if p == "/mp/showcase.html":  # Matterport's player, with its outdoor splat layer left out (see NO_SPLAT)
+        if p == "/mp/showcase.html" and "splat=0" in urlparse(self.path).query:  # the player with its splat left out (see NO_SPLAT)
             page = VENDOR / "showcase.html"
             if not page.is_file():
                 return self._send(404, b"not found", "text/plain")

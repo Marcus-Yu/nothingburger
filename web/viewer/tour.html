@@ -145,7 +145,7 @@ async function captureRoom(world) {
   frames = new Float32Array(await (await fetch(base + meta.frames)).arrayBuffer());
   $("seek").max = meta.n - 1;
   $("chapter").innerHTML = meta.chapters.map((c, i) => `<option value="${i}">${c.label.replace(/</g, "&lt;")}</option>`).join("");
-  const f = $("f"); f.src = `/mp/showcase.html?m=${world.tour.matterport}&applicationKey=${cfg.sdk_key}&play=1&qs=1&title=0&brand=0`;
+  const f = $("f"); f.src = `/mp/showcase.html?m=${world.tour.matterport}&applicationKey=${cfg.sdk_key}&play=1&qs=1&title=0&brand=0${q.get("splat") === "0" ? "&splat=0" : ""}`;   // ?splat=0: without the outdoor splat, see web/serve.py
   await new Promise(r => f.onload = r);
   sdk = await f.contentWindow.MP_SDK.connect(f.contentWindow);
   sdk.Sweep.data.subscribe({ onCollectionUpdated: c => { sweeps = Object.values(c); } });
