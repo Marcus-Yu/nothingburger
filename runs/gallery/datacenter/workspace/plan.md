@@ -1,0 +1,4 @@
+- [x] Read run/ files (no checker_log, no earlier notes)
+- [x] Settle order leg by leg in notes/order.md
+- [x] Check draft against rules (force null, carries only t2, cite existing ids)
+- [x] Emit JSON

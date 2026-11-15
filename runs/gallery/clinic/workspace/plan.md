@@ -1,0 +1,5 @@
+- [x] ls workspace; no earlier notes, no checker_log
+- [x] read tasks, requirements, legs, standoffs, design, intake
+- [x] settle order leg by leg in notes/order.md
+- [x] check draft against rules (each leg once, approach/wipe/retreat per standoff, no grasp for wipe, nulls)
+- [x] emit JSON answer

@@ -9,7 +9,7 @@
       "object": "cloth",
       "demo": "wipe ledge",
       "carries": false,
-      "why": "The corridor window sill is a high-touch surface the job asks to wipe; it is listed first in the job."
+      "why": "The job asks for the corridor window sill to be wiped down."
     },
     {
       "id": "t2",
@@ -18,7 +18,7 @@
       "object": "cloth",
       "demo": "wipe ledge",
       "carries": false,
-      "why": "The reception-desk ledge in the waiting room is the other high-touch surface the job asks to wipe."
+      "why": "The job asks for the ledge at the reception desk in the waiting room to be wiped down."
     }
   ],
   "corridors": [

@@ -14,10 +14,9 @@
       "requirements": [
         "r_width",
         "r_header",
-        "r_step",
-        "r_t1_floor"
+        "r_step"
       ],
-      "note": "Dock to first wipe standoff (4.5 m); step limit 0.0 m is assumed, not scanned, so watch for thresholds.",
+      "note": "Leg 0 goes from dock to the first wipe standoff, 4.5 m; the no-step limit (0.0 m) is assumed, not scanned, so watch the floor.",
       "n": 0
     },
     {
@@ -29,9 +28,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach"
+        "r_t1_reach",
+        "r_t1_floor"
       ],
-      "note": "Joint-space approach of about 12 s; the 16 wipe reach targets are assumed, not measured.",
+      "note": "Free floor at the table edge is only 0.25 m, so check the base is at the planned pose before the arm moves.",
       "n": 1
     },
     {
@@ -44,10 +44,10 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_reach",
-        "r_t1_payload"
+        "r_t1_payload",
+        "r_t1_reach"
       ],
-      "note": "The 10 N press is assumed, and this pass runs 5 strokes against a stated coverage of strokes 0-2, so confirm the coverage.",
+      "note": "The 10 N press is assumed and not checked; the housing is still on the table, so keep the strokes clear of it.",
       "n": 2
     },
     {
@@ -58,8 +58,10 @@
       "force_n": null,
       "press_n": null,
       "turns": null,
-      "requirements": [],
-      "note": "Back off 0.1 m before driving so the cloth clears the coolant-wet table.",
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "The arm backs off 0.1 m and stows before the base moves.",
       "n": 3
     },
     {
@@ -73,10 +75,9 @@
       "requirements": [
         "r_width",
         "r_header",
-        "r_step",
-        "r_t1_floor"
+        "r_step"
       ],
-      "note": "Short 0.45 m shuffle along the table edge, where free floor is only 0.25 m wide.",
+      "note": "Short 0.45 m sideways move along the table to standoff 1, with the arm stowed.",
       "n": 4
     },
     {
@@ -88,9 +89,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach"
+        "r_t1_reach",
+        "r_t1_floor"
       ],
-      "note": "Long joint approach (about 54 s), so check the arm path near the table.",
+      "note": "This approach is long (53.8 s), so watch for the arm getting close to the housing on the table.",
       "n": 5
     },
     {
@@ -103,10 +105,10 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_reach",
-        "r_t1_payload"
+        "r_t1_payload",
+        "r_t1_reach"
       ],
-      "note": "Covers strokes 3-5 at an assumed 10 N press, which has not been calibrated on this table.",
+      "note": "These are strokes 3-5 at an assumed 10 N; the housing sits near this part of the table.",
       "n": 6
     },
     {
@@ -117,8 +119,10 @@
       "force_n": null,
       "press_n": null,
       "turns": null,
-      "requirements": [],
-      "note": "Back off 0.1 m before driving.",
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "The arm backs off 0.1 m and stows before the next move.",
       "n": 7
     },
     {
@@ -132,10 +136,9 @@
       "requirements": [
         "r_width",
         "r_header",
-        "r_step",
-        "r_t1_floor"
+        "r_step"
       ],
-      "note": "Another 0.45 m shuffle within the narrow free floor along the table.",
+      "note": "0.45 m move to the last wipe standoff.",
       "n": 8
     },
     {
@@ -147,9 +150,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach"
+        "r_t1_reach",
+        "r_t1_floor"
       ],
-      "note": "Joint approach of about 52 s for the final wipe pass.",
+      "note": "Approach to the far end of the table, where the base can stand no closer than 0.68 m to the farthest targets.",
       "n": 9
     },
     {
@@ -162,10 +166,10 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_reach",
-        "r_t1_payload"
+        "r_t1_payload",
+        "r_t1_reach"
       ],
-      "note": "Final strokes 6-7 at an assumed 10 N press; check that the table is clear before picking the part.",
+      "note": "These are the last strokes (6-7) at an assumed 10 N; check the coolant is gone.",
       "n": 10
     },
     {
@@ -176,8 +180,10 @@
       "force_n": null,
       "press_n": null,
       "turns": null,
-      "requirements": [],
-      "note": "Back off 0.1 m, which finishes the wipe task.",
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "The arm backs off 0.1 m and stows before moving to the pick.",
       "n": 11
     },
     {
@@ -191,10 +197,9 @@
       "requirements": [
         "r_width",
         "r_header",
-        "r_step",
-        "r_t2_floor"
+        "r_step"
       ],
-      "note": "Move 0.38 m to the pick standoff, where free floor is only 0.18 m from the edge.",
+      "note": "0.38 m move to the pick standoff, where the free floor at the table edge is only 0.18 m.",
       "n": 12
     },
     {
@@ -207,9 +212,10 @@
       "turns": null,
       "requirements": [
         "r_t2_reach",
+        "r_t2_floor",
         "r_t2_opening"
       ],
-      "note": "Gripper opens at the start of the approach and needs at least 0.08 m of opening for the housing.",
+      "note": "The gripper opens at the start; it opens to 0.085 m against the 0.08 m the housing needs, which leaves only 5 mm to spare.",
       "n": 13
     },
     {
@@ -224,7 +230,7 @@
         "r_t2_opening",
         "r_t2_payload"
       ],
-      "note": "Grip force is not established because the ledger has no force band for this 3.5 kg housing, so set and verify it before running.",
+      "note": "The grip force is not established, because the ledger has no force band for this pick, so check the 3.5 kg housing does not slip.",
       "n": 14
     },
     {
@@ -239,7 +245,7 @@
         "r_t2_payload",
         "r_t2_reach"
       ],
-      "note": "Lift 0.15 m with a 3.5 kg user-stated payload, and watch for slip given the unset grip force and coolant residue.",
+      "note": "The lift is 0.15 m with 4.5 kg on an arm rated for 5.0 kg, so there is little margin.",
       "n": 15
     },
     {
@@ -251,9 +257,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_header"
+        "r_t2_floor",
+        "r_t2_payload"
       ],
-      "note": "Retreat to a carry pose that stays under the 2.35 m header while holding the part.",
+      "note": "The arm stows while still holding the housing; carrying stowed was checked for tip-over (ratio 5.92).",
       "n": 16
     },
     {
@@ -270,7 +277,7 @@
         "r_step",
         "r_t2_payload"
       ],
-      "note": "A 5 m carry holding the 3.5 kg housing, so drive gently because the step limit is assumed and grip force is unverified.",
+      "note": "4.97 m to the way out carrying the housing, with a grip force that was never checked, so drive gently.",
       "n": 17
     },
     {
@@ -284,7 +291,7 @@
       "requirements": [
         "r_t2_payload"
       ],
-      "note": "No placement surface is specified at way_out, so confirm where the housing should be set down.",
+      "note": "The housing is set down at the building's way out, not on the inspection cart, which the planner cannot target.",
       "n": 18
     },
     {
@@ -298,7 +305,7 @@
       "requirements": [
         "r_t2_opening"
       ],
-      "note": "Open the gripper only once the part is resting stably.",
+      "note": "Check the housing is resting stably before the gripper opens.",
       "n": 19
     },
     {
@@ -314,8 +321,18 @@
         "r_header",
         "r_step"
       ],
-      "note": "Return empty to the dock (1.9 m).",
+      "note": "1.94 m back to the dock, empty, with the arm stowed.",
       "n": 20
     }
-  ]
+  ],
+  "planning": {
+    "workspace": true,
+    "files": [
+      "notes/order.md",
+      "plan.md"
+    ],
+    "tool_calls": 9,
+    "turns": 5,
+    "revisions": 0
+  }
 }

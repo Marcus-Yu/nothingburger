@@ -1,0 +1,3 @@
+- [x] Read run/ files (tasks, requirements, legs, standoffs, design, intake)
+- [x] Settle order in notes/order.md
+- [x] Emit JSON answer
