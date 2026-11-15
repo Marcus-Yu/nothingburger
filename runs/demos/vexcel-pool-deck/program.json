@@ -1,0 +1,316 @@
+{
+  "schema": "program/1",
+  "source": "model",
+  "model": "claude-sonnet-5-5",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step",
+        "r_t1_floor"
+      ],
+      "note": "Step limit is assumed 0.0 m, not measured, so check thresholds on the long dock run.",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Reach targets come from the demo and scan, so check clearance to the lounger.",
+      "n": 1
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_payload"
+      ],
+      "note": "The 10 N press force is assumed, not measured, so watch the contact.",
+      "n": 2
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Back off 0.1 m before moving the base.",
+      "n": 3
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step",
+        "r_t1_floor"
+      ],
+      "note": "The free floor edge is 0.326 m away, so keep the base clear of it.",
+      "n": 4
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "The approach is long (about 80 s), so keep the area clear.",
+      "n": 5
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press"
+      ],
+      "note": "Strokes 3-4 of 11, at the assumed 10 N press.",
+      "n": 6
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Back off 0.1 m before moving the base.",
+      "n": 7
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step",
+        "r_t1_floor"
+      ],
+      "note": "Short 0.3 m shift along the lounger.",
+      "n": 8
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 2,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Check that the arm is clear of the lounger edge on approach.",
+      "n": 9
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 2,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press"
+      ],
+      "note": "Strokes 5-6 of 11, at the assumed 10 N press.",
+      "n": 10
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 2,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Back off 0.1 m before moving the base.",
+      "n": 11
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 3,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step",
+        "r_t1_floor"
+      ],
+      "note": "Short 0.3 m shift along the lounger.",
+      "n": 12
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 3,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Check that the arm is clear of the lounger edge on approach.",
+      "n": 13
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 3,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press"
+      ],
+      "note": "Strokes 7-8 of 11, at the assumed 10 N press.",
+      "n": 14
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 3,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Back off 0.1 m before moving the base.",
+      "n": 15
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 4,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step",
+        "r_t1_floor"
+      ],
+      "note": "Last 0.3 m shift along the lounger.",
+      "n": 16
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 4,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Check that the arm is clear of the lounger edge on approach.",
+      "n": 17
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 4,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press"
+      ],
+      "note": "Strokes 9-10 of 11, at the assumed 10 N press.",
+      "n": 18
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 4,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Back off 0.1 m before driving home.",
+      "n": 19
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 5,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "Return to the dock. The step limit is assumed, not measured.",
+      "n": 20
+    }
+  ],
+  "planning": {
+    "workspace": true,
+    "files": [
+      "plan.md"
+    ],
+    "tool_calls": 6,
+    "turns": 3,
+    "revisions": 0
+  }
+}

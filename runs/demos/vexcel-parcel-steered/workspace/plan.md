@@ -1,0 +1,2 @@
+- [x] read run files
+- [x] order: leg0, approach, grasp, lift, retreat, leg1, place, release, leg2

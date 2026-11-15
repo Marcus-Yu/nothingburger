@@ -1,0 +1,187 @@
+{
+  "schema": "route/1",
+  "world": "parcel_eastland",
+  "standoffs": [
+    {
+      "task": "t1",
+      "pose": [
+        15.4,
+        0.85,
+        -1.5708
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 4.87,
+      "spares": [
+        [
+          15.4,
+          0.15,
+          1.5708
+        ],
+        [
+          15.491,
+          0.838,
+          -0.2618
+        ]
+      ],
+      "q": {
+        "arm/fr3_joint1": 2.60266,
+        "arm/fr3_joint2": -1.09279,
+        "arm/fr3_joint3": -2.9007,
+        "arm/fr3_joint4": -2.16803,
+        "arm/fr3_joint5": -2.03069,
+        "arm/fr3_joint6": 2.90366,
+        "arm/fr3_joint7": -0.0
+      },
+      "why": "all 1 targets reached, worst tip ratio 4.87"
+    }
+  ],
+  "legs": [
+    {
+      "from": "dock",
+      "to": "t1",
+      "carrying": false,
+      "length_m": 7.365,
+      "waypoints": [
+        [
+          8.2,
+          2.4,
+          0.0
+        ],
+        [
+          8.2,
+          2.4,
+          -0.212
+        ],
+        [
+          15.157,
+          0.902,
+          -0.212
+        ],
+        [
+          15.157,
+          0.902,
+          0.0
+        ],
+        [
+          15.351,
+          0.86,
+          0.0
+        ],
+        [
+          15.351,
+          0.86,
+          -1.5708
+        ],
+        [
+          15.4,
+          0.85,
+          -1.5708
+        ],
+        [
+          15.4,
+          0.85,
+          -1.5708
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 0
+    },
+    {
+      "from": "t1",
+      "to": "way_out",
+      "carrying": true,
+      "length_m": 9.117,
+      "waypoints": [
+        [
+          15.4,
+          0.85,
+          -1.5708
+        ],
+        [
+          15.35,
+          0.853,
+          -1.5708
+        ],
+        [
+          15.35,
+          0.853,
+          3.1416
+        ],
+        [
+          15.151,
+          0.865,
+          3.1416
+        ],
+        [
+          15.151,
+          0.865,
+          3.0812
+        ],
+        [
+          6.3,
+          1.4,
+          3.0812
+        ],
+        [
+          6.3,
+          1.4,
+          3.1416
+        ]
+      ],
+      "footprint_ok": true
+    },
+    {
+      "from": "way_out",
+      "to": "dock",
+      "carrying": false,
+      "length_m": 2.277,
+      "waypoints": [
+        [
+          6.3,
+          1.4,
+          3.1416
+        ],
+        [
+          6.3,
+          1.4,
+          0.0303
+        ],
+        [
+          7.125,
+          1.425,
+          0.0303
+        ],
+        [
+          7.125,
+          1.425,
+          0.7367
+        ],
+        [
+          8.2,
+          2.4,
+          0.7367
+        ],
+        [
+          8.2,
+          2.4,
+          0.0
+        ]
+      ],
+      "footprint_ok": true
+    }
+  ],
+  "door_clearances": [
+    {
+      "doorway": "d_front",
+      "clear_width_m": 0.9,
+      "robot_width_m": 0.434,
+      "margin_m": 0.233,
+      "legs": [
+        "t1->way_out",
+        "way_out->dock"
+      ]
+    }
+  ],
+  "failures": []
+}

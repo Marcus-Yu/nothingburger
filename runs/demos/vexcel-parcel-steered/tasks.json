@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "parcel",
+      "object": "parcel_small",
+      "demo": "pick up parcel",
+      "carries": true,
+      "why": "The parcel is the only located item and it has to be lifted and carried; the way out is the only place the planner can deliver to, so it stands in for the front door.",
+      "deliver_to": "way_out"
+    }
+  ]
+}

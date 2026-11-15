@@ -1,0 +1,31 @@
+{
+  "source": "model",
+  "model": "claude-sonnet-5-5",
+  "job": "Bring the parcel at the kerb up the driveway to the front door",
+  "answers": [],
+  "understood_as": "Pick up the small parcel at the kerb and carry it up the driveway to the front door.",
+  "steps": [
+    "Pick up the small parcel at the kerb",
+    "Carry it up the driveway toward the front door"
+  ],
+  "demos": [
+    {
+      "chore": "pick up parcel",
+      "kind": "path",
+      "why": "Shows how the hand reaches for and lifts a box standing on its long edge."
+    },
+    {
+      "chore": "pick up parcel",
+      "kind": "squeeze",
+      "why": "Shows how firmly to pinch the box so it does not slip or get crushed."
+    }
+  ],
+  "questions": [
+    "The front door is not a located spot in the building. Can someone mark where the front door is in the scan? Until then the robot can only take the parcel to the way out.",
+    "Is the parcel at the kerb the small 20 x 15 x 6 cm box, and roughly how heavy is it?"
+  ],
+  "unmet": [
+    "Putting the parcel down at the front door itself: the planner can only deliver to the way out, not to a specific door."
+  ],
+  "proceeded_without_answers": true
+}

@@ -1,0 +1,93 @@
+{
+  "schema": "program/1",
+  "source": "model",
+  "model": "claude-sonnet-5-5",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Scan limits: width 0.678 m, height 1.979 m, step 0.001 m.",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Reach targets come from the home demo and the scan. Keep the base inside the free floor, 0.376 m from the edge.",
+      "n": 1
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_payload"
+      ],
+      "note": "The 10 N press force is assumed, not measured. This standoff covers only strokes 0-1 of 6, and no other standoff is planned.",
+      "n": 2
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Back off 0.1 m before driving.",
+      "n": 3
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Return to the dock with the arm stowed, under the 1.979 m header.",
+      "n": 4
+    }
+  ],
+  "planning": {
+    "workspace": true,
+    "files": [
+      "notes/order.md",
+      "plan.md"
+    ],
+    "tool_calls": 7,
+    "turns": 3,
+    "revisions": 0
+  }
+}

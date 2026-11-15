@@ -1,0 +1,234 @@
+{
+  "schema": "design/1",
+  "parts": {
+    "base": "tidybot_arx5",
+    "lift": "liftkit_500",
+    "arm": "ur10e",
+    "gripper": "robotiq_2f85",
+    "lidar": "rplidar_s2",
+    "lidar_mount": "stage_rear",
+    "wrist_cam": false,
+    "ego_cam": "base_front"
+  },
+  "price_usd": 66450,
+  "mass_kg": 101.71,
+  "checks": [
+    {
+      "check": "doorway",
+      "task": null,
+      "status": "pass",
+      "value": 0.573,
+      "limit": 0.678,
+      "unit": "m",
+      "requirements": [
+        "r_width"
+      ],
+      "why": "width of the whole robot with the arm stowed"
+    },
+    {
+      "check": "turn",
+      "task": null,
+      "status": "pass",
+      "value": 0.464,
+      "unit": "m",
+      "requirements": [],
+      "why": "holonomic base: it moves sideways, so it need not turn in the hallway"
+    },
+    {
+      "check": "door header",
+      "task": null,
+      "status": "pass",
+      "value": 1.767,
+      "limit": 1.979,
+      "unit": "m",
+      "requirements": [
+        "r_header"
+      ],
+      "why": "height with the lift down and the arm stowed"
+    },
+    {
+      "check": "steps",
+      "task": null,
+      "status": "pass",
+      "value": 0.015,
+      "limit": 0.001,
+      "unit": "m",
+      "requirements": [
+        "r_step"
+      ],
+      "why": "value is the tallest step the base climbs; limit is the tallest step on the corridors"
+    },
+    {
+      "check": "base payload",
+      "task": null,
+      "status": "pass",
+      "value": 56.81,
+      "limit": 60.0,
+      "unit": "kg",
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "why": "value is everything the base carries (lift, arm, gripper, sensors, heaviest object); limit is the base's rating"
+    },
+    {
+      "check": "lidar present",
+      "task": null,
+      "status": "pass",
+      "value": "2d",
+      "limit": "2d",
+      "requirements": [
+        "r_step"
+      ]
+    },
+    {
+      "check": "lidar view",
+      "task": null,
+      "status": "pass",
+      "value": 0.82,
+      "limit": 0.75,
+      "unit": "fraction",
+      "requirements": [],
+      "why": "share of the horizontal circle the lidar sees past the robot's own body, arm stowed, mount stage_rear"
+    },
+    {
+      "check": "ego camera",
+      "task": null,
+      "status": "pass",
+      "requirements": [],
+      "why": "needed to see the floor ahead and each target before reaching"
+    },
+    {
+      "check": "reach",
+      "task": "t1",
+      "status": "pass",
+      "value": 1.301,
+      "limit": 0.704,
+      "unit": "m",
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "why": "target 5 at 0.74 m, tool down: the tool reaches 0.17 to 1.30 m from the base centre; the base centre can stand 0.70 m away or more (free floor 0.50 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 12 targets)",
+      "target": 5,
+      "targets": [
+        {
+          "target": 0,
+          "status": "pass",
+          "needed_m": 0.329,
+          "reach_m": 1.301
+        },
+        {
+          "target": 1,
+          "status": "pass",
+          "needed_m": 0.405,
+          "reach_m": 1.301
+        },
+        {
+          "target": 2,
+          "status": "pass",
+          "needed_m": 0.555,
+          "reach_m": 1.301
+        },
+        {
+          "target": 3,
+          "status": "pass",
+          "needed_m": 0.329,
+          "reach_m": 1.301
+        },
+        {
+          "target": 4,
+          "status": "pass",
+          "needed_m": 0.329,
+          "reach_m": 1.301
+        },
+        {
+          "target": 5,
+          "status": "pass",
+          "needed_m": 0.704,
+          "reach_m": 1.301
+        },
+        {
+          "target": 6,
+          "status": "pass",
+          "needed_m": 0.704,
+          "reach_m": 1.301
+        },
+        {
+          "target": 7,
+          "status": "pass",
+          "needed_m": 0.329,
+          "reach_m": 1.301
+        },
+        {
+          "target": 8,
+          "status": "pass",
+          "needed_m": 0.329,
+          "reach_m": 1.301
+        },
+        {
+          "target": 9,
+          "status": "pass",
+          "needed_m": 0.555,
+          "reach_m": 1.301
+        },
+        {
+          "target": 10,
+          "status": "pass",
+          "needed_m": 0.405,
+          "reach_m": 1.301
+        },
+        {
+          "target": 11,
+          "status": "pass",
+          "needed_m": 0.329,
+          "reach_m": 1.301
+        }
+      ]
+    },
+    {
+      "check": "tip-over",
+      "task": "t1",
+      "status": "pass",
+      "value": 1.71,
+      "limit": 1.5,
+      "unit": "ratio",
+      "requirements": [
+        "r_t1_payload",
+        "r_t1_press",
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "why": "worst case: reaching target 2 (0.60 m out at 0.74 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
+    },
+    {
+      "check": "payload",
+      "task": "t1",
+      "status": "pass",
+      "value": 1.0,
+      "limit": 12.5,
+      "unit": "kg",
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "why": "arm carries object 0.1 + gripper 0.9 + wrist camera 0.0 kg against its 12.5 kg rating; gripper rated 5.0 kg for the 0.1 kg object"
+    },
+    {
+      "check": "press",
+      "task": "t1",
+      "status": "not_assessable",
+      "value": 122.6,
+      "limit": 12.0,
+      "unit": "N",
+      "requirements": [
+        "r_t1_press"
+      ],
+      "why": "press force is assumed"
+    }
+  ],
+  "labels": [
+    "press not verified: t1"
+  ],
+  "considered": 7140,
+  "passed_arithmetic": 2216,
+  "composed_and_checked": 303
+}

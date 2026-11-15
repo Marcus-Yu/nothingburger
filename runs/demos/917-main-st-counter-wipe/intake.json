@@ -1,0 +1,28 @@
+{
+  "source": "model",
+  "model": "claude-sonnet-5-5",
+  "job": "Wipe the kitchen counter at 917 Main St unit 506",
+  "answers": [],
+  "understood_as": "Wipe the kitchen counter in unit 506 at 917 Main St with a cloth.",
+  "steps": [
+    "Pick up the wiping cloth",
+    "Wipe the counter surface in strokes"
+  ],
+  "demos": [
+    {
+      "chore": "wipe counter",
+      "kind": "path",
+      "why": "Shows the stroke pattern and pressing motion for wiping the counter."
+    },
+    {
+      "chore": "hold cloth",
+      "kind": "squeeze",
+      "why": "Shows how firmly to pinch the cloth so it does not slip while wiping."
+    }
+  ],
+  "questions": [
+    "Two surfaces are located in the building (other_1_top_1 and other_1_top_2) and neither is labelled as the kitchen counter. Which one is the kitchen counter? I assumed the first, other_1_top_1, and the plan should be corrected if that is wrong."
+  ],
+  "unmet": [],
+  "proceeded_without_answers": true
+}

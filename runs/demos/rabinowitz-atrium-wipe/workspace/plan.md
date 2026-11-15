@@ -1,0 +1,2 @@
+- [x] read run files; 9 legs, standoffs 0-7 wipe t1, press 10N, no grasp
+- [x] emit move_base/approach/wipe/retreat per standoff, then leg 8

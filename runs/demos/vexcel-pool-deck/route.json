@@ -1,0 +1,426 @@
+{
+  "schema": "route/1",
+  "world": "pooldeck_lakes",
+  "standoffs": [
+    {
+      "task": "t1",
+      "pose": [
+        -3.7,
+        13.95,
+        1.5708
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 2.51,
+      "spares": [],
+      "q": {
+        "arm/shoulder_pan_joint": -2.92003,
+        "arm/shoulder_lift_joint": -1.0946,
+        "arm/elbow_joint": 1.98103,
+        "arm/wrist_1_joint": -2.45727,
+        "arm/wrist_2_joint": -1.57079,
+        "arm/wrist_3_joint": 0.0
+      },
+      "why": "all 6 targets reached, worst tip ratio 2.51",
+      "covers_targets": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "covers": "strokes 0-2 of 11"
+    },
+    {
+      "task": "t1",
+      "pose": [
+        -4.35,
+        14.9,
+        -0.0
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 2.21,
+      "spares": [],
+      "q": {
+        "arm/shoulder_pan_joint": -3.29106,
+        "arm/shoulder_lift_joint": -0.32507,
+        "arm/elbow_joint": 0.48325,
+        "arm/wrist_1_joint": -1.72901,
+        "arm/wrist_2_joint": -1.57079,
+        "arm/wrist_3_joint": 0.0
+      },
+      "why": "all 4 targets reached, worst tip ratio 2.21",
+      "covers_targets": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "covers": "strokes 3-4 of 11"
+    },
+    {
+      "task": "t1",
+      "pose": [
+        -4.35,
+        15.2,
+        -0.0
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 2.21,
+      "spares": [],
+      "q": {
+        "arm/shoulder_pan_joint": -3.29106,
+        "arm/shoulder_lift_joint": -0.32507,
+        "arm/elbow_joint": 0.48325,
+        "arm/wrist_1_joint": -1.72901,
+        "arm/wrist_2_joint": -1.57079,
+        "arm/wrist_3_joint": 0.0
+      },
+      "why": "all 4 targets reached, worst tip ratio 2.21",
+      "covers_targets": [
+        10,
+        11,
+        12,
+        13
+      ],
+      "covers": "strokes 5-6 of 11"
+    },
+    {
+      "task": "t1",
+      "pose": [
+        -4.35,
+        15.5,
+        -0.0
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 2.21,
+      "spares": [],
+      "q": {
+        "arm/shoulder_pan_joint": -3.29106,
+        "arm/shoulder_lift_joint": -0.32507,
+        "arm/elbow_joint": 0.48325,
+        "arm/wrist_1_joint": -1.72901,
+        "arm/wrist_2_joint": -1.57079,
+        "arm/wrist_3_joint": 0.0
+      },
+      "why": "all 4 targets reached, worst tip ratio 2.21",
+      "covers_targets": [
+        14,
+        15,
+        16,
+        17
+      ],
+      "covers": "strokes 7-8 of 11"
+    },
+    {
+      "task": "t1",
+      "pose": [
+        -4.35,
+        15.8,
+        -0.0
+      ],
+      "task_yaw_rad": 0.0,
+      "reach_ok": true,
+      "tip_ratio": 2.21,
+      "spares": [],
+      "q": {
+        "arm/shoulder_pan_joint": -3.29106,
+        "arm/shoulder_lift_joint": -0.32507,
+        "arm/elbow_joint": 0.48325,
+        "arm/wrist_1_joint": -1.72901,
+        "arm/wrist_2_joint": -1.57079,
+        "arm/wrist_3_joint": 0.0
+      },
+      "why": "all 4 targets reached, worst tip ratio 2.21",
+      "covers_targets": [
+        18,
+        19,
+        20,
+        21
+      ],
+      "covers": "strokes 9-10 of 11"
+    }
+  ],
+  "legs": [
+    {
+      "from": "dock",
+      "to": "t1",
+      "carrying": false,
+      "length_m": 9.376,
+      "waypoints": [
+        [
+          -9.6,
+          18.7,
+          -1.5708
+        ],
+        [
+          -9.6,
+          18.7,
+          -0.2462
+        ],
+        [
+          -4.925,
+          17.525,
+          -0.2462
+        ],
+        [
+          -4.925,
+          17.525,
+          -0.3218
+        ],
+        [
+          -4.775,
+          17.475,
+          -0.3218
+        ],
+        [
+          -4.775,
+          17.475,
+          -0.7854
+        ],
+        [
+          -4.525,
+          17.225,
+          -0.7854
+        ],
+        [
+          -4.525,
+          17.225,
+          -1.5549
+        ],
+        [
+          -4.475,
+          14.075,
+          -1.5549
+        ],
+        [
+          -4.475,
+          14.075,
+          -0.7854
+        ],
+        [
+          -4.225,
+          13.825,
+          -0.7854
+        ],
+        [
+          -4.225,
+          13.825,
+          0.0
+        ],
+        [
+          -3.748,
+          13.939,
+          0.0
+        ],
+        [
+          -3.748,
+          13.939,
+          1.5708
+        ],
+        [
+          -3.7,
+          13.95,
+          1.5708
+        ],
+        [
+          -3.7,
+          13.95,
+          1.5708
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 0
+    },
+    {
+      "from": "t1",
+      "to": "t1",
+      "carrying": false,
+      "length_m": 1.651,
+      "waypoints": [
+        [
+          -3.7,
+          13.95,
+          1.5708
+        ],
+        [
+          -4.375,
+          13.975,
+          1.5708
+        ],
+        [
+          -4.475,
+          14.075,
+          1.5708
+        ],
+        [
+          -4.475,
+          14.075,
+          1.5708
+        ],
+        [
+          -4.357,
+          14.851,
+          1.5708
+        ],
+        [
+          -4.357,
+          14.851,
+          0.0
+        ],
+        [
+          -4.35,
+          14.9,
+          0.0
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 1
+    },
+    {
+      "from": "t1",
+      "to": "t1",
+      "carrying": false,
+      "length_m": 0.3,
+      "waypoints": [
+        [
+          -4.35,
+          14.9,
+          0.0
+        ],
+        [
+          -4.35,
+          15.2,
+          0.0
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 2
+    },
+    {
+      "from": "t1",
+      "to": "t1",
+      "carrying": false,
+      "length_m": 0.3,
+      "waypoints": [
+        [
+          -4.35,
+          15.2,
+          0.0
+        ],
+        [
+          -4.35,
+          15.5,
+          0.0
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 3
+    },
+    {
+      "from": "t1",
+      "to": "t1",
+      "carrying": false,
+      "length_m": 0.3,
+      "waypoints": [
+        [
+          -4.35,
+          15.5,
+          0.0
+        ],
+        [
+          -4.35,
+          15.8,
+          0.0
+        ]
+      ],
+      "footprint_ok": true,
+      "standoff": 4
+    },
+    {
+      "from": "t1",
+      "to": "dock",
+      "carrying": false,
+      "length_m": 6.717,
+      "waypoints": [
+        [
+          -4.35,
+          15.8,
+          0.0
+        ],
+        [
+          -4.361,
+          15.848,
+          0.0
+        ],
+        [
+          -4.361,
+          15.848,
+          1.5708
+        ],
+        [
+          -4.394,
+          15.991,
+          1.5708
+        ],
+        [
+          -4.394,
+          15.991,
+          1.7976
+        ],
+        [
+          -4.659,
+          17.138,
+          1.7976
+        ],
+        [
+          -4.659,
+          17.138,
+          2.0944
+        ],
+        [
+          -4.725,
+          17.425,
+          2.0944
+        ],
+        [
+          -4.725,
+          17.425,
+          2.3562
+        ],
+        [
+          -4.775,
+          17.475,
+          2.3562
+        ],
+        [
+          -4.775,
+          17.475,
+          2.8902
+        ],
+        [
+          -5.025,
+          17.525,
+          2.8902
+        ],
+        [
+          -9.6,
+          18.7,
+          2.8902
+        ],
+        [
+          -9.6,
+          18.7,
+          -1.5708
+        ]
+      ],
+      "footprint_ok": true
+    }
+  ],
+  "door_clearances": [],
+  "failures": []
+}

@@ -1,0 +1,28 @@
+{
+  "source": "model",
+  "model": "claude-sonnet-5-5",
+  "job": "Wipe down the table in the kitchen",
+  "answers": [],
+  "understood_as": "Wipe the kitchen table surface clean with a cloth.",
+  "steps": [
+    "Take the wiping cloth",
+    "Wipe the kitchen surface in strokes, pressing on it"
+  ],
+  "demos": [
+    {
+      "chore": "wipe table",
+      "kind": "path",
+      "why": "Shows the robot the wiping strokes across the table top."
+    },
+    {
+      "chore": "wipe table",
+      "kind": "squeeze",
+      "why": "Shows how firmly to hold the cloth and press so it does not slip or lose contact."
+    }
+  ],
+  "questions": [
+    "Is kitchen_top_1 the kitchen table? It is the only surface located in the kitchen, so I assumed it is."
+  ],
+  "unmet": [],
+  "proceeded_without_answers": true
+}

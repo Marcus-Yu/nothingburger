@@ -1,0 +1,13 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "wipe",
+      "anchor": "lounger_top",
+      "object": "cloth",
+      "demo": "wipe lounger",
+      "carries": false,
+      "why": "The job is to wipe down the lounger, and its top surface is the located anchor for it."
+    }
+  ]
+}

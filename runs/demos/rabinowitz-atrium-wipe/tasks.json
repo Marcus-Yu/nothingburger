@@ -1,0 +1,13 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "wipe",
+      "anchor": "table_c6_top",
+      "object": "cloth",
+      "demo": "wipe table",
+      "carries": false,
+      "why": "The job asks for table C6 to be wiped, and its top is a located surface in the atrium."
+    }
+  ]
+}

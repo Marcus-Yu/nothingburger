@@ -1,0 +1,101 @@
+{
+  "calls": [
+    {
+      "n": 0,
+      "name": "nav.corridors",
+      "seconds": 0.0,
+      "summary": "2 corridors; narrowest 0.9 m at d_front; header 2.05 m; step 0.0 m; turn None m"
+    },
+    {
+      "n": 1,
+      "name": "nav.free_floor",
+      "seconds": 0.003,
+      "summary": "edge 0.026 m, side [-0.1104, -0.9939]"
+    },
+    {
+      "n": 2,
+      "name": "composer.design",
+      "seconds": 3.0425,
+      "summary": "tidybot_arx5+none+fr3+franka_hand $34600 64.41 kg"
+    },
+    {
+      "n": 3,
+      "name": "composer.candidates",
+      "seconds": 0.0032,
+      "summary": "7140 candidates"
+    },
+    {
+      "n": 4,
+      "name": "composer.compose",
+      "seconds": 0.2844,
+      "summary": "robot.xml 36392 chars; stowed 0.681 m wide, 0.803 m tall; 7 arm joints"
+    },
+    {
+      "n": 5,
+      "name": "nav.propose",
+      "seconds": 0.0129,
+      "summary": "36 poses, first [15.4, 0.85, -1.5708]"
+    },
+    {
+      "n": 6,
+      "name": "motion.reachable",
+      "seconds": 0.1469,
+      "summary": "ok=True tip 4.87 missed []"
+    },
+    {
+      "n": 7,
+      "name": "motion.reachable",
+      "seconds": 0.0045,
+      "summary": "ok=True tip 4.5 missed []"
+    },
+    {
+      "n": 8,
+      "name": "motion.reachable",
+      "seconds": 0.0017,
+      "summary": "ok=True tip 4.41 missed []"
+    },
+    {
+      "n": 9,
+      "name": "motion.reachable",
+      "seconds": 0.0016,
+      "summary": "ok=True tip 4.41 missed []"
+    },
+    {
+      "n": 10,
+      "name": "motion.reachable",
+      "seconds": 0.0014,
+      "summary": "ok=True tip 4.41 missed []"
+    },
+    {
+      "n": 11,
+      "name": "motion.reachable",
+      "seconds": 0.0015,
+      "summary": "ok=True tip 4.41 missed []"
+    },
+    {
+      "n": 12,
+      "name": "motion.reachable",
+      "seconds": 0.0016,
+      "summary": "ok=True tip 3.34 missed []"
+    },
+    {
+      "n": 13,
+      "name": "motion.reachable",
+      "seconds": 0.0015,
+      "summary": "ok=True tip 3.33 missed []"
+    },
+    {
+      "n": 14,
+      "name": "nav.plan",
+      "seconds": 0.1477,
+      "summary": "3 legs, 1 doors crossed, 0 failures"
+    },
+    {
+      "n": 15,
+      "name": "motion.retarget",
+      "seconds": 0.065,
+      "summary": "t1: 3 segments, 757 samples, max error 0.00042 m"
+    }
+  ],
+  "seconds": 3.719
+}

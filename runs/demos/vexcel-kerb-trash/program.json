@@ -1,0 +1,150 @@
+{
+  "schema": "program/1",
+  "source": "model",
+  "model": "claude-sonnet-5-5",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Step limit of 0.0 m is assumed, not scanned, so check thresholds on the way.",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Free floor at the bag is only 0.226 m from the edge, so keep the base pose exact.",
+      "n": 1
+    },
+    {
+      "primitive": "grasp",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": [
+        4.2,
+        9.6
+      ],
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_force",
+        "r_t1_opening"
+      ],
+      "note": "The force band was measured at home and may differ for this bag.",
+      "n": 2
+    },
+    {
+      "primitive": "lift",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_payload"
+      ],
+      "note": "The payload limit is 4.0 kg from the card, so the bag must not be heavier.",
+      "n": 3
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach"
+      ],
+      "note": "Retreat with the bag held and clear the edge before driving.",
+      "n": 4
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "This 15.7 m leg is driven carrying the bag, so watch for slip.",
+      "n": 5
+    },
+    {
+      "primitive": "place",
+      "task": "t1",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [],
+      "note": "Place the bag at the way-out destination.",
+      "n": 6
+    },
+    {
+      "primitive": "release",
+      "task": "t1",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [],
+      "note": "Open the gripper only after the bag is set down.",
+      "n": 7
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Return to the dock empty; the step limit is still an assumed value.",
+      "n": 8
+    }
+  ],
+  "planning": {
+    "workspace": true,
+    "files": [
+      "notes/order.md",
+      "plan.md"
+    ],
+    "tool_calls": 7,
+    "turns": 3,
+    "revisions": 0
+  }
+}

@@ -1,0 +1,2 @@
+- [x] read run files
+- [x] order: move_base 0, approach, wipe, retreat, move_base 1

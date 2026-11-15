@@ -286,8 +286,13 @@ class WorldForTest(unittest.TestCase):
         self.assertEqual(self.asked, [("AAAAAAAAAAA", "corner_flat")])
 
     def test_a_model_id_works_without_being_listed(self):
-        self.assertEqual(self.pipeline.world_for("zvKHR9DHNjJ")[0], "mp_zvKHR9DHNjJ")
-        self.assertEqual(self.asked, [("zvKHR9DHNjJ", "mp_zvKHR9DHNjJ")])
+        self.assertEqual(self.pipeline.world_for("ZZZZZZZZZZZ")[0], "mp_ZZZZZZZZZZZ")
+        self.assertEqual(self.asked, [("ZZZZZZZZZZZ", "mp_ZZZZZZZZZZZ")])
+
+    def test_a_model_that_already_has_a_world_keeps_that_world(self):
+        # La Mirada's world is world/scenarios/la_mirada.json: asking by model id must not make a second one
+        self.assertEqual(self.pipeline.world_for("zvKHR9DHNjJ")[0], "la_mirada")
+        self.assertEqual(self.asked, [("zvKHR9DHNjJ", "la_mirada")])
 
     def test_the_hand_traced_world_never_asks_matterport(self):
         self.assertEqual(self.pipeline.world_for("rabinowitz-hall")[0], "jrr")

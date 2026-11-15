@@ -1,0 +1,27 @@
+{
+  "source": "model",
+  "model": "claude-sonnet-5-5",
+  "job": "Take the kitchen trash bag out to the bins at the kerb",
+  "answers": [],
+  "understood_as": "Pick up the tied kitchen trash bag and carry it out of the building to the bins at the kerb.",
+  "steps": [
+    "Pick up the tied trash bag in the kitchen by its knot using a hook hold",
+    "Carry it out of the building to the way out"
+  ],
+  "demos": [
+    {
+      "chore": "pick up trash bag",
+      "kind": "path",
+      "why": "Shows how the hand moves to hook the bag's knot, lift it and carry it clear of the floor."
+    },
+    {
+      "chore": "hook trash bag",
+      "kind": "squeeze",
+      "why": "Shows how firmly to hold the bag so it neither slips nor tears."
+    }
+  ],
+  "questions": [],
+  "unmet": [
+    "The planner can only carry the bag to the way out of the building, so it cannot place it into the bins at the kerb itself."
+  ]
+}

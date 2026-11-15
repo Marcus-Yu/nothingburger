@@ -1,0 +1,13 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "wipe",
+      "anchor": "kitchen_top_1",
+      "object": "cloth",
+      "demo": "wipe table",
+      "carries": false,
+      "why": "The kitchen table is the only surface located in the kitchen, so kitchen_top_1 is used for it."
+    }
+  ]
+}

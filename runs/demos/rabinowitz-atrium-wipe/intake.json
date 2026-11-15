@@ -1,0 +1,25 @@
+{
+  "source": "model",
+  "model": "claude-sonnet-5-5",
+  "job": "Wipe table C6 in the atrium",
+  "answers": [],
+  "understood_as": "Wipe the top of table C6 in the atrium with a cloth.",
+  "steps": [
+    "Go to table C6 in the atrium",
+    "Wipe the tabletop with the cloth in strokes"
+  ],
+  "demos": [
+    {
+      "chore": "wipe table",
+      "kind": "path",
+      "why": "Shows the robot the wiping strokes to make across a tabletop."
+    },
+    {
+      "chore": "wipe table",
+      "kind": "squeeze",
+      "why": "Shows how firmly to hold the cloth and press on the surface without it slipping."
+    }
+  ],
+  "questions": [],
+  "unmet": []
+}

@@ -1,0 +1,448 @@
+{
+  "schema": "requirements/1",
+  "world": "917_main_st_unit_506_169f",
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "other_1_top_1",
+      "object": "cloth",
+      "demo": null,
+      "carries": false,
+      "why": "The robot needs to hold the cloth before it can wipe."
+    },
+    {
+      "id": "t2",
+      "skill": "wipe",
+      "anchor": "other_1_top_1",
+      "object": "cloth",
+      "demo": "wipe counter",
+      "carries": false,
+      "why": "Wipes the counter surface with the cloth."
+    }
+  ],
+  "corridors": [
+    {
+      "trip": "dock->t1",
+      "rooms": [
+        "other_1"
+      ],
+      "doorways": [],
+      "bottleneck": null,
+      "header_m": null,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    },
+    {
+      "trip": "dock->t2",
+      "rooms": [
+        "other_1"
+      ],
+      "doorways": [],
+      "bottleneck": null,
+      "header_m": null,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    }
+  ],
+  "requirements": [
+    {
+      "id": "r_step",
+      "task": null,
+      "quantity": "step_max",
+      "value": 0.0,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "tallest step on any corridor"
+    },
+    {
+      "id": "r_t1_reach",
+      "task": "t1",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            1.175,
+            -1.475,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.5,
+          "side": [
+            1.0,
+            0.0
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "other_1_top_1",
+      "yaw_free": true
+    },
+    {
+      "id": "r_t1_floor",
+      "task": "t1",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.5,
+        "side": [
+          1.0,
+          0.0
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t1_payload",
+      "task": "t1",
+      "quantity": "payload",
+      "value": 0.1,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "cloth card"
+    },
+    {
+      "id": "r_t2_reach",
+      "task": "t2",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            1.45,
+            -1.85,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.226,
+          "side": [
+            0.9983,
+            -0.0587
+          ]
+        },
+        {
+          "point": [
+            0.9,
+            -1.85,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.775,
+          "side": [
+            0.9997,
+            -0.0256
+          ]
+        },
+        {
+          "point": [
+            0.9,
+            -1.7,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.775,
+          "side": [
+            0.9997,
+            -0.0256
+          ]
+        },
+        {
+          "point": [
+            1.45,
+            -1.7,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.226,
+          "side": [
+            0.9983,
+            -0.0587
+          ]
+        },
+        {
+          "point": [
+            1.45,
+            -1.55,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.226,
+          "side": [
+            0.9983,
+            0.0587
+          ]
+        },
+        {
+          "point": [
+            0.9,
+            -1.55,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.775,
+          "side": [
+            0.9997,
+            -0.0256
+          ]
+        },
+        {
+          "point": [
+            0.9,
+            -1.4,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.72,
+          "side": [
+            0.7338,
+            0.6794
+          ]
+        },
+        {
+          "point": [
+            1.45,
+            -1.4,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.226,
+          "side": [
+            0.9983,
+            -0.0587
+          ]
+        },
+        {
+          "point": [
+            1.45,
+            -1.25,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.226,
+          "side": [
+            0.9983,
+            -0.0587
+          ]
+        },
+        {
+          "point": [
+            0.9,
+            -1.25,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.625,
+          "side": [
+            0.8178,
+            0.5755
+          ]
+        },
+        {
+          "point": [
+            0.9,
+            -1.1,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.525,
+          "side": [
+            0.0345,
+            0.9994
+          ]
+        },
+        {
+          "point": [
+            1.45,
+            -1.1,
+            1.056
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.148,
+          "side": [
+            0.359,
+            0.9333
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "demo:home+scan",
+      "anchor": "other_1_top_1",
+      "yaw_free": true,
+      "strokes": 6,
+      "from": "strokes regenerated over other_1_top_1's extent inset 0.05 m, lanes 0.15 m apart; targets 2k and 2k+1 are the ends of stroke k",
+      "approach_direction": [
+        -0.7543,
+        0.4815,
+        -0.4464
+      ],
+      "demo_check": {
+        "ok": false,
+        "approach_along_tool_axis": 0.446,
+        "work_pose_max_offset_m": 0.285,
+        "work_poses": 114
+      },
+      "labels": [
+        "hand-to-gripper transform not applied (gap G12)"
+      ]
+    },
+    {
+      "id": "r_t2_floor",
+      "task": "t2",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.5,
+        "side": [
+          1.0,
+          0.0
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t2_payload",
+      "task": "t2",
+      "quantity": "payload",
+      "value": 0.1,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "cloth card"
+    },
+    {
+      "id": "r_t2_press",
+      "task": "t2",
+      "quantity": "press_force",
+      "value": 10.0,
+      "unit": "N",
+      "tolerance": 2.0,
+      "source": "assumed"
+    }
+  ],
+  "conflicts": [
+    {
+      "kind": "demo_disagrees_with_targets",
+      "task": "t2",
+      "requirement": "r_t2_reach",
+      "ask_user": false,
+      "ok": false,
+      "approach_along_tool_axis": 0.446,
+      "work_pose_max_offset_m": 0.285,
+      "work_poses": 114
+    }
+  ]
+}

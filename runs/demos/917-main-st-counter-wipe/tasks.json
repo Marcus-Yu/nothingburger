@@ -1,0 +1,22 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "other_1_top_1",
+      "object": "cloth",
+      "demo": null,
+      "carries": false,
+      "why": "The robot needs to hold the cloth before it can wipe."
+    },
+    {
+      "id": "t2",
+      "skill": "wipe",
+      "anchor": "other_1_top_1",
+      "object": "cloth",
+      "demo": "wipe counter",
+      "carries": false,
+      "why": "Wipes the counter surface with the cloth."
+    }
+  ]
+}

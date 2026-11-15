@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "trash_bag",
+      "object": "trash_bag",
+      "demo": "pick up trash bag",
+      "carries": true,
+      "why": "The bag has to be lifted and then taken out of the building, which is the whole job.",
+      "deliver_to": "way_out"
+    }
+  ]
+}

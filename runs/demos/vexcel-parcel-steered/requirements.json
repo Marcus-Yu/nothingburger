@@ -1,0 +1,193 @@
+{
+  "schema": "requirements/1",
+  "world": "parcel_eastland",
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "parcel",
+      "object": "parcel_small",
+      "demo": "pick up parcel",
+      "carries": true,
+      "why": "The parcel is the only located item and it has to be lifted and carried; the way out is the only place the planner can deliver to, so it stands in for the front door.",
+      "deliver_to": "way_out"
+    }
+  ],
+  "corridors": [
+    {
+      "trip": "dock->t1",
+      "rooms": [
+        "driveway"
+      ],
+      "doorways": [],
+      "bottleneck": null,
+      "header_m": null,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    },
+    {
+      "trip": "t1->way_out",
+      "rooms": [
+        "driveway",
+        "outside"
+      ],
+      "doorways": [
+        "d_front"
+      ],
+      "bottleneck": {
+        "doorway": "d_front",
+        "width_m": 0.9
+      },
+      "header_m": 2.05,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    }
+  ],
+  "requirements": [
+    {
+      "id": "r_width",
+      "task": null,
+      "quantity": "base_width_max",
+      "value": 0.8,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "d_front 0.9 m less 0.05 m a side"
+    },
+    {
+      "id": "r_header",
+      "task": null,
+      "quantity": "stowed_height_max",
+      "value": 2.0,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "lowest header 2.05 m less 0.05 m"
+    },
+    {
+      "id": "r_step",
+      "task": null,
+      "quantity": "step_max",
+      "value": 0.0,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "assumed",
+      "from": "doorway records give 0.0 m; steps are not measured from a mesh, corridor assumed flat"
+    },
+    {
+      "id": "r_t1_reach",
+      "task": "t1",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            15.4,
+            0.5,
+            0.2
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.026,
+          "side": [
+            -0.1104,
+            -0.9939
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "demo:home+scan",
+      "anchor": "parcel",
+      "yaw_free": true,
+      "approach_direction": [
+        -0.0065,
+        -0.5312,
+        -0.8472
+      ],
+      "demo_check": {
+        "ok": false,
+        "approach_along_tool_axis": 0.847,
+        "work_pose_max_offset_m": 0.835,
+        "work_poses": 93
+      },
+      "labels": [
+        "hand-to-gripper transform not applied (gap G12)"
+      ]
+    },
+    {
+      "id": "r_t1_floor",
+      "task": "t1",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.026,
+        "side": [
+          -0.1104,
+          -0.9939
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t1_opening",
+      "task": "t1",
+      "quantity": "gripper_opening_min",
+      "value": 0.07,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "parcel_small width 0.06 m plus 0.01 m"
+    },
+    {
+      "id": "r_t1_payload",
+      "task": "t1",
+      "quantity": "payload",
+      "value": 0.6,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "parcel_small card"
+    },
+    {
+      "id": "r_t1_force",
+      "task": "t1",
+      "quantity": "force_band",
+      "value": [
+        8.83,
+        9.6
+      ],
+      "unit": "N",
+      "tolerance": 0.0,
+      "source": "demo:home",
+      "grip_source": "travel",
+      "labels": [
+        "demo:home",
+        "uncalibrated"
+      ],
+      "from": "low = max(demo min 4.2 N, physics min 8.83 N for a pinch hold of 0.6 kg); high = demo peak. The bulb's unscrew torque is not on its card, so it is not in the low end"
+    }
+  ],
+  "conflicts": [
+    {
+      "kind": "demo_disagrees_with_targets",
+      "task": "t1",
+      "requirement": "r_t1_reach",
+      "ask_user": false,
+      "ok": false,
+      "approach_along_tool_axis": 0.847,
+      "work_pose_max_offset_m": 0.835,
+      "work_poses": 93
+    }
+  ]
+}
