@@ -55,8 +55,9 @@ def _object_for(anchor: str) -> str | None:
 
 
 # words in a job that name a specific object card; a job naming none ("a container", "it") takes any item
-NAMED = {"recycling": "recycling_bin", "trash can": "recycling_bin", "trashcan": "recycling_bin", " bin": "recycling_bin",
-         "trash": "trash_bag", "garbage": "trash_bag", "bag": "trash_bag", "bottle": "sample_bottle",
+# "bin" and "trash can" mean the recycling bin only where the space has one (BIN_WORDS, in tasks_for)
+BIN_WORDS = ("trash can", "trashcan", " bin")
+NAMED = {"recycling": "recycling_bin", "trash": "trash_bag", "garbage": "trash_bag", "bag": "trash_bag", "bottle": "sample_bottle",
          "remote": "tv_remote", "towel": "hand_towel", "pill": "pill_organiser", "drive": "drive_sled", "part": "machined_part", "parcel": "parcel_small"}
 
 
@@ -109,6 +110,8 @@ def tasks_for(skill: str, job: str, world: dict) -> tuple[list | None, str | Non
     if not items:
         return None, f"There’s nothing in {place}’s world file for the robot to pick up and carry."
     named = _named(job, skill)
+    if any(w in f" {job} {skill}".lower() for w in BIN_WORDS) and any(o == "recycling_bin" for _, o in items):
+        named = "recycling_bin"
     if named:
         matching = [(a, o) for a, o in items if o == named]
         if not matching:
