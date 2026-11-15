@@ -104,7 +104,7 @@ namespace Pathfinder.Capture
                 }
                 int t = (int)(now - m_Started), max = (int)m_Request.max_seconds;
                 Say($"<color=#FF5A4E>●</color> Recording: {What()}   {t / 60}:{t % 60:00} / {max / 60}:{max % 60:00}\n" +
-                    "Thumb and middle finger pinch when you're done");
+                    (Squeeze ? "It stops by itself when the time is up" : "Thumb and middle finger pinch when you're done"));
                 if (m_StopAsked || now - m_Started >= m_Request.max_seconds) Finish();
             }
             else if (m_Hud != null && m_Hud.gameObject.activeSelf && now >= m_HudUntil) m_Hud.gameObject.SetActive(false);
@@ -177,9 +177,13 @@ namespace Pathfinder.Capture
             Log.Info($"DemoRecorder: recording {m_Request.id} in passthrough, up to {m_Request.max_seconds:0} s");
         }
 
+        bool Squeeze => m_Request != null && m_Request.kind == "squeeze";
+
         void OnButton(ToolHand hand, ToolButton button)
         {
-            // Give the chore two seconds before the done gesture counts.
+            // Give the chore two seconds before the done gesture counts. A squeeze has no done gesture: gripping
+            // something brings the thumb and middle finger together, which read as "done" three seconds in.
+            if (Squeeze) return;
             if (Current == State.Recording && button == ToolButton.Finish && Time.unscaledTime - m_Started > 2f) m_StopAsked = true;
         }
 
@@ -215,19 +219,37 @@ namespace Pathfinder.Capture
         IEnumerator Upload(DemoRecording recording)
         {
             string summary = $"{recording.Duration:0.0} s";
-            using (var req = new UnityWebRequest(ServerConfig.Current.TrimEnd('/') + "/demos", UnityWebRequest.kHttpVerbPOST)
+            byte[] body = Encoding.UTF8.GetBytes(recording.ToJson());
+            // The link to the laptop (campus Wi-Fi, or the USB tunnel) drops for a few seconds now and then, and a take
+            // lost to that has to be done again: try for about half a minute before giving up.
+            const int Tries = 6;
+            bool ok = false;
+            string error = "";
+            for (int n = 1; n <= Tries && !ok; n++)
             {
-                uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(recording.ToJson())) { contentType = "application/json" },
-                downloadHandler = new DownloadHandlerBuffer(),
-                timeout = 30,
-            })
-            {
-                yield return req.SendWebRequest();
-                bool ok = req.result == UnityWebRequest.Result.Success;
-                LastResult = ok ? $"saved {recording.id}: {summary}, {recording.samples.Count} samples" : $"upload failed ({req.responseCode} {req.error}): {summary}";
-                Say(ok ? $"<b>Saved.</b> {summary} recorded.\nYou can take the headset off." : "Couldn't upload the demonstration.\nIs the laptop reachable?", 6f);
-                Log.Info($"DemoRecorder: {LastResult}");
+                using (var req = new UnityWebRequest(ServerConfig.Current.TrimEnd('/') + "/demos", UnityWebRequest.kHttpVerbPOST)
+                {
+                    uploadHandler = new UploadHandlerRaw(body) { contentType = "application/json" },
+                    downloadHandler = new DownloadHandlerBuffer(),
+                    timeout = 30,
+                })
+                {
+                    yield return req.SendWebRequest();
+                    ok = req.result == UnityWebRequest.Result.Success;
+                    error = $"{req.responseCode} {req.error}";
+                    // an answer from the server that refuses the recording will not change on a second try
+                    if (!ok && req.responseCode >= 400 && req.responseCode < 500) break;
+                }
+                if (!ok && n < Tries)
+                {
+                    Log.Info($"DemoRecorder: upload try {n} failed ({error}), trying again");
+                    Say($"Saving the demonstration... (the laptop didn't answer, try {n + 1} of {Tries})", 30f);
+                    yield return new WaitForSecondsRealtime(5f);
+                }
             }
+            LastResult = ok ? $"saved {recording.id}: {summary}, {recording.samples.Count} samples" : $"upload failed ({error}): {summary}";
+            Say(ok ? $"<b>Saved.</b> {summary} recorded.\nYou can take the headset off." : "Couldn't upload the demonstration.\nIs the laptop reachable?", 6f);
+            Log.Info($"DemoRecorder: {LastResult}");
             Restore();
             m_Recording = null;
             m_Request = null;

@@ -1,6 +1,6 @@
 # Pitch
 
-Draft, 2026-11-14. It follows [PLAN_REVISED.md](PLAN_REVISED.md) and changes nothing in it. Numbers marked *probe* come from [our tests](PLAN_REVISED.md#what-the-tests-found) on 24 real models. Items marked **check** must be verified before anyone says them on stage.
+Draft, 2026-11-14; the demo section added 2026-11-15. It follows [PLAN_REVISED.md](PLAN_REVISED.md) and changes nothing in it. Numbers marked *probe* come from [our tests](PLAN_REVISED.md#what-the-tests-found) on 24 real models. Items marked **check** must be verified before anyone says them on stage.
 
 ## The pitch
 
@@ -14,11 +14,102 @@ Draft, 2026-11-14. It follows [PLAN_REVISED.md](PLAN_REVISED.md) and changes not
 
 | Claim | What backs it |
 | :-- | :-- |
-| **It helps residents who can't do these jobs.** Carrying trash out and changing a ceiling bulb are hard for older and disabled tenants. | The trash-bag and light-bulb jobs in the demo. |
+| **It helps residents who can't do these jobs.** Carrying trash out and changing a ceiling bulb are hard for older and disabled tenants. | The trash-bag job in the demo. The bulb job is not in it: none of the demo's worlds has a light fixture yet, and the studio says so. |
 | **It finds doors people can't get through.** | The robot has to fit through every door, so we measure them. The probe found 0.54 m to 0.86 m; the accessibility minimum is about 0.81 m (**check**). |
 | **Anyone can teach it.** A worker with a cheap glove replaces a robotics engineer and a lab. | The home demonstration: fingertip force from the gloves, finger position from the Quest. |
 
 Lead with the second claim. It is a true finding from real data and needs no robot.
+
+## The demo
+
+Three minutes, one laptop and one Quest with the gloves, all in the studio (http://localhost:8000/#studio).
+How to start it and what to rehearse is in [DEMO.md](DEMO.md). Times are measured on the demo laptop with
+warm caches and Claude reading the job; anything not yet measured is marked **check**.
+
+### The data, layer by layer
+
+| Layer | Where it comes from | What it gives the robot | Shown in the studio as |
+| :-- | :-- | :-- | :-- |
+| **Matterport, inside** | La Mirada: the Model API (floor plan: rooms, walls, doorways with widths, ceiling heights) and the MatterPak mesh (furniture and table tops, measured by `world/mesh.py`). Built by `python -m world.matterport`. | Rooms, doors, the free floor and every surface it can work on | The tour through the Showcase SDK (Walk, Dollhouse, Floor plan), then the robot in the room's 3D mesh |
+| **Matterport, the room we stand in** | Rabinowitz Hall: the public tour, embedded. Our key cannot read this model (404), so its world is traced by hand from the tour and its tables measured on a mesh captured from the tour viewer. | The atrium's tables, doors and route out | The tour, and the plan played inside it (`tour.html`) |
+| **Vexcel, outside** | Aerial photos (about 6 cm a pixel) of lots in Houston and Los Angeles, traced into worlds (`world/scenarios/tools/aerial_worlds.py`); the Rabinowitz building's aerial model for its outside view | The lot: lawn, driveway, kerb, what's parked on it | The aerial photo with the robot's ground outlined, and the route drawn on it |
+| **CoStar** | Not used. | | Do not mention it. |
+
+The two data layers meet in one job only where both exist for the same place: the Rabinowitz building
+(Matterport inside, Vexcel outside view). The Vexcel lots have no scan of the house, so their indoor part is
+assumed ("Heights, doors and anything under a roof are assumed", as each lot's note says). Say that if asked.
+
+### How we use Matterport, and what we say about it
+
+- **Planning uses only what the API gives.** La Mirada's world comes from the Model API and its MatterPak:
+  the official way in. That is the space we design and plan in when the question is "is this real data?".
+- **The Rabinowitz tour is shown, not mined.** We embed the public tour the way Matterport offers it, and
+  trace the atrium's few tables by hand. Our key cannot read that model, so we say so.
+- **The atrium's 3D mesh stays off stage unless asked.** It was stitched from the tiles the public viewer
+  draws, which is not Matterport's sanctioned export (that is the MatterPak or a splat from the scan's
+  owner). It is kept local, not committed, and the repo is public. If a judge asks how the robot was put in
+  the room: the plan is played in the tour through the Showcase SDK; the free-move 3D room is La Mirada's
+  MatterPak mesh (**check**: that La Mirada's `room.glb` is built and lines up).
+- **People, chairs and clutter are removed from pictures only.** The planner never treated them as obstacles.
+
+### The script
+
+**0. The finding (20 s).** Before any robot: "We measured the doorways in real apartment scans. They run from
+0.54 m to 0.86 m. A robot that fits one unit does not fit the next." Open La Mirada's floor plan in the tour.
+
+**1. Inside, real Matterport data (La Mirada, about 70 s).**
+- Pick **5836 La Mirada Ave** in the space bar. Show Dollhouse, then Floor plan.
+- Prompt: **Wipe down the table in the kitchen.**
+- The outline says *Decided by SubQ Snap 1.2* in about 0.2 s, then asks for a demonstration.
+- **Quest take 1, motion** (`wipe table`, a `path` take): put on the headset, pinch at the table you will
+  wipe, wipe it for real, pinch thumb and middle finger to stop. **Quest take 2, squeeze** (glove grip): hold
+  the cloth still and press as you would while wiping. Press **Use these takes → design the robot**.
+- The agent trace opens by itself. Narrate it: robots tried cheapest first, what rules each out, then where
+  it stands to reach the table. **Show trace** if a judge wants the tool calls.
+- **Open Robot Design** → it assembles → **Deploy** → the route. **See it in the real room (3D)**.
+- Time: **check** (the kitchen job in La Mirada has not been timed; the Rabinowitz wipe job takes 33 s
+  rehearsed, 73 s with a new take).
+
+**2. Outside, Vexcel (about 50 s).**
+- Pick **House front and kerb, Houston** under *Outdoor lots (Vexcel aerial)*.
+- Prompt: **Take the kitchen trash bag out to the bins at the kerb.**
+- **Quest take 3, carry** (`carry trash can out`, a `path` take on the gloves page): lift the bin with both
+  hands and walk it a few steps. The squeeze for the bag's grip is the same take as in act 1 if it was done
+  then.
+- The route crosses the driveway round the parked truck to the kerb on the aerial photo.
+- If time is short, use **Mow the back lawn** on *Back lawn, Houston* instead: it needs no demonstration
+  (the robot only drives a pattern over the ground), so it goes straight to the coverage route.
+- Time: **check** (the outdoor lots have not been timed through the studio).
+
+**3. Close (20 s).** The room we are standing in: pick **Rabinowitz Hall foyer**, play the plan in the tour.
+"The building came first. The worker taught it once. The robot was sized to fit."
+
+### What to rehearse, and the fallbacks
+
+- Run every job above once, with takes, before the demo. That teaches the skill and caches every robot
+  check, so the on-stage run is the fast one. A brand-new take on stage changes the job's numbers: allow
+  a minute or two, and keep talking over the trace.
+- No headset or gloves working: the skills learned in rehearsal are used and the demonstration step is
+  skipped ("Already learned from an earlier demonstration").
+- Name the table in a prompt. A vague prompt ("wipe a surface") makes Claude ask "which one?"; the run goes
+  on by rule and shows the question, but it costs seconds.
+- Jobs the spaces cannot hold are refused before the demonstration, with the reason: a bulb change (no
+  light fixture in these worlds), opening a box (no such skill yet). Do not try them on stage.
+
+### How it fits the web app
+
+One studio, one prompt bar, one flow for every space:
+
+- **Spaces** come from `web/worlds.json` (served by the Pathfinder backend): Matterport scans, and the Vexcel
+  lots grouped as *Outdoor lots (Vexcel aerial)*. A space can be designed in only when it has a world file,
+  listed in `WORLDS` in `agent/design_flow/pipeline.py`: today Rabinowitz Hall; La Mirada and the five lots
+  are added in their own branches and must be merged first (**check**).
+- **The flow** is the same for all of them: classify (Snap, then Sonnet), the demonstration (Quest and
+  gloves through the Pathfinder backend), the design and pathing run, the agent trace, Robot Design, the route.
+- **The view** differs by layer: a Matterport space shows its tour (Showcase SDK) and, when its mesh is on
+  disk, the 3D room; a Vexcel lot shows its aerial photo with the route on it.
+- **Mowing** is the one job whose tasks always come by rule: a coverage pattern over the lot's lawn
+  (`nav/coverage.py`), not from the model.
 
 ## The five criteria
 
@@ -50,10 +141,10 @@ Lead with the second claim. It is a true finding from real data and needs no rob
 
 | Their criterion | Say | Status |
 | :-- | :-- | :-- |
-| Use of the data (30%) | Matterport measures the unit and sizes the robot. Vexcel shows the lot the trash has to cross. CoStar says which property and owner a unit belongs to. | Matterport proven. Vexcel: one image call proven. CoStar: untested. |
-| Agentic depth (30%) | The agent plans the job, asks for a demonstration only where precision matters, runs a build and a pathing workflow, and feeds each failure back as a new constraint. | Designed, not built. |
+| Use of the data (30%) | Matterport measures the unit and sizes the robot: rooms, doors and ceilings from the Model API, furniture and table tops from the MatterPak mesh. Vexcel shows the lot the robot has to cross outside. | Matterport: La Mirada built from the API and MatterPak (in its branch, **check** merged); Rabinowitz traced from the public tour. Vexcel: five lots traced and planned (in their branch). CoStar: not used, do not claim. |
+| Agentic depth (30%) | The agent reads the job (SubQ Snap decides fast, Claude Sonnet takes what Snap can't), asks for a demonstration only when the skill is new, designs the robot and plans its route, feeds a route failure back as a redesign, and writes the program, checked by code. | Built and running in the studio, with a live trace of every step. The program step plans in a workspace (its plan and notes in files, its answer checked and sent back); it has run live once, and revisions and reuse of saved notes are tested against a scripted model only. |
 | Usefulness (25%) | 7,228 of the models are apartment units. This is their owners' upkeep problem. | Count is from the sponsor's index. |
-| Demo and polish (15%) | The robot working inside a real scanned unit, seen in a headset. | Not built. |
+| Demo and polish (15%) | Type a job, demonstrate it once, watch the agent design the robot, then see it in the real room. | Built: studio, agent trace, Robot Design, route view, 3D room. Headset playback not tried. |
 
 Only claim a layer on stage if it is working in the demo.
 
@@ -106,6 +197,9 @@ Only where a scan exists. The teaching kit is cheap; the scan and the robot are 
 - That a pass means a unit is accessible or safe.
 - That a robot has been built or deployed.
 - Any use of CoStar or Vexcel that is not running in the demo.
+- That the Rabinowitz atrium's 3D mesh is Matterport data we were given. It was captured from the public
+  tour viewer; the API data we can stand behind is La Mirada's.
+- That a Vexcel lot's indoor part (the kitchen, the front door) was measured. It is assumed.
 
 ## Check before pitching
 
@@ -114,3 +208,7 @@ Only where a scan exists. The teaching kit is cheap; the scan and the robot are 
 - The gloves are calibrated, and a bulb's breaking force is inside the range they can read.
 - One sourced figure on maintenance staff shortages.
 - How many doorways in the probed units are below the minimum once closets are filtered out.
+- The La Mirada world and the Vexcel lots are merged into the demo branch, and their spaces are in `WORLDS`.
+- La Mirada's kitchen wipe and the kerb trash job, timed through the studio after a rehearsal.
+- La Mirada's `room.glb` exists and lines up with its world, so **See it in the real room (3D)** works there.
+- The three Quest takes (wipe, squeeze, carry) recorded once each on the demo laptop, and the gloves reading.

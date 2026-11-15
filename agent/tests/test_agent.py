@@ -426,3 +426,10 @@ def test_proceed_goes_past_open_questions_and_says_so(monkeypatch, world):
     assert reached["intake"]["proceeded_without_answers"] is True and reached["intake"]["questions"]
     reached.clear()
     assert run.pipeline({**job, "proceed": False})["waiting"] is True and not reached
+
+def test_a_demo_belongs_to_the_first_task_its_motion_shows():
+    from agent.run import _demo_task
+    tasks = [{"id": "t1", "skill": "pick"}, {"id": "t2", "skill": "wipe"}, {"id": "t3", "skill": "wipe"}]
+    assert _demo_task({"tasks": tasks, "demo": {"motion": {"kind": "wipe"}}}) == "t2"
+    assert _demo_task({"tasks": tasks, "demo": {"motion": {"kind": "twist"}}}) == "t1"
+    assert _demo_task({"tasks": tasks}) == "t1"

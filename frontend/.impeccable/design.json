@@ -1,0 +1,615 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-15T00:48:09+00:00",
+  "title": "Design System: Gold Bears",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Drafting Paper",
+        "canonical": "#F4EFE7",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#252422",
+          "#413F3D",
+          "#5F5D5A",
+          "#7F7D79",
+          "#A19E99",
+          "#C8C3BD",
+          "#F0EEEB"
+        ],
+        "oklch": "oklch(95.4% 0.012 79.8)"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Drafting Ink",
+        "canonical": "#17140F",
+        "tonalRamp": [
+          "#0C0B09",
+          "#27241F",
+          "#423F3B",
+          "#605D59",
+          "#7F7D79",
+          "#A09E9B",
+          "#C5C4C2",
+          "#EFEEEE"
+        ],
+        "oklch": "oklch(19.3% 0.011 80.5)"
+      },
+      "ink-hover": {
+        "role": "neutral",
+        "displayName": "Ink Hover",
+        "canonical": "#2C2720",
+        "tonalRamp": [
+          "#0C0B09",
+          "#28231C",
+          "#443F38",
+          "#615D57",
+          "#817D77",
+          "#A19E99",
+          "#C6C4C0",
+          "#EFEEED"
+        ],
+        "oklch": "oklch(27.6% 0.015 76.3)"
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "#5D564C",
+        "tonalRamp": [
+          "#0C0B09",
+          "#28231C",
+          "#453F36",
+          "#635C53",
+          "#837C73",
+          "#A39D95",
+          "#C8C3BC",
+          "#F0EEEC"
+        ],
+        "oklch": "oklch(45.7% 0.018 76.9)"
+      },
+      "mute": {
+        "role": "neutral",
+        "displayName": "Pencil",
+        "canonical": "#A0988C",
+        "tonalRamp": [
+          "#0C0B0A",
+          "#27231E",
+          "#443F38",
+          "#625D54",
+          "#837C72",
+          "#A59D91",
+          "#CAC3B8",
+          "#F0EEEA"
+        ],
+        "oklch": "oklch(68.3% 0.020 78.2)",
+        "note": "Not a text colour (2.49:1 on paper); inactive dots only."
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "rgba(23,20,15,.11)",
+        "tonalRamp": [
+          "#0C0B09",
+          "#27241F",
+          "#423F3B",
+          "#605D59",
+          "#7F7D79",
+          "#A09E9B",
+          "#C5C4C2",
+          "#EFEEEE"
+        ],
+        "note": "Translucent token; ramp built from its opaque base #17140F."
+      },
+      "on-ink": {
+        "role": "neutral",
+        "displayName": "On-Ink",
+        "canonical": "#FBF8F3",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242423",
+          "#40403E",
+          "#5E5D5B",
+          "#7E7D7A",
+          "#A09E9B",
+          "#C6C4C0",
+          "#EFEEEC"
+        ],
+        "oklch": "oklch(98.0% 0.007 80.7)"
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field White",
+        "canonical": "#FFFDFA",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242423",
+          "#40403F",
+          "#5E5D5C",
+          "#7E7D7C",
+          "#9F9E9C",
+          "#C5C4C1",
+          "#EFEEED"
+        ],
+        "oklch": "oklch(99.5% 0.005 78.3)"
+      },
+      "glass": {
+        "role": "neutral",
+        "displayName": "Frost",
+        "canonical": "rgba(249,246,241,.8)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242423",
+          "#40403E",
+          "#5E5D5B",
+          "#7E7D7A",
+          "#A09E9B",
+          "#C6C4C0",
+          "#EFEEEC"
+        ],
+        "note": "Translucent token; ramp built from its opaque base #F9F6F1."
+      },
+      "gold": {
+        "role": "primary",
+        "displayName": "Bear Gold",
+        "canonical": "#C99A2E",
+        "tonalRamp": [
+          "#0F0A03",
+          "#332000",
+          "#543B00",
+          "#785802",
+          "#9D7618",
+          "#C4962C",
+          "#E8BE67",
+          "#FBEDD2"
+        ],
+        "oklch": "oklch(71.2% 0.131 83.7)",
+        "note": "Never text (2.25:1 on paper); use gold-ink or sub."
+      },
+      "gold-ink": {
+        "role": "primary",
+        "displayName": "Gold Ink",
+        "canonical": "#8E6A16",
+        "tonalRamp": [
+          "#100A02",
+          "#341F00",
+          "#553A00",
+          "#785804",
+          "#9A772E",
+          "#B99A5D",
+          "#DBC08E",
+          "#F6EDDD"
+        ],
+        "oklch": "oklch(54.7% 0.105 83.0)"
+      },
+      "sub": {
+        "role": "primary",
+        "displayName": "Sub Gold",
+        "canonical": "#85600F",
+        "tonalRamp": [
+          "#100A02",
+          "#361F00",
+          "#563A00",
+          "#7A5705",
+          "#9A7737",
+          "#B89963",
+          "#DBC093",
+          "#F6EDDF"
+        ],
+        "oklch": "oklch(51.4% 0.101 80.7)"
+      },
+      "ok": {
+        "role": "secondary",
+        "displayName": "Verified Green",
+        "canonical": "#3F8058",
+        "tonalRamp": [
+          "#050E07",
+          "#012D16",
+          "#184B2E",
+          "#306C48",
+          "#508D66",
+          "#78AD8A",
+          "#A4D1B2",
+          "#E4F3E8"
+        ],
+        "oklch": "oklch(54.5% 0.092 154.8)"
+      },
+      "scan": {
+        "role": "secondary",
+        "displayName": "Scan Blue",
+        "canonical": "#3D6AA3",
+        "tonalRamp": [
+          "#050B15",
+          "#062447",
+          "#1D406C",
+          "#345F94",
+          "#557FB5",
+          "#7BA1D2",
+          "#A6C7F1",
+          "#E5F0FD"
+        ],
+        "oklch": "oklch(51.9% 0.104 255.1)"
+      },
+      "tape": {
+        "role": "secondary",
+        "displayName": "Tape Amber",
+        "canonical": "#AE6326",
+        "tonalRamp": [
+          "#130803",
+          "#3F1600",
+          "#642F00",
+          "#8B4A12",
+          "#B2682D",
+          "#D08D5C",
+          "#F1B58C",
+          "#FEEADD"
+        ],
+        "oklch": "oklch(57.5% 0.121 55.7)"
+      },
+      "error": {
+        "role": "secondary",
+        "displayName": "Error Brick",
+        "canonical": "#A9432C",
+        "tonalRamp": [
+          "#170603",
+          "#490600",
+          "#71200D",
+          "#9A3A24",
+          "#BD5D47",
+          "#DA846F",
+          "#FAAF9C",
+          "#FFE8E2"
+        ],
+        "oklch": "oklch(51.7% 0.140 34.2)"
+      },
+      "scene-ink": {
+        "role": "neutral",
+        "displayName": "Scene Ink",
+        "canonical": "#2A231B",
+        "tonalRamp": [
+          "#0D0B08",
+          "#2A231B",
+          "#453E37",
+          "#635C56",
+          "#827C76",
+          "#A29D98",
+          "#C7C3BF",
+          "#EFEEED"
+        ],
+        "oklch": "oklch(26.1% 0.018 70.7)",
+        "note": "WebGL line-work only, always at partial opacity (0.7 / 0.55 / 0.22 / 0.2 / 0.15)."
+      },
+      "massing": {
+        "role": "neutral",
+        "displayName": "Massing White",
+        "canonical": "#FBF8F2",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#242423",
+          "#40403E",
+          "#5F5D5B",
+          "#7E7D7A",
+          "#A09E9A",
+          "#C6C4BF",
+          "#EFEEEC"
+        ],
+        "oklch": "oklch(98.0% 0.009 84.6)",
+        "note": "Hall volume; paired with a 0.22 paper emissive under ACES tone mapping."
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero title only; always followed by its display sub-line."
+      },
+      "display-sub": {
+        "displayName": "Display sub",
+        "purpose": "Second line of every display and headline, in sub gold."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles on glass panels (34-52px on the Step inside card)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Step titles; studio card names at 26px / -0.035em."
+      },
+      "title-sm": {
+        "displayName": "Title small",
+        "purpose": "Studio panel headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Page copy; lede at 18px in ink-2, 44ch."
+      },
+      "body-sm": {
+        "displayName": "Body small",
+        "purpose": "Panel copy and notes in the studio."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Pill labels; 14px small, 13px extra-small."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Mono captions, status rows, hints and the scroll cue; 10.5-12px, 0.1-0.32em tracking, uppercase except the site caption."
+      },
+      "measure": {
+        "displayName": "Measure",
+        "purpose": "Measurement values with tabular numerals; step numerals and 3D dimension callouts."
+      }
+    },
+    "shadows": [
+      {
+        "name": "glass-ambient",
+        "value": "0 0 0 1px var(--line), 0 24px 60px -36px rgba(45,32,12,.5)",
+        "purpose": "Every glass panel, card, bar and control."
+      },
+      {
+        "name": "pin-lift",
+        "value": "0 0 0 1px var(--line), 0 8px 20px -12px rgba(40,30,15,.5)",
+        "purpose": "Object pins floating over the scene."
+      },
+      {
+        "name": "nav-rule",
+        "value": "0 1px 0 var(--line)",
+        "purpose": "Scrolled nav, with 82% paper and a 14px blur."
+      },
+      {
+        "name": "gold-focus-halo",
+        "value": "0 0 0 3px rgba(201,154,46,.18)",
+        "purpose": "Focused input wells and selects, with a gold border."
+      }
+    ],
+    "materials": [
+      {
+        "name": "glass",
+        "value": "background: rgba(249,246,241,.8); backdrop-filter: blur(20px) saturate(1.15); border: 1px solid rgba(255,255,255,.75)",
+        "purpose": "The single UI surface material."
+      },
+      {
+        "name": "nav-scrolled",
+        "value": "background: rgba(244,239,231,.82); backdrop-filter: blur(14px)",
+        "purpose": "Landing nav after scroll."
+      },
+      {
+        "name": "drafting-grid-css",
+        "value": "1px rgba(23,20,15,.07) every 96px + 1px rgba(23,20,15,.035) every 24px, background-attachment: fixed",
+        "purpose": "Page ground."
+      },
+      {
+        "name": "drafting-grid-3d",
+        "value": "scene-ink, 10 m major at 0.15 alpha, 2 m minor at 0.06, fade 120-300 m; fog paper 420-820",
+        "purpose": "Site model ground plane."
+      },
+      {
+        "name": "scene-line-tiers",
+        "value": "0.7 subject edges / 0.55 drafting furniture / 0.22 storey bands / 0.2 windows / 0.15 neighbour edges; neighbour fill 0.18",
+        "purpose": "Line weight by opacity (WebGL lines are 1px)."
+      },
+      {
+        "name": "gold-coping",
+        "value": "BoxGeometry 0.45 x 0.55 m, #C99A2E, roughness 0.4, metalness 0.6, emissive 0.25",
+        "purpose": "Roof edge of the subject building."
+      },
+      {
+        "name": "gold-door-frame",
+        "value": "0.22 m section, #C99A2E, roughness 0.35, metalness 0.7, emissive 0.3, in a 1.2 m paper surround",
+        "purpose": "The entrance the camera walks through."
+      },
+      {
+        "name": "scene-light",
+        "value": "Hemisphere #FFF8EE/#D9CBB6 1.15; sun #FFF1DC 1.9 from (-120,160,90), PCF soft shadows on a #3A2A14 catcher at 0.16; ACES filmic, exposure 0.95",
+        "purpose": "Warm daylight on paper."
+      }
+    ],
+    "motion": [
+      {
+        "name": "hover",
+        "value": "0.2s ease",
+        "purpose": "Background, border and 1-2px lift or nudge on pills, chips, rows, tasks."
+      },
+      {
+        "name": "fade-sm",
+        "value": "0.3s ease",
+        "purpose": "Tips, dimension callouts, toasts, hint colour."
+      },
+      {
+        "name": "panel-slide",
+        "value": "0.35s ease, translateX(16px) to 0",
+        "purpose": "Studio card and plan panel entry."
+      },
+      {
+        "name": "mode-crossfade",
+        "value": "0.6s ease (studio UI delayed 0.2s)",
+        "purpose": "Landing to studio."
+      },
+      {
+        "name": "tour-fade",
+        "value": "0.7s ease",
+        "purpose": "Matterport tour view in and out."
+      },
+      {
+        "name": "spinner",
+        "value": "0.8s linear infinite",
+        "purpose": "Loading and in-progress run steps, gold ring."
+      },
+      {
+        "name": "pin-pulse",
+        "value": "1.8s infinite, gold ring to 9px",
+        "purpose": "Object pins in the studio."
+      },
+      {
+        "name": "camera-follow",
+        "value": "1 - exp(-dt * 6)",
+        "purpose": "Scroll progress and view offset smoothing; disabled under reduced motion."
+      },
+      {
+        "name": "camera-ease",
+        "value": "smoothstep windows + cubic ease-in-out",
+        "purpose": "Orbit (10-74%) and descent; walk to the door is smoothstep only."
+      },
+      {
+        "name": "walk-in-fade",
+        "value": "smoothstep(0.82, 1) of the door walk",
+        "purpose": "Paper veil, or the preloaded tour cross-fade (landing fades 4x faster)."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "steps-stack",
+        "value": "540px"
+      },
+      {
+        "name": "nav-compact",
+        "value": "760px"
+      },
+      {
+        "name": "studio-sheets",
+        "value": "900px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Pill",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action: ink pill, lifts 1px on hover.",
+      "html": "<button class=\"ds-pill ds-pill-dark\">Open the studio</button>",
+      "css": ".ds-pill{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;padding:13px 22px;font:600 15px/1 var(--body);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s,background .2s}.ds-pill:focus-visible{outline:2px solid var(--gold-ink);outline-offset:3px}.ds-pill-dark{background:var(--ink);color:#FBF8F3}.ds-pill-dark:hover{background:#2C2720;transform:translateY(-1px)}"
+    },
+    {
+      "name": "Ghost Pill",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action over the scene: translucent with a 22% ink border.",
+      "html": "<button class=\"ds-pill ds-pill-ghost\">How it works</button>",
+      "css": ".ds-pill{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;padding:13px 22px;font:600 15px/1 var(--body);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s,background .2s}.ds-pill:focus-visible{outline:2px solid var(--gold-ink);outline-offset:3px}.ds-pill-ghost{border-color:rgba(23,20,15,.22);color:var(--ink);background:rgba(249,246,241,.6)}.ds-pill-ghost:hover{background:#fff}"
+    },
+    {
+      "name": "Glass Panel",
+      "kind": "card",
+      "refersTo": "glass-panel",
+      "description": "Landing panel over the live drawing: two-tone headline, mono numerals, hairline-divided steps.",
+      "html": "<div class=\"ds-glass ds-panel\"><h2 class=\"ds-h2\">Four steps.<span>Zero manuals.</span></h2><div class=\"ds-step\"><span class=\"ds-n\">01</span><h3>Pick a chore</h3><p>Tap the spot in your home or just type it.</p></div></div>",
+      "css": ".ds-glass{background:var(--glass);backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.75);box-shadow:0 0 0 1px var(--line),0 24px 60px -36px rgba(45,32,12,.5)}.ds-panel{width:min(620px,100%);border-radius:28px;padding:clamp(24px,3.4vw,42px);color:var(--ink);font-family:var(--body)}.ds-h2{margin:0;font:900 clamp(40px,4.8vw,66px)/.92 var(--display);letter-spacing:-.05em}.ds-h2 span{display:block;color:var(--sub)}.ds-step{margin-top:30px;border-top:1px solid rgba(23,20,15,.16);padding:18px 0 22px;display:flex;flex-direction:column;gap:8px}.ds-n{font:500 11px/1 var(--mono);letter-spacing:.2em;color:var(--gold-ink)}.ds-step h3{margin:0;font:800 20px/1.12 var(--display);letter-spacing:-.025em}.ds-step p{margin:0;font-size:15px;line-height:1.5;color:var(--ink-2)}"
+    },
+    {
+      "name": "Evidence Tag",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Mono capsule tinted by an evidence colour (scan, tape, ok) or gold-ink for categories.",
+      "html": "<span class=\"ds-tag\" style=\"--c:var(--scan)\">scan</span> <span class=\"ds-tag\" style=\"--c:var(--tape)\">tape</span> <span class=\"ds-tag\" style=\"--c:var(--ok)\">agent</span>",
+      "css": ".ds-tag{display:inline-flex;align-items:center;border-radius:999px;padding:4px 9px;font:500 10px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;color:var(--c,var(--ink-2));border:1px solid color-mix(in srgb,var(--c,var(--ink)) 35%,transparent);background:color-mix(in srgb,var(--c,var(--ink)) 6%,transparent)}"
+    },
+    {
+      "name": "Prompt Field",
+      "kind": "input",
+      "refersTo": "prompt-field",
+      "description": "Field-white well inside the glass prompt bar; gold border and halo on focus.",
+      "html": "<div class=\"ds-glass ds-bar\"><div class=\"ds-chips\"><button>Change a light bulb</button><button>Wipe a surface</button></div><label class=\"ds-pform\"><input type=\"text\" placeholder=\"Describe a job\"><button class=\"ds-pill ds-pill-dark ds-sm\" type=\"button\">Design robot</button></label></div>",
+      "css": ".ds-glass{background:var(--glass);backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);border:1px solid rgba(255,255,255,.75);box-shadow:0 0 0 1px var(--line),0 24px 60px -36px rgba(45,32,12,.5)}.ds-pill{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;padding:13px 22px;font:600 15px/1 var(--body);text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .2s,background .2s}.ds-pill:focus-visible{outline:2px solid var(--gold-ink);outline-offset:3px}.ds-pill-dark{background:var(--ink);color:#FBF8F3}.ds-pill-dark:hover{background:#2C2720;transform:translateY(-1px)}.ds-sm{padding:10px 16px;font-size:14px}.ds-bar{width:min(760px,100%);border-radius:24px;padding:12px}.ds-chips{display:flex;gap:6px;flex-wrap:wrap;padding:2px 4px 10px}.ds-chips button{font:500 12.5px/1 var(--body);padding:8px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(255,253,250,.8);color:var(--ink);cursor:pointer}.ds-chips button:hover{background:#fff;border-color:var(--gold)}.ds-chips button:focus-visible{outline:2px solid var(--gold-ink);outline-offset:3px}.ds-pform{display:flex;align-items:center;gap:8px;background:#FFFDFA;border:1px solid var(--line);border-radius:18px;padding:6px 6px 6px 16px}.ds-pform input{flex:1;min-width:0;border:0;background:transparent;font:500 16px/1.4 var(--body);padding:10px 0;color:var(--ink)}.ds-pform input:focus{outline:none}.ds-pform:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,154,46,.18)}"
+    },
+    {
+      "name": "Area Row",
+      "kind": "custom",
+      "refersTo": "list-row",
+      "description": "Studio list row: gold dot, Geist name, mono category and count; ink fill when selected.",
+      "html": "<div style=\"display:grid;gap:6px;width:272px\"><button class=\"ds-row\" aria-pressed=\"false\"><span class=\"ds-dot\"></span><span><b>Kitchen sink</b><small>Plumbing</small></span><span class=\"ds-c\">3</span></button><button class=\"ds-row\" aria-pressed=\"true\"><span class=\"ds-dot\"></span><span><b>Table</b><small>Surfaces</small></span><span class=\"ds-c\">2</span></button></div>",
+      "css": ".ds-row{width:100%;display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:10px;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid transparent;background:rgba(255,253,250,.7);color:var(--ink);cursor:pointer;transition:background .2s,border-color .2s}.ds-row:hover{background:#fff;border-color:var(--line)}.ds-row:focus-visible{outline:2px solid var(--gold-ink);outline-offset:3px}.ds-row[aria-pressed=\"true\"]{background:var(--ink);color:#FBF8F3}.ds-dot{width:9px;height:9px;border-radius:50%;background:var(--gold)}.ds-row b{font:600 14px/1.2 var(--body)}.ds-row small{display:block;font:400 11px/1.3 var(--mono);letter-spacing:.06em;color:var(--ink-2);margin-top:2px}.ds-row[aria-pressed=\"true\"] small{color:#CFC6B8}.ds-c{font:500 11px/1 var(--mono);color:var(--ink-2)}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "nav",
+      "refersTo": "segment-selected",
+      "description": "Studio view and camera switch: 6% ink track, ink-filled selection.",
+      "html": "<div class=\"ds-seg\" role=\"tablist\"><button role=\"tab\" aria-selected=\"true\">Inside</button><button role=\"tab\" aria-selected=\"false\">Outside</button></div>",
+      "css": ".ds-seg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:rgba(23,20,15,.06)}.ds-seg button{border:0;background:transparent;border-radius:999px;padding:8px 12px;font:500 12.5px/1 var(--body);color:var(--ink-2);cursor:pointer;white-space:nowrap}.ds-seg button:hover{color:var(--ink);background:rgba(255,255,255,.7)}.ds-seg button:focus-visible{outline:2px solid var(--gold-ink);outline-offset:3px}.ds-seg button[aria-selected=\"true\"]{background:var(--ink);color:#FBF8F3}"
+    },
+    {
+      "name": "Site Caption",
+      "kind": "custom",
+      "refersTo": "site-caption",
+      "description": "Mono caption naming the building and crediting the survey data.",
+      "html": "<p class=\"ds-cap\"><b>JRR Hall · Princeton, NJ</b><span>Footprints and roof heights: Vexcel Imaging</span></p>",
+      "css": ".ds-cap{display:inline-block;margin:0;padding:10px 14px;border-radius:12px;background:rgba(244,239,231,.86);text-align:right;font:500 12px/1.5 var(--mono);letter-spacing:.03em;color:var(--ink)}.ds-cap b{font-weight:500}.ds-cap span{display:block;color:var(--ink-2)}"
+    },
+    {
+      "name": "Scroll Cue",
+      "kind": "custom",
+      "description": "Mono uppercase cue with an inline-SVG arrow in a 1px ink ring; the system's icon pattern.",
+      "html": "<a class=\"ds-cue\" href=\"#\"><span class=\"ds-ring\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path d=\"M12 4v15M6 13l6 6 6-6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></span>Scroll to walk in</a>",
+      "css": ".ds-cue{display:inline-flex;align-items:center;gap:16px;font:500 12px/1 var(--mono);letter-spacing:.32em;text-transform:uppercase;text-decoration:none;color:var(--ink)}.ds-ring{width:52px;height:52px;border-radius:50%;border:1px solid var(--ink);display:grid;place-items:center}.ds-cue:focus-visible{outline:2px solid var(--gold-ink);outline-offset:3px;border-radius:6px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Site Plan You Can Walk Into",
+    "overview": "Gold Bears is drawn, not rendered. Everything sits on warm drafting paper ruled with an ink grid, and the landing opens on a survey-true massing model of JRR Hall, built from Vexcel footprints and roof heights. The hall is solid paper-white with gold coping and a gold-framed, lit entrance. Its neighbours are ghosted ink line-work. A north arrow and a 0–30 m scale bar sit on the ground plane. Scrolling is one continuous camera move: an aerial three-quarter view, an orbit, a descent to eye height at the plaza, and a walk through the door that cross-fades into the live Matterport tour. The studio then opens in that same space.\n\nThe interface's panels, cards and bars float over the drawing as frosted glass: warm translucent panels with a white hairline edge and a soft, low, warm shadow, so the model always reads through. The typography gives the drawing its voice. Schibsted Grotesk sets heavy, tightly tracked two-tone titles (ink over deep gold). Geist carries the body text in plain words. Geist Mono handles anything that is a measurement, a step number, a status or a data credit. Gold is scarce and means one of two things: the subject (the hall's roof edge, its door, the bear mark) or a point of attention (area and pin dots, step-number badges, focus, hover, progress).\n\nDensity is generous on the landing, where panels are left-docked, at most 620px wide, with long scroll runs between them, and compact in the studio, where glass panels dock to the viewport edges at a 12px inset around a full-bleed scene.",
+    "keyCharacteristics": [
+      "Warm paper (#F4EFE7) with a two-scale ink drafting grid, in both CSS and the 3D ground plane.",
+      "A survey-true massing model as the hero subject, credited in a mono caption.",
+      "In 3D, line weight is carried by opacity, not stroke width.",
+      "Frosted glass over a live scene for every panel, card and bar.",
+      "Two-tone display titles: an ink line, then a deep-gold sub-line.",
+      "Mono for every measured or numbered fact.",
+      "Scroll as a single continuous camera move, ending in a cross-fade into the real interior."
+    ],
+    "rules": [
+      {
+        "name": "The Gold Is the Subject Rule",
+        "body": "In the scene, gold belongs only to the building you will enter: its coping strip, its door frame and its plaza mark. Neighbours never take gold. In the UI, gold marks points of attention: area and pin dots, the 16% gold badge behind plan-step numerals, and focus, hover and progress states. It is never a solid fill behind text.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Inks Rule",
+        "body": "UI ink (`ink`) is used opaque, on DOM text and fills. Scene ink (`scene-ink`) is used translucent, on WebGL line-work. Do not swap them.",
+        "section": "colors"
+      },
+      {
+        "name": "The Evidence Colour Rule",
+        "body": "Blue, amber and green say where a fact came from, or what state it is in: scan, tape or caution, verified. They appear only as tag tints (6% fill, 35% border, full-strength text), status dots and short status lines. They are never decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Tone Title Rule",
+        "body": "Every display and headline is two lines: a statement in ink, then a short sub-line in `sub` gold, nested in the same heading element.",
+        "section": "typography"
+      },
+      {
+        "name": "The Measured-in-Mono Rule",
+        "body": "Anything measured, numbered, sourced or reporting status is set in Geist Mono. This covers dimensions, step numbers, the site caption and its data credit, provenance notes, run status, and scale-bar lettering. Titles, explanatory copy and buttons are never set in mono.",
+        "section": "typography"
+      },
+      {
+        "name": "The Glass Over the Drawing Rule",
+        "body": "Panels, cards and bars are translucent and blurred so the model reads through them. An opaque card over the scene breaks the world. Opaque surfaces are limited to small scene annotations and to field-white wells and rows inside glass.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Warm Shadow Rule",
+        "body": "Shadows are tinted warm brown (rgba 40–45, 30–32, 12–15), soft, and drawn with negative spread. They are never neutral grey and never hard-edged.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** keep every panel, card and bar on frosted glass (`glass` fill, 20px blur, white hairline edge, warm negative-spread shadow) so the scene reads through.",
+      "**Do** write every display and headline as two lines: ink, then a `sub` gold sub-line.",
+      "**Do** set measurements, step numbers, captions, data credits, notes and status in Geist Mono at weight 400 or 500.",
+      "**Do** credit survey data in the mono site caption whenever the site model is shown.",
+      "**Do** carry 3D line hierarchy with opacity tiers (0.7 / 0.55 / 0.22 / 0.2 / 0.15) in scene ink, and build heavy emphasis as geometry.",
+      "**Do** reserve gold for the subject building in the scene, and for focus, hover, active and progress states in the UI.",
+      "**Do** use the evidence colours only to say where a fact came from (scan blue, tape amber, verified green).",
+      "**Do** give every scroll-driven move a reduced-motion path that holds the camera's azimuth and removes smoothing and parallax."
+    ],
+    "donts": [
+      "**Don't** set text in `gold` (2.25:1) or `mute` (2.49:1). Use `gold-ink`, `sub` or `ink-2`.",
+      "**Don't** give neighbouring buildings gold, solid fills or strong edges. Context stays at 0.18 fill and 0.15 line opacity.",
+      "**Don't** place opaque cards over the scene. Opaque surfaces are limited to small annotation capsules and to wells and rows inside glass.",
+      "**Don't** use neutral-grey or hard offset shadows. Shadows are soft and warm-tinted.",
+      "**Don't** put a small tracked mono label above a heading as a kicker. Mono labels describe data, not sections.",
+      "**Don't** use Unicode characters as icon controls or status marks. Draw icons as inline SVG, as the scroll cue does.",
+      "**Don't** use overshoot or bounce easing. Panels arrive on the default ease."
+    ]
+  }
+}

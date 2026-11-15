@@ -9,10 +9,14 @@ dependencies = [
   "mujoco",    # TODO pin
   "mink",      # TODO pin
   "langgraph", # TODO pin
-  "langsmith", # TODO pin
+  "langchain-anthropic", # Claude for agent/design_flow LLM steps
+  "langsmith>=0.14.9", # TODO pin; >=0.14.9 needed to trace to an agent (LANGSMITH_AGENT_ID)
   "numpy",
   "anthropic",
   "jsonschema",
+  "trimesh>=5.2.1",
+  "scipy",     # world/mesh.py
+  "httpx",     # world/matterport.py, through Pathfinder's Matterport client
 ]
 
 [dependency-groups]

@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "robot-design/index.html"
+        ],
+        "createdAt": "2026-11-15T02:07:56.762Z",
+        "reason": "user confirmed: chose the site's paper + gold ground (DESIGN.md paper #F4EFE7) over blueprint blue for the Robot Design page"
+      }
+    ]
+  }
+}

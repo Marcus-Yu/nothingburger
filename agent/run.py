@@ -19,12 +19,13 @@ import sys
 import time
 from pathlib import Path
 
-from . import observe
+from . import observe, workspace
 from .nodes import design, intake, ledger, pathing, prepass, program
 from .tools import trace, viz
 
 REPO = Path(__file__).resolve().parents[1]
 MAX_ROBOT_FIXES = 5  # the loop stops after this many redesigns
+WORKSPACE = "workspace"  # the folder in a run folder where the model's own files are kept between runs
 EXIT_WAITING = 3  # intake asked the person something and nobody said to go on without an answer
 OUTPUTS = ["world.json", "tasks.json", "demo.json", "grip.json", "requirements.json", "design.json", "decisions.jsonl",
            "robot.xml", "build.json", "route.json", "trajectory.json", "program.json", "intake.json", "trace.json"]
@@ -41,6 +42,20 @@ def _write(path: Path, doc, compact: bool = False) -> None:
     path.write_text(json.dumps(doc, separators=(",", ":")) if compact else json.dumps(doc, indent=2) + "\n")
 
 
+# What a demonstrated motion (capture's motion.kind) shows, as a task skill.
+DEMO_SKILL = {"wipe": "wipe", "carry": "pick", "reach": "pick"}
+
+
+def _demo_task(state: dict):
+    """The task a demo belongs to when none is named: the first task whose skill the demo's motion shows,
+    else the first task."""
+    tasks = state["tasks"]
+    kind = ((state.get("demo") or {}).get("motion") or {}).get("kind")
+    skill = DEMO_SKILL.get(kind)
+    match = next((t["id"] for t in tasks if skill and t.get("skill") == skill), None)
+    return match or (tasks[0]["id"] if tasks else None)
+
+
 def pipeline(state: dict) -> dict:
     """intake -> pre-pass -> ledger -> design and compose -> pathing (skipped when no design is feasible)."""
     if "tasks" not in state:
@@ -55,7 +70,7 @@ def pipeline(state: dict) -> dict:
     top = viz.room_view(state["world"])  # the rooms from above, for the live view (None when frames are off)
     if top:
         observe.emit("room_view", **top)
-    tid = state.get("demo_task") or (state["tasks"][0]["id"] if state["tasks"] else None)
+    tid = state.get("demo_task") or _demo_task(state)
     for key in ("demo", "grip"):  # the demonstration files belong to one task
         if state.get(key) is not None:
             state[key + "s"] = {tid: state[key]}
@@ -111,6 +126,8 @@ def pipeline(state: dict) -> dict:
         state = observe.node("5d program", program.step)(state)
         pr = state["program"]
         observe.emit("program", source=pr["source"], model=pr.get("model"), rejected=pr.get("model_rejected"), steps=pr["steps"])
+        if pr.get("planning"):  # the model worked in the workspace: show its plan and notes
+            observe.emit("workspace", **pr["planning"], contents=state["workspace"]["files"])
         if state.get("walkthrough"):  # film the plan: the robot driving the route and running each arm motion
             film = viz.walkthrough(state["world"], state["robot_xml"], state["build"], state["route"], state["trajectory"])
             if film:
@@ -144,6 +161,7 @@ def write_run(state: dict, out: Path) -> list:
     if state.get("intake"):
         _write(out / "intake.json", state["intake"])
     _write(out / "trace.json", {"calls": trace.entries(), "seconds": round(sum(e["seconds"] for e in trace.entries()), 3)})
+    workspace.save(workspace.Workspace.from_state(state), out / WORKSPACE)  # the model's plan and notes, for the next run
     return [n for n in OUTPUTS if (out / n).exists()]
 
 
@@ -156,6 +174,7 @@ def write_waiting(state: dict, out: Path) -> list:
     _write(out / "world.json", state["world"])
     _write(out / "tasks.json", {"tasks": state["tasks"]})
     _write(out / "intake.json", state["intake"])
+    workspace.save(workspace.Workspace.from_state(state), out / WORKSPACE)  # notes from an earlier run of this job stay
     return ["world.json", "tasks.json", "intake.json"]
 
 
@@ -223,6 +242,10 @@ def summary(state: dict) -> list:
         pr = state["program"]
         lines.append(f"program: {len(pr['steps'])} steps, written by " + (f"the model ({pr['model']})" if pr["source"] == "model" else "rule")
                      + (f"; the model's program was rejected: {'; '.join(pr['model_rejected']['problems'][:3])}" if pr.get("model_rejected") else ""))
+        if pr.get("planning"):
+            pl = pr["planning"]
+            lines.append(f"  planned in the workspace: {pl['tool_calls']} file operations, {pl.get('revisions', 0)} checked revisions; "
+                         f"kept {', '.join(pl['files']) or 'no files'}")
     for c in d.get("checks", []):
         if c["status"] == "not_assessable":
             lines.append(f"not_assessable: {c['check']} / {c.get('task') or 'building'}: {c.get('why', '')}")
@@ -255,11 +278,14 @@ def main(argv=None) -> int:
     ap.add_argument("--walkthrough", action="store_true",
                     help="with --frames: also film the robot driving the planned route and doing each task (needs ffmpeg)")
     ap.add_argument("--no-model", action="store_true", help="skip every model step; tasks come from --tasks, the program by rule")
+    ap.add_argument("--no-workspace", action="store_true",
+                    help="the program step asks the model once, with the plan in the prompt, instead of letting it work in the workspace")
     ap.add_argument("--answers", help='the person\'s answers to intake\'s questions: a JSON list of {"question", "answer"}')
     ap.add_argument("--proceed", action="store_true", help="do not stop when intake has questions; they stay on record as unanswered")
     ap.add_argument("--demo")
     ap.add_argument("--grip")
-    ap.add_argument("--demo-task", help="the task id the demo and grip files belong to (default: the first task)")
+    ap.add_argument("--demo-task", help="the task id the demo and grip files belong to "
+                                        "(default: the first task whose skill the demo's motion shows, else the first task)")
     ap.add_argument("--radius", type=float, default=prepass.DEFAULT_RADIUS_M,
                     help="pre-pass disc radius in metres: half the narrowest base width in the catalog")
     ap.add_argument("--out", required=True)
@@ -275,6 +301,8 @@ def main(argv=None) -> int:
              "job": a.job, "use_model": not a.no_model, "walkthrough": a.walkthrough, "proceed": a.proceed,
              "answers": json.loads(Path(a.answers).read_text()) if a.answers else []}
     state["demo_task"] = a.demo_task
+    state["use_workspace"] = not a.no_workspace
+    state["workspace"] = workspace.load(Path(a.out) / WORKSPACE, workspace.key_for(state))  # what the model kept last time
     if a.demo:
         state["demo"] = json.loads(Path(a.demo).read_text())
     if a.grip:
