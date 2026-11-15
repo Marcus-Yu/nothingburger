@@ -1,6 +1,6 @@
 """Stream C's entry point for demonstrations: `latest(kind)`.
 
-Raw recordings arrive from the Quest app as JSON files in the inbox (the Pathfinder backend's
+Raw recordings arrive from the Quest app as JSON files in the inbox (the Nothingburger backend's
 `POST /demos` writes them there). `latest("demo")` and `latest("grip")` process the newest one
 that has what that kind needs and return the dict that goes into a run folder as `demo.json` or
 `grip.json`. Recorded demos stay on disk, so the pipeline never needs the headset live.
@@ -19,7 +19,7 @@ KINDS = ("demo", "grip")
 
 
 def inbox() -> Path:
-    """Where raw recordings land: `CAPTURE_INBOX`, else the Pathfinder backend's data folder."""
+    """Where raw recordings land: `CAPTURE_INBOX`, else the Nothingburger backend's data folder."""
     return Path(os.environ.get("CAPTURE_INBOX") or _REPO / "world" / "pathfinder" / "backend" / "data" / "demos")
 
 

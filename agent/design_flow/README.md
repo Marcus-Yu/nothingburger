@@ -43,7 +43,7 @@ uv run --env-file .env python -m agent.design_flow.serve        # http://127.0.0
 uv run python -m agent.design_flow.serve --standin              # no API key: keyword classifier, the scenario's own task list
 ```
 
-The studio's **Design robot** uses it when it answers on port 8020 and the space is a scan, else it falls back to the Pathfinder backend's stand-in planner. A session runs in a thread and the page polls it, because the design step takes a few minutes. When it finishes, **Open Robot Design** opens the run in the Robot Design page, and its **Deploy** opens the route view. Endpoints are listed in `serve.py`.
+The studio's **Design robot** uses it when it answers on port 8020 and the space is a scan, else it falls back to the Nothingburger backend's stand-in planner. A session runs in a thread and the page polls it, because the design step takes a few minutes. When it finishes, **Open Robot Design** opens the run in the Robot Design page, and its **Deploy** opens the route view. Endpoints are listed in `serve.py`.
 
 ### Running it
 
@@ -52,7 +52,7 @@ uv run --env-file .env python -m agent.design_flow                    # terminal
 uv run python -m unittest discover -s agent/design_flow/tests -t .    # tests; Claude is replaced by stand-ins
 ```
 
-At a demo step the terminal takes a path to each recording, or Enter to use capture's newest for that chore (from `CAPTURE_INBOX`, else the Pathfinder backend's `data/demos/`).
+At a demo step the terminal takes a path to each recording, or Enter to use capture's newest for that chore (from `CAPTURE_INBOX`, else the Nothingburger backend's `data/demos/`).
 
 ## Tracing
 

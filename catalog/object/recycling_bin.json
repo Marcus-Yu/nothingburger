@@ -1,0 +1,17 @@
+{
+  "id": "recycling_bin",
+  "slot": "object",
+  "name": "Slim recycling bin, 23 gal, bottles and cans",
+  "mass_kg": 4.5,
+  "mass_max_kg": 5.0,
+  "width_m": 0.03,
+  "hold": "hook",
+  "anchor_point": "middle of the rim on a long side",
+  "src": "empty mass about 3.7 kg for a 23-gallon slim bin, from memory; a light load of bottles and cans assumed; rim lip about 3 cm. Weigh it and state the mass if it matters: the catalogue's strongest gripper is rated 5 kg",
+  "confidence": {
+    "mass_kg": "assumed",
+    "mass_max_kg": "assumed",
+    "width_m": "assumed"
+  },
+  "notes": "Lifted by the rim lip: hooked, not pinched, so the force band's low end is zero and the Payload check covers the weight. A person lifts it with two hands; one gripper under the rim is assumed to hold it level enough to carry. No simulator model yet."
+}

@@ -1,6 +1,6 @@
-# G2: Grok Voice API and Grok agents, and what they can do for Pathfinder
+# G2: Grok Voice API and Grok agents, and what they can do for Nothingburger
 
-Research agent G2, 2026-09-26. Scope: the xAI realtime voice API, xAI's agent tools, the "Grok bot" products, what people build with them, and ranked feature ideas for Pathfinder's server.
+Research agent G2, 2026-09-26. Scope: the xAI realtime voice API, xAI's agent tools, the "Grok bot" products, what people build with them, and ranked feature ideas for Nothingburger's server.
 
 Tags: **[V]** verified from xAI docs (docs.x.ai, fetched today as markdown) or by our own live call. **[S]** secondary source: a blog, review, news story or X post. **[I]** my inference.
 
@@ -77,7 +77,7 @@ Scores are 1–5. "Fit" means server-side, reuses existing modules, and needs li
 | 5 | **Quartermaster voice identity**: custom-cloned voice (≤120 s clip of a teammate) or `rex`/`sal`, plus `replace` pronunciations, `keyterms`, and a `force_message` greeting and payment confirmation | 3 | 4 | 5 | free to create | Consent for cloned voices; mostly config. **Fold into #1** |
 | 6 | **Renovation planner** (multi-agent, 4 agents, web+x search): measurements + placed parts → BOM, cost range, schedule, permit notes, DIY vs pro | 4 | 3 | 3 | tens of seconds [I], maybe $0.10–0.50 [I] | Slow; no function tools on multi-agent [V]; overlaps `server/bom.py` |
 | 7 | **Spectator co-pilot**: a second person on a laptop/phone talks to Grok about what the headset sees (shared `session_id`, last frame, per-response `instructions`) | 3 | 4 | 2 | $0.08/min per extra session; T0 allows 10 concurrent [V] | Needs frame casting from Unity; two voices at a noisy table |
-| 8 | **Pathfinder bot on X**: tag it with a gutter photo, it replies with a parts list and scene link | 2 | 3 | 1 | X API write tier + vision call | Bot account, X API access and cost, moderation; @grok itself isn't programmable [S]. **Skip**; at most a "share to X" intent link on the report |
+| 8 | **Nothingburger bot on X**: tag it with a gutter photo, it replies with a parts list and scene link | 2 | 3 | 1 | X API write tier + vision call | Bot account, X API access and cost, moderation; @grok itself isn't programmable [S]. **Skip**; at most a "share to X" intent link on the report |
 
 Also worth doing as a small change: switch `voice.speak()`'s first choice to xAI TTS (`POST /v1/tts`, same voice as realtime) so the push-to-talk fallback sounds like the same character [I]. Keep Groq/edge-tts as fallbacks.
 

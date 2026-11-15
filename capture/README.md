@@ -5,7 +5,7 @@ Exposes `api.py`: `latest(kind)`.
 
 ## How a demonstration is filmed
 
-The recorder is native, inside the Pathfinder Quest app (`world/pathfinder/vr`,
+The recorder is native, inside the Nothingburger Quest app (`world/pathfinder/vr`,
 `Assets/Pathfinder/Runtime/Capture/DemoRecorder.cs`), not a WebXR page. The app already tracks
 hands and controllers in the frame of the loaded scan, so a demonstration comes out in the same
 coordinates as the home it was filmed in.

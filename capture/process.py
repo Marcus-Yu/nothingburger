@@ -455,8 +455,8 @@ def build_grip(recording: dict, n_per_unit: float = DEFAULT_N_PER_UNIT, rate_hz:
         return {
             "schema": "capture.grip/1", "recording": recording.get("id"),
             "object": (recording.get("anchor") or {}).get("label"), "hand": raw["hand"],
-            "source": "glove_raw", "force_n": None, "glove_raw": raw, "travel": None,
-            "scale_n_per_unit": None, "held_s": None,
+            "source": "glove_raw", "force_n": raw["est_n"], "force_basis": glove.ESTIMATE_BASIS,
+            "glove_raw": raw, "travel": None, "scale_n_per_unit": None, "held_s": None,
         }  # fmt: skip
     count, hand, measured, values, travel = best
     if raw is not None and not measured:
@@ -468,10 +468,11 @@ def build_grip(recording: dict, n_per_unit: float = DEFAULT_N_PER_UNIT, rate_hz:
         "object": (recording.get("anchor") or {}).get("label"),
         "hand": hand,
         # "glove": calibrated newtons. "glove_raw": the glove was worn but is not calibrated, so
-        # the band that means something is glove_raw (this glove's own units) and force_n is null.
+        # force_n is an estimate from its raw units (force_basis says how) and stays labelled uncalibrated.
         "source": "glove" if measured else "glove_raw" if raw is not None else "travel",
-        "force_n": None if (raw is not None and not measured) else
+        "force_n": raw["est_n"] if (raw is not None and not measured) else
         {"min": round(float(lo), 2), "max": round(float(hi), 2), "peak": round(float(values.max()), 2)},
+        **({"force_basis": glove.ESTIMATE_BASIS} if (raw is not None and not measured) else {}),
         "glove_raw": raw,
         "travel": {"min": round(float(np.percentile(travel, 10)), 3), "max": round(float(np.percentile(travel, 90)), 3)},
         "scale_n_per_unit": None if (measured or raw is not None) else n_per_unit,

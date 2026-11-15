@@ -177,7 +177,7 @@ def test_links_and_mentions_are_rejected(text):
     entry = {"caption": f"Sink {text} $10.00", "part": None}
     post = booth.x_text(entry)
     assert not booth.LINK_RE.search(post)
-    assert post.endswith(" #Pathfinder") and post.count("#Pathfinder") == 1 and len(post) <= 240
+    assert post.endswith(" #Nothingburger") and post.count("#Nothingburger") == 1 and len(post) <= 240
     with pytest.raises(booth.XError):
         asyncio.run(booth.x_post(__file__, text))  # type: ignore[arg-type]
 

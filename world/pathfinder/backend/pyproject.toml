@@ -1,7 +1,7 @@
 [project]
 name = "pathfinder"
 version = "0.1.0"
-description = "Pathfinder parts server backend"
+description = "Nothingburger parts server backend"
 authors = [
     { name = "Subham Dash", email = "subhamdash14@gmail.com" }
 ]

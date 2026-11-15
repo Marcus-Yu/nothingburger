@@ -1,4 +1,4 @@
-# Pathfinder Parts Server — HTTP API
+# Nothingburger Parts Server — HTTP API
 
 Unity/Quest client reference (P2/P3, C#, UnityWebRequest + glTFast).
 
@@ -1809,7 +1809,7 @@ needs a notebook (`404` otherwise). Re-sharing a session replaces its entry.
   the entry isn't ranked on that board.
 - With X configured, `x` is `{ready: true, preview_text, confirm_token, expires_in_s: 300}`.
   `preview_text` has no URL (X bills $0.20 for a post with one, $0.015 without) and no
-  @mention, and ends in `#Pathfinder`.
+  @mention, and ends in `#Nothingburger`.
 
 ### `POST /booth/x/confirm` — post a card to X
 

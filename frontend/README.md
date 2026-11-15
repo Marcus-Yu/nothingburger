@@ -1,6 +1,6 @@
 # Nothingburger front-end
 
-The landing page and studio for Nothingburger. The landing opens on a 3D site model of Princeton's Julis Romo Rabinowitz (JRR) Hall on the drafting grid; scrolling circles the building, then walks through its front door into the studio, which opens inside the hall's Matterport tour. The studio plans a job with the Pathfinder backend and can preview it with the robot in a sample apartment.
+The landing page and studio for Nothingburger. The landing opens on a 3D site model of Princeton's Julis Romo Rabinowitz (JRR) Hall on the drafting grid; scrolling circles the building, then walks through its front door into the studio, which opens inside the hall's Matterport tour. The studio plans a job with the Nothingburger backend and can preview it with the robot in a sample apartment.
 
 Plain HTML, CSS and JavaScript with no build step. Three.js 0.160.0 loads from jsDelivr through an import map in `index.html`.
 
@@ -17,7 +17,7 @@ Then open http://localhost:8000 (use `localhost`, not `127.0.0.1`: the Matterpor
 
 For the real design workflow (outline, demonstration, then the design and pathing pipeline), also start `uv run --env-file .env python -m agent.design_flow.serve` from the repo root (port 8020; `?agent=http://host:port` overrides it). With it running, **Design robot** in a scan space runs that workflow and ends in **Open Robot Design**; without it the panel uses the stand-in planner below.
 
-For the full flow, also start the Pathfinder backend from the repo (CORS is open, so the two ports talk):
+For the full flow, also start the Nothingburger backend from the repo (CORS is open, so the two ports talk):
 
 ```
 cd robots-repo/world/pathfinder/backend

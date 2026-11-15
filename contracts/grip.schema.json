@@ -14,6 +14,7 @@
   "source": {
    "enum": [
     "glove",
+    "glove_raw",
     "travel"
    ]
   },

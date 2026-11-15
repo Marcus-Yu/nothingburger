@@ -22,7 +22,7 @@ The robot is designed from the user's own demonstration and their real space (a 
 
 - The site has two parts: a landing page that explains the idea, and the studio, where the user is inside a real 3D space and plans a job.
 - The showcase space is Princeton's Julis Romo Rabinowitz (JRR) Hall: the inside is the CoStar team's Matterport tour (model `2K7G7cdukZV`, embed only, our API key cannot download its mesh); there is no Matterport or Vexcel 3D model of the outside.
-- Demonstrations are recorded on the Quest; the studio talks to the Pathfinder backend (`world/pathfinder/backend`, port 8004) and the design agent (`agent/`).
+- Demonstrations are recorded on the Quest; the studio talks to the Nothingburger backend (`world/pathfinder/backend`, port 8004) and the design agent (`agent/`).
 
 ## Capabilities and Constraints
 

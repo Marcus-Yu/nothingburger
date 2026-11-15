@@ -1,7 +1,7 @@
-# G3: Grok round 2, fresh uses for Pathfinder
+# G3: Grok round 2, fresh uses for Nothingburger
 
 Research agent G3, 2026-09-26. Question: what has xAI shipped since round 1 (G1 Imagine, G2 voice and
-agents), what are people building with it right now, and which new Grok uses would make Pathfinder
+agents), what are people building with it right now, and which new Grok uses would make Nothingburger
 better or more memorable? Already built or on branches, so not proposed again: the realtime
 Quartermaster relay (F1), "reimagine this view" (F2), installer intel (F3), the site-walk report, the
 "see it installed" postcard and the clean catalogue front view.
@@ -180,7 +180,7 @@ most of the work is on P3.
 answer the common questions in under 1 ms. Keep it only as a fallback for questions nobody modelled
 ("snow load on 3.66 m of gutter at 60 cm spacing"), with a "calculating…" filler line.
 
-**10. Parts server as MCP.** It would let grok.com or any MCP client use Pathfinder. It isn't needed for
+**10. Parts server as MCP.** It would let grok.com or any MCP client use Nothingburger. It isn't needed for
 the demo, and it needs a public tunnel.
 
 ---

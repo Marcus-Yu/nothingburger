@@ -7,7 +7,7 @@ Status: draft, 2026-11-14. It covers step 3 of the [flow](PLAN_REVISED.md#flow):
 | # | Assumption | Why |
 | :-- | :-- | :-- |
 | A1 | **One robot per building, covering every job the user picked there.** Its requirements are the union of the jobs' requirements. The run folder holds one `demo.json`, `grip.json` and `trajectory.json`, so until gap G7 lands, it is **one run per job**, and the design step reads the ledgers of all that building's job runs. | A landlord buys one robot per property, not one per chore. With one job picked, this is the same as one robot per job. |
-| A2 | **The world frame is Matterport's: metres, Z up.** Capture and the Pathfinder scene package are +Y up. Each converts at its own boundary: `world.api.load` and `capture.api.latest` hand out Z-up data. | One frame in every run file. The only conversion is in the loader and the capture code, which already know both frames. |
+| A2 | **The world frame is Matterport's: metres, Z up.** Capture and the Nothingburger scene package are +Y up. Each converts at its own boundary: `world.api.load` and `capture.api.latest` hand out Z-up data. | One frame in every run file. The only conversion is in the loader and the capture code, which already know both frames. |
 | A3 | **Keep the 18-combination method:** enumerate, check, size, then rank. | Continuous part search was reviewed and [not adopted](PLAN_REVISED.md#suggestions-from-the-review-not-adopted). Sizing still tunes continuous values inside the chosen parts. |
 | A4 | **Fixtures are anchors, found by the panorama agent or entered by hand and tagged `manual`.** Both workflows run the same way on either. | The API found 0 objects on 24 models. Without an anchor nothing can be reached. |
 

@@ -84,6 +84,9 @@ def running(session: str) -> bool:
 
 def _kill(proc: subprocess.Popen, grace_s: float = 5.0) -> None:
     """TERM the process group (the run and its worker processes), then KILL what is left after `grace_s`."""
+    if os.name == "nt":  # Windows has no process groups or SIGKILL: end the process tree with taskkill
+        subprocess.run(["taskkill", "/T", "/F", "/PID", str(proc.pid)], capture_output=True)
+        return
     for sig in (signal.SIGTERM, signal.SIGKILL):
         try:
             os.killpg(proc.pid, sig)

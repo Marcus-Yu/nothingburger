@@ -202,6 +202,8 @@ function describeGrip(g) {
   if (g.source === 'glove') return `Grip ${g.force_n.min} to ${g.force_n.max} N, measured by the glove.`;
   if (g.source === 'glove_raw') {
     const r = g.glove_raw.raw;
+    const n = g.glove_raw.est_n;
+    if (n) return `Grip about ${n.min} to ${n.max} N, peak ${n.peak} N (estimated from the glove’s raw pressure, not calibrated)` + (g.glove_raw.near_ceiling ? '; the sensor was near its ceiling, so the peak is a floor.' : '.');
     return `Glove pressure ${r.min} to ${r.max} of 4095 (raw, not yet newtons)` + (g.glove_raw.near_ceiling ? ', near the sensor’s ceiling.' : '.');
   }
   return `Grip about ${g.force_n.min} to ${g.force_n.max} N from hand closure alone: a placeholder, no glove.`;
