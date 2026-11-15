@@ -28,9 +28,10 @@ The building panel is a picture, not a diagram: with `--frames` the run renders 
 
 After measuring, the stitch cleans the mesh for showing (`world/scenarios/tools/scan_clean.py`; `--as-scanned` skips it):
 
-- **Cleared.** People, chairs, bags, equipment and things left on tables are taken out. What stays is the floor, walls and pillars (columns with scan all the way up), the stairs, and the table tops. Cloth sides and legs are redrawn in the cloth's colour, because the scanner fuses chairs into them.
-- **Patched.** A copy of the floor's own picture lies just under it and closes the gaps where things stood and the cracks between tiles.
-- **Evenly lit.** The photos' pools of sun and shade are divided out of the floor and the table tops; where the shade was too deep to hold colour, the floor is rebuilt from the room's floor colour and the boards' grain. Walls get a gentler correction.
+- **Cleared, keeping the scan.** People, chairs, bags, equipment and things left on tables are taken out. The floor, walls and pillars (columns with scan all the way up) and the stairs stay. In a table's volume, the triangles whose texture is the cloth's colour stay, so the tables are the real draped cloths with the chairs and laptops cut away; a plain sheet in the cloth's colour sits just inside to close the cuts.
+- **Dark or torn tables replaced.** A table too deep in shade to brighten cleanly, or with little cloth left, is replaced by a copy of one of the best scanned tables. They are all the same table under the same cloth.
+- **Floor evened and mended.** The photos' sun and shade are divided out of the floor up to a limit. Past it (deep shade, tinted sun, marks where things stood, gaps) the boards are copied from a well-lit stretch of the same room's floor. The finished floor picture also lies just under the floor, closing gaps and the cracks between tiles, and each table gets a soft shadow where it meets the floor.
+- **Cloths brightened, not flattened.** Each table gets one brightness factor, with sun patches and deep shade on the cloth pulled in, because a cloth's folds are its shading.
 
 This changes the picture only. The planner never saw the chairs and still does not: a robot that drives where a chair stood in the scan is not shown hitting anything.
 
