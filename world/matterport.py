@@ -54,7 +54,15 @@ class NoPlan(ValueError):
 # ---------------------------------------------------------------------------------------------- network
 
 def _client():
-    """Pathfinder's Matterport client (world/pathfinder is its own project, so it is loaded by path)."""
+    """Pathfinder's Matterport client (world/pathfinder is its own project, so it is loaded by path). It looks
+    for the keys in the environment and in ./.env; the repo's own .env is read here so any working directory does."""
+    import os
+    env = HERE.parent / ".env"
+    if env.exists():
+        for line in env.read_text().splitlines():
+            key, sep, value = line.partition("=")
+            if sep and not key.strip().startswith("#"):
+                os.environ.setdefault(key.strip(), value.strip().strip("'\""))
     name = "_pathfinder_matterport"
     if name not in sys.modules:
         path = HERE / "pathfinder" / "backend" / "pipeline" / "matterport.py"
@@ -369,7 +377,7 @@ def build(model: dict, *, name: str | None = None, mesh: str | Path | None = Non
         "mesh": str(mesh) if mesh is not None else None,
         "tour": {"matterport": model["id"], "to_model": [TO_MODEL[0], [0.0, 0.0, 1.0, round(lift, 3)], TO_MODEL[2]],
                  "note": "the world's X and Y are the model's, so this is the floor's height and the change from Z up to "
-                         "the tour's Y up (x, y, z to x, z, -y); not yet checked in the tour viewer"},
+                         "the tour's Y up (x, y, z to x, z, -y), as the viewer's own scan positions confirm"},
         "floors": [{"id": f["id"], "z": f["z"]} for f in plan["floors"]],
         "rooms": rooms,
         "doorways": doorways,
@@ -385,11 +393,30 @@ def load(model_id: str, name: str, *, with_mesh: bool = True) -> dict:
     """Fetch (or reuse, from world/_scans/<name>/) and build."""
     scan = SCANS / name
     model = fetch(model_id, cache=scan / "api.json")
-    obj = fetch_mesh(model_id, scan / "matterpak") if with_mesh else None
+    layout(model)   # no floor plan: say so before downloading anything
+    obj, why = None, None
+    if with_mesh:
+        try:
+            obj = fetch_mesh(model_id, scan / "matterpak")
+        except Exception as e:   # the MatterPak is locked for this key, or the download failed
+            why = f"{type(e).__name__}: {e}"
     world = build(model, name=name, mesh=obj)
+    if why:
+        world["source"] += f". The model's mesh could not be downloaded ({why}), so there is no furniture and no real-room picture"
     if obj is not None:
         world["mesh"] = str(obj.relative_to(HERE.parent))
+        pictures(model_id, name, world, obj=obj)
+        world["scan"] = {"dir": str(scan.relative_to(HERE.parent)), "source": f"Matterport model {model_id}, its MatterPak mesh, "
+                         "cut into pieces for the web app's pictures by world/scan.py (an export, not committed)"}
     return world
+
+
+def pictures(model_id: str, name: str, world: dict, *, obj: Path | None = None) -> None:
+    """Write the real room for the web app's pictures into world/_scans/<name>/ (see world/scan.py)."""
+    from world import scan as export
+    folder = SCANS / name
+    obj = obj or fetch_mesh(model_id, folder / "matterpak")
+    export.write(obj, folder, world, lift=world["tour"]["to_model"][1][3])
 
 
 def main(argv: list) -> int:

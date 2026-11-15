@@ -22,6 +22,31 @@ VIEWER = REPO / "web" / "viewer"
 RUNS = REPO / "runs"
 SCANS = REPO / "world" / "_scans"  # the real place's mesh per world, captured from its tour (tour.html?capture=1), not committed
 VENDOR = REPO / "web" / "_vendor" / "matterport"  # Matterport's SDK bundle, fetched by web/fetch_sdk.py, not committed
+
+# The hackathon models carry a Gaussian splat of the outside of the building. This version of the SDK bundle starts
+# its splat renderer on it, the renderer throws, and the player then waits for it for ever: it stays on its loading
+# picture, the camera cannot move and no view can be changed. Until a bundle that draws these splats is pinned in
+# web/fetch_sdk.py, the player is told the model has none: the scan itself (inside, dollhouse, floor plan) is untouched.
+NO_SPLAT = r"""<script>(function () {
+  var real = window.fetch;
+  window.fetch = async function (what) {
+    var answer = await real.apply(this, arguments);
+    try {
+      var url = typeof what === "string" ? what : what.url;
+      if (/\/models\/graph/.test(url)) {
+        var text = await answer.clone().text();
+        if (text.indexOf('"splats"') !== -1) {
+          var doc = JSON.parse(text), assets = doc && doc.data && doc.data.model && doc.data.model.assets;
+          if (assets && Array.isArray(assets.splats) && assets.splats.length) {
+            assets.splats = [];
+            return new Response(JSON.stringify(doc), { status: answer.status, statusText: answer.statusText, headers: answer.headers });
+          }
+        }
+      }
+    } catch (e) { }
+    return answer;
+  };
+})();</script>"""
 TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json",
          ".jsonl": "application/x-ndjson", ".png": "image/png", ".svg": "image/svg+xml", ".xml": "text/xml", ".txt": "text/plain", ".mp4": "video/mp4"}
 
@@ -149,6 +174,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(list_runs())
         if p == "/api/tour":  # what the tour page needs: the SDK key (it only works from localhost) and whether the bundle is here
             return self._json({"sdk_key": _env("MATTERPORT_SDK_KEY"), "bundle": (VENDOR / "showcase.html").exists()})
+        if p == "/mp/showcase.html":  # Matterport's player, with its outdoor splat layer left out (see NO_SPLAT)
+            page = VENDOR / "showcase.html"
+            if not page.is_file():
+                return self._send(404, b"not found", "text/plain")
+            html = page.read_text()
+            at = html.find("<head>") + len("<head>") if "<head>" in html else 0
+            return self._send(200, (html[:at] + NO_SPLAT + html[at:]).encode(), "text/html; charset=utf-8")
         if p.startswith("/mp/"):
             return self._file(VENDOR, p[len("/mp/"):])
         if p.startswith("/runs/"):

@@ -17,6 +17,7 @@ dependencies = [
   "trimesh>=5.2.1",
   "scipy",     # world/mesh.py
   "httpx",     # world/matterport.py, through Pathfinder's Matterport client
+  "pillow",    # world/scan.py: the scan's textures for the pictures
 ]
 
 [dependency-groups]

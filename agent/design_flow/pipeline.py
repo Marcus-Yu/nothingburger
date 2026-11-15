@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -31,8 +32,11 @@ REPO = Path(__file__).resolve().parents[2]
 RUNS = REPO / "runs" / "studio"
 EXPORT = REPO / "frontend" / "robot-design" / "data" / "export.py"
 
-# Studio space id (web/worlds.json) -> scenario in world/scenarios/
-WORLDS = {"rabinowitz-hall": "jrr", "la-mirada": "la_mirada"}
+# Studio space id (web/worlds.json) -> scenario in world/scenarios/, for worlds that were not read from their
+# Matterport model (the key cannot read the Rabinowitz tour, so that one is traced by hand). Every other space
+# is read from its model the first time it is asked for: see world_for.
+WORLDS = {"rabinowitz-hall": "jrr"}
+SPACES = REPO / "web" / "worlds.json"
 
 
 # Session (LangGraph thread id) -> its run folder, relative to the repo, set as soon as the run starts,
@@ -52,14 +56,34 @@ def _tail(text: str, n: int = 12) -> str:
     return "\n".join(text.strip().splitlines()[-n:])
 
 
+def _model_for(world_id: str) -> str | None:
+    """The Matterport model behind a space: the one web/worlds.json lists for it, or the id itself when it is
+    a model id (11 letters and digits), so any model can be asked for without listing it first."""
+    try:
+        spaces = json.loads(SPACES.read_text())
+    except (OSError, ValueError):
+        spaces = []
+    listed = next((s.get("matterport") for s in spaces if s.get("id") == world_id), None)
+    return listed or (world_id if re.fullmatch(r"[A-Za-z0-9]{11}", world_id) else None)
+
+
 def world_for(world_id: str | None) -> tuple[str, dict]:
-    """(scenario, world dict) for a studio space, or NoWorld."""
+    """(scenario, world dict) for a studio space, or NoWorld. A space with a Matterport model is read from
+    it through world.api.for_model the first time, and from world/scenarios/ after that."""
     world_id = world_id or "rabinowitz-hall"
     scenario = WORLDS.get(world_id)
-    if scenario is None:
-        raise NoWorld(f"No world file for the space \"{world_id}\" yet, so the robot can't be designed or pathed there. "
-                      f"Spaces with one: {', '.join(sorted(WORLDS))}.")
-    return scenario, json.loads((REPO / "world" / "scenarios" / f"{scenario}.json").read_text())
+    if scenario is not None:
+        return scenario, json.loads((REPO / "world" / "scenarios" / f"{scenario}.json").read_text())
+    model = _model_for(world_id)
+    if model is None:
+        raise NoWorld(f"The space \"{world_id}\" has no Matterport model in web/worlds.json, so there is no world to design "
+                      f"or path a robot in.")
+    from agent.tools import world as worlds
+    scenario = re.sub(r"[^a-z0-9]+", "_", world_id.lower()).strip("_") if model != world_id else f"mp_{model}"
+    try:
+        return scenario, worlds.for_model(model, scenario)
+    except ValueError as e:
+        raise NoWorld(f"The space \"{world_id}\" can't be used yet: {e}") from e
 
 
 def model_reads_jobs() -> bool:

@@ -88,11 +88,12 @@ Entry points (signatures are part of the contract):
 
 ### What each entry point takes and returns
 
-Every argument and return value is a plain dict or list in the shape of the matching file in `contracts/` (`world` is `world.json`, and so on). Functions do not read or write the run folder; the agent does. Extra inputs are keyword-only, so the positional signatures above still hold. Added on 2026-11-14 for the design and pathing workflows (gaps G2, G8, G13 in the workflow doc): `composer.api.candidates`, `composer.api.design`, `nav.api.corridors`, `nav.api.free_floor`, `nav.api.propose`, `motion.api.reachable`. Added on 2026-11-15: `world.api.from_matterport`.
+Every argument and return value is a plain dict or list in the shape of the matching file in `contracts/` (`world` is `world.json`, and so on). Functions do not read or write the run folder; the agent does. Extra inputs are keyword-only, so the positional signatures above still hold. Added on 2026-11-14 for the design and pathing workflows (gaps G2, G8, G13 in the workflow doc): `composer.api.candidates`, `composer.api.design`, `nav.api.corridors`, `nav.api.free_floor`, `nav.api.propose`, `motion.api.reachable`. Added on 2026-11-15: `world.api.from_matterport`, `world.api.for_model`.
 
 | Call | Returns |
 | :-- | :-- |
 | `world.api.from_matterport(model_id, name, *, with_mesh=True)` | a `world.json` dict read from a Matterport model: rooms and doorways from the Model API, obstacles and `surface` anchors from the MatterPak mesh. Calls the network; `python -m world.matterport <model id> <name>` writes it to `world/scenarios/` |
+| `world.api.for_model(model_id, name)` | the `world.json` dict for a Matterport model: `world/scenarios/<name>.json` when it exists, else `from_matterport` and saved there. The one call a studio space needs |
 | `composer.api.candidates()` | list of `parts` dicts (the eight keys in `design.json`'s `parts`), every valid combination in `catalog/` |
 | `composer.api.check(candidate, requirements)` | `{"parts", "feasible": bool, "price_usd", "mass_kg", "checks": [check, ...], "labels": [...]}`; each check as in `contracts/check.schema.json`. Reach here is the envelope check on the composed model (tool pointing up, down or level), not inverse kinematics |
 | `composer.api.design(requirements)` | a `design.json` dict: the cheapest feasible candidate, or `{"schema": "design/1", "parts": null, "infeasible": {"binding_checks": [...]}, ...}` |

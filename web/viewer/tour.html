@@ -25,6 +25,7 @@
   <select id="chapter" aria-label="Jump to a step"></select>
   <button id="follow" class="on" title="Move the viewpoint to the scan position nearest the robot and look at it">Follow</button>
   <button id="doll" title="Switch between standing inside the scan and the dollhouse view">Dollhouse</button>
+  <button id="plan" title="Switch between standing inside the scan and its floor plan, seen from straight above">Floor plan</button>
   <div id="msg"></div>
 </div>
 <script>
@@ -36,7 +37,7 @@ const $ = id => document.getElementById(id), q = new URLSearchParams(location.se
 const run = (q.get("run") || "runs/gallery/jrr").replace(/^runs\//, ""), base = `/runs/${run}/`;
 const say = t => { $("msg").textContent = t; };
 const nudge = { dx: +(q.get("dx") || 0), dz: +(q.get("dz") || 0), rot: +(q.get("rot") || 0) };
-let sdk, meta, frames, bodies = [], rootNode, three, ctx, worldId, frame = 0, playing = false, follow = true, sweeps = [], pose = null, lastMove = 0, mode = "inside", toModel;
+let sdk, meta, frames, bodies = [], rootNode, three, ctx, worldId, frame = 0, playing = false, follow = true, sweeps = [], pose = null, lastMove = 0, mode = "inside", now = null, entering = true, live = 0, rooms = [], toModel;
 
 function placeRoot() {  // world (metres, Z up) -> the scan's frame (Y up), then the hand nudge about the vertical
   if (!rootNode || !three) return;
@@ -56,18 +57,30 @@ function show(i) {
   let c = 0; meta.chapters.forEach((ch, n) => { if (t >= ch.t) c = n; });
   $("now").textContent = meta.chapters[c] ? meta.chapters[c].label : ""; if ($("chapter").selectedIndex !== c) $("chapter").selectedIndex = c;
 }
+function roomOf(m) {
+  // The world's room a point of the tour is in: the point is taken back through to_model (a rotation and a shift).
+  const R = toModel, d = [m.x - R[0][3], m.y - R[1][3], m.z - R[2][3]];
+  const x = R[0][0] * d[0] + R[1][0] * d[1] + R[2][0] * d[2], y = R[0][1] * d[0] + R[1][1] * d[1] + R[2][1] * d[2];
+  for (const r of rooms) { let hit = false; const q = r.polygon;
+    for (let i = 0, j = q.length - 1; i < q.length; j = i++) if ((q[i][1] > y) !== (q[j][1] > y) && x < q[i][0] + (y - q[i][1]) * (q[j][0] - q[i][0]) / (q[j][1] - q[i][1])) hit = !hit;
+    if (hit) return r.id; }
+  return null;
+}
 async function lookAtRobot(force) {
   // Keep the robot in view: turn to face it from where we stand when it is 1.5 to 5 m away, otherwise fly to the scan
   // position nearest to 2.5 m from it. The tour only lets you stand where the scanner stood.
-  if (!follow || mode !== "inside" || !sweeps.length || !pose || (!force && performance.now() - lastMove < 1200)) return;
+  // A tour may open in its dollhouse (the hackathon models do). Forced, that is taken as "go and stand by the robot".
+  if (!follow || !live || !sweeps.length || !pose || (mode !== "inside" && !(force && entering)) || (!force && performance.now() - lastMove < 1200)) return;
+  const outside = mode !== "inside"; entering = false;
   const p = robotInModel(); lastMove = performance.now();
   const aim = from => { const dx = p.x - from.x, dz = p.z - from.z, dy = (p.y + 0.8) - from.y;
     return { x: Math.atan2(dy, Math.hypot(dx, dz)) * 180 / Math.PI, y: Math.atan2(-dx, -dz) * 180 / Math.PI }; };
   const here = Math.hypot(pose.position.x - p.x, pose.position.z - p.z);
   try {
-    if (here > 1.5 && here < 5 && Math.abs(pose.position.y - 1.4 - p.y) < 1.2) return await sdk.Camera.setRotation(aim(pose.position), { speed: 90 });
+    if (!outside && here > 1.5 && here < 5 && Math.abs(pose.position.y - 1.4 - p.y) < 1.2) return await sdk.Camera.setRotation(aim(pose.position), { speed: 90 });
     let best = null;
-    sweeps.forEach(s => { const d = Math.hypot(s.position.x - p.x, s.position.z - p.z), cost = Math.abs(d - 2.5);
+    const room = roomOf(p);   // a scan position in the robot's own room sees it; one next door looks at a wall
+    sweeps.forEach(s => { const d = Math.hypot(s.position.x - p.x, s.position.z - p.z), cost = Math.abs(d - 2.5) + (room && roomOf(s.position) !== room ? 10 : 0);
       if (Math.abs(s.position.y - 1.4 - p.y) < 1.2 && d > 1.5 && (!best || cost < best.cost)) best = { s, cost }; });
     if (best) await sdk.Sweep.moveTo(best.s.id || best.s.sid, { rotation: aim(best.s.position), transition: sdk.Sweep.Transition.FLY, transitionTime: 900 });
   } catch (e) { /* a move was already under way; the next call tries again */ }
@@ -128,7 +141,7 @@ async function captureRoom(world) {
   const world = await (await fetch(base + "world.json")).json();
   if (!meta) return say("This run has no tour export: rerun it with --frames --walkthrough");
   if (!world.tour) return say("This world has no Matterport tour and no alignment to one (world.json has no `tour`)");
-  toModel = world.tour.to_model; worldId = world.id;
+  toModel = world.tour.to_model; worldId = world.id; rooms = world.rooms || [];
   frames = new Float32Array(await (await fetch(base + meta.frames)).arrayBuffer());
   $("seek").max = meta.n - 1;
   $("chapter").innerHTML = meta.chapters.map((c, i) => `<option value="${i}">${c.label.replace(/</g, "&lt;")}</option>`).join("");
@@ -137,7 +150,8 @@ async function captureRoom(world) {
   sdk = await f.contentWindow.MP_SDK.connect(f.contentWindow);
   sdk.Sweep.data.subscribe({ onCollectionUpdated: c => { sweeps = Object.values(c); } });
   sdk.Camera.pose.subscribe(p => { pose = p; });
-  sdk.Mode.current.subscribe(m => { mode = m === sdk.Mode.Mode.INSIDE ? "inside" : "other"; });
+  sdk.App.state.subscribe(a => { if (a.phase === sdk.App.Phase.PLAYING && !live) live = performance.now(); });
+  sdk.Mode.current.subscribe(m => { now = m; mode = m === sdk.Mode.Mode.INSIDE ? "inside" : "other"; });
 
   // a component that owns the animation: the tour's renderer calls onTick every frame
   let player;
@@ -150,6 +164,8 @@ async function captureRoom(world) {
       if (!bodies.length) { rootNode = root; placeRoot(); bodies = Array.from({ length: meta.bodies }, (_, i) => root.getObjectByName(`body${i}`));
         if (!bodies[0]) { bodies = []; return; }
         root.traverse(o => { if (o.isMesh) o.frustumCulled = false; }); show(0); $("now").textContent = meta.chapters[0].label; say(world.tour.note || ""); lookAtRobot(true); }
+      // walk in to the robot once, after the tour has started and finished its own opening move (moving sooner collides with it)
+      if (entering && bodies.length && live && performance.now() - live > 2500 && !q.get("capture")) lookAtRobot(true);
       if (playing) { show(frame + dt / 1000 * meta.fps * (+$("speed").value) * (world.tour.playback_rate || 1)); if (frame >= meta.n - 1) { playing = false; $("play").textContent = "Play"; } lookAtRobot(false); }
     },
     onDestroy() { },
@@ -168,10 +184,15 @@ async function captureRoom(world) {
 })().catch(e => say("Could not start: " + (e && e.message || e)));
 
 $("play").onclick = () => { if (!bodies.length) return; if (frame >= meta.n - 1) show(0); playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; lookAtRobot(true); };
+$("follow").addEventListener("click", () => { entering = true; });   // turning Follow on from the dollhouse or the plan goes back inside
 $("seek").oninput = e => { if (bodies.length) { show(+e.target.value); lastMove = 0; lookAtRobot(true); } };
 $("chapter").onchange = e => { if (bodies.length) { show(meta.chapters[+e.target.value].t * meta.fps + 1); lookAtRobot(true); } };
 $("follow").onclick = () => { follow = !follow; $("follow").classList.toggle("on", follow); lookAtRobot(true); };
-$("doll").onclick = async () => { if (!sdk) return; const to = mode === "inside" ? sdk.Mode.Mode.DOLLHOUSE : sdk.Mode.Mode.INSIDE; try { await sdk.Mode.moveTo(to); } catch (e) { } };
+// the tour's own views: inside (walk), the dollhouse (the whole building from outside) and the floor plan (from straight above).
+// Each button goes to its view, or back inside when that view is already showing; the robot is drawn in all three.
+const view = async name => { if (!sdk) return; const to = now === name ? sdk.Mode.Mode.INSIDE : name; try { await sdk.Mode.moveTo(to); } catch (e) { say("The tour would not switch view: " + (e && e.message || e)); } };
+$("doll").onclick = () => view(sdk && sdk.Mode.Mode.DOLLHOUSE);
+$("plan").onclick = () => view(sdk && sdk.Mode.Mode.FLOORPLAN);
 addEventListener("keydown", e => {
   const k = e.key.toLowerCase(), step = { i: [0, -.05, 0], k: [0, .05, 0], j: [-.05, 0, 0], l: [.05, 0, 0], u: [0, 0, -1], o: [0, 0, 1] }[k]; if (!step || !rootNode) return;
   nudge.dx = +(nudge.dx + step[0]).toFixed(2); nudge.dz = +(nudge.dz + step[1]).toFixed(2); nudge.rot = +(nudge.rot + step[2]).toFixed(1); placeRoot();
