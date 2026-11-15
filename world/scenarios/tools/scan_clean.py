@@ -23,10 +23,13 @@ from scipy.sparse.csgraph import connected_components
 CELL = 0.10            # grid for "is there a wall in this column", metres
 WALL_BAND = (1.9, 2.4)  # a column with scan in this height band, and most of the way up to it, is structure
 WALL_BINS = 7
+FINE = 0.025           # grid for "is this under the wall above it"
+UPPER = (1.5, 2.4)     # the part of a wall that nothing leans on
 FLOOR_TOP = 0.07       # below this a triangle is floor
 HEAD = 1.95            # at or above this nothing is clutter
 TOP_BAND = 0.06        # a cloth lies within this of the measured table top (it wrinkles)
 CLOTH_M = 0.60         # and hangs no further than this below it
+EDGE_M = 0.30          # nothing is cleared within this of a room's outline: a bench or a rail on the line would be cut in two
 SHARD_M2 = 0.30        # a loose piece smaller than this is dropped
 FLOOR_CELL = 0.01      # the floor picture: fine enough to show boards, since repairs are painted from it
 LIGHT_CELL = 0.12      # the grid the light is read on
@@ -110,10 +113,12 @@ def _area(tri):
     return 0.5 * np.linalg.norm(np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]), axis=1)
 
 
-def remove_clutter(tiles: dict, images: dict, tables: dict, keep_boxes: list, lo, hi, h) -> tuple[dict, dict]:
+def remove_clutter(tiles: dict, images: dict, tables: dict, keep_boxes: list, rooms: list, lo, hi, h) -> tuple[dict, dict]:
     """Drop the triangles of things standing about and replace tables too dark or too torn to show.
     `tables` is {id: {"min", "max", "top_m"}}; `keep_boxes` are other obstacles' boxes [(min xyz, max xyz)], kept
-    whole. Adds tiles (and their pictures) for replaced tables. Returns (counts for the report,
+    whole. `rooms` are [(min xy, max xy)]: only inside them is anything cleared. Past a room's walls the scan is
+    left exactly as captured (someone on a bench in a wall niche stays, whole), because cutting a thing out of a
+    wall leaves a hole in its shape and nothing behind it. Adds tiles (and their pictures) for replaced tables. Returns (counts for the report,
     {table id: its cloth's colour as scanned})."""
     shape = tuple(np.ceil((hi - lo) / CELL).astype(int) + 1)
     # A wall or pillar has scan all the way up its column. Under a stair flight or a balcony there is scan overhead
@@ -131,6 +136,21 @@ def remove_clutter(tiles: dict, images: dict, tables: dict, keep_boxes: list, lo
             filled[ij[:, 0], ij[:, 1], np.clip(np.searchsorted(edges, p[:, 2]) - 1, 0, WALL_BINS - 1)] = True
     wall = filled[..., edges[:-1] >= WALL_BAND[0] - 1e-9].any(-1) & (filled.sum(-1) >= WALL_BINS * 0.7)
     wall = ndimage.binary_dilation(wall, iterations=1)
+    # Within such a column, only what stands under the wall itself: a wall or pillar goes straight up, so its lower
+    # part lies under its upper part, and someone sitting against it, or a bench along it, does not. `upper` is
+    # where there is scan between chest and head height, on a fine grid, with a few centimetres' allowance.
+    fshape = tuple(np.ceil((hi - lo) / FINE).astype(int) + 1)
+    upper = np.zeros(fshape, bool)
+    for t in tiles.values():
+        tri = t["w"][t["idx"]]
+        tri = tri[(tri[:, :, 2].max(1) > UPPER[0]) & (tri[:, :, 2].min(1) < UPPER[1])]
+        for part, w in samples(tri, FINE * 0.7):
+            p = np.einsum("pc,tcd->tpd", w, tri[part]).reshape(-1, 3)
+            p = p[(p[:, 2] > UPPER[0]) & (p[:, 2] < UPPER[1])]
+            ij = _cells(p[:, :2], lo, fshape, FINE)
+            upper[ij[:, 0], ij[:, 1]] = True
+    upper = ndimage.binary_dilation(upper, iterations=3)
+    four = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [1 / 3, 1 / 3, 1 / 3]])
 
     before = 0
     stat = {tid: {"top": 0.0, "side": 0.0, "rgb": [], "wt": []} for tid in tables}
@@ -139,7 +159,12 @@ def remove_clutter(tiles: dict, images: dict, tables: dict, keep_boxes: list, lo
         c, zmax = tri.mean(1), tri[:, :, 2].max(1)
         ij = _cells(c[:, :2], lo, shape, CELL)
         floor = zmax - (c[:, 2] - _above(h, c, lo)) < FLOOR_TOP
-        keep = floor | (zmax >= HEAD) | wall[ij[:, 0], ij[:, 1]]
+        fij = _cells(np.einsum("kc,tcd->tkd", four, tri[:, :, :2]).reshape(-1, 2), lo, fshape, FINE)
+        under = upper[fij[:, 0], fij[:, 1]].reshape(-1, 4).mean(1) >= 0.5
+        indoors = np.zeros(len(c), bool)
+        for rl, rh in rooms:
+            indoors |= np.all((c[:, :2] > np.array(rl) + EDGE_M) & (c[:, :2] < np.array(rh) - EDGE_M), 1)
+        keep = ~indoors | floor | (zmax >= HEAD) | (wall[ij[:, 0], ij[:, 1]] & under)
         for bl, bh in keep_boxes:  # kept, but not spared the shard test below: a stair is one piece, a broken glass rail is splinters
             keep |= np.all((c >= np.array(bl) - [0, 0, 0.1]) & (c <= np.array(bh) + [0, 0, 0.3]), 1)
         colour, area = tri_colour(t, images[k]), _area(tri)

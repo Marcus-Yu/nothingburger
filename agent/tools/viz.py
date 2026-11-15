@@ -154,7 +154,7 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
         spec.visual.headlight.ambient = [0.45, 0.45, 0.45]
         spec.visual.headlight.diffuse = [0.35, 0.35, 0.35]
         spec.add_texture(name="scan_sky", type=mujoco.mjtTexture.mjTEXTURE_SKYBOX, builtin=mujoco.mjtBuiltin.mjBUILTIN_GRADIENT,
-                         rgb1=[0.90, 0.92, 0.94], rgb2=[0.80, 0.82, 0.84], width=64, height=64)
+                         rgb1=[0.84, 0.81, 0.77], rgb2=[0.74, 0.71, 0.67], width=64, height=64)  # the building's stone tone: a gap in a wall does not glare
         root, listing = scan
         seen = {}
         for i, t in enumerate(listing["tiles"]):
@@ -168,7 +168,7 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
                 mat.textures = tex
                 seen[t["texture"]] = f"scan_m{i}"
             spec.add_mesh(name=f"scan_g{i}", file=str(root / t["mesh"]), inertia=mujoco.mjtMeshInertia.mjMESH_INERTIA_SHELL)
-            wb.add_geom(type=mujoco.mjtGeom.mjGEOM_MESH, meshname=f"scan_g{i}", material=seen[t["texture"]], contype=0, conaffinity=0)
+            wb.add_geom(type=mujoco.mjtGeom.mjGEOM_MESH, meshname=f"scan_g{i}", material=seen[t["texture"]], contype=0, conaffinity=0, group=SCAN_GROUP)
     for r in [] if scan else world["rooms"]:
         p = np.array(r["polygon"], dtype=float)
         lo, hi = p.min(0), p.max(0)
@@ -190,12 +190,16 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
                                 rgba=[0.25, 0.25, 0.27, 1], contype=0, conaffinity=0)
             lo = np.array([lo[0], lo[1], hi[2] - skirt])
         wb.add_geom(type=box, pos=list((lo + hi) / 2), size=list(np.maximum((hi - lo) / 2, 0.005)), rgba=[*rgb, 1], contype=0, conaffinity=0)
-    if not top and robot_xml:  # the wiping cloth, placed frame by frame by the film
-        cloth = wb.add_body(name="towel", mocap=True, pos=[0, 0, -5])
-        cloth.add_geom(type=box, size=[v / 2 for v in TOWEL], rgba=[*TOWEL_RGB, 1], contype=0, conaffinity=0)
+    if not top and robot_xml:  # the things the robot handles, placed frame by frame by the film
+        for name, prop in PROPS.items():
+            body = wb.add_body(name=name, mocap=True, pos=[0, 0, -5])
+            if "box" in prop:
+                body.add_geom(type=box, size=[v / 2 for v in prop["box"]], rgba=[*prop["rgb"], 1], contype=0, conaffinity=0)
+            else:
+                body.add_geom(type=mujoco.mjtGeom.mjGEOM_CYLINDER, size=[prop["cylinder"][0], prop["cylinder"][1] / 2, 0], rgba=[*prop["rgb"], 1], contype=0, conaffinity=0)
     if not top:  # the film looks across the floor, so there has to be something beyond the building
         wb.add_geom(type=box, pos=[(x0 + x1) / 2, (y0 + y1) / 2, -0.06], size=[x1 - x0 + 20, y1 - y0 + 20, 0.01],
-                    rgba=[0.78, 0.79, 0.80, 1] if scan else [0.20, 0.21, 0.22, 1], contype=0, conaffinity=0)
+                    rgba=[0.74, 0.71, 0.67, 1] if scan else [0.20, 0.21, 0.22, 1], contype=0, conaffinity=0)
     elif scan:  # from above, where the scan has nothing (inside walls, outside the building) is a light grey, not black
         wb.add_geom(type=box, pos=[(x0 + x1) / 2, (y0 + y1) / 2, -0.4], size=[(x1 - x0) / 2 + 1, (y1 - y0) / 2 + 1, 0.01], rgba=[0.80, 0.81, 0.82, 1],
                     contype=0, conaffinity=0)
@@ -278,7 +282,8 @@ def robot_top(world: dict, robot_xml: str, qpos: dict | None, pose, label: str) 
 
 def _timeline(build: dict, route: dict, trajectory: dict):
     """The plan as film frames: [(base pose [x, y, yaw], {joint: value}, what)] and chapters [(frame index, label)];
-    `what` is "drive", or the arm segment being played ("approach", "retreat", or the work's kind such as "wipe").
+    `what` is "drive", or the arm segment being played ("approach", "retreat", or the work's kind such as "wipe");
+    in a pick it turns to "carry" from the moment the gripper closes.
     The base drives each leg's waypoints (turn, then go), and at each stop the arm plays that stop's samples
     from trajectory.json. Positions only: nothing is simulated."""
     stowed = dict((build.get("stowed") or {}).get("qpos") or {})
@@ -311,49 +316,70 @@ def _timeline(build: dict, route: dict, trajectory: dict):
             chapters.append((len(frames), f"{entry['task']}: {label}" + (f" ({entry['covers']})" if entry.get("covers") and seg.get("phase") == "work" else "")))
             t0, t1 = float(samples[0]["t"]), float(samples[-1]["t"])
             ts = np.array([float(x["t"]) for x in samples])
+            what = seg.get("kind", "work") if seg.get("phase") == "work" else seg.get("phase")
+            closes = min((float(e["t"]) for e in seg.get("events") or [] if e.get("gripper") == "close"), default=None) if what == "pick" else None
             for k in range(max(1, int(np.ceil((t1 - t0) / ARM_X * WALK_FPS)))):
-                i = min(int(np.searchsorted(ts, t0 + k * ARM_X / WALK_FPS)), len(samples) - 1)
-                frames.append((pose, {**stowed, **dict(zip(names, samples[i]["q"]))}, seg.get("kind", "work") if seg.get("phase") == "work" else seg.get("phase")))
+                t = t0 + k * ARM_X / WALK_FPS
+                i = min(int(np.searchsorted(ts, t)), len(samples) - 1)
+                frames.append((pose, {**stowed, **dict(zip(names, samples[i]["q"]))}, "carry" if closes is not None and t >= closes else what))
     return frames, chapters
 
 
+SCAN_GROUP = 1          # the scan's geoms are in a group of their own, so a sight line can be tested against the room alone
+WALK_CAM_M = 4.6        # how far behind the robot the film's camera stands when nothing is in the way
 SCAN_DIM = 0.08        # the scan's materials reflect this little light and glow for the rest: see _top_scene
-TOWEL = (0.30, 0.22, 0.012)   # the wiping cloth shown in the film and the 3D page: length, width, thickness in metres
-TOWEL_RGB = (0.93, 0.96, 0.99)
+# What the robot handles, shown in the film and the 3D page: the plan does not model these, so they are drawn where
+# the tool point says they must be. Sizes in metres.
+PROPS = {"towel": {"box": (0.30, 0.22, 0.012), "rgb": (0.93, 0.96, 0.99)},
+         "bottle": {"cylinder": (0.035, 0.20), "rgb": (0.62, 0.80, 0.93)}}  # radius, height: a 500 ml bottle
 
 
-def _towel_track(robot_xml: str, build: dict, frames) -> np.ndarray | None:
-    """Where the wiping cloth is in each film frame, [n, 7] (x y z, quaternion w x y z), or None when the job
-    has no wipe. It lies on the surface where the first stroke starts until the tool gets there, is under the
-    tool while wiping, stays in the gripper between stops, and is left where the last stroke ends. Drawn for
-    the viewer only: the plan does not model the cloth."""
-    wipes = [i for i, f in enumerate(frames) if f[2] == "wipe"]
-    if not wipes:
-        return None
+def _prop_tracks(robot_xml: str, build: dict, frames) -> dict:
+    """Where each handled thing is in every film frame: {name: [n, 7]} (x y z, quaternion w x y z).
+
+    The wiping cloth lies on the surface where the first stroke starts until the tool gets there, is pressed under
+    the fingertips while wiping, hangs from them between stops, and is left where the last stroke ends. A picked
+    thing stands where the gripper will close on it, and from then on moves rigidly with the hand."""
+    kinds = [f[2] for f in frames]
+    wipes = [i for i, k in enumerate(kinds) if k == "wipe"]
+    grasp = next((i for i, k in enumerate(kinds) if k == "carry"), None)
+    if not wipes and grasp is None:
+        return {}
     m = mujoco.MjModel.from_xml_string(robot_xml)
     d = mujoco.MjData(m)
     site = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_SITE, build.get("tool_site") or "tool")
     if site < 0:
-        return None
+        return {}
     jadr = {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j): m.jnt_qposadr[j] for j in range(m.njnt)}
-    out = np.zeros((len(frames), 7), dtype=np.float32)
-    first, last, rest = wipes[0], wipes[-1], None
-    for i, (pose, q, what) in enumerate(frames):
-        if i < first and rest is not None:
-            out[i] = rest
-            continue
+    n = len(frames)
+    at, turn = np.zeros((n, 3)), np.zeros((n, 3, 3))
+    for i, (pose, q, _) in enumerate(frames):
         mujoco.mj_resetData(m, d)
-        for name, v in {**(frames[first][1] if i < first else q), **dict(zip(("joint_x", "joint_y", "joint_th"), frames[first][0] if i < first else pose))}.items():
+        for name, v in {**q, "joint_x": pose[0], "joint_y": pose[1], "joint_th": pose[2]}.items():
             if name in jadr:
                 d.qpos[jadr[name]] = v
         mujoco.mj_kinematics(m, d)
-        yaw = float((frames[first][0] if i < first else pose)[2])
-        at = [*d.site_xpos[site][:2], d.site_xpos[site][2] - TOWEL[2] / 2, np.cos(yaw / 2), 0.0, 0.0, np.sin(yaw / 2)]
-        if i < first:
-            rest = at
-        elif i > last:
-            at = out[last]
-        out[i] = at
+        at[i], turn[i] = d.site_xpos[site], d.site_xmat[site].reshape(3, 3)
+    out = {}
+    if wipes:
+        first, last, thick = wipes[0], wipes[-1], PROPS["towel"]["box"][2]
+        src = np.clip(np.arange(n), first, last)  # before the first stroke it waits where that starts; after the last it stays
+        yaw = np.array([frames[j][0][2] for j in src])
+        track = np.zeros((n, 7), dtype=np.float32)
+        track[:, :3] = at[src]
+        lying = (np.arange(n) <= first) | (np.arange(n) >= last) | (np.array(kinds) == "wipe")
+        track[:, 2] += np.where(lying, thick / 2, -thick / 2)  # on the surface the tool point touches, or hanging just under the fingertips
+        track[:, 3], track[:, 6] = np.cos(yaw / 2), np.sin(yaw / 2)
+        out["towel"] = track
+    if grasp is not None:
+        track = np.zeros((n, 7), dtype=np.float32)
+        track[:, :3] = at[np.maximum(np.arange(n), grasp)]
+        track[:grasp, 3] = 1.0  # upright
+        quat = np.zeros(4)
+        for i in range(grasp, n):
+            mujoco.mju_mat2Quat(quat, (turn[i] @ turn[grasp].T).ravel())
+            track[i, 3:] = quat
+        out["bottle"] = track
     return out
 
 
@@ -380,19 +406,31 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
         ff = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{WALK_W}x{WALK_H}",
                                "-r", str(WALK_FPS), "-i", "-", "-an", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "27",
                                "-movflags", "+faststart", str(video)], stdin=subprocess.PIPE)
-        cam.azimuth, cam.elevation, cam.distance = 62.0, -30.0, 4.6
+        cam.azimuth, cam.elevation, cam.distance = 62.0, -30.0, WALK_CAM_M
         look = np.array([frames[0][0][0], frames[0][0][1], 0.5])
-        towel, tid = _towel_track(robot_xml, build, frames), m.body_mocapid[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, "towel")]
+        tracks = {m.body_mocapid[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, name)]: track for name, track in _prop_tracks(robot_xml, build, frames).items()}
+        room = np.zeros(mujoco.mjNGROUP, dtype=np.uint8)
+        room[SCAN_GROUP] = 1
+        hit, reach = np.zeros(1, dtype=np.int32), cam.distance
         for i, (pose, q, _) in enumerate(frames):
             mujoco.mj_resetData(m, d)
             for name, v in {**q, "joint_x": pose[0], "joint_y": pose[1], "joint_th": pose[2]}.items():
                 if name in jadr:
                     d.qpos[jadr[name]] = v
-            if towel is not None:
-                d.mocap_pos[tid], d.mocap_quat[tid] = towel[i, :3], towel[i, 3:]
+            for mid, track in tracks.items():
+                d.mocap_pos[mid], d.mocap_quat[mid] = track[i, :3], track[i, 3:]
             mujoco.mj_forward(m, d)
             look += 0.12 * (np.array([pose[0], pose[1], 0.5]) - look)  # the camera eases after the robot
             cam.lookat[:] = look
+            # Keep the robot in sight: if a wall, pillar or the floor above stands between it and where the camera
+            # would be, the camera comes in to just this side of it, and eases back out when the way is clear.
+            az, el = np.radians(cam.azimuth), np.radians(cam.elevation)
+            back = -np.array([np.cos(el) * np.cos(az), np.cos(el) * np.sin(az), np.sin(el)])
+            seen_from = np.array([pose[0], pose[1], 1.0])
+            blocked = mujoco.mj_ray(m, d, seen_from, back, room, 1, -1, hit)
+            limit = WALK_CAM_M if blocked < 0 else float(np.clip(blocked - 0.3, 1.6, WALK_CAM_M))
+            reach = min(limit, reach + 0.04)
+            cam.distance = reach
             r.update_scene(d, cam)
             ff.stdin.write(r.render().tobytes())
         ff.stdin.close()
@@ -473,17 +511,17 @@ def tour_export(robot_xml: str, build: dict, route: dict, trajectory: dict) -> d
                 scene.add_geometry(mesh, node_name=f"{name}_g{i}", geom_name=f"{name}_g{i}", parent_node_name=name)
             bodies.append(b)
         frames, chapters = _timeline(build, route, trajectory)
-        towel = _towel_track(robot_xml, build, frames)
-        if towel is not None:  # the cloth goes in as one more body, after the robot's
-            name = f"body{len(bodies)}"
+        tracks = _prop_tracks(robot_xml, build, frames)
+        for k, prop_name in enumerate(tracks):  # each handled thing goes in as one more body, after the robot's
+            name, prop = f"body{len(bodies) + k}", PROPS[prop_name]
             scene.graph.update(frame_to=name, frame_from=scene.graph.base_frame, matrix=np.eye(4))
-            cloth = trimesh.creation.box(extents=TOWEL)
-            cloth.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(baseColorFactor=[*TOWEL_RGB, 1.0], metallicFactor=0.0, roughnessFactor=0.9))
-            scene.add_geometry(cloth, node_name=f"{name}_g0", geom_name=f"{name}_g0", parent_node_name=name)
+            shape = trimesh.creation.box(extents=prop["box"]) if "box" in prop else trimesh.creation.cylinder(radius=prop["cylinder"][0], height=prop["cylinder"][1], sections=24)
+            shape.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(baseColorFactor=[*prop["rgb"], 1.0], metallicFactor=0.0, roughnessFactor=0.9))
+            scene.add_geometry(shape, node_name=f"{name}_g0", geom_name=f"{name}_g0", parent_node_name=name)
         glb = where[0].with_name("tour_robot.glb")
         glb.write_bytes(scene.export(file_type="glb"))
         jadr = {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j): m.jnt_qposadr[j] for j in range(m.njnt)}
-        out = np.zeros((len(frames), len(bodies) + (towel is not None), 7), dtype=np.float32)
+        out = np.zeros((len(frames), len(bodies) + len(tracks), 7), dtype=np.float32)
         for i, (pose, q, _) in enumerate(frames):
             mujoco.mj_resetData(m, d)
             for name, v in {**q, "joint_x": pose[0], "joint_y": pose[1], "joint_th": pose[2]}.items():
@@ -491,8 +529,8 @@ def tour_export(robot_xml: str, build: dict, route: dict, trajectory: dict) -> d
                     d.qpos[jadr[name]] = v
             mujoco.mj_kinematics(m, d)
             out[i, :len(bodies), :3], out[i, :len(bodies), 3:] = d.xpos[bodies], d.xquat[bodies]
-        if towel is not None:
-            out[:, -1] = towel
+        for k, track in enumerate(tracks.values()):
+            out[:, len(bodies) + k] = track
         where[0].with_name("tour_frames.bin").write_bytes(out.tobytes())
         return {"glb": "frames/tour_robot.glb", "frames": "frames/tour_frames.bin", "bodies": out.shape[1], "fps": WALK_FPS, "n": len(frames),
                 "chapters": [{"t": round(i / WALK_FPS, 1), "label": label} for i, label in chapters]}
