@@ -86,6 +86,9 @@ def read_events(path: Path, start: int) -> dict:
     """Whole lines of events.jsonl from byte `start`; a line still being written waits for the next read."""
     if not path.is_file():
         return {"events": [], "next": 0}
+    reset = start > path.stat().st_size  # the log was started again (a rerun into the same folder)
+    if reset:
+        start = 0
     with path.open("rb") as f:
         f.seek(start)
         data = f.read()
@@ -96,7 +99,7 @@ def read_events(path: Path, start: int) -> dict:
             events.append(json.loads(line))
         except json.JSONDecodeError:
             continue
-    return {"events": events, "next": start + end}
+    return {"events": events, "next": start + end, **({"reset": True} if reset else {})}
 
 
 class Sessions:

@@ -1,8 +1,9 @@
 # Quick demo: a robot that wipes a table
 
-One job, typed in the studio: **Wipe a surface**. The agent reads it, asks the headset for one wipe and one
+One job, typed in the studio: **Wipe table C6 in the atrium**. The agent reads it, asks the headset for one wipe and one
 squeeze, designs the robot, plans where it stands and drives in Rabinowitz Hall, then opens the Robot Design
-page, the route view and the robot inside the scanned room in 3D. About **15 s** of generation once rehearsed (below).
+page, the route view and the robot inside the scanned room in 3D. About **35 s** of generation once rehearsed
+with Claude reading the job (about 15 s without a Claude key, below).
 
 ## Once per machine (about 5 min, unattended)
 
@@ -41,10 +42,12 @@ matched to the hall's tables and items by rule (`agent/design_flow/jobs.py`).
 headset. That teaches the skill (its takes are kept in `agent/design_flow/skill_data/`) and caches every robot
 check for that job. The first run takes one to two minutes.
 
-## On stage (about 15 s)
+## On stage (about 35 s with Claude, 15 s without)
 
 1. Open http://localhost:8000/#studio. The space is Rabinowitz Hall.
-2. Type **Wipe a surface** (or tap it under the prompt) and press **Design robot**.
+2. Type **Wipe table C6 in the atrium** and press **Design robot**. Name the table: with a Claude key, the
+   prompt-bar **Wipe a surface** makes Claude ask "which surface?"; the run goes on with table C6 by rule and
+   shows the question, but spends a few seconds more.
    The outline says *Decided by SubQ Snap 1.2 in 0.2 s* and *Already learned from an earlier demonstration*.
 3. The agent trace opens by itself: the six steps, the robots tried cheapest first and why each fails, then
    where it stands. **Show trace** lists every call.
@@ -72,5 +75,7 @@ the request shows (`wipe table`).
 | Open a box, caretaker jobs | refused: not a skill the pipeline has yet |
 | Replace … | the parts search, as before |
 
-Measured on this machine, 2026-11-15, with warm caches: rehearsal 56 s, on stage 15 s including the 3D export.
+Measured on this machine, 2026-11-15, with warm caches. With Claude (Sonnet 5.5 reads the job and writes the
+program): rehearsal 73 s, on stage 33 s. Without a Claude key (`--standin`): rehearsal 56 s, on stage 15 s.
+Both include the 3D export.
 The design step can still loop once ("redesign") when pathing cannot use the first robot.

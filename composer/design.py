@@ -34,7 +34,9 @@ def _check_file(parts: dict, requirements: dict):
         for f in sorted(Path(__file__).parent.glob("*.py")):
             h.update(f.read_bytes())
         _CODE_HASH = h.hexdigest()
-    key = json.dumps([_CODE_HASH, P.full(parts), requirements], sort_keys=True, default=str).encode()
+    # a task's `why` is the model's own wording, different on every run; no check reads it
+    req = {**requirements, "tasks": [{k: v for k, v in t.items() if k != "why"} for t in requirements.get("tasks", [])]}
+    key = json.dumps([_CODE_HASH, P.full(parts), req], sort_keys=True, default=str).encode()
     return P.CATALOG_DIR / "_cache" / "checks" / f"{hashlib.sha256(key).hexdigest()[:32]}.json"
 
 

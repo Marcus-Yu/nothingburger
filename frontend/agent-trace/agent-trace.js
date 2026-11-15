@@ -112,11 +112,12 @@ function failRows(failed, tasks) {
 
 export function openAgentTrace({ agentBase, run, job, place: where = '', onClose = () => {}, onOpenDesign = () => {}, mount = document.body, replay = 0 }) {
   loadCss();
-  const S = {
-    from: 0, events: [], steps: {}, tasks: {}, taskList: [], names: {}, t0: Date.now(), now: null,
+  const fresh = () => ({
+    from: 0, events: [], steps: {}, tasks: {}, taskList: [], now: null,
     funnel: null, built: 0, failedBy: {}, last: null, shown: null, shownAt: 0, standoffs: {}, arms: {}, route: null, program: null,
-    llm: null, fixes: [], ended: null, result: null, error: null, traceOpen: false, closed: false,
-  };
+    design: null, infeasible: null, building: null, requirements: 0, llm: null, fixes: [], ended: null, wonAt: 0,
+  });
+  const S = { ...fresh(), names: {}, t0: Date.now(), result: null, error: null, traceOpen: false, closed: false };
 
   /* ---------- the frame ---------- */
   const back = h('button.at-back', { type: 'button', 'aria-label': 'Back to the studio', html: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' });
@@ -231,6 +232,7 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
     if (S.closed) return;
     try {
       const r = await fetch(`${agentBase}/${run}/events?from=${S.from}`).then((x) => x.json());
+      if (r.reset) Object.assign(S, fresh());   // the run started over in the same folder
       if (r.events && r.events.length) { r.events.forEach(take); S.from = r.next; render(); }
     } catch { /* the server is busy or restarting: try again */ }
     if (!S.result && !S.error) setTimeout(poll, POLL_MS);

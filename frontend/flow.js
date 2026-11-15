@@ -423,7 +423,10 @@ function robotResult(d, s) {
   const route = (d.summary || []).find((l) => l.startsWith('route:'));
   if (route) out.push(h('p.note', route.replace(/^route: /, 'Route: ').replace(/ > /g, ' → ')));
   if (d.infeasible) out.push(h('p.state.warn', 'No robot in the catalog can do every task here, so there is no route.'), h('ul.plan-steps', (d.summary || []).slice(0, 6).map((l) => h('li', l))));
-  if (d.tasks_source && /^rule/.test(d.tasks_source)) out.push(h('p.note', 'Tasks: matched from your words to this space by rule (no model read the job).'));
+  if (d.tasks_source && /^rule/.test(d.tasks_source)) out.push(h('p.note', /model named no task/.test(d.tasks_source)
+    ? 'Tasks: Claude asked instead of naming a task, so the job was matched to this space by rule.'
+    : 'Tasks: matched from your words to this space by rule (no model read the job).'));
+  if ((d.questions || []).length) out.push(h('div.qs', h('p.note', 'Claude would like to know (the run went on without answers):'), h('ul.plan-steps', d.questions.map((q) => h('li', q)))));
   if (!d.valid) out.push(h('p.state.warn', 'Some run files didn’t validate against the contracts.'));
   if (d.snapshot) {
     const open = h('button.pill.dark.xs', { type: 'button' }, 'Open Robot Design →');

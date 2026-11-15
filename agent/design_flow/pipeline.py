@@ -31,6 +31,10 @@ REPO = Path(__file__).resolve().parents[2]
 RUNS = REPO / "runs" / "studio"
 EXPORT = REPO / "frontend" / "robot-design" / "data" / "export.py"
 
+# The model for the pipeline's own steps in studio runs: Sonnet, as in the rest of the design workflow (the
+# command line's default, agent/llm.py, is Opus). AGENT_MODEL in the environment overrides it.
+STUDIO_MODEL = "claude-sonnet-5-5"
+
 # Studio space id (web/worlds.json) -> scenario in world/scenarios/
 WORLDS = {"rabinowitz-hall": "jrr"}
 
@@ -68,13 +72,12 @@ def model_reads_jobs() -> bool:
 
 def can_plan(skill: str, task: str, world_id: str | None) -> str | None:
     """None when the job can be planned in this space, else why not (checked before asking for a demo).
-    With a model reading the job there is nothing to check up front."""
+    The pipeline's skills and the space's anchors are the same whether or not a model reads the job, so the
+    rule check applies either way; a model only maps the words onto them more freely."""
     try:
         _, world = world_for(world_id)
     except NoWorld as e:
         return str(e)
-    if model_reads_jobs():
-        return None
     return jobs.tasks_for(skill, task, world)[1]
 
 
@@ -107,10 +110,26 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
         cmd += [f"--{kind}", str(path)]
 
     env = {**os.environ, "PYTHONPATH": str(REPO)}
+    env.setdefault("AGENT_MODEL", STUDIO_MODEL)  # the pipeline's model steps (intake, program): Sonnet unless set
     done = subprocess.run(cmd, cwd=REPO, env=env, capture_output=True, text=True, timeout=timeout_s)
     (out / "pipeline.log").write_text(done.stdout + "\n--- stderr ---\n" + done.stderr)
     if done.returncode == 3:  # agent.run.EXIT_WAITING: should not happen with --proceed, but say so plainly
         raise RuntimeError("The pipeline stopped to ask questions about the job; see intake.json in " + _rel(out))
+    fell_back = False
+    tasks_doc = out / "tasks.json"
+    if not standin_tasks and tasks_doc.exists() and not json.loads(tasks_doc.read_text()).get("tasks"):
+        # the model read the job but named no task (it asked instead, e.g. "which surface?"): designing for an
+        # empty job would "succeed" with a robot for nothing, so plan the rule's tasks and keep its questions
+        asked = json.loads((out / "intake.json").read_text()) if (out / "intake.json").exists() else {}
+        tasks, why_not = jobs.tasks_for(request.get("skill") or task, task, world_doc)
+        if tasks is None:
+            raise NoWorld(why_not)
+        (inputs / "tasks.json").write_text(json.dumps({"tasks": tasks}, indent=1))
+        (inputs / "model_intake.json").write_text(json.dumps(asked, indent=1))
+        cmd = [c for c in cmd if c not in ("--job", task, "--proceed")] + ["--tasks", str(inputs / "tasks.json")]
+        done = subprocess.run(cmd, cwd=REPO, env=env, capture_output=True, text=True, timeout=timeout_s)
+        (out / "pipeline.log").write_text(done.stdout + "\n--- stderr ---\n" + done.stderr)
+        fell_back = True
     if not (out / "design.json").exists():
         raise RuntimeError(f"The design and pathing pipeline stopped (exit {done.returncode}):\n{_tail(done.stderr or done.stdout)}")
 
@@ -121,7 +140,8 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
         "run": _rel(out),
         "world": world_id,
         "scenario": scenario,
-        "tasks_source": "rule (the classified skill on this space's anchors)" if standin_tasks else "the job, read by the model",
+        "tasks_source": ("rule (the classified skill on this space's anchors)" if standin_tasks
+                         else "rule, because the model named no task" if fell_back else "the job, read by the model"),
         "valid": done.returncode == 0,
         "infeasible": not (out / "route.json").exists(),
         "parts": design.get("parts"),
@@ -130,6 +150,11 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
         "summary": lines[1:] if lines and lines[0].startswith("run folder:") else lines,
         "snapshot": None,
     }
+    intake = out / "inputs" / "model_intake.json" if fell_back else out / "intake.json"
+    if intake.exists():  # what the model asked and could not cover; the run went on without answers (--proceed)
+        said = json.loads(intake.read_text())
+        result["questions"] = said.get("questions") or []
+        result["unmet"] = said.get("unmet") or []
     if not result["infeasible"]:  # the robot and its motion for the real-room 3D page (agent/tour_export.py, ~3 s)
         exported = subprocess.run([sys.executable, "-m", "agent.tour_export", str(out)], cwd=REPO, env=env,
                                   capture_output=True, text=True, timeout=300)
