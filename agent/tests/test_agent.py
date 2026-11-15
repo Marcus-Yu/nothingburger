@@ -433,3 +433,22 @@ def test_a_demo_belongs_to_the_first_task_its_motion_shows():
     assert _demo_task({"tasks": tasks, "demo": {"motion": {"kind": "wipe"}}}) == "t2"
     assert _demo_task({"tasks": tasks, "demo": {"motion": {"kind": "twist"}}}) == "t1"
     assert _demo_task({"tasks": tasks}) == "t1"
+
+
+def test_the_real_model_export_names_its_parts_by_stage(tmp_path, monkeypatch):
+    """agent/tools/cad.py: one GLB per robot, nodes grouped by the stage the design page assembles."""
+    import io
+
+    import trimesh
+
+    from agent.tools import cad
+    assert [cad.stage_of(n) for n in ("base_link", "lift_stage", "arm/forearm_link", "grip/left_pad", "sens/lidar")] == \
+        ["body", "torso", "arm", "hand", "sensors"]
+    monkeypatch.setattr(cad, "CACHE", tmp_path)
+    parts = {"base": "tidybot_arx5", "lift": "liftkit_500", "arm": "xarm7", "gripper": "xarm_gripper",
+             "lidar": "rplidar_s2", "lidar_mount": "stage_rear", "wrist_cam": True, "ego_cam": "stage_front"}
+    data = cad.robot_glb(parts)
+    scene = trimesh.load(io.BytesIO(data), file_type="glb")
+    assert {n.split("/")[0] for n in scene.graph.nodes_geometry} == {"body", "torso", "arm", "hand", "sensors"}
+    assert 0.5 < scene.bounds[1][2] < 2.5 and len(data) < 8_000_000   # a robot's height in metres; a few megabytes
+    assert cad.robot_glb(parts) == data and len(list(tmp_path.glob("*.glb"))) == 1   # second call is the cached file

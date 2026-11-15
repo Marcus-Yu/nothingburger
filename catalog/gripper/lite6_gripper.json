@@ -19,6 +19,7 @@
     "lite6"
   ],
   "price_usd": 0,
+  "list_price_usd": 0,
   "src": "integrated in the lite6 model; stroke assumed; open/close only",
   "confidence": {
     "stroke_m": "assumed",

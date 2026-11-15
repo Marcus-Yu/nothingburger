@@ -9,7 +9,9 @@
     3.0
   ],
   "hfov_deg": 87.0,
-  "price_usd": 350,
+  "price_usd": 95,
+  "list_price_usd": 350,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "src": "Intel RealSense D435i: range and field of view from memory; price assumed",
   "confidence": {
     "range_m": "unverified",

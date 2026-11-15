@@ -97,7 +97,7 @@ def test_compose_loads_in_mujoco_and_build_fits_the_contract(parts):
 
 def test_check_known_good(requirements):
     r = api.check(GOOD, requirements)
-    assert r["feasible"] and r["parts"] == GOOD and r["price_usd"] == 23800
+    assert r["feasible"] and r["parts"] == GOOD and r["price_usd"] == 1745
     for c in r["checks"]:
         jsonschema.validate(c, schema("check"))
         assert c["status"] in ("pass", "not_assessable")
@@ -148,7 +148,7 @@ def test_design_picks_the_cheapest_feasible(requirements, designed):
     assert {k: designed["parts"][k] for k in ("base", "lift", "arm", "gripper", "lidar", "wrist_cam")} == {
         "base": "tidybot_arx5", "lift": "liftkit_500", "arm": "xarm7", "gripper": "xarm_gripper", "lidar": "rplidar_s2",
         "wrist_cam": True}
-    assert designed["price_usd"] == 23800
+    assert designed["price_usd"] == 1745
     again = api.check(designed["parts"], requirements)
     assert again["feasible"] and again["checks"] == designed["checks"]
     assert api.compose(designed)["build"]["stowed"] == api.compose(designed, requirements=requirements)["build"]["stowed"]
@@ -209,4 +209,4 @@ def test_reach_is_checked_per_target_on_a_deep_counter(requirements):
     # design agrees: with the per-target numbers the cheapest robot is no longer the xarm7
     assert api.design(deep_counter(requirements, per_target=False))["parts"]["arm"] == "xarm7"
     picked = api.design(deep_counter(requirements, per_target=True))
-    assert picked["parts"]["arm"] != "xarm7" and picked["price_usd"] > 23800
+    assert picked["parts"]["arm"] != "xarm7" and picked["price_usd"] > 1745

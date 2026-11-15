@@ -20,10 +20,17 @@
     GET  /runs/studio/<run>/events?from=N   the run's events.jsonl from byte N: {"events": [...], "next": N}
     GET  /catalog/names                     {part id: name} for every catalog card
     GET  /catalog/cards                     {slot: [card, ...]} (frontend/robot-design/data/export.py's catalog())
+    GET  /cad/robot.glb?base=&lift=&arm=&gripper=&lidar=&lidar_mount=&wrist_cam=true|false&ego_cam=
+                                            the real model of that robot as GLB (agent/tools/cad.py); a slot left out
+                                            takes cad's default; 400 {"detail"} for parts that cannot be composed
 
 Steering options (slots: base, lift, arm, gripper, lidar, lidar_mount, wrist_cam, ego_cam):
     {"exclude": [{slot: part id, ...}], "require": {slot: part id}, "max_price_usd": number | null}
     GET  /room.html?run=runs/studio/<run>   the run played inside the scanned room (needs world/_scans/<world>/room.glb)
+    GET  /runs/demos/<run>/<file>, /runs/gallery/<run>/<file>   a kept run's files, as for runs/studio
+    GET  /vr                                the headset's launch page (web/viewer/vr.html); see docs/VR.md
+    GET  /vr/runs                           the runs room.html can play: [{"run", "title", "place", "world", "has_room",
+                                            "when", "seconds"}]: all of runs/demos and runs/gallery, the 15 newest of runs/studio
 
 Each reply runs in a thread, because the design step (the design and pathing pipeline) takes minutes:
 the studio polls GET /sessions/<id>. Sessions live in memory and are lost on restart.
@@ -40,7 +47,9 @@ import argparse
 import importlib.util
 import json
 import os
+import re
 import threading
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
@@ -82,6 +91,97 @@ def standin_classifier():
 
 CTYPES = {".json": "application/json", ".jsonl": "application/x-ndjson", ".glb": "model/gltf-binary",
           ".bin": "application/octet-stream", ".png": "image/png", ".mp4": "video/mp4", ".xml": "application/xml"}
+
+
+STUDIO_IN_VR = 15  # how many of runs/studio the headset's list shows, newest first
+
+
+def run_roots() -> list:
+    """The folders whose runs are served: the kept demos, the gallery, and the studio's own."""
+    return [REPO / "runs" / "demos", REPO / "runs" / "gallery", RUNS]
+
+
+def _json(path: Path):
+    try:
+        return json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def tour_of(folder: Path) -> dict | None:
+    """The run's last "tour" event (what room.html plays), when the robot export it names is on disk."""
+    if not (folder / "frames" / "tour_robot.glb").is_file() or not (folder / "world.json").is_file():
+        return None
+    try:
+        lines = (folder / "events.jsonl").read_text().splitlines()
+    except OSError:
+        return None
+    for line in reversed(lines):
+        if '"tour"' not in line:
+            continue
+        try:
+            e = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if e.get("kind") == "tour" and all((folder / str(e.get(k) or "-")).is_file() for k in ("glb", "frames")):
+            return e
+    return None
+
+
+def place_name(world: dict) -> str:
+    """A place's name for people: the studio's name for its Matterport model, else the address the world
+    was read from, else the world id."""
+    model = (world.get("tour") or {}).get("matterport")
+    for space in _json(REPO / "web" / "worlds.json") or []:
+        if model and space.get("matterport") == model and space.get("name"):
+            return space["name"]
+    m = re.search(r"Matterport model \w+ \(([^)]+)\)", str(world.get("source") or ""))
+    if m:
+        return re.sub(r"(, \d{5})?(, US)?$", "", m.group(1))
+    return str(world.get("id") or "unknown place")
+
+
+def room_runs() -> list:
+    """The runs room.html can play, for the headset's launch page: each has a "tour" event and its robot
+    export. `has_room` says whether the scanned room's mesh is on this machine; without it the page draws
+    the world file's outlines and boxes."""
+    out = []
+    for root in run_roots():
+        if not root.is_dir():
+            continue
+        folders = [d for d in root.iterdir() if d.is_dir() and (d / "events.jsonl").is_file()]
+        if root == RUNS:  # the studio's pile: newest first, and only so many
+            folders.sort(key=lambda d: -(d / "events.jsonl").stat().st_mtime)
+        else:
+            folders.sort(key=lambda d: d.name)
+        kept = 0
+        for d in folders:
+            if root == RUNS and kept >= STUDIO_IN_VR:
+                break
+            tour = tour_of(d)
+            if tour is None:
+                continue
+            kept += 1
+            world = _json(d / "world.json") or {}
+            job = (_json(d / "intake.json") or {}).get("job")
+            if not job:  # a run from a task file has no job in words: its run_start may, else the folder's name
+                with (d / "events.jsonl").open() as f:
+                    first = f.readline()
+                try:
+                    job = json.loads(first).get("job")
+                except json.JSONDecodeError:
+                    job = None
+            wid = str(world.get("id") or "")
+            out.append({
+                "run": d.relative_to(REPO).as_posix(),
+                "title": job or d.name,
+                "place": place_name(world),
+                "world": wid,
+                "has_room": bool(wid) and (REPO / "world" / "_scans" / wid / "room.glb").is_file(),
+                "when": datetime.fromtimestamp((d / "events.jsonl").stat().st_mtime).isoformat(timespec="seconds"),
+                "seconds": round(tour["n"] / tour["fps"]) if tour.get("n") and tour.get("fps") else None,
+            })
+    return out
 
 
 def catalog_names() -> dict:
@@ -268,13 +368,13 @@ def make_handler(sessions: Sessions, standin: bool):
         def log_message(self, fmt, *args):  # quiet: the studio polls
             pass
 
-        def _send(self, code: int, body: dict | bytes, ctype: str = "application/json"):
+        def _send(self, code: int, body: dict | bytes, ctype: str = "application/json", cache: str = "no-store"):
             data = body if isinstance(body, bytes) else json.dumps(body).encode()
             self.send_response(code)
             self.send_header("content-type", ctype)
             self.send_header("access-control-allow-origin", "*")
             self.send_header("access-control-allow-headers", "content-type")
-            self.send_header("cache-control", "no-store")
+            self.send_header("cache-control", cache)
             self.end_headers()
             self.wfile.write(data)
 
@@ -303,6 +403,18 @@ def make_handler(sessions: Sessions, standin: bool):
                 return self._send(200, catalog_names())
             if path == "/catalog/cards":
                 return self._send(200, catalog_cards())
+            if path == "/cad/robot.glb":  # the first build of a robot takes a few seconds; cad keeps it on disk after
+                from agent.tools import cad  # here, not at the top: it loads MuJoCo
+
+                q = parse_qs(urlparse(self.path).query)
+                parts = {slot: q[slot][0] for slot in STEER_SLOTS if q.get(slot) and q[slot][0]}
+                if "wrist_cam" in parts:
+                    parts["wrist_cam"] = parts["wrist_cam"].lower() in ("true", "1", "yes")
+                try:
+                    data = cad.robot_glb(parts)
+                except Exception as e:  # noqa: BLE001 - an unknown part, or parts that do not fit together
+                    return self._send(400, {"detail": str(e) or type(e).__name__})
+                return self._send(200, data, "model/gltf-binary", cache="public, max-age=3600")
             if path.startswith("/runs/studio/") and path.endswith("/events"):
                 folder = (REPO / path.lstrip("/")[: -len("/events")]).resolve()
                 if not folder.is_relative_to(RUNS.resolve()):
@@ -311,21 +423,27 @@ def make_handler(sessions: Sessions, standin: bool):
                 return self._send(200, read_events(folder / "events.jsonl", int((q.get("from") or ["0"])[0])))
             if path == "/room.html":  # the real-room 3D page (web/viewer/room.html), for a studio run
                 return self._send(200, (REPO / "web" / "viewer" / "room.html").read_bytes(), "text/html; charset=utf-8")
+            if path in ("/vr", "/vr.html"):  # the headset's launch page: the runs below as large cards
+                return self._send(200, (REPO / "web" / "viewer" / "vr.html").read_bytes(), "text/html; charset=utf-8")
+            if path == "/vr/runs":
+                return self._send(200, room_runs())
             if path.startswith("/scans/") and path.endswith(("/room.glb", "/scan.json")):  # the scanned room's mesh and its listing
-                scans = (REPO / "world" / "_scans").resolve()
-                file = (scans / path[len("/scans/"):]).resolve()
-                if file.is_relative_to(scans) and file.is_file():
+                # Only those two files of a world named in the address. The world's folder may be a link to another
+                # checkout's scan (world/_scans is not committed, and a mesh is 20 MB), so the link is followed.
+                m = re.fullmatch(r"/scans/([A-Za-z0-9_-][A-Za-z0-9_.-]*)/(room\.glb|scan\.json)", path)
+                file = REPO / "world" / "_scans" / m.group(1) / m.group(2) if m else None
+                if file is not None and file.is_file():
                     return self._send(200, file.read_bytes(), "model/gltf-binary" if file.suffix == ".glb" else "application/json")
                 return self._send(404, {"detail": "no room mesh on this machine"})
             if path.startswith("/mp/images/"):  # Matterport's logo for the room page, from the SDK bundle (web/fetch_sdk.py)
-                vendor = (REPO / "web" / "_vendor").resolve()
+                vendor = (REPO / "web" / "_vendor" / "matterport").resolve()
                 file = (vendor / path[len("/mp/"):]).resolve()
                 if file.is_relative_to(vendor) and file.is_file():
                     return self._send(200, file.read_bytes(), "image/svg+xml" if file.suffix == ".svg" else "application/octet-stream")
                 return self._send(404, {"detail": "not found"})
-            if path.startswith("/runs/studio/"):  # a studio run's files: snapshot, events, world, the robot export
+            if path.startswith("/runs/"):  # a run's files (studio, kept demos, gallery): snapshot, events, world, the robot export
                 file = (REPO / path.lstrip("/")).resolve()
-                if file.is_relative_to(RUNS.resolve()) and file.is_file():
+                if any(file.is_relative_to(root.resolve()) for root in run_roots()) and file.is_file():
                     return self._send(200, file.read_bytes(), CTYPES.get(file.suffix, "application/octet-stream"))
             return self._send(404, {"detail": "not found"})
 

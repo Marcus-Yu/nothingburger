@@ -6,7 +6,9 @@
   "flange_site": "attachment_site",
   "payload_kg": 3.5,
   "reach_m": 0.7,
-  "price_usd": 10000,
+  "price_usd": 500,
+  "list_price_usd": 10000,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "src": "UFACTORY: 3.5 kg, 700 mm; price assumed",
   "confidence": {
     "payload_kg": "vendor",

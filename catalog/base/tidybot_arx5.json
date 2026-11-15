@@ -24,7 +24,9 @@
   "payload_kg": 60.0,
   "step_max_m": 0.015,
   "support_inset_m": 0.07,
-  "price_usd": 5000,
+  "price_usd": 355,
+  "list_price_usd": 5000,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "mounts": {
     "top": [
       0.0,

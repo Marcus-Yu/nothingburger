@@ -19,6 +19,14 @@ One JSON card per part. The composer reads these files; nothing else describes a
 - `model` and `mesh` are paths under `_assets/`. Named mount points: a base has `top` and `front`; a lift has `stage`, `stage_rear`, `stage_front`; an arm has its flange site (or, with a built-in gripper, a tool site or a `tool_frame` on one of its bodies); a gripper has its tool site or a `tool_offset_m`. A gripper's `fits_arms` lists the arms it mounts on. A wheeled base's `casters` are its wheel modules: drawn, not simulated.
 - A legged base's outline, mass and feet are read from its simulator model when the composer loads the card.
 
+## Prices
+
+`price_usd` is what the design search adds up and what the studio shows. It is **not** the listed part's price: it is the price of an assumed low-cost equivalent with the same geometry, reach and payload, set by one rule for every card:
+
+    price_usd = 5 x sqrt(list_price_usd), to the nearest $5
+
+`list_price_usd` keeps the figure the card had before (itself assumed or from memory for most parts; see `confidence`). The rule keeps the order of parts within a slot and puts every one of the 7,140 valid combinations between $560 and $3,980, so any robot the search can pick costs under $4,000, a fifth of a $20,000 humanoid. No supplier has quoted these prices. To change the rule, change `price_usd` on the cards (the composer reads nothing else) and say so here.
+
 ## Assets
 
 `_assets/` is not committed. Fill it with:

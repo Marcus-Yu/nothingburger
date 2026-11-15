@@ -18,6 +18,7 @@ dependencies = [
   "scipy",     # world/mesh.py
   "httpx",     # world/matterport.py, through Pathfinder's Matterport client
   "pillow",    # world/scan.py: the scan's textures for the pictures
+  "fast-simplification>=0.2.0",
 ]
 
 [dependency-groups]

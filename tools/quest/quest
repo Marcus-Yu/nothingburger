@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+# Watch a designed robot do its job in VR on a Meta Quest: one command. How-to and fixes: docs/VR.md.
+#
+#   tools/quest/quest            check the headset, start the design workflow server if it is down, give the
+#                                headset the laptop's port (adb reverse) and open the launch page in its browser
+#   tools/quest/quest <run>      the same, but open one run straight away, e.g. runs/demos/la-mirada-kitchen-wipe
+#   tools/quest/quest --check    say what is ready and what is missing; change nothing
+#
+# Needs adb (Android platform tools) and this repo; the server needs uv. WebXR only runs on a secure origin or
+# localhost, which is why the page is opened as http://localhost:8020 through `adb reverse` and not by the
+# laptop's address. QUEST_PORT picks another port (the server is then started with --port).
+set -u
+
+PORT="${QUEST_PORT:-8020}"
+REPO="$(cd "$(dirname "$0")/../.." && pwd -P)"
+LOG="/tmp/claude-design-workflow$([ "$PORT" = 8020 ] || echo "-$PORT").log"
+BASE="http://127.0.0.1:$PORT"
+
+check=0 run=""
+for arg in "$@"; do
+  case "$arg" in
+    --check) check=1 ;;
+    -h|--help) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -*) echo "quest: unknown option $arg (try --help)" >&2; exit 2 ;;
+    *) [ -z "$run" ] || { echo "quest: one run at a time (got '$run' and '$arg')" >&2; exit 2; }; run="$arg" ;;
+  esac
+done
+
+missing=0
+ok()   { printf '  ok       %s\n' "$*"; }
+miss() { printf '  MISSING  %s\n' "$*"; missing=$((missing + 1)); }
+note() { printf '           %s\n' "$*"; }
+todo() { printf '  would    %s\n' "$*"; }
+stop() { echo; echo "Stopped: $*" >&2; exit 1; }
+get()  { curl -fsS -m "${2:-4}" "$BASE$1" 2>/dev/null; }
+
+[ "$check" = 1 ] && echo "Quest VR check (nothing is changed):" || echo "Quest VR:"
+
+# ---- 1. the headset --------------------------------------------------------------------------------------
+serial=""
+if ! command -v adb >/dev/null 2>&1; then
+  miss "adb is not installed. On a Mac: brew install android-platform-tools"
+else
+  listed="$(adb devices 2>/dev/null | tail -n +2 | awk 'NF >= 2 { print $1 "\t" $2 }')"
+  ready="$(printf '%s\n' "$listed" | awk -F'\t' '$2 == "device" { print $1 }')"
+  if [ -n "${ANDROID_SERIAL:-}" ] && printf '%s\n' "$ready" | grep -qxF "$ANDROID_SERIAL"; then
+    serial="$ANDROID_SERIAL"
+  else
+    serial="$(printf '%s\n' "$ready" | head -n 1)"
+  fi
+  if [ -n "$serial" ]; then
+    model="$(adb -s "$serial" shell getprop ro.product.model 2>/dev/null | tr -d '\r')"
+    ok "headset connected: ${model:-unknown model} ($serial)"
+    case "$model" in *Quest*|"") ;; *) note "that is not a Quest by its name; carrying on, the page needs a WebXR browser" ;; esac
+    [ "$(printf '%s\n' "$ready" | grep -c .)" -gt 1 ] && note "more than one device is connected: using $serial (set ANDROID_SERIAL to pick another)"
+  elif printf '%s\n' "$listed" | grep -q 'unauthorized$'; then
+    miss "the headset is plugged in but has not allowed this computer."
+    note "Put it on and accept \"Allow USB debugging\" (tick \"Always allow from this computer\"). If no prompt"
+    note "shows, unplug the cable and plug it in again."
+  elif printf '%s\n' "$listed" | grep -q 'offline$'; then
+    miss "the headset shows as offline. Wake it, unplug the cable and plug it in again, or run: adb kill-server"
+  else
+    miss "no headset: \`adb devices\` lists none."
+    note "1. Developer mode on: Meta Horizon phone app > Menu > Devices > your headset > Headset settings >"
+    note "   Developer Mode (the account must be a developer account: developers.meta.com, create an organisation)."
+    note "2. Plug the headset into this computer with a USB-C cable that carries data."
+    note "3. Put it on and accept \"Allow USB debugging\"."
+    note "Without a cable: docs/VR.md, \"Wireless adb\"."
+  fi
+fi
+adb_() { adb -s "$serial" "$@"; }
+
+# ---- 2. the design workflow server -----------------------------------------------------------------------
+up=0
+if get /health 2 | grep -q '"ok": *true'; then
+  up=1
+  pid="$(lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null | head -n 1)"
+  from="$([ -n "$pid" ] && lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p' | head -n 1)"
+  ok "design workflow server is up on port $PORT${pid:+ (pid $pid)}"
+  if [ -n "$from" ] && [ "$(cd "$from" 2>/dev/null && pwd -P)" != "$REPO" ]; then
+    note "it runs from ANOTHER checkout: $from"
+    note "its runs and room meshes are what the headset will show, not this checkout's ($REPO)."
+    note "To serve this one: kill $pid, then run tools/quest/quest again."
+  fi
+elif [ -n "$(lsof -nP -iTCP:"$PORT" -sTCP:LISTEN -t 2>/dev/null)" ]; then
+  miss "something else is listening on port $PORT and does not answer /health as the design workflow server."
+  note "Stop it (lsof -nP -iTCP:$PORT -sTCP:LISTEN), or pick another port: QUEST_PORT=8021 tools/quest/quest"
+elif [ "$check" = 1 ]; then
+  miss "the design workflow server is not running on port $PORT."
+  todo "start it from $REPO (log: $LOG)"
+elif ! command -v uv >/dev/null 2>&1; then
+  miss "the design workflow server is not running, and uv is not installed to start it (https://docs.astral.sh/uv/)."
+else
+  echo "  starting the design workflow server on port $PORT (log: $LOG)"
+  envfile=(); [ -f "$REPO/.env" ] && envfile=(--env-file .env)
+  portarg=(); [ "$PORT" = 8020 ] || portarg=(--port "$PORT")
+  # on its own, with nothing of this command's left open, so it outlives the terminal and a pipe this runs in
+  ( cd "$REPO" && PYTHONPATH=. exec nohup uv run ${envfile[@]+"${envfile[@]}"} python -m agent.design_flow.serve ${portarg[@]+"${portarg[@]}"} ) > "$LOG" 2>&1 < /dev/null &
+  for _ in $(seq 1 60); do get /health 1 | grep -q '"ok": *true' && { up=1; break; }; sleep 1; done
+  if [ "$up" = 1 ]; then ok "design workflow server started on port $PORT"
+  else miss "the server did not come up within a minute. Its log: $LOG"; tail -n 5 "$LOG" 2>/dev/null | sed 's/^/           | /'; fi
+fi
+
+# ---- 3. what there is to watch ---------------------------------------------------------------------------
+runs=""
+if [ "$up" = 1 ]; then
+  if runs="$(get /vr/runs 15)" && [ "${runs#\[}" != "$runs" ]; then
+    total="$(printf '%s' "$runs" | grep -o '"run": *"' | grep -c .)"
+    rooms="$(printf '%s' "$runs" | grep -o '"has_room": *true' | grep -c .)"
+    if [ "$total" -eq 0 ]; then
+      miss "no run can be played: none under runs/demos, runs/gallery or runs/studio has a robot export (frames/tour_robot.glb)."
+    else
+      ok "$total runs can be played; $rooms of them have their room's mesh on this machine"
+      [ "$rooms" -lt "$total" ] && note "the other $((total - rooms)) show the robot among outlines and boxes (docs/VR.md, \"Blank room\")"
+    fi
+  else
+    miss "the server on port $PORT has no /vr/runs: it is an older design workflow server (or another checkout's)."
+    note "Stop it and run tools/quest/quest again, which starts this checkout's."
+    runs=""
+  fi
+fi
+
+# ---- the run to open, if one was named -------------------------------------------------------------------
+url="http://localhost:$PORT/vr"
+if [ -n "$run" ]; then
+  run="${run#"$REPO"/}"; run="${run%/}"; case "$run" in runs/*) ;; *) run="runs/$run" ;; esac
+  case "$run" in *..*|*[!A-Za-z0-9_./-]*) echo "quest: '$run' is not a run folder's path" >&2; exit 2 ;; esac
+  if [ -n "$runs" ] && ! printf '%s' "$runs" | grep -qF "\"run\": \"$run\""; then
+    miss "$run is not a run that can be played. The ones that can:"
+    printf '%s' "$runs" | grep -o '"run": *"[^"]*"' | sed 's/.*: *"\(.*\)"/           \1/'
+  else
+    [ -n "$runs" ] && ok "run to open: $run"
+    url="http://localhost:$PORT/room.html?run=$run&vr=1"
+  fi
+fi
+
+# ---- 4. the headset's localhost, and the page ------------------------------------------------------------
+if [ "$check" = 1 ]; then
+  if [ -n "$serial" ]; then
+    if adb_ reverse --list 2>/dev/null | grep -q "tcp:$PORT tcp:$PORT"; then ok "the headset's localhost:$PORT already reaches this computer (adb reverse)"
+    else todo "run: adb reverse tcp:$PORT tcp:$PORT   (it is not set yet; it is lost when the cable is unplugged)"; fi
+  fi
+  todo "open $url in the headset's browser"
+  echo
+  if [ "$missing" -eq 0 ]; then echo "Ready. Run tools/quest/quest${run:+ $run} to open it in the headset."; exit 0; fi
+  echo "$missing thing(s) missing. Fix them, then run tools/quest/quest${run:+ $run}."; exit 1
+fi
+
+[ "$missing" -eq 0 ] || stop "$missing thing(s) missing above. Nothing was opened in the headset."
+adb_ reverse "tcp:$PORT" "tcp:$PORT" >/dev/null || stop "adb reverse tcp:$PORT tcp:$PORT failed."
+ok "the headset's localhost:$PORT is this computer (adb reverse tcp:$PORT tcp:$PORT)"
+# the address goes through the headset's shell: quoted there, or it is cut at the &
+adb_ shell "am start -a android.intent.action.VIEW -d '$url'" >/dev/null || stop "could not open the browser on the headset. Open $url there by hand."
+ok "opened $url in the headset's browser"
+
+cat <<TXT
+
+Now, in the headset:
+  1. $([ -n "$run" ] && echo "The room loads with one large button." || echo "Point at a job and pull the trigger. The room loads with one large button.")
+  2. Press Enter VR. You stand about two metres from the robot, and it starts the job.
+  3. Right trigger: play or pause. Left stick: walk. Right stick: snap-turn (left, right) and walk (forward, back).
+     A or X: stand by the robot again. B or Y: start again. Either grip: Follow on or off.
+  4. The headset's menu button leaves VR.
+If the browser was already open on another page, the address is: $url
+Keep the cable in: adb reverse is lost when it is unplugged (run this again). More: docs/VR.md
+TXT

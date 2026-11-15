@@ -188,7 +188,8 @@ def _envelope_file(ck: tuple, seed: int, n: int, kind: str = "envelopes"):
     p = dict(zip(("base", "lift", "arm", "gripper", "wrist_cam"), ck))
     for slot in ("base", "lift", "arm", "gripper"):
         try:
-            h.update(_json.dumps(P.card(slot, p[slot]), sort_keys=True).encode())
+            card = {k: v for k, v in P.card(slot, p[slot]).items() if "price" not in k}  # a price is not geometry
+            h.update(_json.dumps(card, sort_keys=True).encode())
         except KeyError:
             h.update(str(p[slot]).encode())
     h.update(repr((ck, seed, n, ENV_STEP)).encode())

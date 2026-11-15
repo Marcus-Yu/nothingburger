@@ -6,7 +6,9 @@
   "flange_site": "attachment_site",
   "payload_kg": 5.0,
   "reach_m": 0.85,
-  "price_usd": 35000,
+  "price_usd": 935,
+  "list_price_usd": 35000,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "src": "UR datasheet figures from memory, unverified; price assumed",
   "confidence": {
     "payload_kg": "unverified",

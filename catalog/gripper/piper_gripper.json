@@ -18,6 +18,7 @@
     "piper"
   ],
   "price_usd": 0,
+  "list_price_usd": 0,
   "src": "integrated in the piper model; stroke from the model's finger travel; treated as open/close only",
   "confidence": {
     "stroke_m": "model",

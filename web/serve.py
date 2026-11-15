@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -186,12 +187,13 @@ class Handler(BaseHTTPRequestHandler):
         if p.startswith("/runs/"):
             return self._file(RUNS, p[len("/runs/"):])
         if p.startswith("/scans/"):  # only the stitched model and its listing (levels, layers), for room.html
-            return self._file(SCANS, p[len("/scans/"):]) if p.endswith(("/room.glb", "/scan.json")) else self._send(404, b"not found", "text/plain")
+            # the world's folder may be a link to another checkout's scan (not committed, 20 MB a mesh): the link is followed
+            m = re.fullmatch(r"/scans/([A-Za-z0-9_-][A-Za-z0-9_.-]*)/(room\.glb|scan\.json)", p)
+            return self._file(SCANS / m.group(1), m.group(2)) if m else self._send(404, b"not found", "text/plain")
         return self._file(VIEWER, p.lstrip("/"))
 
     def do_POST(self):
         if urlparse(self.path).path == "/api/scan_put":  # one captured tile file from tour.html?capture=1
-            import re
             from urllib.parse import parse_qs
 
             qs = parse_qs(urlparse(self.path).query)

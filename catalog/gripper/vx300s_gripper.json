@@ -18,6 +18,7 @@
     "vx300s"
   ],
   "price_usd": 0,
+  "list_price_usd": 0,
   "src": "integrated in the vx300s model; stroke from the model's finger travel; open/close only",
   "confidence": {
     "stroke_m": "model",

@@ -113,15 +113,15 @@ Why it is a deep agent:
 
 | Building and job | Robot it chose | Estimated parts price |
 | :-- | :-- | --: |
-| Outpatient clinic: wipe high-touch ledges | wheeled base, 0.5 m lift, AgileX Piper arm | $14,049 |
-| Senior apartment: four household tasks | wheeled base, 0.5 m lift, UR5e arm | $48,800 |
-| JRR Hall atrium: wipe two tables, carry a bottle out | wheeled base, 0.9 m lift, UR5e arm | $49,580 |
-| Factory cell: wipe a fixture table, carry a 3.5 kg part | wheeled base, 0.5 m lift, CRX-5iA arm | $49,800 |
-| Pump house with a 0.15 m kerb: fetch a sample bottle | Spot legged base, xArm 7 | $91,600 |
+| Outpatient clinic: wipe high-touch ledges | wheeled base, 0.5 m lift, AgileX Piper arm | $1,180 |
+| Senior apartment: four household tasks | wheeled base, 0.5 m lift, UR5e arm | $2,180 |
+| JRR Hall atrium: wipe two tables, carry a bottle out | wheeled base, 0.9 m lift, UR5e arm | $2,205 |
+| Factory cell: wipe a fixture table, carry a 3.5 kg part | wheeled base, 0.5 m lift, CRX-5iA arm | $2,300 |
+| Pump house with a 0.15 m kerb: fetch a sample bottle | Spot legged base, xArm 7 | $2,595 |
 
 JRR Hall is traced from its Matterport tour; the rest are hand-written test scenarios, designed from the building and the job.
 
-- **Against 1X NEO** ($20,000, or $499 a month): our clinic robot is an estimated $14,049 in parts, about 30% less. The others cost more, since they use off-the-shelf industrial arms. Every one is checked against its own building's doors, reach and payload. **CHECK:** parts only, and most catalog prices are our estimates.
+- **Against 1X NEO** ($20,000, or $499 a month): every robot the catalog can build comes to under $4,000 in parts, at least five times less; the ones above run from $1,180 to $2,595. Every one is checked against its own building's doors, reach and payload. **CHECK:** parts only, and the prices are assumed: each card is priced as a low-cost equivalent of the listed part (5 × the square root of its list price), which no supplier has quoted.
 - **A real search.** JRR Hall: 7,140 combinations, 860 pass arithmetic, 84 composed and checked in MuJoCo, cheapest kept. 15 route legs, 13 arm motions, no failures.
 - **Hardware we built.** Ten fingertip force sensors, hand-soldered, over Bluetooth, time-aligned with Quest hand tracking.
 - **It says what it doesn't know.** Every number carries its source.
@@ -133,7 +133,7 @@ JRR Hall is traced from its Matterport tour; the rest are hand-written test scen
 - Real building data is uneven: 10 of 24 scans had no doorway widths, none had detected objects.
 - A demonstration is mostly about the object, not where the person stood.
 - Cheap force sensors give a safe band, not a precise newton figure.
-- Modular does not mean generic: same parts, $14,000 for one job and $91,600 for another.
+- Modular does not mean generic: same parts, $1,180 for one job and $2,595 for another.
 
 ## What's next for Nothingburger
 

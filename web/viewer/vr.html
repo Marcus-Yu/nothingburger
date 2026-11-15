@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watch a robot in VR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800;900&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* The headset's launch page: the runs the room page can play, as cards big enough to hit with a controller's pointer
+     and read at arm's length. Served by the design workflow server at /vr (docs/VR.md). Looks as frontend/DESIGN.md says. */
+  :root { --paper: #F4EFE7; --ink: #17140F; --ink-hover: #2C2720; --ink-2: #5D564C; --line: rgba(23, 20, 15, .11); --on-ink: #FBF8F3; --field: #FFFDFA;
+          --glass: rgba(249, 246, 241, .8); --gold: #C99A2E; --gold-ink: #8E6A16; --sub: #85600F; --ok: #3F8058; --tape: #AE6326; --error: #A9432C;
+          --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif; --body: Geist, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+          --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  * { box-sizing: border-box; }
+  html { background: var(--paper); }
+  body { margin: 0; min-height: 100vh; color: var(--ink); font: 400 20px/1.5 var(--body); -webkit-font-smoothing: antialiased;
+         background-image: linear-gradient(rgba(23, 20, 15, .07) 1px, transparent 1px), linear-gradient(90deg, rgba(23, 20, 15, .07) 1px, transparent 1px),
+                           linear-gradient(rgba(23, 20, 15, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(23, 20, 15, .035) 1px, transparent 1px);
+         background-size: 96px 96px, 96px 96px, 24px 24px, 24px 24px; background-attachment: fixed; }
+  main { max-width: 1280px; margin: 0 auto; padding: clamp(24px, 4vw, 56px) clamp(16px, 5vw, 72px) 72px; }
+  h1 { margin: 0; font: 900 clamp(44px, 6.4vw, 78px)/.92 var(--display); letter-spacing: -.05em; }
+  h1 span { display: block; margin-top: .14em; font-size: .5em; font-weight: 800; line-height: .98; letter-spacing: -.048em; color: var(--sub); }
+  .lede { margin: 20px 0 0; max-width: 46ch; font-size: 22px; line-height: 1.45; color: var(--ink-2); }
+  #xr { display: inline-flex; align-items: center; gap: 12px; margin: 24px 0 0; padding: 12px 18px; border-radius: 12px; background: rgba(244, 239, 231, .86); box-shadow: 0 0 0 1px var(--line);
+        font: 500 16px/1.4 var(--mono); letter-spacing: .02em; color: var(--ink-2); }
+  #xr i { flex: none; width: 12px; height: 12px; border-radius: 50%; background: #A0988C; }
+  #xr.yes i { background: var(--ok); } #xr.no i { background: var(--tape); }
+  h2 { margin: 48px 0 16px; font: 800 26px/1.12 var(--display); letter-spacing: -.03em; }
+  h2 small { margin-left: 10px; font: 500 15px/1 var(--mono); letter-spacing: .04em; color: var(--ink-2); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: 18px; }
+  a.card { display: flex; flex-direction: column; gap: 12px; min-height: 236px; padding: 24px; border-radius: 22px; color: inherit; text-decoration: none; background: var(--glass);
+           border: 2px solid rgba(255, 255, 255, .75); box-shadow: 0 0 0 1px var(--line), 0 24px 60px -36px rgba(45, 32, 12, .5); transition: transform .2s, border-color .2s, background .2s; }
+  a.card:hover, a.card:focus-visible { border-color: var(--gold); background: #fff; transform: translateY(-2px); }
+  a.card:focus-visible, a.pill:focus-visible { outline: 3px solid var(--gold-ink); outline-offset: 3px; }
+  .card h3 { margin: 0; font: 800 28px/1.1 var(--display); letter-spacing: -.035em; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .card .place { margin: 0; font-size: 20px; line-height: 1.35; color: var(--ink-2); }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 6px; }
+  .tag { --c: var(--ink-2); padding: 7px 12px; border-radius: 999px; font: 500 14px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--c);
+         background: color-mix(in srgb, var(--c) 6%, transparent); border: 1px solid color-mix(in srgb, var(--c) 35%, transparent); white-space: nowrap; }
+  .tag.yes { --c: var(--ok); } .tag.no { --c: var(--tape); } .tag.plain { text-transform: none; letter-spacing: .03em; }
+  .go { align-self: flex-start; margin-top: 6px; padding: 18px 28px; border-radius: 999px; background: var(--ink); color: var(--on-ink); font: 600 20px/1 var(--body); transition: background .2s; }
+  a.card:hover .go { background: var(--ink-hover); }
+  .note { margin: 14px 0 0; max-width: 64ch; font: 400 16px/1.5 var(--mono); color: var(--ink-2); }
+  .note code, .lede code { font-family: var(--mono); font-size: .92em; background: var(--field); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+  #problem { margin: 40px 0 0; padding: 24px; border-radius: 22px; background: var(--glass); box-shadow: 0 0 0 1px var(--line); font-size: 22px; max-width: 60ch; }
+  #problem[hidden] { display: none; }
+  #problem b { display: block; font: 800 26px/1.12 var(--display); letter-spacing: -.03em; margin-bottom: 8px; }
+  @media (prefers-reduced-motion: reduce) { a.card, .go { transition: none; } a.card:hover, a.card:focus-visible { transform: none; } }
+</style>
+
+<main>
+  <h1>Stand next to the robot<span>Watch it do the job, at full size.</span></h1>
+  <p class="lede">Pick a job. The room opens with one large button: press <b>Enter VR</b> and the robot starts working about two metres in front of you.</p>
+  <p id="xr" role="status"><i aria-hidden="true"></i><span>Checking whether this browser can enter VR</span></p>
+  <div id="problem" role="alert" hidden></div>
+  <div id="lists" aria-live="polite"></div>
+  <p class="note" id="foot" hidden>Room: no means the scanned room's mesh is not on the laptop serving this page (<code>world/_scans</code> is not committed), so the robot works among outlines and boxes drawn from the world file. Controls in the headset and fixes: <code>docs/VR.md</code>.</p>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const GROUPS = [["runs/demos/", "Kept demos", "the runs behind the recordings"], ["runs/gallery/", "Gallery", ""], ["runs/studio/", "From the studio", "newest first"]];
+const length = s => s == null ? "" : s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s`;
+const day = when => { const d = new Date(when); return isNaN(d) ? "" : d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); };
+
+function card(r) {
+  const a = el("a", "card"); a.href = `/room.html?run=${encodeURIComponent(r.run).replace(/%2F/g, "/")}&vr=1`;
+  a.append(el("h3", "", r.title), el("p", "place", r.place));
+  const facts = el("div", "facts");
+  facts.append(el("span", `tag ${r.has_room ? "yes" : "no"}`, `Room: ${r.has_room ? "yes" : "no"}`));
+  if (r.seconds != null) facts.append(el("span", "tag plain", length(r.seconds)));
+  if (day(r.when)) facts.append(el("span", "tag plain", day(r.when)));
+  a.append(facts, el("span", "go", "Watch in VR"));
+  a.setAttribute("aria-label", `${r.title}, ${r.place}. Room mesh: ${r.has_room ? "yes" : "no"}. Watch in VR`);
+  return a;
+}
+function problem(title, text) { const p = $("problem"); p.hidden = false; p.replaceChildren(el("b", "", title), document.createTextNode(text)); }
+
+(async () => {   // what this browser can do, said before a job is picked
+  const xr = $("xr"), line = xr.querySelector("span");
+  let ok = false; try { ok = !!navigator.xr && await navigator.xr.isSessionSupported("immersive-vr"); } catch (e) { }
+  xr.className = ok ? "yes" : "no";
+  line.textContent = ok ? "This browser can enter VR"
+    : !isSecureContext || !navigator.xr ? "This browser cannot enter VR from this address: open it as http://localhost:8020/vr (run tools/quest/quest on the laptop)"
+    : "No headset here: open this page in the Quest's browser. The runs still play on this screen";
+})();
+
+(async () => {
+  let runs;
+  try { const r = await fetch("/vr/runs"); if (!r.ok) throw new Error(r.status); runs = await r.json(); }
+  catch (e) { return problem("The list of runs did not load", "This page needs the design workflow server, on port 8020. On the laptop run tools/quest/quest from the repo: it starts the server and opens this page again."); }
+  if (!runs.length) return problem("No run to play yet", "A run can be played once it has finished with a robot export (frames/tour_robot.glb). Design a robot for an indoor job in the studio, then reload this page.");
+  for (const [prefix, name, hint] of GROUPS) {
+    const mine = runs.filter(r => r.run.startsWith(prefix)); if (!mine.length) continue;
+    const h = el("h2", "", name); if (hint) h.append(el("small", "", hint));
+    const grid = el("div", "grid"); mine.forEach(r => grid.append(card(r)));
+    $("lists").append(h, grid);
+  }
+  $("foot").hidden = false;
+})();
+</script>
+</html>

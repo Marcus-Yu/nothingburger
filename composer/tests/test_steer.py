@@ -76,7 +76,7 @@ def test_max_price_below_everything_is_infeasible_naming_the_limit(stand_in):
 
 def test_limit_that_rules_out_the_only_working_part_is_named(stand_in):
     stand_in["feasible"] = lambda p: p["arm"] == "ur10e"
-    d = D.design({}, require={"arm": "piper"}, max_price_usd=cheapest(arm="piper") + 5000)
+    d = D.design({}, require={"arm": "piper"}, max_price_usd=cheapest(arm="piper") + 500)  # the limit must still cut some candidates
     assert d["parts"] is None
     checks = [c["check"] for c in d["infeasible"]["binding_checks"]]
     assert checks[:2] == ["required parts", "price limit"] and "reach" in checks

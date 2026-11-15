@@ -43,14 +43,14 @@ The model plans, asks and explains. Every pass or fail is code, and the model ne
 
 | Building and job | Robot | Estimated parts price |
 | :-- | :-- | --: |
-| Outpatient clinic: wipe high-touch ledges | wheeled base, 0.5 m lift, AgileX Piper arm | $14,049 |
-| Senior apartment: pick up a remote and a towel, fetch a pill organiser, wipe a table | wheeled base, 0.5 m lift, UR5e arm | $48,800 |
-| JRR Hall atrium: wipe two tables, carry a bottle out | wheeled base, 0.9 m lift, UR5e arm | $49,580 |
-| Data centre: pull two failed drive sleds, one high and one low | wheeled base, 0.9 m lift, UR5e arm | $49,580 |
-| Factory cell: wipe a fixture table, carry a 3.5 kg part | wheeled base, 0.5 m lift, CRX-5iA arm | $49,800 |
-| Pump house with a 0.15 m kerb: fetch a sample bottle | Spot legged base, xArm 7 | $91,600 |
+| Outpatient clinic: wipe high-touch ledges | wheeled base, 0.5 m lift, AgileX Piper arm | $1,180 |
+| Senior apartment: pick up a remote and a towel, fetch a pill organiser, wipe a table | wheeled base, 0.5 m lift, UR5e arm | $2,180 |
+| JRR Hall atrium: wipe two tables, carry a bottle out | wheeled base, 0.9 m lift, UR5e arm | $2,205 |
+| Data centre: pull two failed drive sleds, one high and one low | wheeled base, 0.9 m lift, UR5e arm | $2,205 |
+| Factory cell: wipe a fixture table, carry a 3.5 kg part | wheeled base, 0.5 m lift, CRX-5iA arm | $2,300 |
+| Pump house with a 0.15 m kerb: fetch a sample bottle | Spot legged base, xArm 7 | $2,595 |
 
-JRR Hall is traced from its Matterport tour; the other five are hand-written test scenarios. These runs were designed from the building and the job, without a demonstration file. Prices are the sum of the catalog cards, and most card prices are marked `assumed` or `unverified`. Each run is in `runs/gallery/`.
+JRR Hall is traced from its Matterport tour; the other five are hand-written test scenarios. These runs were designed from the building and the job, without a demonstration file. Prices are the sum of the catalog cards. A card's price is that of an assumed low-cost equivalent of the listed part (5 × the square root of its list price; see `catalog/README.md`, Prices), so every robot the search can pick costs under $4,000, a fifth of a $20,000 humanoid. No supplier has quoted these prices. The files in `runs/gallery/` were written before this rule and still carry the earlier, higher prices. Each run is in `runs/gallery/`.
 
 ## Run it
 

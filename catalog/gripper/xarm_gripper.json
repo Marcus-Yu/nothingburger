@@ -20,7 +20,9 @@
     "xarm7",
     "ur5e"
   ],
-  "price_usd": 1900,
+  "price_usd": 220,
+  "list_price_usd": 1900,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "src": "all assumed",
   "confidence": {
     "mass_kg": "assumed",

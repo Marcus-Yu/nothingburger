@@ -6,7 +6,9 @@
   "radius_m": 0.0515,
   "height_m": 0.072,
   "mass_kg": 0.83,
-  "price_usd": 4000,
+  "price_usd": 315,
+  "list_price_usd": 4000,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "geometry": "stand-in",
   "src": "Velodyne VLP-16: spinning 3D, 16 beams; size, mass, price from memory",
   "confidence": {

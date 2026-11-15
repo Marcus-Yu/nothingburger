@@ -5,6 +5,7 @@
   "dim": null,
   "mass_kg": 0.0,
   "price_usd": 0,
+  "list_price_usd": 0,
   "src": "-",
   "confidence": {}
 }

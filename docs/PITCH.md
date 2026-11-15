@@ -20,6 +20,8 @@ Draft, 2026-11-14; the demo section added 2026-11-15. It follows [PLAN_REVISED.m
 
 Lead with the second claim. It is a true finding from real data and needs no robot.
 
+**On price.** Every robot the agent can design comes to under $4,000 in parts: the demo robots run from $755 (the mowing robot) to $2,520. That is at least five times less than a $20,000 general-purpose humanoid (1X's NEO; **check** the price before saying it). Say how the number is made: each part is priced as an assumed low-cost equivalent of the listed part (`catalog/README.md`, Prices). It is a parts estimate, not a quote, and it leaves out assembly, wiring and support.
+
 ## The demo
 
 Three minutes, one laptop and one Quest with the gloves, all in the studio (http://localhost:8000/#studio).
@@ -192,6 +194,7 @@ Only where a scan exists. The teaching kit is cheap; the scan and the robot are 
 ## Do not claim
 
 - That rents will fall, or that it saves a stated amount of money.
+- That the parts prices are real quotes. They are assumed equivalents; the list prices of the named parts are many times higher.
 - That it replaces workers.
 - That it works anywhere in the world.
 - That a pass means a unit is accessible or safe.

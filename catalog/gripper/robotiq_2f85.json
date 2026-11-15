@@ -25,7 +25,9 @@
     "ur10e",
     "iiwa14"
   ],
-  "price_usd": 4900,
+  "price_usd": 350,
+  "list_price_usd": 4900,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "src": "Robotiq figures from memory, unverified; price assumed",
   "confidence": {
     "mass_kg": "unverified",

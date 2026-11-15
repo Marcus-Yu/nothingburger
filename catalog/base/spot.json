@@ -8,7 +8,9 @@
   "keyframe": "home",
   "payload_kg": 14.0,
   "step_max_m": 0.3,
-  "price_usd": 75000,
+  "price_usd": 1370,
+  "list_price_usd": 75000,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "front_inset_m": 0.1,
   "src": "14 kg payload and $75,000 from comparison sites; 30 cm step unverified",
   "confidence": {

@@ -6,7 +6,9 @@
   "retracted_m": 0.725,
   "mass_kg": 24.1,
   "push_load_n": 1500.0,
-  "price_usd": 6580,
+  "price_usd": 405,
+  "list_price_usd": 6580,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "geometry": "stand-in",
   "src": "Ewellix datasheet; price: Vention listing",
   "confidence": {

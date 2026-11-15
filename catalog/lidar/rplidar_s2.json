@@ -6,7 +6,9 @@
   "radius_m": 0.0385,
   "height_m": 0.04,
   "mass_kg": 0.19,
-  "price_usd": 400,
+  "price_usd": 100,
+  "list_price_usd": 400,
+  "price_basis": "assumed low-cost equivalent of the listed part: 5 x sqrt(list price), to the nearest $5 (see catalog/README.md, Prices)",
   "geometry": "stand-in",
   "src": "Slamtec RPLIDAR S2: spinning 2D; size, mass, price from memory",
   "confidence": {
