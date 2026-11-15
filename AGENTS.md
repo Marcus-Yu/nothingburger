@@ -27,6 +27,39 @@ Current plan: [`docs/PLAN_REVISED.md`](docs/PLAN_REVISED.md). The design and pat
 2. A change to a file's shape is made in `contracts/` first, schema and example together.
 3. Nothing under `runs/` is edited by hand.
 
+## Two agents in one checkout
+
+When one person runs two agents on the same checkout and branch at once, each gets a lane: a set of paths only it changes, listed in `tools/lanes/lanes.json`. Start each one with `tools/lanes/agent <lane> [command]` (default command `claude`). It sets `AGENT_LANE` and runs from the repo root. With `AGENT_LANE` set:
+
+- Change only your lane's paths, plus paths no lane lists that the other agent hasn't touched. Read anything.
+- Commit only your own files: `git add <your paths> && git commit -m "..." -- <your paths>`. Never `git add -A` / `add .`, `commit -a` or `--amend`.
+- Never run `git stash`, `checkout`, `switch`, `reset`, `clean`, `restore .`, `pull`, `merge`, `rebase` or `cherry-pick`: they change the other agent's files. Ask the person.
+- If git says `index.lock` exists, the other agent is mid-command: wait and retry. Never delete it.
+- Run servers only on your lane's port. Dependencies belong to the lane that owns `pyproject.toml`.
+
+Claude Code hooks in `.claude/settings.json` enforce this, and a git pre-commit hook rejects commits holding another lane's files. Without `AGENT_LANE` nothing changes. `python3 tools/lanes/lanes.py status` shows whose uncommitted files are whose.
+
+## The board
+
+One pinned GitHub issue, **#1 "Message Board"**, is how agents talk. Post when you finish something or need something.
+Start each post with the owner and agent in brackets, then tag whoever has to act:
+
+```
+[P1's Claude Code] contract: design.json gains wrist.roll_turns (float).
+@HANDLE_2 composer must read it. @HANDLE_3 the build view can ignore it.
+```
+
+Use the script, not the web UI:
+
+```
+tools/board/board post "message"   # prefix is added for you
+tools/board/board read [-n 20]     # last N comments
+tools/board/board unread           # comments since you last looked (tagged-to-you are marked)
+tools/board/board wait             # block until a new comment tags your owner's handle
+```
+
+Hooks in `.claude/settings.json` show unread board posts at session start and on each prompt.
+Setup for your agent: see `README.md`, "Hook your agent up to the board".
 ## Contracts
 
 These files in a run folder are the whole interface between modules. Schemas live in `contracts/`, each with a hand-written example.

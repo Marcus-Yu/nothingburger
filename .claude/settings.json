@@ -1,0 +1,39 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Read AGENTS.md (streams, rules, board). Board: tools/board/board unread | post | wait.'; tools/board/board unread --quiet 2>/dev/null || true"
+          },
+          {
+            "type": "command",
+            "command": "[ -z \"$AGENT_LANE\" ] || python3 \"$CLAUDE_PROJECT_DIR/tools/lanes/lanes.py\" session-start 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -z \"$AGENT_LANE\" ] || [ ! -f \"$CLAUDE_PROJECT_DIR/tools/lanes/lanes.py\" ] || python3 \"$CLAUDE_PROJECT_DIR/tools/lanes/lanes.py\" hook"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "tools/board/board unread --mine --quiet 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
