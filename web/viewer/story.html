@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot plan for your building</title>
+<!-- The same run folder as index.html (events.jsonl and frames/), told in the order a building's owner asks:
+     what did you understand, what do you need from me, which robot and why, can it do each job, what is not proven.
+     Reads only; nothing here changes what the agent writes. Open as /story.html?run=runs/gallery/seniorcare -->
+<style>
+:root {
+  --bg: #f4f2ee; --panel: #fffdf9; --ink: #1d1b18; --muted: #6f6a62; --line: #e2ddd3; --soft: #ece8df;
+  --accent: #1f6f78; --accent-soft: #d9ecee; --ok: #2f7d4f; --ok-soft: #dcefe2; --bad: #b3452f; --bad-soft: #f6dfd9;
+  --warn: #8a5d0c; --warn-soft: #f5e9cf; --stage: #ebe7de;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #151614; --panel: #1d1f1c; --ink: #ecebe6; --muted: #9a988f; --line: #2e312c; --soft: #262925;
+    --accent: #6cc3cc; --accent-soft: #17383c; --ok: #7cc89a; --ok-soft: #1a3325; --bad: #ee8f78; --bad-soft: #3d201a;
+    --warn: #e0b45c; --warn-soft: #3a2f16; --stage: #23261f; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, "Segoe UI", Inter, Roboto, sans-serif; }
+a { color: var(--accent); } button, select { font: inherit; color: inherit; }
+.top { display: flex; gap: 12px; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+.top b { font-weight: 650; } .top select { padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); max-width: 100%; }
+.top .sp { flex: 1; }
+.wrap { max-width: 1060px; margin: 0 auto; padding: 22px 20px 80px; }
+.job { font-size: 21px; line-height: 1.35; font-weight: 600; letter-spacing: -.01em; margin: 0 0 4px; text-wrap: pretty; }
+.eyebrow { font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.verdict { margin: 16px 0 10px; border-radius: 14px; padding: 16px 18px; border: 1px solid var(--line); background: var(--panel); display: grid; grid-template-columns: 1fr auto; gap: 8px 24px; align-items: center; }
+.verdict h2 { margin: 0; font-size: 19px; } .verdict p { margin: 4px 0 0; color: var(--muted); }
+.verdict.ok { border-color: var(--ok); background: var(--ok-soft); } .verdict.ok h2 { color: var(--ok); }
+.verdict.warn { border-color: var(--warn); background: var(--warn-soft); } .verdict.warn h2 { color: var(--warn); }
+.verdict.bad { border-color: var(--bad); background: var(--bad-soft); } .verdict.bad h2 { color: var(--bad); }
+.verdict.live { border-color: var(--accent); background: var(--accent-soft); }
+.facts { display: flex; gap: 22px; flex-wrap: wrap; }
+.facts div b { display: block; font: 600 19px/1.15 var(--mono); letter-spacing: -.02em; white-space: nowrap; }
+.facts div span { font-size: 12px; color: var(--muted); }
+
+.path { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 0 14px; align-items: stretch; }
+.chip { flex: 0 0 auto; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 6px 10px; font-size: 12.5px; text-decoration: none; color: var(--ink); min-width: 104px; }
+.chip small { display: block; color: var(--muted); font-size: 11.5px; } .chip i { font-style: normal; font-weight: 700; }
+.chip.ok i { color: var(--ok); } .chip.bad { border-color: var(--bad); } .chip.bad i { color: var(--bad); } .chip.model { border-color: var(--accent); }
+.arrow { align-self: center; color: var(--muted); flex: 0 0 auto; }
+
+section { margin-top: 26px; scroll-margin-top: 12px; }
+section > h3 { font-size: 17px; margin: 0 0 2px; } section > .sub { color: var(--muted); margin: 0 0 12px; max-width: 70ch; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 820px) { .two { grid-template-columns: 1fr; } .verdict { grid-template-columns: 1fr; } }
+ul.plain { list-style: none; margin: 0; padding: 0; } ul.plain li { padding: 8px 0; border-top: 1px solid var(--line); } ul.plain li:first-child { border-top: 0; padding-top: 0; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 1px 8px; border-radius: 99px; background: var(--soft); color: var(--muted); white-space: nowrap; vertical-align: 1px; }
+.tag.ok { background: var(--ok-soft); color: var(--ok); } .tag.bad { background: var(--bad-soft); color: var(--bad); } .tag.warn { background: var(--warn-soft); color: var(--warn); } .tag.model { background: var(--accent-soft); color: var(--accent); }
+.muted { color: var(--muted); } .small { font-size: 13px; } .mono { font-family: var(--mono); }
+.need { border-left: 3px solid var(--warn); padding-left: 12px; }
+.ask label { display: block; margin: 10px 0 4px; } .ask textarea { width: 100%; min-height: 54px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: inherit; font: inherit; resize: vertical; }
+.ask textarea:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--panel); font-weight: 600; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); } .btn:disabled { opacity: .5; cursor: default; }
+.ask .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+
+.attempt { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); margin-bottom: 0; overflow: hidden; }
+.attempt > header { display: flex; justify-content: space-between; gap: 12px; padding: 10px 16px; background: var(--soft); align-items: baseline; flex-wrap: wrap; }
+.attempt > header b { font-size: 14px; } .attempt .body { padding: 6px 16px 14px; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; }
+.attempt .shot { background: var(--stage); border-radius: 10px; aspect-ratio: 1; overflow: hidden; display: grid; place-items: center; color: var(--muted); font-size: 12px; text-align: center; }
+.attempt .shot img, .stopshot img { width: 100%; height: 100%; object-fit: contain; display: block; }
+@media (max-width: 620px) { .attempt .body { grid-template-columns: 1fr; } .attempt .shot { max-width: 220px; } }
+.rung { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; padding: 7px 0; border-top: 1px solid var(--line); align-items: baseline; }
+.rung:first-child { border-top: 0; } .rung .m { font-weight: 700; } .rung.x .m { color: var(--bad); } .rung.v .m { color: var(--ok); } .rung.i .m { color: var(--muted); }
+.rung .p { font: 600 13px var(--mono); white-space: nowrap; color: var(--muted); } .rung.v .p { color: var(--ink); }
+details > summary { cursor: pointer; color: var(--accent); font-size: 12.5px; } details .more { color: var(--muted); font-size: 12.5px; padding: 4px 0 0; }
+.between { margin: 0 0 0 26px; padding: 10px 0 10px 16px; border-left: 2px dashed var(--bad); color: var(--ink); font-size: 14px; }
+.between b { color: var(--bad); }
+.parts { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; font-size: 13.5px; margin-top: 8px; } .parts span { color: var(--muted); }
+
+#plan { position: sticky; top: 12px; }
+#plan svg { width: 100%; height: auto; display: block; max-height: 70vh; border-radius: 8px; }
+.room { fill: var(--stage); stroke: var(--ink); stroke-width: .045; } svg.photo .room, svg.photo .obst { fill: none; stroke: none; }
+.obst { fill: var(--line); stroke: var(--muted); stroke-width: .02; }
+.lbl { font-size: .19px; fill: var(--muted); paint-order: stroke; stroke: var(--panel); stroke-width: .06px; stroke-linejoin: round; }
+.door { stroke: var(--accent); stroke-width: .06; } .door.tight { stroke: var(--bad); stroke-width: .09; }
+.doorlbl { font-size: .19px; fill: var(--accent); font-family: var(--mono); text-anchor: middle; paint-order: stroke; stroke: var(--panel); stroke-width: .06px; } .doorlbl.tight { fill: var(--bad); font-weight: 700; }
+.route { fill: none; stroke: var(--accent); stroke-width: .055; stroke-linejoin: round; stroke-linecap: round; } .route.carry { stroke: var(--warn); stroke-dasharray: .12 .08; }
+.anchor { fill: var(--warn); } .stop circle { fill: var(--panel); stroke: var(--accent); stroke-width: .04; } .stop text { font: 700 .2px var(--mono); fill: var(--accent); text-anchor: middle; }
+.stop.hot circle { fill: var(--accent); } .stop.hot text { fill: var(--panel); } .stop.dim { opacity: .3; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); padding-top: 8px; } .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+.task { border-top: 1px solid var(--line); padding: 12px 0; cursor: default; } .task:first-child { border-top: 0; padding-top: 0; }
+.task h4 { margin: 0 0 2px; font-size: 15px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; } .task p { margin: 2px 0; }
+.task.hot h4 span.t { color: var(--accent); }
+.stops { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; } .stopshot { width: 92px; } .stopshot div { background: var(--stage); border-radius: 8px; aspect-ratio: 1; overflow: hidden; } .stopshot small { color: var(--muted); font-size: 11.5px; display: block; text-align: center; }
+.num { display: inline-grid; place-items: center; width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--accent); color: var(--accent); font: 700 11px var(--mono); margin-right: 3px; }
+.hint { color: var(--muted); padding: 40px 0; text-align: center; }
+</style>
+</head>
+<body>
+<div class="top">
+  <b>Robot plan for your building</b>
+  <select id="runs" aria-label="Runs"></select>
+  <span class="sp"></span>
+  <a id="eng" href="/">Engineer's view: every step and tool call</a>
+</div>
+<div class="wrap" id="app"><div class="hint">Pick a run.</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const words = s => String(s ?? "").replace(/_/g, " ");
+const money = v => v == null ? "–" : "$" + Number(v).toLocaleString("en-US");
+const NAMES = {tidybot_arx5:"small wheeled base",tidybot_kinova:"medium wheeled base",tidybot_franka:"large wheeled base",go2:"four-legged base (Unitree Go2)",spot:"four-legged base (Boston Dynamics Spot)",
+  none:"none",liftkit_500:"0.5 m lift column",liftkit_900:"0.9 m lift column",liftkit_1400:"1.4 m lift column",lite6:"UFACTORY Lite 6 arm",xarm7:"UFACTORY xArm 7 arm",ur5e:"Universal Robots UR5e arm",piper:"AgileX PiPER arm",vx300s:"Trossen ViperX 300 S arm",z1:"Unitree Z1 arm",fr3:"Franka Research 3 arm",gen3:"Kinova Gen3 arm",crx5ia:"FANUC CRX-5iA arm",ur10e:"Universal Robots UR10e arm",iiwa14:"KUKA iiwa 14 arm",
+  franka_hand:"Franka gripper",piper_gripper:"PiPER gripper",vx300s_gripper:"ViperX gripper",z1_gripper:"Z1 gripper",robotiq_2f85:"Robotiq 2F-85 gripper",xarm_gripper:"xArm gripper",lite6_gripper:"Lite 6 gripper",rplidar_s2:"2D laser scanner",vlp16:"3D laser scanner"};
+const nm = k => NAMES[k] || words(k);
+const robotLine = p => [p.base, p.lift, p.arm, p.gripper].filter(x => x && x !== "none").map(nm).join(" + ");
+// What a failed check means to someone who does not know the check's name.
+const CHECK = {reach: "cannot reach", "tip-over": "would tip over", payload: "cannot lift the weight", "base payload": "base cannot carry the load", doorway: "is too wide for the narrowest door",
+  turn: "is too long to turn in the hallway", "door header": "is too tall for the lowest door", steps: "cannot get over the step", floors: "cannot change floor", opening: "gripper does not open wide enough",
+  force: "cannot grip in the safe range", press: "cannot press hard enough", twist: "cannot turn far enough", "lidar view": "its own arm or lift blocks the laser scanner", "lidar present": "has no laser scanner", "wrist camera": "has no camera at the hand", "ego camera": "has no forward camera"};
+const VERIFY = {force: "How hard to grip", press: "How hard to press"};
+const ASSUMED = {step_max: "Door thresholds and steps were taken as flat; none was measured.", press_force: "The wiping pressure is a default (10 N), not measured.", reach_targets: "Where the hand has to go was worked out from the scan alone, not from a demonstration.", payload: "The object's weight is a default from its card."};
+let run = null, events = [], hot = null, timer = null, draft = {};
+
+function taskTitle(t) {
+  const a = words(t.anchor), o = words(t.object || "");
+  if (t.skill === "wipe") return `Wipe the ${a}`;
+  if (t.skill === "pick") return `Pick up the ${o || a}` + (o && !a.includes(o.split(" ").pop()) ? ` (${a})` : "");
+  if (t.skill === "twist_out") return `Unscrew the ${o} at the ${a}`;
+  if (t.skill === "twist_in") return `Screw in the ${o} at the ${a}`;
+  return `${words(t.skill)} at the ${a}`;
+}
+const doorName = id => words(String(id ?? "").replace(/^d_/, "")) + " door";
+const dest = d => d === "way_out" ? "the way out of the building" : "the " + words(d);
+
+/* ---------- read the event log into the story ---------- */
+function build() {
+  const S = {attempts: [], steps: [], llm: [], tools: 0, tasks: [], reqs: [], conflicts: []};
+  const cur = () => S.attempts[S.attempts.length - 1] || (S.attempts.push({cands: [], standoffs: [], failed: [], arm: []}), S.attempts[0]);
+  for (const e of events) switch (e.kind) {
+    case "run_start": S.world = e.world; S.job = e.job; S.tasksFile = e.tasks_file; break;
+    case "step_end": S.steps.push(e); break;
+    case "llm": S.llm.push(e); break;
+    case "tool": S.tools++; break;
+    case "tasks": S.tasks = e.tasks; S.intake = e.intake || {}; break;
+    case "room_view": S.roomView = e; break;
+    case "building": S.demands = e.demands; S.corridors = e.corridors; break;
+    case "requirements": S.reqs = e.rows; S.conflicts = e.conflicts || []; break;
+    case "candidates": S.attempts.push({funnel: e, cands: [], standoffs: [], failed: [], arm: []}); break;
+    case "candidate": cur().cands.push(e); break;
+    case "design": cur().design = e; break;
+    case "infeasible": cur().infeasible = e; break;
+    case "standoff": { const a = cur(), k = a.standoffs.findIndex(s => s.task === e.task && s.pose.join() === e.pose.join()); if (k >= 0) a.standoffs[k] = e; else a.standoffs.push(e); break; }
+    case "standoff_failed": cur().failed.push(e); break;
+    case "arm_path": cur().arm.push(e); break;
+    case "route": cur().route = e; break;
+    case "robot_fix": cur().fix = e; break;
+    case "program": S.program = e; break;
+    case "awaiting_answers": S.waiting = e; break;
+    case "verdict": S.verdict = e; break;
+    case "run_end": S.end = e; break;
+  }
+  S.final = S.attempts[S.attempts.length - 1] || null;
+  return S;
+}
+const taskOf = (S, id) => S.tasks.find(t => t.id === id);
+const shortTask = (S, id) => { const t = taskOf(S, id); return t ? "“" + taskTitle(t) + "”" : id; };
+function failText(S, f) { return (CHECK[f.check] || `fails the ${f.check} check`) + (f.task ? ` for ${shortTask(S, f.task)}` : ""); }
+function taskState(S, t) {
+  const a = S.final; if (!a || a.infeasible) return {cls: "bad", word: "No robot"};
+  const stops = a.standoffs.filter(s => s.task === t.id), miss = a.failed.filter(f => f.task === t.id);
+  const arms = a.arm.filter(p => p.task === t.id), last = {}; arms.forEach(p => { last[p.pose.join()] = p; });
+  const armBad = stops.filter(s => last[s.pose.join()] && !last[s.pose.join()].ok);
+  if (!stops.length) return {cls: "bad", word: "Cannot do", stops, miss};
+  if (miss.length || armBad.length) return {cls: "warn", word: "Only part of it", stops, miss, armBad};
+  return {cls: "ok", word: "Can do, on paper", stops, miss, seconds: stops.reduce((n, s) => n + ((last[s.pose.join()] || {}).segments || []).reduce((m, g) => m + (g.seconds || 0), 0), 0)};
+}
+function openPoints(S) {
+  const out = [], d = S.final && S.final.design, it = S.intake || {};
+  (it.questions || []).forEach(q => out.push({kind: "question", text: q}));
+  const usedDemo = S.reqs.some(r => String(r.source).startsWith("demo"));
+  if ((it.demos || []).length && !usedDemo) out.push({kind: "demo", text: `${it.demos.length} demonstration${it.demos.length > 1 ? "s were" : " was"} asked for and none was used: ${[...new Set(it.demos.map(m => m.chore))].join(", ")}.`});
+  (d && d.labels || []).forEach(l => { const m = /^(\w+) not verified: (.*)$/.exec(l); out.push({kind: "unverified", text: m ? `${VERIFY[m[1]] || m[1]} was not checked for ${m[2].split(", ").map(id => shortTask(S, id)).join(", ")}.` : l}); });
+  (it.unmet || []).forEach(u => out.push({kind: "unmet", text: u}));
+  const seen = new Set(); S.reqs.filter(r => r.source === "assumed").forEach(r => { if (ASSUMED[r.quantity] && !seen.has(r.quantity)) { seen.add(r.quantity); out.push({kind: "assumed", text: ASSUMED[r.quantity]}); } });
+  S.conflicts.forEach(c => out.push({kind: "conflict", text: c.note || `${c.kind} for ${c.task}`}));
+  const out_ = S.tasks.filter(t => t.carries && t.deliver_to === "way_out");
+  if (out_.length) out.push({kind: "delivery", text: `${out_.map(t => "the " + words(t.object)).join(", ")} ${out_.length > 1 ? "are" : "is"} carried to the way out of the building. Confirm that is where you want ${out_.length > 1 ? "them" : "it"}.`});
+  if (d && !S.verdict) out.push({kind: "sim", text: "Nothing here has been run in a physics simulation yet. Each motion was planned, not tried."});
+  return out;
+}
+
+/* ---------- drawing ---------- */
+const src = f => `/runs/${run.replace(/^runs\//, "")}/${f}`;
+function drawVerdict(S, open) {
+  const a = S.final, d = a && a.design, live = !S.end;
+  let cls = "live", h = "The agent is still working", p = "This page fills in as it goes.";
+  if (S.end && S.end.waiting) { cls = "warn"; const n = S.waiting ? S.waiting.questions.length : 0; h = `Waiting for your answer${n === 1 ? "" : "s"}`;
+    p = `It has ${n} question${n === 1 ? "" : "s"} before it designs anything. Answer below, or tell it to go on with its own guesses.`; }
+  else if (S.end && S.end.error) { cls = "bad"; h = "The run stopped with an error"; p = S.end.error; }
+  else if (a && a.infeasible) { cls = "bad"; h = "No robot in the catalogue can do this job";
+    p = "Closest it got: " + (a.infeasible.binding_checks || []).map(c => failText(S, c)).join("; ") + "."; }
+  else if (d && !live) { const st = S.tasks.map(t => taskState(S, t)), bad = st.filter(s => s.cls !== "ok").length;
+    if (bad) { cls = "bad"; h = `This robot can do ${S.tasks.length - bad} of your ${S.tasks.length} jobs`; p = "See the jobs marked below."; }
+    else if (open.length) { cls = "warn"; h = `A robot can do this, with ${open.length} thing${open.length > 1 ? "s" : ""} still open`; p = "It fits the building and reaches every job on paper. The open points are listed below; several need you."; }
+    else { cls = "ok"; h = "A robot can do this"; p = "It fits the building and reaches every job."; } }
+  const fixes = S.attempts.filter(x => x.fix), first = S.attempts.find(x => x.design), route = a && a.route;
+  const facts = d ? `<div class="facts"><div><b>${money(d.price_usd)}</b><span>${fixes.length && first.design.price_usd !== d.price_usd ? `was ${money(first.design.price_usd)} before ${fixes.length} redesign${fixes.length > 1 ? "s" : ""}` : "parts, list price"}</span></div>`
+    + `<div><b>${d.stowed.width_m.toFixed(2)} m</b><span>wide; tightest door ${S.demands ? S.demands.narrowest_m + " m" : "?"}</span></div>`
+    + (route ? `<div><b>${route.legs.reduce((n, l) => n + (l.length_m || 0), 0).toFixed(0)} m</b><span>driven, ${a.standoffs.length} stop${a.standoffs.length === 1 ? "" : "s"}</span></div>` : "") + `</div>` : "";
+  return `<div class="verdict ${cls}"><div><h2>${esc(h)}</h2><p>${esc(p)}</p></div>${facts}</div>`;
+}
+function drawPath(S) {
+  const c = [], sec = k => S.steps.filter(s => s.step === k).reduce((n, s) => n + s.seconds, 0).toFixed(0) + " s";
+  if (S.tasks.length) c.push(`<a class="chip ${S.intake.source === "model" ? "model" : ""}" href="#understood"><i>Understood</i><small>${S.tasks.length} jobs${(S.intake.questions || []).length ? `, ${S.intake.questions.length} questions` : ""}</small></a>`);
+  if (S.end && S.end.waiting) c.push(`<a class="chip bad" href="#understood"><i>Waiting for you</i><small>nothing designed yet</small></a>`);
+  if (S.demands) c.push(`<a class="chip" href="#building"><i>Measured</i><small>tightest door ${S.demands.narrowest_m} m</small></a>`);
+  S.attempts.forEach((a, i) => {
+    if (a.design) c.push(`<a class="chip ok" href="#robot"><i>Robot ${i + 1}</i><small>${money(a.design.price_usd)}</small></a>`);
+    if (a.infeasible) c.push(`<a class="chip bad" href="#robot"><i>No robot fits</i><small>${a.cands.length} built and checked</small></a>`);
+    const missed = a.fix ? a.fix.tasks.length : new Set(a.failed.map(f => f.task)).size;
+    if (missed) c.push(`<a class="chip bad" href="${a.fix ? "#robot" : "#jobs"}"><i>Tried it: failed</i><small>could not reach ${missed} job${missed > 1 ? "s" : ""}</small></a>`);
+    else if (a.route) c.push(`<a class="chip ok" href="#jobs"><i>Tried it: works</i><small>${a.standoffs.length} stop${a.standoffs.length === 1 ? "" : "s"} planned</small></a>`); });
+  if (S.program) c.push(`<a class="chip ${S.program.source === "model" ? "model" : ""}" href="#jobs"><i>Wrote the routine</i><small>${S.program.steps.length} steps</small></a>`);
+  c.push(`<span class="chip"><i style="color:var(--muted)">Not yet</i><small>run in simulation</small></span>`);
+  return `<div class="eyebrow">How the agent got here</div><div class="path">${c.join('<span class="arrow">→</span>')}</div>`;
+}
+function drawUnderstood(S, open) {
+  const it = S.intake || {}, qs = open.filter(o => o.kind === "question"), demos = it.demos || [];
+  const left = `<div class="card"><div class="eyebrow">What it understood</div>` + (it.understood_as ? `<p style="margin:6px 0 10px">${esc(it.understood_as)}</p>` : `<p class="muted" style="margin:6px 0 10px">The jobs were read from a file; no model read your words.</p>`)
+    + `<ul class="plain">${S.tasks.map((t, i) => `<li><b>${i + 1}. ${esc(taskTitle(t))}</b>${t.carries && t.deliver_to ? ` <span class="muted">then carry it to ${esc(dest(t.deliver_to))}</span>` : ""}${t.why ? `<div class="muted small">${esc(t.why)}</div>` : ""}</li>`).join("")}</ul></div>`;
+  const right = `<div class="card need"><div class="eyebrow">What it needs from you</div>`
+    + ((it.answers || []).length ? `<p class="small muted" style="margin:6px 0">You answered:</p><ul class="plain">${it.answers.map(a => `<li><span class="muted">${esc(a.question)}</span><div><b>${esc(a.answer)}</b></div></li>`).join("")}</ul>` : "")
+    + ((it.unmet || []).length ? `<p class="small" style="margin:12px 0 6px;color:var(--bad)"><b>Asked for, but not in this plan:</b></p><ul class="plain">${it.unmet.map(u => `<li>${esc(u)}</li>`).join("")}</ul>` : "")
+    + (S.end && S.end.waiting ? `<p class="small" style="margin:6px 0">Nothing is designed yet. It will not guess at these.</p>` + askForm(qs, true)
+      : qs.length ? `<p class="small muted" style="margin:${(it.answers || []).length ? 12 : 6}px 0 6px">${it.proceeded_without_answers ? "It asked these and was told to go on without an answer." : "It asked these, then carried on without an answer."} The plan below is built on its own guesses.</p><ul class="plain">${qs.map(q => `<li>${esc(q.text)}</li>`).join("")}</ul>`
+        + (S.end ? `<details style="margin-top:10px"><summary>answer these and plan again</summary>${askForm(qs, false)}</details>` : "")
+      : (it.answers || []).length ? "" : `<p class="muted">It asked nothing.</p>`)
+    + (demos.length ? `<div class="eyebrow" style="margin-top:14px">Show it once</div><ul class="plain" style="margin-top:6px">${demos.map(m => `<li><b>${m.kind === "squeeze" ? "Squeeze" : "Motion"}: ${esc(m.chore)}</b><div class="muted small">${esc(m.why)}</div></li>`).join("")}</ul>` : "") + `</div>`;
+  return `<section id="understood"><h3>What you asked for</h3><p class="sub">Check this first. Everything after it follows from how the job was read.</p><div class="two">${left}${right}</div></section>`;
+}
+function askForm(qs, canProceed) {
+  return `<form class="ask" id="ask">${qs.map((q, i) => `<label for="q${i}">${esc(q.text)}</label><textarea id="q${i}" data-q="${esc(q.text)}" placeholder="Your answer">${esc(draft[q.text] || "")}</textarea>`).join("")}
+    <div class="row"><button class="btn" type="submit">Send answers and plan</button>${canProceed ? `<button class="btn ghost" type="button" id="goon">Go on without answers</button>` : ""}<span class="small muted" id="askmsg"></span></div></form>`;
+}
+function drawBuilding(S) {
+  const dm = S.demands; if (!dm) return "";
+  const r = q => S.reqs.find(x => x.quantity === q && !x.task), row = (label, measured, limit) => `<li><b>${label}</b> ${measured}${limit ? `<div class="muted small">${limit}</div>` : ""}</li>`;
+  const w = r("base_width_max"), hh = r("stowed_height_max"), st = r("step_max");
+  return `<section id="building"><h3>What your building demands</h3><p class="sub">Measured on the route to each job before any robot was chosen. These set the robot's size.</p><div class="card"><ul class="plain">`
+    + row("Narrowest door on the way:", `${dm.narrowest_m} m, the ${esc(doorName(dm.narrowest_doorway))}`, w ? `so the robot can be at most ${w.value} m wide` : "")
+    + row("Lowest door frame:", `${dm.lowest_header_m} m`, hh ? `so it must fold down to ${hh.value} m or less` : "")
+    + row("Tallest step:", `${dm.tallest_step_m} m`, st && st.source === "assumed" ? "assumed, not measured" : "")
+    + (dm.tightest_turn_m ? row("Tightest turn into a doorway:", `a ${dm.tightest_turn_m} m hallway`, "") : "") + `</ul></div></section>`;
+}
+function drawRobot(S) {
+  if (!S.attempts.length) return "";
+  let h = `<section id="robot"><h3>The robot, and why not a cheaper one</h3><p class="sub">Options are tried from the cheapest up. Each line is one reason and how many cheaper robots it ruled out; a robot that failed for two reasons is counted on both lines.</p>`;
+  S.attempts.forEach((a, i) => {
+    const d = a.design, fn = a.funnel, groups = {};
+    a.cands.filter(c => !c.feasible && (!d || c.price_usd <= d.price_usd)).forEach(c => { const seen = new Set(); c.failed.forEach(f => { const k = f.check + "|" + (f.task || ""); if (seen.has(k)) return; seen.add(k); (groups[k] = groups[k] || {f, list: []}).list.push(c); }); });
+    const rungs = Object.values(groups).sort((x, y) => y.list.length - x.list.length).map(g => { const ps = g.list.map(c => c.price_usd), lo = Math.min(...ps), hi = Math.max(...ps);
+      return `<div class="rung x"><span class="m">✕</span><div>${g.list.length} cheaper robot${g.list.length > 1 ? "s" : ""} ${g.list.length > 1 ? "were" : "was"} dropped: ${esc(failText(S, g.f))}`
+        + `<details><summary>the measurement</summary><div class="more">${esc(g.f.why || `${g.f.value} against ${g.f.limit} ${g.f.unit || ""}`)}<br>For example: ${esc(robotLine(g.list[0].parts))}.</div></details></div><span class="p">${lo === hi ? money(lo) : money(lo) + " to " + money(hi)}</span></div>`; }).join("");
+    const title = S.attempts.length > 1 ? `${["First", "Second", "Third", "Fourth", "Fifth", "Sixth"][i] || "Next"} design` : "The design";
+    h += `<div class="attempt"><header><b>${title}</b><span class="muted small">${fn ? `${fn.considered.toLocaleString()} combinations of parts, ${fn.passed_arithmetic.toLocaleString()} fit on paper, ${a.cands.length} built and checked` : ""}</span></header><div class="body">`
+      + `<div class="shot">${d && d.frame ? `<img alt="The chosen robot, folded" src="${src(d.frame)}">` : a.infeasible ? "no robot" : "no picture"}</div><div>` + rungs
+      + (d ? `<div class="rung v"><span class="m">✓</span><div><b>Cheapest that passes every check</b><div class="parts">${[["Base", nm(d.parts.base)], ["Lift", nm(d.parts.lift)], ["Arm", nm(d.parts.arm)], ["Gripper", nm(d.parts.gripper)], ["Eyes", nm(d.parts.lidar) + (d.parts.wrist_cam ? ", camera at the hand" : "")]].map(([k, v]) => `<span>${k}</span><b style="font-weight:500">${esc(v)}</b>`).join("")}</div></div><span class="p">${money(d.price_usd)}</span></div>` : "")
+      + (a.infeasible ? (a.infeasible.binding_checks || []).map(c => `<div class="rung x"><span class="m">✕</span><div><b>Even the closest robot ${esc(failText(S, c))}</b><div class="muted small">${esc(c.why || "")}</div></div><span class="p">${money(a.infeasible.closest_price_usd)}</span></div>`).join("") : "")
+      + `</div></div></div>`;
+    if (a.fix) { const next = S.attempts[i + 1] && S.attempts[i + 1].design, delta = next && d ? next.price_usd - d.price_usd : null;
+      h += `<div class="between"><b>Then it tried that robot in your building, and it failed.</b> Parked anywhere the floor allows, the ${esc(nm(a.fix.ruled_out.arm))}${a.fix.ruled_out.lift !== "none" ? " on the " + esc(nm(a.fix.ruled_out.lift)) : " with no lift"} could not reach all of ${a.fix.tasks.map(t => esc(shortTask(S, t))).join(" and ")}.`
+        + (a.failed.length ? `<details><summary>what fell short</summary><div class="more">${a.failed.map(f => `${esc(shortTask(S, f.task))}: ${esc(f.reason || "")}. ${esc((f.notes || []).slice(0, 2).join("; "))}`).join("<br>")}</div></details>` : "")
+        + ` That arm and lift were ruled out and it designed again${delta != null ? ` <b style="color:var(--ink)">(${delta >= 0 ? "+" : "−"}${money(Math.abs(delta))})</b>` : ""}.</div>`; }
+  });
+  return h + `</section>`;
+}
+function drawPlan(S) {
+  const w = S.world; if (!w || !w.rooms) return "";
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  w.rooms.forEach(r => r.polygon.forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
+  const rv = S.roomView, pad = rv ? .3 : .6, Y = y => y1 - y + y0, a = S.final || {standoffs: []}, tight = S.demands && S.demands.narrowest_doorway;
+  const layer = f => rv && f ? `<image href="${src(f)}" x="${rv.extent[0]}" y="${Y(rv.extent[3])}" width="${rv.extent[2] - rv.extent[0]}" height="${rv.extent[3] - rv.extent[1]}" preserveAspectRatio="none"/>` : "";
+  let h = `<svg class="${rv ? "photo" : ""}" viewBox="${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}" role="img" aria-label="Your rooms from above, with the robot's route and stops">` + layer(rv && rv.frame);
+  w.rooms.forEach(r => { const rx = Math.max(...r.polygon.map(p => p[0])), ty = Math.max(...r.polygon.map(p => p[1]));
+    h += `<polygon class="room" points="${r.polygon.map(([x, y]) => `${x},${Y(y)}`).join(" ")}"/><text class="lbl" text-anchor="end" x="${rx - .12}" y="${Y(ty) + .27}">${esc(words(r.id))}</text>`; });
+  if (!rv) (w.obstacles || []).forEach(o => { h += `<rect class="obst" x="${o.box.min[0]}" y="${Y(o.box.max[1])}" width="${o.box.max[0] - o.box.min[0]}" height="${o.box.max[1] - o.box.min[1]}"/>`; });
+  (w.doorways || []).forEach(d => { const [px, py] = d.position, [ax, ay] = d.along, k = d.width_m / 2, t = d.id === tight;
+    h += `<line class="door ${t ? "tight" : ""}" x1="${px - ax * k}" y1="${Y(py - ay * k)}" x2="${px + ax * k}" y2="${Y(py + ay * k)}"/><text class="doorlbl ${t ? "tight" : ""}" x="${px + (ay ? .36 : 0)}" y="${Y(py) + (ax ? -.14 : .06)}">${d.width_m} m</text>`; });
+  const shown = a.standoffs.filter(s => !hot || s.task === hot); (shown.length ? shown : a.standoffs).forEach(s => { h += layer(s.top); });
+  if (a.route) a.route.legs.forEach(l => { if (l.waypoints && l.waypoints.length > 1) h += `<polyline class="route ${l.carrying ? "carry" : ""}" points="${l.waypoints.map(p => `${p[0]},${Y(p[1])}`).join(" ")}"/>`; });
+  (w.anchors || []).forEach(an => { h += `<rect class="anchor" x="${an.point[0] - .06}" y="${Y(an.point[1]) - .06}" width=".12" height=".12" transform="rotate(45 ${an.point[0]} ${Y(an.point[1])})"/>`; });
+  if (w.dock) h += `<text class="lbl" text-anchor="middle" x="${w.dock.pose[0]}" y="${Y(w.dock.pose[1]) - .3}">dock</text>`;
+  a.standoffs.forEach((s, i) => { h += `<g class="stop ${hot ? (s.task === hot ? "hot" : "dim") : ""}"><circle cx="${s.pose[0]}" cy="${Y(s.pose[1])}" r=".17"/><text x="${s.pose[0]}" y="${Y(s.pose[1]) + .07}">${i + 1}</text></g>`; });
+  return h + `</svg><div class="legend"><span><i style="background:var(--accent)"></i>drives</span><span><i style="background:var(--warn)"></i>drives while carrying</span><span><i style="background:var(--bad)"></i>tightest door</span><span>numbers are where it parks, in order</span></div>`;
+}
+function drawJobs(S) {
+  const a = S.final; if (!a || !a.design) return "";
+  const notes = {}; (S.program ? S.program.steps : []).forEach(s => { if (s.task && s.note && s.primitive !== "move_base") (notes[s.task] = notes[s.task] || []).push(s); });
+  const cards = S.tasks.map((t, i) => { const st = taskState(S, t), nums = (st.stops || []).map(s => a.standoffs.indexOf(s) + 1);
+    const leg = a.route && a.route.legs.find(l => l.from === t.id && l.carrying);
+    return `<div class="task ${hot === t.id ? "hot" : ""}" data-task="${esc(t.id)}"><h4><span class="t">${i + 1}. ${esc(taskTitle(t))}</span><span class="tag ${st.cls}">${st.word}</span></h4>`
+      + (nums.length ? `<p class="small">${nums.map(n => `<span class="num">${n}</span>`).join("")} parks ${nums.length === 1 ? "once" : nums.length + " times"}${st.seconds ? `; about ${Math.round(st.seconds)} s of arm work` : ""}${leg ? `; then carries it ${leg.length_m.toFixed(1)} m to ${esc(dest(leg.to))}` : ""}.</p>` : "")
+      + (st.miss || []).map(f => `<p class="small" style="color:var(--bad)">${esc(f.reason || "No place to park reaches it")}.</p>`).join("")
+      + (st.armBad || []).map(s => `<p class="small" style="color:var(--bad)">From stop ${a.standoffs.indexOf(s) + 1} the arm could not follow the whole motion.</p>`).join("")
+      + (st.stops && st.stops.some(s => s.frame) ? `<div class="stops">${st.stops.filter(s => s.frame).map(s => `<div class="stopshot"><div><img loading="lazy" alt="The robot reaching at stop ${a.standoffs.indexOf(s) + 1}" src="${src(s.frame)}"></div><small>stop ${a.standoffs.indexOf(s) + 1}${s.covers ? ", " + esc(s.covers.replace(/ of \d+$/, "")) : ""}</small></div>`).join("")}</div>` : "")
+      + (notes[t.id] ? `<details style="margin-top:6px"><summary>the agent's notes for whoever sets it up (${notes[t.id].length})</summary><div class="more">${notes[t.id].map(s => `<b>${esc(words(s.primitive))}:</b> ${esc(s.note)}`).join("<br>")}</div></details>` : "") + `</div>`; }).join("");
+  return `<section id="jobs"><h3>Your jobs, one by one</h3><p class="sub">Point at a job to see where the robot parks for it. “On paper” means the reach and the motion were planned, not yet tried in simulation.</p><div class="two"><div class="card">${cards}</div><div class="card" id="plan">${drawPlan(S)}</div></div></section>`;
+}
+function drawOpen(S, open) {
+  const rest = open.filter(o => o.kind !== "question"); if (!rest.length) return "";
+  const label = {unmet: ["bad", "not in the plan"], demo: ["warn", "needs you"], unverified: ["warn", "not checked"], assumed: ["", "assumed"], conflict: ["bad", "conflict"], delivery: ["warn", "check this"], sim: ["", "not done"]};
+  return `<section id="open"><h3>What is not proven yet</h3><p class="sub">${S.final && S.final.infeasible ? "These guesses went into that answer. Changing one could change it." : "The plan holds only if these do. None of them stopped the run."}</p><div class="card"><ul class="plain">${rest.map(o => `<li><span class="tag ${label[o.kind][0]}">${label[o.kind][1]}</span> ${esc(o.text)}</li>`).join("")}</ul></div></section>`;
+}
+function draw() {
+  if (!events.length) { $("app").innerHTML = `<div class="hint">Waiting for the run to start.</div>`; return; }
+  const S = build(), open = openPoints(S), secs = S.end && S.end.seconds;
+  $("app").innerHTML = `<div class="eyebrow">The job</div><p class="job">${esc(S.job || (S.intake && S.intake.job) || "Jobs read from " + (S.tasksFile || "a file"))}</p>`
+    + drawVerdict(S, open) + drawPath(S) + (S.tasks.length ? drawUnderstood(S, open) : "") + drawBuilding(S) + drawRobot(S) + drawJobs(S) + drawOpen(S, open)
+    + `<section><p class="muted small">Behind this page: ${S.tools} measurements and checks by code, ${S.llm.length} question${S.llm.length === 1 ? "" : "s"} to a language model${secs ? `, ${secs} s in all` : ""}. Pass and fail are decided by code; the model reads the job and writes the routine. <a href="/?run=${encodeURIComponent(run)}">See every step</a>.</p></section>`;
+  $("eng").href = "/?run=" + encodeURIComponent(run);
+}
+$("app").addEventListener("mouseover", e => { const t = e.target.closest(".task"); const id = t ? t.dataset.task : null; if (id === hot || (!t && !e.target.closest("#jobs .card:first-child"))) return;
+  hot = id; const S = build(); $("plan").innerHTML = drawPlan(S); document.querySelectorAll(".task").forEach(n => n.classList.toggle("hot", n.dataset.task === hot)); });
+
+// Answers go to a new run of the same job in the same building; this run stays as the record of what was asked.
+async function send(proceed) {
+  const answers = [...document.querySelectorAll("#ask textarea")].map(t => ({question: t.dataset.q, answer: t.value.trim()})).filter(a => a.answer);
+  const msg = $("askmsg");
+  if (!proceed && !answers.length) { msg.textContent = "Write at least one answer first."; return; }
+  document.querySelectorAll("#ask button").forEach(b => { b.disabled = true; });
+  try { const r = await fetch("/api/run", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({resume: run, answers, proceed})}), j = await r.json();
+    if (!r.ok || !j.run) throw new Error(j.error || "the server did not start a run");
+    draft = {}; await loadRuns(j.run); }
+  catch (e) { msg.textContent = "Could not send: " + e.message; document.querySelectorAll("#ask button").forEach(b => { b.disabled = false; }); }
+}
+$("app").addEventListener("submit", e => { if (e.target.id === "ask") { e.preventDefault(); send(false); } });
+$("app").addEventListener("click", e => { if (e.target.id === "goon") send(true); });
+$("app").addEventListener("input", e => { if (e.target.dataset.q) draft[e.target.dataset.q] = e.target.value; });
+async function poll() {
+  try { const r = await fetch(src("events.jsonl"), {cache: "no-store"}); if (r.ok) { const fresh = [];
+      for (const l of (await r.text()).split("\n").filter(Boolean)) { try { fresh.push(JSON.parse(l)); } catch (e) { break; } }
+      if (fresh.length !== events.length) { events = fresh; draw(); } } } catch (e) {}
+  if (!events.some(e => e.kind === "run_end")) timer = setTimeout(poll, 1000);
+}
+function open(r) { clearTimeout(timer); run = r; events = []; hot = null; history.replaceState(null, "", "?run=" + encodeURIComponent(r)); draw(); poll(); }
+async function loadRuns(go) {
+  const list = await (await fetch("/api/runs")).json(), q = go || new URLSearchParams(location.search).get("run");
+  $("runs").innerHTML = list.map(r => `<option value="${esc(r.run)}">${esc(r.run.replace(/^runs\/(gallery\/)?/, "") + (r.job ? ": " + r.job.slice(0, 60) : ""))}</option>`).join("");
+  if (go && !list.some(r => r.run === go)) $("runs").innerHTML = `<option value="${esc(go)}">${esc(go.replace(/^runs\//, ""))}</option>` + $("runs").innerHTML;
+  const first = q || (list[0] && list[0].run); if (first) { $("runs").value = first; open(first); }
+}
+$("runs").onchange = e => open(e.target.value);
+loadRuns();
+</script>
+</body>
+</html>

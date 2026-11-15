@@ -16,3 +16,5 @@
 {"t": 47.0, "kind": "arm_path", "task": "t1", "skill": "twist_out", "pose": [2.141, 3.141, -2.3562], "ok": true, "why": null, "rejected": 0, "segments": [{"phase": "approach", "kind": "follow_path", "samples": 359, "seconds": 17.9}]}
 {"t": 88.0, "kind": "program", "source": "model", "model": "claude-opus-5-5", "rejected": null, "steps": []}
 {"t": 88.2, "kind": "run_end", "ok": true, "summary": ["design: ..."], "seconds": 88.2}
+{"t": 13.0, "kind": "awaiting_answers", "questions": ["Where should the bulb go once it is out?"], "demos": []}
+{"t": 13.1, "kind": "run_end", "ok": true, "waiting": true, "seconds": 13.1}

@@ -5,6 +5,10 @@
 
 Each step is a plain function `step(state: dict) -> dict` in agent/nodes/, called here in a fixed order.
 Exit code 0 only when every file written validates against contracts/.
+
+When intake has questions for the person, the run stops there (exit code 3) and writes them to intake.json.
+Run again with `--answers answers.json` ([{"question", "answer"}]) to go on, or with `--proceed` to go on
+without answers; the unanswered questions then stay on record as open.
 """
 from __future__ import annotations
 
@@ -21,6 +25,7 @@ from .tools import trace, viz
 
 REPO = Path(__file__).resolve().parents[1]
 MAX_ROBOT_FIXES = 5  # the loop stops after this many redesigns
+EXIT_WAITING = 3  # intake asked the person something and nobody said to go on without an answer
 OUTPUTS = ["world.json", "tasks.json", "demo.json", "grip.json", "requirements.json", "design.json", "decisions.jsonl",
            "robot.xml", "build.json", "route.json", "trajectory.json", "program.json", "intake.json", "trace.json"]
 
@@ -41,6 +46,12 @@ def pipeline(state: dict) -> dict:
     if "tasks" not in state:
         state = observe.node("0 intake", intake.step)(state)
     observe.emit("tasks", tasks=state["tasks"], intake=state.get("intake"))
+    asked = (state.get("intake") or {}).get("questions") or []
+    if asked and not state.get("proceed"):  # the person's turn: nothing is designed on a guess
+        observe.emit("awaiting_answers", questions=asked, demos=state["intake"].get("demos", []))
+        return {**state, "waiting": True}
+    if asked:
+        state["intake"] = {**state["intake"], "proceeded_without_answers": True}
     top = viz.room_view(state["world"])  # the rooms from above, for the live view (None when frames are off)
     if top:
         observe.emit("room_view", **top)
@@ -110,6 +121,18 @@ def write_run(state: dict, out: Path) -> list:
     return [n for n in OUTPUTS if (out / n).exists()]
 
 
+def write_waiting(state: dict, out: Path) -> list:
+    """What a run that stopped for answers leaves: the world, the tasks as read so far, and intake.json with
+    the questions. Older outputs are removed, so the folder never shows a design the questions could change."""
+    out.mkdir(parents=True, exist_ok=True)
+    for name in OUTPUTS:
+        (out / name).unlink(missing_ok=True)
+    _write(out / "world.json", state["world"])
+    _write(out / "tasks.json", {"tasks": state["tasks"]})
+    _write(out / "intake.json", state["intake"])
+    return ["world.json", "tasks.json", "intake.json"]
+
+
 def validate_run(out: Path) -> list:
     """[(file, error or None)] for every file in the folder that has a schema in contracts/."""
     v, results = _validator(), []
@@ -127,13 +150,17 @@ def validate_run(out: Path) -> list:
 
 def summary(state: dict) -> list:
     """The lines printed at the end of a run."""
-    d, lines = state["design"], []
+    d, lines = state.get("design") or {}, []
     it = state.get("intake") or {}
     if it.get("source") == "model":
         lines.append(f"intake ({it['model']}): {it['understood_as']}")
         lines += [f"  task {t['id']}: {t['skill']} on {t['anchor']}" + (f" with {t['object']}" if t.get("object") else "") for t in state["tasks"]]
         lines += [f"  demo to record: {m['chore']} ({m['kind']})" for m in it["demos"]]
-        lines += [f"  question: {q}" for q in it["questions"]]
+        lines += [f"  answered: {x['question']} -> {x['answer']}" for x in it.get("answers", [])]
+        lines += [f"  question{' (unanswered, went on anyway)' if it.get('proceeded_without_answers') else ''}: {q}" for q in it["questions"]]
+        lines += [f"  not covered by the tasks: {u}" for u in it.get("unmet", [])]
+    if state.get("waiting"):
+        return lines + ["waiting for answers; nothing was designed"]
     if state["infeasible"]:
         inf = d.get("infeasible") or {}
         lines.append("design: INFEASIBLE, no candidate passes every check; pathing skipped")
@@ -200,6 +227,8 @@ def main(argv=None) -> int:
     ap.add_argument("--job", help="the job in words; a model turns it into the task list (needs ANTHROPIC_API_KEY)")
     ap.add_argument("--frames", action="store_true", help="also render the robot as the run goes, for the live view in web/")
     ap.add_argument("--no-model", action="store_true", help="skip every model step; tasks come from --tasks, the program by rule")
+    ap.add_argument("--answers", help='the person\'s answers to intake\'s questions: a JSON list of {"question", "answer"}')
+    ap.add_argument("--proceed", action="store_true", help="do not stop when intake has questions; they stay on record as unanswered")
     ap.add_argument("--demo")
     ap.add_argument("--grip")
     ap.add_argument("--demo-task", help="the task id the demo and grip files belong to (default: the first task)")
@@ -215,7 +244,8 @@ def main(argv=None) -> int:
     if a.no_model:
         __import__("os").environ["AGENT_NO_MODEL"] = "1"
     state = {"world": json.loads(Path(a.world).read_text()), "tasks_file": a.tasks, "prepass_radius_m": a.radius,
-             "job": a.job, "use_model": not a.no_model}
+             "job": a.job, "use_model": not a.no_model, "proceed": a.proceed,
+             "answers": json.loads(Path(a.answers).read_text()) if a.answers else []}
     state["demo_task"] = a.demo_task
     if a.demo:
         state["demo"] = json.loads(Path(a.demo).read_text())
@@ -237,6 +267,18 @@ def main(argv=None) -> int:
         observe.emit("run_end", ok=False, error=f"{type(e).__name__}: {e}")
         observe.finish()
         raise
+
+    if state.get("waiting"):
+        written = write_waiting(state, out)
+        qs = state["intake"]["questions"]
+        print(f"run folder: {out} ({len(written)} files, {round(time.perf_counter() - t0, 1)} s)")
+        print(f"waiting for {len(qs)} answer{'s' if len(qs) != 1 else ''}; nothing was designed:")
+        for q in qs:
+            print(f"  question: {q}")
+        print(f"answer in a JSON list of {{\"question\", \"answer\"}} and run again with --answers, or run again with --proceed")
+        observe.emit("run_end", ok=True, waiting=True, seconds=round(time.perf_counter() - t0, 1))
+        observe.finish()
+        return EXIT_WAITING
 
     written = write_run(state, out)
     checked = validate_run(out)
