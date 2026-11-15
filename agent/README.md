@@ -7,7 +7,7 @@ PYTHONPATH=. python -m agent.run --world contracts/world.example.json --tasks ag
     --demo contracts/demo.example.json --grip contracts/grip.example.json --demo-task t1 --out runs/scratch/example
 ```
 
-It writes `world.json`, `tasks.json`, `demo.json` and `grip.json` (when given), `requirements.json`, `design.json`, `decisions.jsonl`, `robot.xml`, `build.json`, `route.json`, `trajectory.json` and `trace.json`, validates the folder with `contracts/validate.py`, and prints the design, each task's standoff and whether its arm path was built, every `not_assessable` check, and every failure. The exit code is 0 when every file fits its schema. A task that cannot be done is recorded and printed; it does not change the exit code. Tests: `PYTHONPATH=. python -m pytest agent -q`.
+It writes `world.json`, `tasks.json`, `demo.json` and `grip.json` (when given), `requirements.json`, `design.json`, `decisions.jsonl`, `robot.xml`, `build.json`, `route.json`, `trajectory.json`, `program.json`, `intake.json` and `trace.json`, and keeps the model's own plan and notes in `workspace/` (see [the workspace](#the-workspace-a-virtual-file-system)), validates the folder with `contracts/validate.py`, and prints the design, each task's standoff and whether its arm path was built, every `not_assessable` check, and every failure. The exit code is 0 when every file fits its schema. A task that cannot be done is recorded and printed; it does not change the exit code. Tests: `PYTHONPATH=. python -m pytest agent -q`.
 
 ## Questions stop the run
 
@@ -23,20 +23,79 @@ With `--job`, intake may have questions for the person (a drop-off place nobody 
 | File | Holds |
 | :-- | :-- |
 | `run.py` | the runner: the steps in order, the run folder, validation, the summary |
-| `nodes/intake.py` | step 0, a stub: the tasks come from a JSON file |
+| `nodes/intake.py` | step 0: with `--job`, the model turns the words into tasks, demonstrations to ask for and questions; with `--tasks`, the tasks come from a JSON file |
 | `nodes/prepass.py` | step 1: corridors, building demands, free floor near each anchor |
 | `nodes/ledger.py` | step 2: `requirements.json` |
 | `nodes/design.py` | steps 3 and 4: design, compose, `decisions.jsonl` |
 | `nodes/pathing.py` | step 5: standoffs, route, arm paths |
+| `nodes/program.py` | step 5d: `program.json`, written by the model in the workspace and checked by code, or built by rule |
+| `llm.py` | the one door to Claude: `ask_json`, one request or a loop of tool calls and checked revisions |
+| `workspace.py` | the virtual file system a model step plans through, and its save and load |
+| `observe.py` | the live event log (`events.jsonl`) and LangSmith tracing |
 | `tools/composer.py`, `nav.py`, `motion.py` | pass-through wrappers around each module's `api.py`; each call adds `{n, name, seconds, summary}` to the trace in `tools/trace.py` |
 | `tasks.example.json` | three jobs on the example world, the bag stated as 1.0 kg |
 | `tasks.heavy_bag.json`, `grip.glove.example.json` | the same jobs with the bag at its card mass of 4 kg, and a grip file whose source is `glove`: together they end in an infeasible design |
 
 Nothing outside `tools/` imports `composer`, `nav` or `motion` (a test checks it).
 
-## Not a graph yet
+## How the agent works
 
-There is no LangGraph dependency and no model call. Every step is a plain function `step(state: dict) -> dict` that returns a new state with its keys added, so each can become a graph node as it is; `run.pipeline` is the fixed order the graph will replace. State keys: `world`, `tasks`, `demos` and `grips` (`{task id: file}`), `building`, `requirements`, `design`, `decisions`, `infeasible`, `robot_xml`, `build`, `route`, `trajectory`.
+This is a harness, not a free-running agent. Code owns the order of the steps, every number and every check; the model is called at two points (intake and the program) and whatever it returns is checked by code before it is used. It is not built on LangGraph or on the `deepagents` package, but it takes four of the five ideas a deep agent rests on (all but sub-agents), and this section says where each one lives.
+
+| Idea | Here |
+| :-- | :-- |
+| A plan the agent keeps and updates | `plan.md` in the workspace: `- [ ]` lines the model writes first and ticks as it goes |
+| A file system for context | the workspace (`workspace.py`): the run so far as read-only files, the model's notes as its own files |
+| Loops | three, each with a hard stop: tool calls, checked revisions, robot fixes (below) |
+| A detailed prompt per step | `SYSTEM` in `nodes/intake.py` and `nodes/program.py`, plus `workspace.GUIDE` |
+| Sub-agents | none. One model, one conversation per model step |
+
+### The steps and the shared state
+
+Every step is a plain function `step(state: dict) -> dict` that returns a new state with its keys added; `run.pipeline` calls them in a fixed order. The state is the shared context between steps: `world`, `tasks`, `intake`, `demos` and `grips` (`{task id: file}`), `building`, `requirements`, `design`, `decisions`, `infeasible`, `excluded`, `robot_fixes`, `robot_xml`, `build`, `route`, `trajectory`, `program`, `workspace`. No step reads another step's prompt or conversation. What one model step wants a later one to know goes in the workspace; what code wants a model step to know is mounted there from the state.
+
+Model steps are off with `--no-model`, with no `ANTHROPIC_API_KEY`, or with `AGENT_NO_MODEL` set (the tests set it). Each then takes its rule-based path: tasks from `--tasks`, the program from `program.by_rule`. The model is `AGENT_MODEL` (default `claude-opus-5-5`).
+
+### The workspace, a virtual file system
+
+A long job does not fit in one prompt that the model then has to hold in its head. The program step therefore gets files and four tools (`ls`, `read_file`, `write_file`, `edit_file`) instead of the plan pasted in:
+
+| Path | Written by | Holds |
+| :-- | :-- | :-- |
+| `run/tasks.json`, `run/requirements.json`, `run/legs.json`, `run/standoffs.json` | code, read-only | the tasks, the ledger rows with their ids, the route's legs by number, each standoff with its planned arm segments |
+| `run/design.json`, `run/robot_fixes.json`, `run/intake.json` | code, read-only | the chosen robot and its checks, the designs ruled out and why, how the job was read and the person's answers |
+| `plan.md` | the model | what it will do, one `- [ ]` line each, ticked when done |
+| `notes/...` | the model | what it worked out: an ordering, a number and where it came from |
+| `notes/checker_log.md` | code | every problem the checker found in an earlier answer for this job |
+
+Files from an earlier run can be out of date (answers can change the tasks, a robot fix changes the route), so the prompt tells the model to check them against `run/` before relying on them.
+
+The files live in memory (`state["workspace"] = {"key", "files"}`). Paths are relative; an absolute path, `..`, a hidden name or a write under `run/` is refused, and the refusal goes back to the model as the tool's error. A file holds at most 60,000 characters, the model at most 64 files, and one read returns 400 lines (it reads on with `offset`). The disk is touched only at the end of a run, when the model's own files are written to `<run folder>/workspace/`, and at the start, when they are loaded back. They are loaded only for the same building and the same job (`workspace.key_for`), so a rerun with `--answers`, a rerun after a failure and a rerun after a robot fix all start from the earlier plan and notes, and a different job in the same folder starts empty. The `run/` files are never saved: they are rebuilt from the state each time.
+
+`--no-workspace` (or `AGENT_NO_WORKSPACE`) sends the program step back to one request with the plan in the prompt.
+
+### The loops
+
+| Loop | Where | What goes round | It stops |
+| :-- | :-- | :-- | :-- |
+| Tool calls | `llm.ask_json(tools=...)` | the model calls workspace tools; every result of a turn goes back in one message | when it answers, or after 40 requests (the step then falls back to the rule) |
+| Checked revisions | `llm.ask_json(review=...)` | code checks the answer (`program.check`); the model is shown the problems in the same conversation and answers again | after 2 revisions; the caller checks the last answer itself and uses the rule-built program if it still fails |
+| Robot fixes | `run.pipeline` | a design pathing cannot use becomes an exclusion and the design step runs again | after 5; the best attempt is kept |
+| Questions | `run.main`, across runs | intake's questions stop the run (exit 3); the person answers and runs again | when intake has nothing left to ask, or with `--proceed` |
+| Spare standoffs | `nodes/pathing.py` | an arm path that cannot be built is retried from the next proposed pose | when the proposals run out |
+
+In every loop the model proposes and code decides. A model answer that fails its check is never used: `program.json` then has `source: "rule"` and keeps the model's problems under `model_rejected`. When the model worked in the workspace, `program.json` also has `planning`: `{workspace, files, tool_calls, turns, revisions}`.
+
+### Watching it
+
+`events.jsonl` in the run folder gets one line per event as the run goes. The model's side shows as `llm_start`, `llm_tool` (one per file operation), `llm_review` (one per checked revision), `llm` (the answer and token use) and `workspace` (the files it kept, with their contents). With LangSmith tracing on, the whole loop of a model step is one `llm` run.
+
+### Not here yet
+
+- The workspace loop has run live once, on the example job (11 legs, 9 standoffs): 9 file operations, no revision needed, a 42-step program that passed the checker. A job long enough to need the plan ticked off over many turns, and a rerun that starts from saved notes, have only been run against a scripted stand-in for the model (`tests/test_workspace.py`).
+- Intake does not use the workspace: it is still one request. Its result reaches the program step as `run/intake.json`.
+- The design workflow in `design_flow/` (LangGraph) has no workspace and shares no state with this pipeline.
+- No sub-agents, and no model step chooses a fix in the robot-fix loop; that loop is rules.
 
 ## The tasks file
 
@@ -68,7 +127,7 @@ An empty force band (physics minimum above the demo's peak) goes in `conflicts` 
 
 ## Stubbed or left out
 
-- Intake (words to tasks), the demonstration interrupts, `program.json` (step 5d), the simulator, and the failure loop (program fix, robot fix, back to the ledger). The only program fix done is the spare standoff.
+- The demonstration interrupts, the simulator, and the parts of the failure loop that need it. The robot fix (a design ruled out, back to the design step) runs on pathing failures only, and the only program fix done is the spare standoff.
 - `task_yaw_rad` is always 0: the three jobs act on horizontal anchors and `motion` ignores the field. The wipe's stroke direction is fixed in the ledger instead of being chosen with the base pose.
 - The hand-to-gripper transform (gap G12) is not applied to the re-anchored demo, and the bulb's unscrew torque is not in the force band's low end (it is on no card).
 - The demo's turns are not used (the card's are), as the doc says.

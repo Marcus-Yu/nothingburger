@@ -242,6 +242,8 @@ Out: base waypoints, the standoff pose per task, and the clearance at each door 
 
 The **model** writes `program.json` from the task list, the route and the arm paths: ordered primitives with parameters (move base, lift, follow path, grasp with a force band, twist, wipe, retreat, place). Each primitive cites the requirements it serves.
 
+The model does this in a workspace, not from one prompt: the tasks, the ledger, the legs and the standoffs are read-only files, and it keeps a plan and notes of its own next to them, which stay for the next run of the same job. Code checks the program (every leg once and in order, every planned piece of arm work present, every cited requirement real, every force inside its band) and shows the model what is wrong, at most twice; a program that still fails is replaced by the one built by rule. See [`agent/README.md`](../agent/README.md#how-the-agent-works).
+
 ## Step 6. Simulate and judge
 
 `sim.api.run(run_dir)` runs the program in MuJoCo on the mesh. The run checks: the task's outcome (the bulb turned out and in; the patch covered; the bag reached the way out), pad force inside the band throughout, no unplanned contact, no tip. The verdict keeps the source labels: a force inside the band is "inside the band measured at home", never a fact about the building.
@@ -277,7 +279,7 @@ A decision's `revisit_if` is tested on every pass. When a new constraint matches
 | 5a Standoff | code | propose in `nav`, check IK in `motion`, called in turn by the agent node |
 | 5b Route | code | `nav.api.plan(world, build)` |
 | 5c Arm path | code | `motion.api.retarget(demo, robot)` |
-| 5d Program | model | agent node |
+| 5d Program | model, working in the workspace; the program is checked by code | agent node |
 | 6 Simulate | code | `sim.api.run(run_dir)` |
 | Loop: diagnose and choose the fix | model; the fix is checked by code | agent node |
 
