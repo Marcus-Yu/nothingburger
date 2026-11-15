@@ -86,6 +86,7 @@ def _summary(recording: dict) -> dict | None:
             grip = {
                 "source": built["source"],
                 "force_n": built["force_n"],
+                "force_basis": built.get("force_basis"),
                 "glove_raw": built.get("glove_raw"),
             }
         except ValueError:

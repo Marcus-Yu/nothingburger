@@ -1,6 +1,6 @@
 # pathfinder-backend
 
-P4 parts server backend for Pathfinder. Takes a voice or text query from a Unity/Quest headset,
+P4 parts server backend for Nothingburger. Takes a voice or text query from a Unity/Quest headset,
 finds real parts on the web at true size with verified dimensions, sellers, prices, delivery
 estimates, and a 3D GLB asset, runs a fit check against the headset's tape measurement, and
 supports a Cybersource sandbox checkout. The Unity/Quest app is the client; see

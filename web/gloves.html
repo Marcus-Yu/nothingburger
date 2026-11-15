@@ -181,7 +181,7 @@ async function watch(mine) {
       const st = await (await fetch("/demos/state")).json();
       if (st.active === mine.id) mine.collected = true;
       if (!mine.collected && st.waiting !== mine.id) {
-        $("take-state").textContent = "the headset never collected it: it is asleep, or Pathfinder is not open. Wake it, open the app, then Redo.";
+        $("take-state").textContent = "the headset never collected it: it is asleep, or Nothingburger is not open. Wake it, open the app, then Redo.";
         $("redo").disabled = false;
         return;
       }
@@ -212,8 +212,9 @@ function show(d) {
     `. Lifted ${(100 * m.lift_m).toFixed(0)} cm, hand travelled ${m.travel_m.toFixed(2)} m, ended ${m.distance_m.toFixed(2)} m from where it started` +
     (m.put_back ? " (put back where it was)" : "") + `, ${d.read_as.two_handed ? "two hands" : "one hand"}. `;
   $("take-read").textContent = moved +
-    (band ? `Grip read: ${band.raw.min} to ${band.raw.max} raw on the ${band.hand} hand, peak ${band.raw.peak}` +
-            (band.near_ceiling ? " (near the sensor's ceiling). " : ". ") : "No grip could be read from this take. ") +
+    (band ? `Grip read on the ${band.hand} hand: ` + (band.est_n ? `about ${band.est_n.min} to ${band.est_n.max} N, peak ${band.est_n.peak} N (estimated, not calibrated); ` : "") +
+            `${band.raw.min} to ${band.raw.max} raw, peak ${band.raw.peak}` +
+            (band.near_ceiling ? " (near the sensor's ceiling, so the peak is a floor). " : ". ") : "No grip could be read from this take. ") +
     (hands.length && flat.length ? `No pressure on: ${flat.join(", ")}.` : "");
   $("redo").disabled = $("keep").disabled = false;
 }

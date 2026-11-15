@@ -337,7 +337,7 @@ class _Page:
         self.y += 62
         self.draw.line((MARGIN, self.y, PAGE_W - MARGIN, self.y), fill=INK, width=4)
         self.y += 24
-        footer = f"Pathfinder job packet · {subtitle} · page {n} of 4"
+        footer = f"Nothingburger job packet · {subtitle} · page {n} of 4"
         self.draw.text((MARGIN, PAGE_H - MARGIN + 30), footer, font=_font(20), fill=MUTE)
 
     def text(self, s: str, size: int = 26, color=INK, bold: bool = False, indent: int = 0) -> bool:

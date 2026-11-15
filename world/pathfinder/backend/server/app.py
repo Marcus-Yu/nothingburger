@@ -1,4 +1,4 @@
-"""FastAPI routes for the Pathfinder parts server (plan §1b endpoint table)."""
+"""FastAPI routes for the Nothingburger parts server (plan §1b endpoint table)."""
 
 import asyncio
 import base64

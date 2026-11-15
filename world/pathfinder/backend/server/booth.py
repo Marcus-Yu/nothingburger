@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 ENTRY_ID_RE = re.compile(r"^[a-f0-9]{12}$")
 CAPTION_MAX = 90
 POST_MAX = 240
-HASHTAG = "#Pathfinder"
+HASHTAG = "#Nothingburger"
 CONFIRM_TTL_S = 300
 MAX_NAME = 40
 CARD_W, CARD_H = 1200, 675
@@ -263,7 +263,7 @@ def render_card(entry: dict, hero: Path | None, path: Path) -> None:
         draw.text((x + 14, y + 7), label, font=packet._font(24), fill=INK)
         y += 60
     text(entry["caption"], 28, MUTE, 3)
-    foot = f"Pathfinder booth · {entry['site']} · built with Grok"
+    foot = f"Nothingburger booth · {entry['site']} · built with Grok"
     draw.text((x, CARD_H - 50), foot.translate(packet._GLYPHS), font=packet._font(20), fill=MUTE)
     path.parent.mkdir(parents=True, exist_ok=True)
     img.save(path, "JPEG", quality=88)
@@ -543,9 +543,9 @@ def render_html(entries: list[dict], show: int = 6) -> str:
     out = [
         "<!doctype html><html lang=en><head><meta charset=utf-8>",
         '<meta http-equiv=refresh content=5><meta name=viewport content="width=device-width">',
-        f"<title>Pathfinder booth wall</title><style>{_CSS}</style></head><body><main><section>",
+        f"<title>Nothingburger booth wall</title><style>{_CSS}</style></head><body><main><section>",
         (
-            f"<h1>Pathfinder <span>booth wall</span></h1><div class=mute>{len(entries)} design(s) "
+            f"<h1>Nothingburger <span>booth wall</span></h1><div class=mute>{len(entries)} design(s) "
             "shared today. Say &ldquo;add it to the wall&rdquo; in the headset.</div>"
         ),
     ]

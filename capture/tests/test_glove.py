@@ -35,7 +35,9 @@ def test_merge_lays_glove_readings_on_the_samples_by_time(tmp_path):
     assert rec["device"]["glove"].startswith("ESP32")
 
     grip = process.build_grip(rec)
-    assert grip["source"] == "glove_raw" and grip["force_n"] is None
+    assert grip["source"] == "glove_raw"  # uncalibrated: newtons are an estimate and say so
+    assert grip["force_n"] == grip["glove_raw"]["est_n"] and "estimated" in grip["force_basis"]
+    assert grip["force_n"]["peak"] == pytest.approx(9.0, abs=0.1)  # 2000 raw on the estimate curve
     assert grip["glove_raw"]["raw"]["peak"] == 2000 and grip["glove_raw"]["per_finger_peak"]["index"] == 2000
     assert grip["glove_raw"]["near_ceiling"] is False
 

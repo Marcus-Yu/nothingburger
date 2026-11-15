@@ -1,7 +1,7 @@
-# G1: Grok Imagine (image + video) for Pathfinder
+# G1: Grok Imagine (image + video) for Nothingburger
 
 Research agent G1, 2026-09-26. Question: what can the Grok Imagine API do today, what are people
-building with it, and which uses would make Pathfinder better or more memorable for the judges?
+building with it, and which uses would make Nothingburger better or more memorable for the judges?
 
 Tags: **[V]** verified from xAI docs or our own API call, **[S]** secondary source (blog, third-party
 host, social post), **[I]** inferred by us.

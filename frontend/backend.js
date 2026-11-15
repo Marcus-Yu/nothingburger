@@ -1,5 +1,5 @@
 /* =====================================================================
-   The Pathfinder backend (robots-repo/world/pathfinder/backend), and the
+   The Nothingburger backend (robots-repo/world/pathfinder/backend), and the
    stand-ins used when it isn't running.
 
    Endpoints used: GET /worlds, GET /web-config, POST /plan,

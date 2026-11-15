@@ -1,5 +1,5 @@
 // The demo flow: pick a space, state a job, get a plan, film the demonstrations it asks for,
-// then (not wired in yet) see the robot and its run. Talks to the Pathfinder backend it is
+// then (not wired in yet) see the robot and its run. Talks to the Nothingburger backend it is
 // served from: /worlds, /plan, /demos/*, /parts/*.
 
 const $ = (id) => document.getElementById(id);

@@ -309,6 +309,23 @@ class GloveHub:
         return report
 
 
+# Raw reading -> newtons for a glove nobody has calibrated: an estimate, the same curve for every
+# sensor. It is anchored on one real take, a 0.55 kg bottle lifted in a one-handed grasp
+# (demo-20261114-201313): the thumb has to press with at least m g / (2 mu) = 5.4 N (mu 0.5) or the
+# bottle slips, and it read about 1000 raw at the low end of the hold, 2500 at the high end, where
+# people grip at about twice the slip limit. Above 3500 the sensor flattens, so the top of the curve
+# is a floor on the force, not a reading. Good to about a factor of two.
+ESTIMATE_POINTS = [(0, 0.0), (80, 0.2), (1000, 5.4), (2500, 10.8), (3300, 18.0), (3800, 30.0), (FULL_SCALE, 45.0)]
+ESTIMATE_BASIS = ("estimated from raw glove readings with one generic curve anchored on a 0.55 kg bottle lift; "
+                  "not calibrated, good to about a factor of two")
+
+
+def estimate_newtons(raw):
+    """Raw glove units -> estimated newtons (see ESTIMATE_POINTS). Not a calibration."""
+    pts = np.array(ESTIMATE_POINTS, dtype=float)
+    return np.interp(np.asarray(raw, dtype=float), pts[:, 0], pts[:, 1])
+
+
 def raw_band(recording: dict) -> dict | None:
     """The grip in raw glove units, for an uncalibrated glove: for the hand that pressed
     hardest, the 10th to 90th percentile of its hardest-pressed fingertip while anything was
@@ -334,6 +351,10 @@ def raw_band(recording: dict) -> dict | None:
         "raw": {"min": int(lo), "max": int(hi), "peak": int(hardest.max())},
         "per_finger_peak": {f: int(raw[:, k].max()) for k, f in enumerate(FINGERS)},
         "near_ceiling": bool(hardest.max() > 3500),  # above about 3500 the sensor barely moves
+        # the same band and peaks in estimated newtons (estimate_newtons): a prediction, not a measurement
+        "est_n": {"min": round(float(estimate_newtons(lo)), 1), "max": round(float(estimate_newtons(hi)), 1),
+                  "peak": round(float(estimate_newtons(hardest.max())), 1)},
+        "per_finger_peak_n": {f: round(float(estimate_newtons(raw[:, k].max())), 1) for k, f in enumerate(FINGERS)},
     }
 
 

@@ -100,12 +100,12 @@ assumed ("Heights, doors and anything under a roof are assumed", as each lot's n
 
 One studio, one prompt bar, one flow for every space:
 
-- **Spaces** come from `web/worlds.json` (served by the Pathfinder backend): Matterport scans, and the Vexcel
+- **Spaces** come from `web/worlds.json` (served by the Nothingburger backend): Matterport scans, and the Vexcel
   lots grouped as *Outdoor lots (Vexcel aerial)*. A space can be designed in only when it has a world file,
   listed in `WORLDS` in `agent/design_flow/pipeline.py`: today Rabinowitz Hall; La Mirada and the five lots
   are added in their own branches and must be merged first (**check**).
 - **The flow** is the same for all of them: classify (Snap, then Sonnet), the demonstration (Quest and
-  gloves through the Pathfinder backend), the design and pathing run, the agent trace, Robot Design, the route.
+  gloves through the Nothingburger backend), the design and pathing run, the agent trace, Robot Design, the route.
 - **The view** differs by layer: a Matterport space shows its tour (Showcase SDK) and, when its mesh is on
   disk, the 3D room; a Vexcel lot shows its aerial photo with the route on it.
 - **Mowing** is the one job whose tasks always come by rule: a coverage pattern over the lot's lawn

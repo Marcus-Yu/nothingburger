@@ -161,7 +161,7 @@ worked, so the entries below are pages we fetched. Treat the social signal in th
   confidence per finding is a credibility edge.
 
 **Sharing and multiplayer**
-- **X API pay-per-use** (§2): a $0.01 summoned reply makes an "@Pathfinder, what does this gutter
+- **X API pay-per-use** (§2): a $0.01 summoned reply makes an "@Nothingburger, what does this gutter
   need?" bot cheap to run. A link in a post costs 13× more than a plain post [V sub].
 - **Quest colocation is off the shelf.** Shared Spatial Anchors, Colocation Discovery (Bluetooth,
   anchors shared by group id) and the Multiplayer Building Blocks give two headsets the same placed
@@ -211,7 +211,7 @@ to a new action) × **Fit** (reuses our endpoints and modules). Costs are per us
 | 7 | **Template material library**: tileable galvanised, vinyl, stainless and brick for the llm tier's non-photo faces | 2 | 4 | 5 | 40 | 12 × $0.07 = $0.84 once [I] | Low wow; the template colours already look fine |
 | 8 | **Batch survey of every frame** → a condition heat map on the mesh | 3 | 3 | 4 | 36 | ~$0.25 for 118 frames on 4.20 NR [I]; Batch API is async, ≤24 h | Duplicate findings across views need merging in 3D |
 | 9 | **Two headsets, one session** (contractor and homeowner, colocated) | 5 | 2 | 3 | 30 | tokens only | Mostly Unity and colocation work; a second Quest at the booth |
-| 10 | **@Pathfinder reply bot on X**: photo in a mention → diagnosis, part and price in the reply | 5 | 2 | 3 | 30 | $0.01 per reply + $0.005 per mention read + ~$0.003 vision [V sub prices] | X developer account, a public webhook or a poller, and moderation |
+| 10 | **@Nothingburger reply bot on X**: photo in a mention → diagnosis, part and price in the reply | 5 | 2 | 3 | 30 | $0.01 per reply + $0.005 per mention read + ~$0.003 vision [V sub prices] | X developer account, a public webhook or a poller, and moderation |
 
 **4. Public share and X handoff.**
 - F4 already renders the report and has a "Share on X" intent link, but no public URL.
@@ -261,7 +261,7 @@ Build it only after pick 1.
 - A "contractor mode" persona could answer in trade terms. The wow is huge but the build isn't a
   few hours.
 
-**10. @Pathfinder bot.**
+**10. @Nothingburger bot.**
 - The flow: poll mentions, run Grok vision on the attached photo (the `/scene/ask` prompt), run
   `find_parts`, and reply with part, price and a link.
 - It is cheap per reply but needs X credentials, a public poller and abuse handling. A good

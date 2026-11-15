@@ -402,14 +402,14 @@ def _usd(value) -> str:
 
 def share_text(report: Report) -> str:
     site = (report.scene or {}).get("name") or "a site"
-    bits = [f"Walked {site} in AR with Pathfinder"]
+    bits = [f"Walked {site} in AR with Nothingburger"]
     if report.measurements:
         bits.append(f"{len(report.measurements)} measurements")
     if report.parts:
         bits.append(f"{len(report.parts)} parts placed")
     if report.orders:
         bits.append(f"{_usd(report.totals['orders_usd'])} cart")
-    return ", ".join(bits) + ". Built with Grok. #Pathfinder"
+    return ", ".join(bits) + ". Built with Grok. #Nothingburger"
 
 
 def render_html(report: Report) -> str:

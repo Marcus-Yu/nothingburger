@@ -1,8 +1,8 @@
-# Pathfinder
+# Nothingburger
 
-Pathfinder is a mixed-reality app for the Meta Quest 3S for measuring, fitting and buying parts inside 3D scans of real places. You load an existing 3D scan of a building or a unit (a Matterport model, or a property built from Vexcel aerial data), then walk through it in the headset at true scale. There you can measure an opening and ask Grok for a part that fits. Grok searches real store listings, builds a 3D model of each candidate at its listed size, and places it in the scan, so you can check the fit before you buy.
+Nothingburger is a mixed-reality app for the Meta Quest 3S for measuring, fitting and buying parts inside 3D scans of real places. You load an existing 3D scan of a building or a unit (a Matterport model, or a property built from Vexcel aerial data), then walk through it in the headset at true scale. There you can measure an opening and ask Grok for a part that fits. Grok searches real store listings, builds a 3D model of each candidate at its listed size, and places it in the scan, so you can check the fit before you buy.
 
-![Pathfinder system overview](docs/architecture.png)
+![Nothingburger system overview](docs/architecture.png)
 
 ## Features
 

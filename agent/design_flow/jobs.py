@@ -55,7 +55,8 @@ def _object_for(anchor: str) -> str | None:
 
 
 # words in a job that name a specific object card; a job naming none ("a container", "it") takes any item
-NAMED = {"trash": "trash_bag", "garbage": "trash_bag", "bag": "trash_bag", "bottle": "sample_bottle",
+NAMED = {"recycling": "recycling_bin", "trash can": "recycling_bin", "trashcan": "recycling_bin", " bin": "recycling_bin",
+         "trash": "trash_bag", "garbage": "trash_bag", "bag": "trash_bag", "bottle": "sample_bottle",
          "remote": "tv_remote", "towel": "hand_towel", "pill": "pill_organiser", "drive": "drive_sled", "part": "machined_part", "parcel": "parcel_small"}
 
 
