@@ -12,19 +12,19 @@
   --bg:#f3f5f7; --panel:#ffffff; --fg:#17202a; --muted:#5b6876; --line:#d8dee5;
   --accent:#2f5bd3; --accent-soft:#e3eafb;
   --now:#1f7a4d; --now-bg:#dcf1e5; --next:#9a5b00; --next-bg:#fbeacc; --later:#5b6876; --later-bg:#e6eaef;
-  --contract:#a3324a;
+  --contract:#a3324a; --obj:#b0701c; --obj-soft:#f8ead2; --grid:#e6eaef;
   --f-display:"Archivo",system-ui,sans-serif; --f-body:"IBM Plex Sans",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0f141a; --panel:#171e26; --fg:#e4e9ef; --muted:#93a1b0; --line:#2a3440;
   --accent:#7d9cf5; --accent-soft:#1f2b48;
   --now:#6fd39f; --now-bg:#173326; --next:#f0b65a; --next-bg:#3a2a10; --later:#a5b1be; --later-bg:#26303b;
-  --contract:#f08aa0; color-scheme:dark}}
+  --contract:#f08aa0; --obj:#e6a956; --obj-soft:#3a2c17; --grid:#1c242d; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f141a; --panel:#171e26; --fg:#e4e9ef; --muted:#93a1b0; --line:#2a3440;
   --accent:#7d9cf5; --accent-soft:#1f2b48;
   --now:#6fd39f; --now-bg:#173326; --next:#f0b65a; --next-bg:#3a2a10; --later:#a5b1be; --later-bg:#26303b;
-  --contract:#f08aa0; color-scheme:dark}
+  --contract:#f08aa0; --obj:#e6a956; --obj-soft:#3a2c17; --grid:#1c242d; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
@@ -62,7 +62,7 @@ svg{width:100%;height:auto;display:block}
 .section-title h3{font-family:var(--f-display);font-weight:700;font-size:18px;margin:0}
 .section-title .ans{font-size:13px;color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:hidden;display:flex;flex-direction:column;gap:6px;min-width:0}
 .card .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
 .card .id{font-family:var(--f-mono);font-size:13px;font-weight:500;word-break:break-all}
 .pill{font-family:var(--f-mono);font-size:11px;padding:2px 8px;border-radius:999px;white-space:nowrap}
@@ -88,9 +88,28 @@ th{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:
 td code{font-size:12px}
 ul.checks{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px}
 footer{font-size:12.5px;color:var(--muted)}
+.art{margin:-12px -14px 4px;border-bottom:1px solid var(--line);border-radius:8px 8px 0 0;
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:12px 12px;padding:6px 10px}
+.art svg{max-width:100%;height:auto;aspect-ratio:160/96}
+.art .s{fill:none;stroke:var(--fg);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.art .sf{fill:var(--panel);stroke:var(--fg);stroke-width:2;stroke-linejoin:round}
+.art .a{fill:none;stroke:var(--accent);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.art .af{fill:var(--accent);stroke:none}
+.art .obj{fill:var(--obj-soft);stroke:var(--obj);stroke-width:1.6;stroke-linejoin:round}
+.art .objl{fill:none;stroke:var(--obj);stroke-width:2;stroke-linejoin:round}
+.art .g{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 3}
+.art .ray{fill:none;stroke:var(--accent);stroke-width:1.2;stroke-dasharray:3 3;opacity:.75}
+.art .glow{fill:var(--accent);opacity:.15}
+.art .t{fill:var(--muted);font-family:var(--f-mono);font-size:9px}
+.art .warn{fill:var(--contract)}
+.art .ok{fill:var(--now)}.art .mid{fill:var(--next)}
+.arh{fill:var(--accent)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="arh"/></marker></defs></svg>
 <div class="wrap">
   <header>
     <span class="eyebrow">docs/SUBSYSTEMS.md · draft 2026-11-14</span>
@@ -265,6 +284,62 @@ document.querySelectorAll("[data-pri]").forEach(b=>b.addEventListener("click",()
 document.getElementById("minonly").addEventListener("click",()=>{state.min=!state.min;render()});
 
 const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+// Schematic drawings, 160x96. Ink = structure, blue = the moving or sensing part, amber = the object or building.
+const G='<line class="g" x1="8" y1="86" x2="152" y2="86"/>';
+const M='marker-end="url(#ar)"', MM='marker-start="url(#ar)" marker-end="url(#ar)"';
+const bulb=(x,y,r=14)=>`<path class="obj" d="M${x-r} ${y} a${r} ${r} 0 1 1 ${2*r} 0 c0 7 -6 9 -6 15 h${-2*r+12} c0 -6 -6 -8 -6 -15z"/><rect class="obj" x="${x-6}" y="${y+15}" width="12" height="7"/>`;
+const ART={
+ "base.diff_drive_compact":G+`<rect class="sf" x="38" y="42" width="84" height="30" rx="4"/><circle class="sf" cx="60" cy="72" r="13"/><circle class="a" cx="60" cy="72" r="13"/><circle class="af" cx="60" cy="72" r="3"/><line class="s" x1="108" y1="72" x2="108" y2="77"/><circle class="s" cx="108" cy="81" r="5"/><text class="t" x="46" y="36">side view</text>`,
+ "base.diff_drive_narrow":G+`<rect class="obj" x="26" y="8" width="10" height="78"/><rect class="obj" x="124" y="8" width="10" height="78"/><rect class="sf" x="60" y="34" width="40" height="40" rx="4"/><rect class="a" x="55" y="68" width="7" height="18" rx="2"/><rect class="a" x="98" y="68" width="7" height="18" rx="2"/><line class="a" x1="56" y1="24" x2="104" y2="24" ${MM}/><text class="t" x="60" y="18">≤0.45 m</text><text class="t" x="40" y="62">door</text>`,
+ "base.omni_mecanum":`<rect class="sf" x="52" y="22" width="56" height="52" rx="4"/>`+[[40,14],[108,14],[40,60],[108,60]].map(([x,y],i)=>`<rect class="sf" x="${x}" y="${y}" width="12" height="22" rx="2"/><path class="a" d="${i%3?`M${x+2} ${y+4}L${x+10} ${y+10}M${x+2} ${y+12}L${x+10} ${y+18}`:`M${x+10} ${y+4}L${x+2} ${y+10}M${x+10} ${y+12}L${x+2} ${y+18}`}"/>`).join("")+`<line class="a" x1="124" y1="48" x2="152" y2="48" ${M}/><line class="a" x1="36" y1="48" x2="8" y2="48" ${M}/><text class="t" x="62" y="52">top view</text>`,
+ "base.tracked":`<path class="objl" d="M8 86H118V74H152"/><rect class="sf" x="40" y="30" width="66" height="24" rx="3"/><rect class="a" x="26" y="56" width="92" height="28" rx="14"/>`+[40,72,104].map(x=>`<circle class="s" cx="${x}" cy="70" r="8"/>`).join("")+`<text class="t" x="124" y="68">step</text>`,
+ "base.stair_climber":`<path class="objl" d="M8 86H46V70H78V54H110V38H152"/><g transform="rotate(-27 76 56)"><rect class="sf" x="46" y="30" width="58" height="20" rx="3"/><rect class="a" x="38" y="50" width="76" height="20" rx="10"/><line class="a" x1="112" y1="60" x2="134" y2="54"/><circle class="af" cx="134" cy="54" r="3"/></g>`,
+ "base.fixed_mount":`<rect class="obj" x="8" y="48" width="96" height="10"/><path class="sf" d="M84 40H110V68H96V58H84Z"/><line class="a" x1="103" y1="68" x2="103" y2="80"/><rect class="sf" x="90" y="10" width="12" height="30"/><text class="t" x="20" y="74">bench</text>`,
+ "reach.telescoping_mast":G+`<rect class="sf" x="52" y="72" width="56" height="14" rx="3"/><rect class="sf" x="69" y="48" width="22" height="24"/><rect class="sf" x="72" y="28" width="16" height="20"/><rect class="sf" x="75" y="8" width="10" height="20"/><rect class="a" x="75" y="8" width="10" height="20"/><line class="a" x1="118" y1="66" x2="118" y2="12" ${M}/><text class="t" x="122" y="44">stroke</text>`,
+ "reach.scissor_lift":G+`<rect class="sf" x="38" y="74" width="84" height="12" rx="3"/><path class="a" d="M46 74L114 58M114 74L46 58M46 58L114 42M114 58L46 42M46 42L114 26M114 42L46 26"/><rect class="sf" x="36" y="18" width="88" height="8" rx="2"/><text class="t" x="128" y="54">high</text><text class="t" x="128" y="64">ceiling</text>`,
+ "reach.mast_with_boom":G+`<rect class="obj" x="94" y="58" width="58" height="28"/><rect class="sf" x="12" y="72" width="44" height="14" rx="3"/><rect class="sf" x="28" y="12" width="12" height="60"/><rect class="sf" x="40" y="18" width="78" height="8"/><line class="a" x1="44" y1="22" x2="114" y2="22"/><line class="s" x1="112" y1="26" x2="112" y2="50"/><rect class="sf" x="100" y="50" width="24" height="6" rx="2"/><line class="a" x1="62" y1="38" x2="92" y2="38" ${M}/><text class="t" x="104" y="76">counter</text>`,
+ "reach.planar_arm_2link":G+`<rect class="sf" x="24" y="52" width="18" height="34" rx="2"/><path class="a" d="M33 50L82 26L124 56" style="stroke-width:5"/><circle class="sf" cx="33" cy="50" r="6"/><circle class="sf" cx="82" cy="26" r="6"/><path class="s" d="M118 60l6 -4l6 6M124 56l-2 10"/>`,
+ "reach.arm_6dof":G+`<rect class="sf" x="24" y="74" width="34" height="12" rx="2"/><path class="a" d="M41 74V56L72 30L108 38L124 56L134 62" style="stroke-width:4.5"/>`+[[41,56],[72,30],[108,38],[124,56]].map(([x,y])=>`<circle class="sf" cx="${x}" cy="${y}" r="5"/>`).join("")+`<text class="t" x="80" y="78">6 joints</text>`,
+ "reach.fixed_column":G+`<rect class="sf" x="40" y="74" width="56" height="12" rx="3"/><rect class="sf" x="62" y="26" width="12" height="48"/><line class="a" x1="74" y1="34" x2="104" y2="34"/><path class="s" d="M104 30V44M110 30V44"/><path class="obj" d="M104 46l-10 12c-6 10 -2 26 8 28h12c10 -2 14 -18 8 -28l-10 -12z"/>`,
+ "wrist.fixed":`<rect class="sf" x="48" y="18" width="64" height="10" rx="2"/><rect class="sf" x="58" y="28" width="44" height="34"/><rect class="sf" x="48" y="62" width="64" height="10" rx="2"/>`+[54,106].map(x=>`<circle class="af" cx="${x}" cy="23" r="2"/><circle class="af" cx="${x}" cy="67" r="2"/>`).join("")+`<text class="t" x="62" y="86">rigid flange</text>`,
+ "wrist.continuous_roll":`<rect class="sf" x="60" y="16" width="40" height="52"/><ellipse class="sf" cx="80" cy="16" rx="20" ry="6"/><ellipse class="sf" cx="80" cy="68" rx="20" ry="6"/><path class="a" d="M50 46A32 11 0 1 0 110 46" ${M}/><text class="t" x="114" y="34">×3 turns</text>`,
+ "wrist.pitch_roll":`<rect class="sf" x="72" y="4" width="16" height="30"/><path class="s" d="M80 44L106 74" style="stroke-width:7"/><circle class="sf" cx="80" cy="44" r="10"/><path class="a" d="M58 30A26 26 0 0 0 60 62" ${M}/><path class="a" d="M100 82A14 5 -40 1 0 118 66" ${M}/><text class="t" x="20" y="50">pitch</text><text class="t" x="122" y="88">roll</text>`,
+ "wrist.compliant_pad":`<rect class="sf" x="58" y="8" width="44" height="8" rx="2"/><path class="a" d="M80 16L68 22L92 28L68 34L92 40L68 46L92 52L80 58"/><rect class="sf" x="52" y="58" width="56" height="10" rx="3"/><rect class="obj" x="16" y="70" width="128" height="10"/><path class="s" d="M36 46v12M124 46v12" ${M}/><text class="t" x="108" y="30">spring</text>`,
+ "wrist.spherical_3axis":`<circle class="sf" cx="80" cy="48" r="24"/><ellipse class="a" cx="80" cy="48" rx="24" ry="8"/><ellipse class="a" cx="80" cy="48" rx="8" ry="24"/><path class="a" d="M110 30A34 34 0 0 1 112 66" ${M}/><text class="t" x="20" y="52">roll pitch yaw</text>`,
+ "gripper.parallel_jaw":`<rect class="sf" x="46" y="12" width="68" height="14" rx="3"/><line class="s" x1="50" y1="30" x2="110" y2="30"/><rect class="a" x="54" y="28" width="9" height="44" rx="2"/><rect class="a" x="97" y="28" width="9" height="44" rx="2"/><rect class="obj" x="68" y="44" width="24" height="26"/><line class="a" x1="36" y1="56" x2="50" y2="56" ${M}/><line class="a" x1="124" y1="56" x2="110" y2="56" ${M}/>`,
+ "gripper.three_finger_soft":`<rect class="sf" x="58" y="6" width="44" height="12" rx="3"/>`+bulb(80,42,16)+`<path class="a" d="M64 18Q46 36 60 60" style="stroke-width:5"/><path class="a" d="M80 18V26" style="stroke-width:5"/><path class="a" d="M96 18Q114 36 100 60" style="stroke-width:5"/><text class="t" x="118" y="86">bulb</text>`,
+ "gripper.bulb_cup":`<line class="objl" x1="20" y1="6" x2="140" y2="6"/><rect class="obj" x="72" y="6" width="16" height="10"/><path class="obj" d="M74 16h12c0 4 6 6 6 12a12 12 0 1 1 -24 0c0 -6 6 -8 6 -12z"/><path class="a" d="M56 26L64 54H96L104 26"/><line class="s" x1="80" y1="54" x2="80" y2="92" style="stroke-width:4"/><text class="t" x="108" y="70">pole cup</text>`,
+ "gripper.suction":`<line class="s" x1="80" y1="4" x2="80" y2="30" style="stroke-width:5"/><path class="sf" d="M80 30L60 58H100Z"/><path class="a" d="M60 58H100"/><rect class="obj" x="30" y="60" width="100" height="10"/><path class="a" d="M80 54V40" ${M}/><text class="t" x="104" y="40">vacuum</text>`,
+ "gripper.hook":`<line class="s" x1="84" y1="4" x2="84" y2="40" style="stroke-width:5"/><path class="a" d="M84 40V54A12 12 0 1 1 60 54" style="stroke-width:4"/><path class="obj" d="M66 60l-6 8c-14 6 -18 18 -12 24h44c6 -6 2 -18 -12 -24l-6 -8z"/><text class="t" x="102" y="80">tied bag</text>`,
+ "gripper.wipe_pad":`<line class="s" x1="80" y1="4" x2="80" y2="44" style="stroke-width:5"/><rect class="sf" x="54" y="44" width="52" height="10" rx="3"/><rect class="a" x="54" y="50" width="52" height="4" rx="2"/><rect class="obj" x="14" y="56" width="132" height="12"/><line class="a" x1="46" y1="30" x2="20" y2="30" ${M}/><line class="a" x1="114" y1="30" x2="140" y2="30" ${M}/>`,
+ "gripper.tool_changer":`<rect class="sf" x="40" y="6" width="80" height="12" rx="3"/><line class="g" x1="20" y1="34" x2="140" y2="34"/><rect class="a" x="28" y="40" width="28" height="6"/><path class="s" d="M32 46v16M52 46v16"/><rect class="a" x="66" y="40" width="28" height="6"/><path class="s" d="M80 46L70 62H90Z"/><rect class="a" x="104" y="40" width="28" height="6"/><rect class="sf" x="104" y="54" width="28" height="6"/><line class="s" x1="118" y1="46" x2="118" y2="54"/><text class="t" x="44" y="80">swap per job</text>`,
+ "sensor.fingertip_force":`<path class="sf" d="M58 4V52A22 22 0 0 0 102 52V4"/><ellipse class="af" cx="80" cy="73" rx="12" ry="3"/><rect class="obj" x="30" y="78" width="100" height="10"/><line class="a" x1="124" y1="40" x2="124" y2="72" ${M}/><text class="t" x="130" y="58">N</text>`,
+ "sensor.wrist_camera":`<rect class="sf" x="16" y="34" width="38" height="26" rx="3"/><circle class="sf" cx="62" cy="47" r="9"/><circle class="af" cx="62" cy="47" r="4"/><path class="ray" d="M70 47L146 16M70 47L146 78"/><rect class="obj" x="130" y="36" width="16" height="22"/><text class="t" x="98" y="88">socket</text>`,
+ "sensor.wrist_ft":`<rect class="sf" x="50" y="56" width="60" height="14"/><ellipse class="sf" cx="80" cy="70" rx="30" ry="8"/><ellipse class="sf" cx="80" cy="56" rx="30" ry="8"/><line class="a" x1="80" y1="56" x2="80" y2="12" ${M}/><line class="a" x1="80" y1="56" x2="128" y2="44" ${M}/><line class="a" x1="80" y1="56" x2="40" y2="36" ${M}/><text class="t" x="86" y="16">Fz</text><text class="t" x="128" y="38">Fx</text><text class="t" x="22" y="32">Fy</text>`,
+ "sensor.depth_camera":`<rect class="sf" x="12" y="36" width="44" height="22" rx="3"/><circle class="af" cx="24" cy="47" r="4"/><circle class="af" cx="44" cy="47" r="4"/><path class="ray" d="M56 47L140 12M56 47L140 82"/>`+[0,1,2,3,4].map(i=>[0,1,2,3].map(j=>`<circle class="af" cx="${112+j*9}" cy="${26+i*11}" r="1.6"/>`).join("")).join(""),
+ "sensor.lidar":`<rect class="sf" x="42" y="62" width="76" height="22" rx="4"/><rect class="sf" x="68" y="44" width="24" height="18" rx="3"/>`+[-160,-135,-110,-90,-70,-45,-20].map(d=>{const r=d*Math.PI/180;return`<line class="ray" x1="80" y1="50" x2="${(80+66*Math.cos(r)).toFixed(1)}" y2="${(50+46*Math.sin(r)).toFixed(1)}"/>`}).join(""),
+ "sensor.imu":`<rect class="sf" x="40" y="30" width="44" height="36" rx="3"/>`+[0,1,2,3].map(i=>`<line class="s" x1="${46+i*11}" y1="24" x2="${46+i*11}" y2="30"/><line class="s" x1="${46+i*11}" y1="66" x2="${46+i*11}" y2="72"/>`).join("")+`<line class="a" x1="112" y1="70" x2="112" y2="22" ${M}/><line class="a" x1="112" y1="70" x2="150" y2="70" ${M}/><line class="a" x1="112" y1="70" x2="96" y2="84" ${M}/><text class="t" x="118" y="28">tilt</text>`,
+ "sensor.bumper":`<rect class="sf" x="54" y="20" width="80" height="56" rx="8"/><path class="a" d="M62 18Q48 18 48 30V66Q48 78 62 78" style="stroke-width:5"/><circle class="obj" cx="24" cy="48" r="12"/><path class="a" d="M38 40l4 4M38 56l4 -4M36 48h6"/><text class="t" x="72" y="52">top view</text>`,
+ "sensor.joint_torque":`<path class="s" d="M24 70L80 44L136 60" style="stroke-width:6"/><circle class="sf" cx="80" cy="44" r="11"/><circle class="af" cx="80" cy="44" r="3"/><path class="a" d="M64 26A24 24 0 0 1 102 30" ${M}/><text class="t" x="72" y="14">τ</text>`,
+ "actuator.position_servo":`<rect class="sf" x="44" y="34" width="72" height="40" rx="3"/><rect class="sf" x="34" y="40" width="10" height="8"/><rect class="sf" x="116" y="40" width="10" height="8"/><circle class="sf" cx="64" cy="30" r="7"/><line class="a" x1="64" y1="30" x2="96" y2="18" style="stroke-width:5"/><path class="a" d="M44 18A22 22 0 0 1 60 6" ${M}/>`,
+ "actuator.geared_dc":`<rect class="sf" x="20" y="36" width="64" height="26" rx="5"/><rect class="sf" x="84" y="32" width="24" height="34" rx="2"/><line class="a" x1="108" y1="49" x2="134" y2="49" style="stroke-width:4"/><circle class="a" cx="140" cy="49" r="8"/><text class="t" x="34" y="82">motor + gearbox</text>`,
+ "actuator.series_elastic":`<rect class="sf" x="12" y="34" width="44" height="30" rx="4"/><path class="a" d="M56 49L62 39L70 59L78 39L86 59L94 39L100 49"/><line class="s" x1="100" y1="49" x2="146" y2="49" style="stroke-width:5"/><circle class="sf" cx="146" cy="49" r="5"/><text class="t" x="62" y="76">spring</text>`,
+ "actuator.holding_brake":`<circle class="sf" cx="74" cy="50" r="28"/><circle class="s" cx="74" cy="50" r="5"/><rect class="af" x="62" y="16" width="24" height="8" rx="2"/><rect class="af" x="62" y="76" width="24" height="8" rx="2"/><path class="s" d="M116 44v-6a8 8 0 0 1 16 0v6"/><rect class="sf" x="112" y="44" width="24" height="18" rx="2"/>`,
+ "power.battery_pack":`<rect class="sf" x="34" y="28" width="82" height="40" rx="5"/><rect class="sf" x="116" y="40" width="7" height="16" rx="1"/>`+[0,1,2].map(i=>`<rect class="af" x="${40+i*18}" y="34" width="14" height="28" rx="2"/>`).join("")+`<rect class="s" x="94" y="34" width="14" height="28" rx="2"/><text class="t" x="52" y="84">Wh vs job time</text>`,
+ "power.dock":G+`<line class="objl" x1="148" y1="10" x2="148" y2="86"/><rect class="sf" x="116" y="50" width="32" height="36" rx="3"/><rect class="af" x="110" y="58" width="6" height="5"/><rect class="af" x="110" y="68" width="6" height="5"/><rect class="sf" x="30" y="44" width="62" height="34" rx="4"/><circle class="s" cx="46" cy="80" r="6"/><line class="a" x1="96" y1="62" x2="106" y2="62" ${M}/>`,
+ "power.tether":G+`<rect class="sf" x="14" y="44" width="48" height="32" rx="4"/><path class="a" d="M62 56C92 56 96 84 120 78S132 50 138 50"/><line class="objl" x1="148" y1="10" x2="148" y2="86"/><rect class="obj" x="138" y="42" width="10" height="16"/>`,
+ "compute.sbc":`<rect class="sf" x="24" y="22" width="112" height="54" rx="3"/><rect class="af" x="44" y="36" width="26" height="26" rx="2"/><rect class="s" x="88" y="34" width="34" height="12"/><rect class="s" x="88" y="52" width="16" height="12"/>`+[0,1,2,3,4,5,6,7].map(i=>`<circle class="s" cx="${36+i*12}" cy="28" r="1.5"/>`).join(""),
+ "compute.gpu_module":`<rect class="sf" x="20" y="24" width="120" height="50" rx="3"/><circle class="sf" cx="96" cy="49" r="19"/>`+[0,72,144,216,288].map(d=>`<path class="a" d="M96 49l${(14*Math.cos(d*Math.PI/180)).toFixed(1)} ${(14*Math.sin(d*Math.PI/180)).toFixed(1)}"/>`).join("")+`<rect class="af" x="32" y="36" width="30" height="26" rx="2"/>`,
+ "safety.estop":`<rect class="sf" x="46" y="52" width="68" height="32" rx="4"/><rect class="sf" x="72" y="40" width="16" height="12"/><ellipse class="warn" cx="80" cy="38" rx="28" ry="10"/><text class="t" x="66" y="74">STOP</text>`,
+ "safety.light_tower":G+`<rect class="warn" x="70" y="10" width="20" height="16" rx="2"/><rect class="mid" x="70" y="26" width="20" height="16"/><rect class="ok" x="70" y="42" width="20" height="16"/><rect class="sf" x="76" y="58" width="8" height="20"/><rect class="sf" x="60" y="78" width="40" height="8" rx="2"/>`,
+ "structure.counterweight":G+`<rect class="sf" x="40" y="58" width="80" height="24" rx="4"/><rect class="sf" x="74" y="6" width="12" height="52"/><rect class="af" x="50" y="66" width="60" height="12" rx="2"/><text class="t" x="70" y="75" style="fill:var(--panel)">kg</text><path class="a" d="M110 18A40 40 0 0 1 128 40" ${M}/><text class="t" x="118" y="14">tip</text>`,
+ "structure.mount_adapter":`<rect class="sf" x="34" y="18" width="92" height="60" rx="4"/>`+[[44,28],[116,28],[44,68],[116,68]].map(([x,y])=>`<circle class="s" cx="${x}" cy="${y}" r="3.5"/>`).join("")+[[66,38],[94,38],[66,58],[94,58]].map(([x,y])=>`<circle class="af" cx="${x}" cy="${y}" r="3.5"/>`).join("")+`<text class="t" x="50" y="92">two bolt patterns</text>`,
+ "accessory.bin":G+`<rect class="sf" x="30" y="60" width="100" height="18" rx="4"/><circle class="s" cx="48" cy="80" r="6"/><circle class="s" cx="112" cy="80" r="6"/><path class="obj" d="M74 26l-6 8c-14 4 -16 18 -12 26h44c4 -8 2 -22 -12 -26l-6 -8z"/><path class="a" d="M48 36L54 60H106L112 36Z"/>`,
+ "accessory.bulb_holder":bulb(80,34,15)+`<path class="a" d="M60 46L66 70H94L100 46"/><line class="s" x1="80" y1="70" x2="80" y2="90" style="stroke-width:4"/><text class="t" x="106" y="80">spare</text>`,
+ "accessory.spray_nozzle":`<rect class="sf" x="20" y="36" width="36" height="22" rx="3"/><path class="sf" d="M56 42H72V52H56Z"/>`+[[-14,0],[-7,0],[0,0],[7,0],[14,0]].map(([d],i)=>[1,2,3].map(k=>`<circle class="af" cx="${74+k*18}" cy="${(47+d*k*0.9).toFixed(1)}" r="${1.8-k*.2}"/>`).join("")).join("")+`<rect class="obj" x="136" y="14" width="10" height="66"/>`,
+ "accessory.work_light":`<rect class="sf" x="20" y="34" width="34" height="26" rx="3"/><rect class="af" x="54" y="40" width="8" height="14" rx="2"/><path class="glow" d="M62 40L146 12V82L62 54Z"/><rect class="obj" x="130" y="36" width="16" height="22"/><text class="t" x="80" y="88">dark fixture</text>`,
+};
+const art=id=>ART[id]?`<div class="art"><svg viewBox="0 0 160 96" aria-hidden="true">${ART[id]}</svg></div>`:"";
 function visible(c){
   if(!state.pri.has(c.pri))return false;
   if(state.job!=="all"&&!c.jobs.includes(state.job))return false;
@@ -295,7 +370,7 @@ function render(){
     cs.forEach(c=>{
       const el=document.createElement("article");el.className="card";
       const tags=[c.min?'<span class="tag min">minimum set</span>':"",c.example?'<span class="tag">in example run</span>':"",c.contract?'<span class="tag contract">contract change</span>':""].join("");
-      el.innerHTML=`<div class="top"><span class="id">${esc(c.id)}</span><span class="pill p-${c.pri}">${c.pri}</span></div>
+      el.innerHTML=`${art(c.id)}<div class="top"><span class="id">${esc(c.id)}</span><span class="pill p-${c.pri}">${c.pri}</span></div>
         <div class="what">${esc(c.what)}</div><div class="when">${esc(c.when)}</div>
         <dl class="meta"><dt>Params</dt><dd class="mono">${esc(c.params)}</dd><dt>MuJoCo</dt><dd>${esc(c.sim)}</dd></dl>
         ${tags?`<div class="tags">${tags}</div>`:""}`;
