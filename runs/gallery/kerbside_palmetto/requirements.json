@@ -1,0 +1,362 @@
+{
+  "schema": "requirements/1",
+  "world": "kerbside_palmetto",
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "trash_bag_a",
+      "object": "trash_bag",
+      "carries": true,
+      "deliver_to": "way_out"
+    },
+    {
+      "id": "t2",
+      "skill": "pick",
+      "anchor": "trash_bag_b",
+      "object": "trash_bag",
+      "carries": true,
+      "deliver_to": "way_out"
+    },
+    {
+      "id": "t3",
+      "skill": "pick",
+      "anchor": "trash_bag_c",
+      "object": "trash_bag",
+      "carries": true,
+      "deliver_to": "way_out"
+    }
+  ],
+  "corridors": [
+    {
+      "trip": "dock->t1",
+      "rooms": [
+        "front_yards"
+      ],
+      "doorways": [],
+      "bottleneck": null,
+      "header_m": null,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    },
+    {
+      "trip": "t1->way_out",
+      "rooms": [
+        "front_yards",
+        "outside"
+      ],
+      "doorways": [
+        "d_kerb"
+      ],
+      "bottleneck": {
+        "doorway": "d_kerb",
+        "width_m": 1.4
+      },
+      "header_m": 9.0,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    },
+    {
+      "trip": "dock->t2",
+      "rooms": [
+        "front_yards"
+      ],
+      "doorways": [],
+      "bottleneck": null,
+      "header_m": null,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    },
+    {
+      "trip": "t2->way_out",
+      "rooms": [
+        "front_yards",
+        "outside"
+      ],
+      "doorways": [
+        "d_kerb"
+      ],
+      "bottleneck": {
+        "doorway": "d_kerb",
+        "width_m": 1.4
+      },
+      "header_m": 9.0,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    },
+    {
+      "trip": "dock->t3",
+      "rooms": [
+        "front_yards"
+      ],
+      "doorways": [],
+      "bottleneck": null,
+      "header_m": null,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    },
+    {
+      "trip": "t3->way_out",
+      "rooms": [
+        "front_yards",
+        "outside"
+      ],
+      "doorways": [
+        "d_kerb"
+      ],
+      "bottleneck": {
+        "doorway": "d_kerb",
+        "width_m": 1.4
+      },
+      "header_m": 9.0,
+      "step_m": 0.0,
+      "changes_floor": false,
+      "turns": []
+    }
+  ],
+  "requirements": [
+    {
+      "id": "r_width",
+      "task": null,
+      "quantity": "base_width_max",
+      "value": 1.3,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "d_kerb 1.4 m less 0.05 m a side"
+    },
+    {
+      "id": "r_header",
+      "task": null,
+      "quantity": "stowed_height_max",
+      "value": 8.95,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "scan",
+      "from": "lowest header 9.0 m less 0.05 m"
+    },
+    {
+      "id": "r_step",
+      "task": null,
+      "quantity": "step_max",
+      "value": 0.0,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "assumed",
+      "from": "doorway records give 0.0 m; steps are not measured from a mesh, corridor assumed flat"
+    },
+    {
+      "id": "r_t1_reach",
+      "task": "t1",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            -16.0,
+            9.6,
+            0.5
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.176,
+          "side": [
+            -0.0665,
+            -0.9978
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "trash_bag_a",
+      "yaw_free": true
+    },
+    {
+      "id": "r_t1_floor",
+      "task": "t1",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.176,
+        "side": [
+          -0.0665,
+          -0.9978
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t1_opening",
+      "task": "t1",
+      "quantity": "gripper_opening_min",
+      "value": 0.07,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "trash_bag width 0.06 m plus 0.01 m"
+    },
+    {
+      "id": "r_t1_payload",
+      "task": "t1",
+      "quantity": "payload",
+      "value": 4.0,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "trash_bag card"
+    },
+    {
+      "id": "r_t2_reach",
+      "task": "t2",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            -2.7,
+            12.0,
+            0.5
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.176,
+          "side": [
+            -0.9978,
+            -0.0665
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "trash_bag_b",
+      "yaw_free": true
+    },
+    {
+      "id": "r_t2_floor",
+      "task": "t2",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.176,
+        "side": [
+          -0.9978,
+          -0.0665
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t2_opening",
+      "task": "t2",
+      "quantity": "gripper_opening_min",
+      "value": 0.07,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "trash_bag width 0.06 m plus 0.01 m"
+    },
+    {
+      "id": "r_t2_payload",
+      "task": "t2",
+      "quantity": "payload",
+      "value": 4.0,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "trash_bag card"
+    },
+    {
+      "id": "r_t3_reach",
+      "task": "t3",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
+            8.0,
+            7.5,
+            0.5
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.176,
+          "side": [
+            -0.0665,
+            -0.9978
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "trash_bag_c",
+      "yaw_free": true
+    },
+    {
+      "id": "r_t3_floor",
+      "task": "t3",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.176,
+        "side": [
+          -0.0665,
+          -0.9978
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t3_opening",
+      "task": "t3",
+      "quantity": "gripper_opening_min",
+      "value": 0.07,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "trash_bag width 0.06 m plus 0.01 m"
+    },
+    {
+      "id": "r_t3_payload",
+      "task": "t3",
+      "quantity": "payload",
+      "value": 4.0,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "trash_bag card"
+    }
+  ],
+  "conflicts": []
+}

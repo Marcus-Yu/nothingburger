@@ -1,0 +1,107 @@
+{
+  "calls": [
+    {
+      "n": 0,
+      "name": "nav.corridors",
+      "seconds": 0.0001,
+      "summary": "2 corridors; narrowest 0.9 m at d_front; header 2.05 m; step 0.0 m; turn None m"
+    },
+    {
+      "n": 1,
+      "name": "nav.free_floor",
+      "seconds": 0.0029,
+      "summary": "edge 0.026 m, side [-0.1104, -0.9939]"
+    },
+    {
+      "n": 2,
+      "name": "composer.design",
+      "seconds": 6.1815,
+      "summary": "go2+none+piper+piper_gripper $7389 17.91 kg"
+    },
+    {
+      "n": 3,
+      "name": "composer.compose",
+      "seconds": 2.4546,
+      "summary": "robot.xml 61002 chars; stowed 0.654 m wide, 0.568 m tall; 6 arm joints"
+    },
+    {
+      "n": 4,
+      "name": "composer.candidates",
+      "seconds": 0.0037,
+      "summary": "7140 candidates"
+    },
+    {
+      "n": 5,
+      "name": "composer.compose",
+      "seconds": 1.7256,
+      "summary": "robot.xml 61002 chars; stowed 0.654 m wide, 0.568 m tall; 6 arm joints"
+    },
+    {
+      "n": 6,
+      "name": "nav.propose",
+      "seconds": 0.018,
+      "summary": "36 poses, first [15.4, 0.8, -0.0]"
+    },
+    {
+      "n": 7,
+      "name": "motion.reachable",
+      "seconds": 0.8487,
+      "summary": "ok=True tip 5.62 missed []"
+    },
+    {
+      "n": 8,
+      "name": "motion.reachable",
+      "seconds": 0.0012,
+      "summary": "ok=True tip 5.62 missed []"
+    },
+    {
+      "n": 9,
+      "name": "motion.reachable",
+      "seconds": 0.0013,
+      "summary": "ok=True tip 4.34 missed []"
+    },
+    {
+      "n": 10,
+      "name": "motion.reachable",
+      "seconds": 0.0014,
+      "summary": "ok=True tip 4.35 missed []"
+    },
+    {
+      "n": 11,
+      "name": "motion.reachable",
+      "seconds": 0.0018,
+      "summary": "ok=True tip 4.34 missed []"
+    },
+    {
+      "n": 12,
+      "name": "motion.reachable",
+      "seconds": 0.0013,
+      "summary": "ok=True tip 4.34 missed []"
+    },
+    {
+      "n": 13,
+      "name": "motion.reachable",
+      "seconds": 0.0013,
+      "summary": "ok=True tip 4.35 missed []"
+    },
+    {
+      "n": 14,
+      "name": "motion.reachable",
+      "seconds": 0.0015,
+      "summary": "ok=True tip 4.34 missed []"
+    },
+    {
+      "n": 15,
+      "name": "nav.plan",
+      "seconds": 0.2494,
+      "summary": "3 legs, 1 doors crossed, 0 failures"
+    },
+    {
+      "n": 16,
+      "name": "motion.retarget",
+      "seconds": 0.015,
+      "summary": "t1: 3 segments, 176 samples, max error 0.00013 m"
+    }
+  ],
+  "seconds": 11.509
+}

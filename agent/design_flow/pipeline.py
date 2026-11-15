@@ -36,7 +36,16 @@ EXPORT = REPO / "frontend" / "robot-design" / "data" / "export.py"
 STUDIO_MODEL = "claude-sonnet-5-5"
 
 # Studio space id (web/worlds.json) -> scenario in world/scenarios/
-WORLDS = {"rabinowitz-hall": "jrr", "la-mirada": "la_mirada"}
+WORLDS = {
+    "rabinowitz-hall": "jrr",
+    "la-mirada": "la_mirada",  # read from its Matterport scan (world/matterport.py)
+    # outdoor lots traced on Vexcel aerial photos (world/scenarios/tools/aerial_worlds.py)
+    "lawn-palmetto": "lawn_palmetto",
+    "trash-palmetto": "trash_palmetto",
+    "pooldeck-lakes": "pooldeck_lakes",
+    "parcel-eastland": "parcel_eastland",
+    "lawn-sanpedro": "lawn_sanpedro",
+}
 
 
 # Session (LangGraph thread id) -> its run folder, relative to the repo, set as soon as the run starts,
@@ -78,7 +87,8 @@ def model_reads_jobs() -> bool:
 def can_plan(skill: str, task: str, world_id: str | None) -> str | None:
     """None when the job can be planned in this space, else why not (checked before asking for a demo).
     The pipeline's skills and the space's anchors are the same whether or not a model reads the job, so the
-    rule check applies either way; a model only maps the words onto them more freely."""
+    rule check applies either way; a model only maps the words onto them more freely.
+    Mowing's tasks always come by rule from the space's marked lawn (a coverage pattern)."""
     try:
         _, world = world_for(world_id)
     except NoWorld as e:
@@ -93,6 +103,8 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
     if standin_tasks is None:
         standin_tasks = not model_reads_jobs()
     task = request["task"]
+    if jobs.pipeline_skill(request.get("skill") or task) == "navigate":
+        standin_tasks = True  # a coverage pattern is geometry (nav.api.cover); the model's intake does not write one
     out = runs / f"{time.strftime('%Y%m%d-%H%M%S')}-{slug(task)[:40]}"
     inputs = out / "inputs"
     inputs.mkdir(parents=True, exist_ok=True)

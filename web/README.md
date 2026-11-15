@@ -44,6 +44,65 @@ With the mesh on disk, a world that names it (`scan` in `world.json`) is drawn w
 PYTHONPATH=. python -m agent.run --world world/scenarios/clinic.json --job "$(cat world/scenarios/clinic.job.txt)" --proceed --frames --out runs/gallery/clinic
 ```
 
+### Outdoor runs on Vexcel aerial photos
+
+Five more kept runs happen outside, each on a real lot traced on a Vexcel aerial photo (about 6 cm a pixel):
+
+| Run | Job | Where |
+| :-- | :-- | :-- |
+| `runs/gallery/lawn_palmetto` | mow a back lawn: 22 lines 0.5 m apart, five of them split round a cluttered patio | Houston |
+| `runs/gallery/trash_palmetto` | kitchen trash bag out of the front door, round the parked truck, to the bins at the kerb | Houston |
+| `runs/gallery/pooldeck_lakes` | wipe a sun lounger, then carry a towel from the daybed to the clubhouse door | Houston, apartment pool deck |
+| `runs/gallery/parcel_eastland` | bring a parcel from the kerb up the driveway to the front door | Houston |
+| `runs/gallery/lawn_sanpedro` | mow a fenced lawn, starting and finishing on the patio slab | Los Angeles |
+
+**Planned on the survey, not on a tracing.** A sixth run, `runs/gallery/kerbside_palmetto`, needs the aerial data to plan at all: three
+trash bags in front of three Houston houses go to the kerb, and nothing in its world file says where the houses, trees, fences or
+parked vehicles are. `aerial_fetch.py <name> --heights` downloads Vexcel's surface model (the top of everything, from the same
+flight as the photo) and terrain model; their difference is the height of what stands on the ground, one value per photo pixel
+(`world/scenarios/aerial/<name>.height.npz`). A world whose `ground` names that file is planned on it: `nav/grid.py` blocks every
+cell standing more than 0.15 m high and anything outside the survey. The survey sees the top of things only, so ground under a
+tree's canopy counts as blocked. A pool is flat in the survey, so open water is taken from the photo's colour; that rule is a
+rough threshold and has not been checked on a site with a pool in the work area. Only the base's route reads the survey: arm
+motion is still checked against the world's obstacle boxes. The work area, the kerb line, the dock and the bags are set by hand
+in `aerial_worlds.py`; no obstacle is.
+
+Planned again with the survey taken away, the same stops give a 91.7 m route of which 13.7 m passes through the tree and the
+parked vehicles; with it the route is 119.9 m and none does. The film draws the same heights as a surface with the photo over
+it, and shows each bag being carried off. One video tells the whole run, from the photo to the robot at the kerb (the height
+download needs `tifffile` and `imagecodecs`, which are not project dependencies):
+
+```bash
+PYTHONPATH=. python world/scenarios/tools/aerial_story.py runs/gallery/kerbside_palmetto --out docs/media/aerial/kerbside_palmetto-full.mp4
+```
+
+Replay one at `http://127.0.0.1:8010/?run=runs/gallery/lawn_palmetto`; the film is `frames/walkthrough.mp4` in each folder
+(copies in `docs/media/aerial/`). To make them again:
+
+```bash
+python world/scenarios/tools/aerial_worlds.py
+```
+
+```bash
+for s in lawn_palmetto trash_palmetto pooldeck_lakes parcel_eastland lawn_sanpedro; do PYTHONPATH=. python -m agent.run --world world/scenarios/$s.json --tasks world/scenarios/$s.tasks.json --no-model --frames --walkthrough --out runs/gallery/$s; done
+```
+
+How they are built:
+
+- `world/scenarios/tools/aerial_fetch.py <name> <lat> <lon>` downloads the photo and Vexcel's building footprints for a 60 m square
+  into `world/scenarios/aerial/` (needs `VEXCEL_API_KEY`; Houston and Los Angeles are covered).
+- `world/scenarios/tools/aerial_worlds.py` holds what was read off each photo by eye against a one-metre grid (the lawn's edge, the
+  driveway, parked vehicles, loungers) and writes the world, task and job files. A world that has `ground` (the photo and the square
+  it covers) is drawn on the photo in the top view and the film; an obstacle marked `"seen": "photo"` is drawn as a faint box, since
+  the photo already shows it.
+- The photo gives plan positions only. Heights, doors and anything under a roof are assumed, and each world's `source` lists them.
+- Mowing is a `navigate` task that carries its own `waypoints` (the ends of each pass, from `nav.api.cover` over a lawn listed in
+  the world's `areas`); the route drives them in order and the film marks the ground covered. The catalog has no mowing deck, so
+  these runs plan where the base drives and assume the deck.
+- The same five lots are spaces in the studio (`frontend/`): `web/worlds.json` lists them, `WORLDS` in
+  `agent/design_flow/pipeline.py` maps each to its world file, and `agent/design_flow/jobs.py` turns "mow the lawn" into the
+  navigate task. The 3D room page and the route page's floor do not show the photo yet.
+
 ## The demo flow site
 
 A second site lives in this folder, served by the Pathfinder backend, not by `web.serve`.

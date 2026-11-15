@@ -1,0 +1,101 @@
+{
+  "schema": "world/1",
+  "id": "lawn_sanpedro",
+  "frame": "metres, Z up, right handed; x east, y north, origin at the fetched point",
+  "source": "traced by eye on a Vexcel aerial photo (us-ca-losangeles-2025, 0.062 m a pixel) around 33.9251667, -118.2698727: the fenced lawn between two houses, the concrete path on its west side and the patio slab in its north-east corner. Assumed, not in the photo: that the ground is level; the slab's edge is taken as flush with the grass",
+  "mesh": null,
+  "ground": {
+    "image": "world/scenarios/aerial/sanpedro.jpg",
+    "extent": [
+      -30.02,
+      -30.025,
+      30.061,
+      30.025
+    ],
+    "m_per_px": 0.062,
+    "source": "Vexcel Imaging ortho photo and building footprints, collection us-ca-losangeles-2025",
+    "lat": 33.9251667,
+    "lon": -118.2698727
+  },
+  "floors": [
+    {
+      "id": "f0",
+      "z": 0.0
+    }
+  ],
+  "rooms": [
+    {
+      "id": "lawn",
+      "type": "lawn",
+      "floor": "f0",
+      "polygon": [
+        [
+          -13.0,
+          11.4
+        ],
+        [
+          -5.2,
+          11.4
+        ],
+        [
+          -5.2,
+          21.8
+        ],
+        [
+          -13.0,
+          21.8
+        ]
+      ],
+      "ceiling_m": 3.0,
+      "source": "manual"
+    }
+  ],
+  "doorways": [],
+  "obstacles": [],
+  "dock": {
+    "room": "lawn",
+    "pose": [
+      -5.9,
+      21.0,
+      3.141592653589793
+    ]
+  },
+  "way_out": {
+    "doorway": null,
+    "note": "the job stays on the lawn"
+  },
+  "anchors": [],
+  "areas": [
+    {
+      "id": "lawn",
+      "kind": "lawn",
+      "room": "lawn",
+      "polygon": [
+        [
+          -13.0,
+          11.4
+        ],
+        [
+          -5.2,
+          11.4
+        ],
+        [
+          -5.2,
+          19.9
+        ],
+        [
+          -6.7,
+          19.9
+        ],
+        [
+          -6.7,
+          21.8
+        ],
+        [
+          -13.0,
+          21.8
+        ]
+      ]
+    }
+  ]
+}

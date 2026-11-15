@@ -1,0 +1,19 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "wipe",
+      "anchor": "lounger_top",
+      "object": "cloth",
+      "carries": false
+    },
+    {
+      "id": "t2",
+      "skill": "pick",
+      "anchor": "towel",
+      "object": "hand_towel",
+      "carries": true,
+      "deliver_to": "way_out"
+    }
+  ]
+}

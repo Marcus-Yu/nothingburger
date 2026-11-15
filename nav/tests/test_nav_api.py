@@ -373,3 +373,39 @@ def test_plan_sideways_through_a_door(world, build, reqs):
     car = api.plan(world, _rect_build(build, 0.5, 0.8, holonomic=False), requirements=tasks, standoffs=standoffs)
     assert car["failures"] and car["failures"][0]["leg"] == "dock->t1"
     assert car["failures"][0]["kind"] == "footprint"
+
+
+def test_plan_navigate_waypoints_are_driven_in_order(build):
+    # a navigate task carries its own poses (a coverage pattern): each becomes a stop, with no standoff and no failure
+    lawn = {"schema": "world/1", "id": "lawn", "frame": "metres, Z up", "mesh": None, "floors": [{"id": "f0", "z": 0.0}],
+            "rooms": [{"id": "lawn", "type": "lawn", "floor": "f0", "polygon": [[0, 0], [6, 0], [6, 5], [0, 5]], "ceiling_m": 3.0, "source": "manual"}],
+            "doorways": [], "obstacles": [], "dock": {"room": "lawn", "pose": [1.0, 1.0, 0.0]}, "way_out": {"doorway": None}, "anchors": []}
+    pts = [[1.0, 2.0, 0.0], [5.0, 2.0, 0.0], [5.0, 3.0, math.pi], [1.0, 3.0, math.pi]]
+    task = {"id": "t1", "skill": "navigate", "anchor": None, "object": None, "carries": False, "waypoints": pts}
+    small = _rect_build(build, 0.5, 0.5)
+    route = api.plan(lawn, small, requirements={"tasks": [task]}, standoffs=[])
+    assert route["failures"] == []
+    assert [leg["to"] for leg in route["legs"]] == ["t1.1", "t1.2", "t1.3", "t1.4", "dock"]
+    for leg, p in zip(route["legs"], pts):
+        assert leg["waypoints"][-1] == pytest.approx(p, abs=1e-3)
+    _check_route(route, lawn, small)
+
+
+def test_surveyed_ground_blocks_what_stands_on_it_and_open_water(tmp_path):
+    # a world on surveyed ground (ground.height): the grid takes what the survey shows standing, with nothing traced
+    height = np.zeros((40, 60), np.float16)          # 6 m by 4 m at 0.1 m a pixel, row 0 at the north edge
+    height[10:20, 30:40] = 1.5                       # a parked car: x 3..4, y 2..3
+    height[30:34, 5:9] = 0.10                        # a kerb stone, low enough to drive over
+    water = np.zeros((40, 60), bool)
+    water[0:6, 50:60] = True                         # a pool in the north-east corner: x 5..6, y 3.4..4
+    np.savez_compressed(tmp_path / "site.height.npz", height=height, water=water)
+    yard = {"schema": "world/1", "id": "yard", "frame": "metres, Z up", "mesh": None, "floors": [{"id": "f0", "z": 0.0}],
+            "ground": {"extent": [0, 0, 6, 4], "height": str(tmp_path / "site.height.npz")},
+            "rooms": [{"id": "yard", "type": "yard", "floor": "f0", "polygon": [[0, 0], [6, 0], [6, 4], [0, 4]], "ceiling_m": 3.0, "source": "manual"}],
+            "doorways": [], "obstacles": [], "dock": {"room": "yard", "pose": [1.0, 2.5, 0.0]}, "way_out": {"doorway": None}, "anchors": []}
+    g = G.from_world(yard)
+    at = lambda x, y: bool(g.occupied_at(np.array(x), np.array(y)))  # noqa: E731
+    assert at(3.5, 2.5) and at(5.5, 3.7)             # the car and the pool
+    assert not at(1.0, 2.5) and not at(0.7, 0.8)     # open ground, and the low kerb stone
+    assert not bool(G.from_world(yard, ground=False).occupied_at(np.array(3.5), np.array(2.5)))
+    assert bool(G.ground_blocked(yard, np.array(9.0), np.array(1.0)))  # outside the survey: not known, so not driven on

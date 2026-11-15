@@ -19,9 +19,11 @@ def invalid(reason: str) -> dict:
     return {"verdict": "invalid", "skill": "", "reason": reason, "missing": []}
 
 
-def make_classify(classifier: Runnable, store: SkillStore, can_plan=None):
+def make_classify(classifier: Runnable, store: SkillStore, can_plan=None, needs_demo=None):
     """`can_plan(skill, task, world) -> reason | None`, when given, turns a chore down before any demo is
-    asked for if it can't be planned in this space (no fixture to work on, a skill the robot lacks)."""
+    asked for if it can't be planned in this space (no fixture to work on, a skill the robot lacks).
+    `needs_demo(skill) -> bool`, when given, says which skills have nothing to demonstrate (driving a
+    pattern, such as mowing): those are complete without recordings."""
     """Build the node around a runnable that maps {"task", "known_skills"} to a TaskAssessment."""
 
     def classify(state: WorkflowState) -> WorkflowState:
@@ -38,9 +40,12 @@ def make_classify(classifier: Runnable, store: SkillStore, can_plan=None):
         why_not = can_plan(skill, task, state.get("world")) if can_plan else None
         if why_not:
             return {"assessment": invalid(why_not) | ({"decided_by": result._decided_by} if getattr(result, "_decided_by", "") else {})}
-        missing = store.missing(skill)
+        no_demo = needs_demo is not None and not needs_demo(skill)
+        missing = [] if no_demo else store.missing(skill)
         verdict = "incomplete" if missing else "complete"
         assessment = {"verdict": verdict, "skill": skill, "reason": result.reason, "missing": missing}
+        if no_demo:
+            assessment["no_demo"] = True  # nothing to show the robot: it drives a pattern
         if getattr(result, "_decided_by", ""):
             assessment["decided_by"] = result._decided_by
         return {"assessment": assessment}

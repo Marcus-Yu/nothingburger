@@ -1,0 +1,1 @@
+{"schema":"trajectory/1","robot":"robot.xml","joints":["arm/joint1","arm/joint2","arm/joint3","arm/joint4","arm/joint5","arm/joint6"],"tasks":[],"failures":[]}
