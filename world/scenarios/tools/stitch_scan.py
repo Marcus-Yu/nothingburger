@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-LOW_M, HIGH_M, MARGIN_M, CELL = 2.6, 6.0, 1.5, 0.04  # top view shows below LOW_M; the film and 3D page up to HIGH_M
+LOW_M, HIGH_M, MARGIN_M, CELL, RISE_M = 2.6, 6.0, 1.5, 0.04, 3.0  # top view shows below LOW_M; the film and 3D page up to HIGH_M
 
 
 def load(raw: Path) -> dict:
@@ -29,17 +29,23 @@ def load(raw: Path) -> dict:
 
 
 def finest(tiles: dict) -> dict:
-    """Drop every triangle that sits inside the bounds of a finer tile."""
+    """Drop every triangle that reaches into the bounds of a finer tile: a corner, an edge midpoint or its middle
+    inside one is enough. A coarse tile's triangles are large, so testing the middle alone leaves sheets of it
+    hanging across rooms that finer tiles already cover."""
     cells = defaultdict(list)
     for t in tiles.values():
         cells[(t["lod"], t["chunk"])].append(t["pos"])
-    boxes = [(lod, np.concatenate(ps).min(0) - 0.03, np.concatenate(ps).max(0) + 0.03) for (lod, _), ps in cells.items()]
+    # a tile's bounds are those of what is in it, which stops at the table tops in an open hall; the tile itself goes
+    # on up, so the test reaches RISE_M above and below (the tour's frame has Y up)
+    grow = np.array([0.03, RISE_M, 0.03])
+    boxes = [(lod, np.concatenate(ps).min(0) - grow, np.concatenate(ps).max(0) + grow) for (lod, _), ps in cells.items()]
+    weights = np.array([(1, 0, 0), (0, 1, 0), (0, 0, 1), (.5, .5, 0), (0, .5, .5), (.5, 0, .5), (1 / 3, 1 / 3, 1 / 3)])
     for t in tiles.values():
-        cen = t["pos"][t["idx"]].mean(1)
-        drop = np.zeros(len(cen), bool)
+        pts = np.einsum("kc,tcd->tkd", weights, t["pos"][t["idx"]].astype(float))  # [triangles, 7 points, 3]
+        drop = np.zeros(len(pts), bool)
         for lod, lo, hi in boxes:
             if lod > t["lod"]:
-                drop |= np.all((cen >= lo) & (cen <= hi), 1)
+                drop |= np.all((pts >= lo) & (pts <= hi), 2).any(1)
         t["idx"] = t["idx"][~drop]
     return {k: t for k, t in tiles.items() if len(t["idx"])}
 
@@ -84,6 +90,8 @@ def main(wid: str) -> None:
     tiles = finest(load(out / "raw"))
     if not tiles:
         sys.exit(f"no captured tiles in {out / 'raw'}: open tour.html?run=...&capture=1 first")
+    top = max(t["lod"] for t in tiles.values())
+    tiles = {k: t for k, t in tiles.items() if t["lod"] >= top - 1}  # what is left of the coarsest levels is a few huge triangles with smeared colour
     pts = np.array([p for r in world["rooms"] for p in r["polygon"]], float)
     lo, hi = pts.min(0) - MARGIN_M, pts.max(0) + MARGIN_M
     for t in tiles.values():
@@ -139,7 +147,7 @@ def main(wid: str) -> None:
     tdir.mkdir(exist_ok=True)
     for old in tdir.iterdir():
         old.unlink()
-    listing, scene, faces = [], trimesh.Scene(), 0
+    listing, scene, faces, per = [], trimesh.Scene(), 0, {}
     for k, t in sorted(tiles.items()):
         tri = t["w"][t["idx"]]
         c = tri.mean(1)
@@ -163,8 +171,10 @@ def main(wid: str) -> None:
             mat = trimesh.visual.material.PBRMaterial(baseColorTexture=Image.open(io.BytesIO(buf.getvalue())), metallicFactor=0.0, roughnessFactor=1.0, doubleSided=True)
             scene.add_geometry(trimesh.Trimesh(p, f, visual=trimesh.visual.TextureVisuals(uv=uv, material=mat), process=False), geom_name=name)
             faces += len(f)
+            per[t["lod"]] = per.get(t["lod"], 0) + len(f)
     scene.export(out / "room.glb")
     (out / "scan.json").write_text(json.dumps({"world": wid, "frame": "the world's (metres, Z up)", "to_model": M.round(3).tolist(), "low_m": LOW_M, "tiles": listing, "glb": "room.glb"}, indent=1))
+    print("triangles kept per detail level:", dict(sorted(per.items())))
     print(f"{len(listing)} pieces, {faces} triangles, room.glb {(out / 'room.glb').stat().st_size / 1e6:.1f} MB")
 
 

@@ -62,11 +62,13 @@ function show(i) {
 }
 // The viewpoint stays inside the scanned rooms and under their ceilings: outside them there is nothing but the backs of walls.
 // Rooms are the world file's outlines (X east, Y north, in metres); on screen x = X and z = -Y.
-const WALL_GAP = 0.35, TOP = 5.5;
+const WALL_GAP = 0.35, TOP = 5.5, LOW_TOP = 2.3, OVERHANG = 2.5;
 function inRooms(x, z) {  // the nearest point to (x, z) that is inside a room, a little off its walls
   let best = null;
   for (const r of rooms) { const cx = Math.min(Math.max(x, r.x0 + WALL_GAP), r.x1 - WALL_GAP), cz = Math.min(Math.max(z, r.z0 + WALL_GAP), r.z1 - WALL_GAP), d = Math.hypot(cx - x, cz - z);
-    if (!best || d < best.d) best = { x: cx, z: cz, d, top: Math.min(r.top - 0.4, TOP) }; }
+    // high up only in the open middle of a tall room: near its walls the floor above overhangs, and the scan there is torn
+    const off = Math.min(cx - r.x0, r.x1 - cx, cz - r.z0, r.z1 - cz), top = r.top > TOP && off > OVERHANG ? TOP : LOW_TOP;
+    if (!best || d < best.d) best = { x: cx, z: cz, d, top }; }
   return best;
 }
 function keepInside() {

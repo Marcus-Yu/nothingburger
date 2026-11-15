@@ -185,6 +185,9 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
                                 rgba=[0.25, 0.25, 0.27, 1], contype=0, conaffinity=0)
             lo = np.array([lo[0], lo[1], hi[2] - skirt])
         wb.add_geom(type=box, pos=list((lo + hi) / 2), size=list(np.maximum((hi - lo) / 2, 0.005)), rgba=[*rgb, 1], contype=0, conaffinity=0)
+    if not top and robot_xml:  # the wiping cloth, placed frame by frame by the film
+        cloth = wb.add_body(name="towel", mocap=True, pos=[0, 0, -5])
+        cloth.add_geom(type=box, size=[v / 2 for v in TOWEL], rgba=[*TOWEL_RGB, 1], contype=0, conaffinity=0)
     if not top:  # the film looks across the floor, so there has to be something beyond the building
         wb.add_geom(type=box, pos=[(x0 + x1) / 2, (y0 + y1) / 2, -0.06], size=[x1 - x0 + 20, y1 - y0 + 20, 0.01], rgba=[0.20, 0.21, 0.22, 1],
                     contype=0, conaffinity=0)
@@ -266,7 +269,8 @@ def robot_top(world: dict, robot_xml: str, qpos: dict | None, pose, label: str) 
 
 
 def _timeline(build: dict, route: dict, trajectory: dict):
-    """The plan as film frames: [(base pose [x, y, yaw], {joint: value})] and chapters [(frame index, label)].
+    """The plan as film frames: [(base pose [x, y, yaw], {joint: value}, what)] and chapters [(frame index, label)];
+    `what` is "drive", or the arm segment being played ("approach", "retreat", or the work's kind such as "wipe").
     The base drives each leg's waypoints (turn, then go), and at each stop the arm plays that stop's samples
     from trajectory.json. Positions only: nothing is simulated."""
     stowed = dict((build.get("stowed") or {}).get("qpos") or {})
@@ -286,7 +290,7 @@ def _timeline(build: dict, route: dict, trajectory: dict):
             n = max(1, int(np.ceil(max(dist / DRIVE_MPS, turn / TURN_RPS) / DRIVE_X * WALK_FPS)))
             for k in range(1, n + 1):
                 f = k / n
-                frames.append(([pose[0] + (wp[0] - pose[0]) * f, pose[1] + (wp[1] - pose[1]) * f, pose[2] + wrap(wp[2] - pose[2]) * f], stowed))
+                frames.append(([pose[0] + (wp[0] - pose[0]) * f, pose[1] + (wp[1] - pose[1]) * f, pose[2] + wrap(wp[2] - pose[2]) * f], stowed, "drive"))
             pose = wp
         entry = by_pose.get(tuple(round(v, 3) for v in pose))
         if entry is None or leg.get("to") == "dock":
@@ -301,8 +305,47 @@ def _timeline(build: dict, route: dict, trajectory: dict):
             ts = np.array([float(x["t"]) for x in samples])
             for k in range(max(1, int(np.ceil((t1 - t0) / ARM_X * WALK_FPS)))):
                 i = min(int(np.searchsorted(ts, t0 + k * ARM_X / WALK_FPS)), len(samples) - 1)
-                frames.append((pose, {**stowed, **dict(zip(names, samples[i]["q"]))}))
+                frames.append((pose, {**stowed, **dict(zip(names, samples[i]["q"]))}, seg.get("kind", "work") if seg.get("phase") == "work" else seg.get("phase")))
     return frames, chapters
+
+
+TOWEL = (0.30, 0.22, 0.012)   # the wiping cloth shown in the film and the 3D page: length, width, thickness in metres
+TOWEL_RGB = (0.93, 0.96, 0.99)
+
+
+def _towel_track(robot_xml: str, build: dict, frames) -> np.ndarray | None:
+    """Where the wiping cloth is in each film frame, [n, 7] (x y z, quaternion w x y z), or None when the job
+    has no wipe. It lies on the surface where the first stroke starts until the tool gets there, is under the
+    tool while wiping, stays in the gripper between stops, and is left where the last stroke ends. Drawn for
+    the viewer only: the plan does not model the cloth."""
+    wipes = [i for i, f in enumerate(frames) if f[2] == "wipe"]
+    if not wipes:
+        return None
+    m = mujoco.MjModel.from_xml_string(robot_xml)
+    d = mujoco.MjData(m)
+    site = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_SITE, build.get("tool_site") or "tool")
+    if site < 0:
+        return None
+    jadr = {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j): m.jnt_qposadr[j] for j in range(m.njnt)}
+    out = np.zeros((len(frames), 7), dtype=np.float32)
+    first, last, rest = wipes[0], wipes[-1], None
+    for i, (pose, q, what) in enumerate(frames):
+        if i < first and rest is not None:
+            out[i] = rest
+            continue
+        mujoco.mj_resetData(m, d)
+        for name, v in {**(frames[first][1] if i < first else q), **dict(zip(("joint_x", "joint_y", "joint_th"), frames[first][0] if i < first else pose))}.items():
+            if name in jadr:
+                d.qpos[jadr[name]] = v
+        mujoco.mj_kinematics(m, d)
+        yaw = float((frames[first][0] if i < first else pose)[2])
+        at = [*d.site_xpos[site][:2], d.site_xpos[site][2] - TOWEL[2] / 2, np.cos(yaw / 2), 0.0, 0.0, np.sin(yaw / 2)]
+        if i < first:
+            rest = at
+        elif i > last:
+            at = out[last]
+        out[i] = at
+    return out
 
 
 def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajectory: dict) -> dict | None:
@@ -330,11 +373,14 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
                                "-movflags", "+faststart", str(video)], stdin=subprocess.PIPE)
         cam.azimuth, cam.elevation, cam.distance = 62.0, -30.0, 4.6
         look = np.array([frames[0][0][0], frames[0][0][1], 0.5])
-        for pose, q in frames:
+        towel, tid = _towel_track(robot_xml, build, frames), m.body_mocapid[mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, "towel")]
+        for i, (pose, q, _) in enumerate(frames):
             mujoco.mj_resetData(m, d)
             for name, v in {**q, "joint_x": pose[0], "joint_y": pose[1], "joint_th": pose[2]}.items():
                 if name in jadr:
                     d.qpos[jadr[name]] = v
+            if towel is not None:
+                d.mocap_pos[tid], d.mocap_quat[tid] = towel[i, :3], towel[i, 3:]
             mujoco.mj_forward(m, d)
             look += 0.12 * (np.array([pose[0], pose[1], 0.5]) - look)  # the camera eases after the robot
             cam.lookat[:] = look
@@ -416,20 +462,29 @@ def tour_export(robot_xml: str, build: dict, route: dict, trajectory: dict) -> d
             for i, mesh in enumerate(meshes):
                 scene.add_geometry(mesh, node_name=f"{name}_g{i}", geom_name=f"{name}_g{i}", parent_node_name=name)
             bodies.append(b)
+        frames, chapters = _timeline(build, route, trajectory)
+        towel = _towel_track(robot_xml, build, frames)
+        if towel is not None:  # the cloth goes in as one more body, after the robot's
+            name = f"body{len(bodies)}"
+            scene.graph.update(frame_to=name, frame_from=scene.graph.base_frame, matrix=np.eye(4))
+            cloth = trimesh.creation.box(extents=TOWEL)
+            cloth.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(baseColorFactor=[*TOWEL_RGB, 1.0], metallicFactor=0.0, roughnessFactor=0.9))
+            scene.add_geometry(cloth, node_name=f"{name}_g0", geom_name=f"{name}_g0", parent_node_name=name)
         glb = where[0].with_name("tour_robot.glb")
         glb.write_bytes(scene.export(file_type="glb"))
-        frames, chapters = _timeline(build, route, trajectory)
         jadr = {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j): m.jnt_qposadr[j] for j in range(m.njnt)}
-        out = np.zeros((len(frames), len(bodies), 7), dtype=np.float32)
-        for i, (pose, q) in enumerate(frames):
+        out = np.zeros((len(frames), len(bodies) + (towel is not None), 7), dtype=np.float32)
+        for i, (pose, q, _) in enumerate(frames):
             mujoco.mj_resetData(m, d)
             for name, v in {**q, "joint_x": pose[0], "joint_y": pose[1], "joint_th": pose[2]}.items():
                 if name in jadr:
                     d.qpos[jadr[name]] = v
             mujoco.mj_kinematics(m, d)
-            out[i, :, :3], out[i, :, 3:] = d.xpos[bodies], d.xquat[bodies]
+            out[i, :len(bodies), :3], out[i, :len(bodies), 3:] = d.xpos[bodies], d.xquat[bodies]
+        if towel is not None:
+            out[:, -1] = towel
         where[0].with_name("tour_frames.bin").write_bytes(out.tobytes())
-        return {"glb": "frames/tour_robot.glb", "frames": "frames/tour_frames.bin", "bodies": len(bodies), "fps": WALK_FPS, "n": len(frames),
+        return {"glb": "frames/tour_robot.glb", "frames": "frames/tour_frames.bin", "bodies": out.shape[1], "fps": WALK_FPS, "n": len(frames),
                 "chapters": [{"t": round(i / WALK_FPS, 1), "label": label} for i, label in chapters]}
     except Exception as e:
         observe.emit("note", text=f"tour export failed: {type(e).__name__}: {e}")
