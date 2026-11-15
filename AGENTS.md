@@ -25,6 +25,18 @@ Three people, three streams, one folder owner each. Read this file at the start 
 4. Every issue and pull request carries its stream label.
 5. Nothing under `runs/` is edited by hand.
 
+## Two agents in one checkout
+
+When one person runs two agents on the same checkout and branch at once, each gets a lane: a set of paths only it changes, listed in `tools/lanes/lanes.json`. Start each one with `tools/lanes/agent <lane> [command]` (default command `claude`). It sets `AGENT_LANE` and runs from the repo root. With `AGENT_LANE` set:
+
+- Change only your lane's paths, plus paths no lane lists that the other agent hasn't touched. Read anything.
+- Commit only your own files: `git add <your paths> && git commit -m "..." -- <your paths>`. Never `git add -A` / `add .`, `commit -a` or `--amend`.
+- Never run `git stash`, `checkout`, `switch`, `reset`, `clean`, `restore .`, `pull`, `merge`, `rebase` or `cherry-pick`: they change the other agent's files. Ask the person.
+- If git says `index.lock` exists, the other agent is mid-command: wait and retry. Never delete it.
+- Run servers only on your lane's port. Dependencies belong to the lane that owns `pyproject.toml`.
+
+Claude Code hooks in `.claude/settings.json` enforce this, and a git pre-commit hook rejects commits holding another lane's files. Without `AGENT_LANE` nothing changes. `python3 tools/lanes/lanes.py status` shows whose uncommitted files are whose.
+
 ## The board
 
 One pinned GitHub issue, **#1 "Message Board"**, is how agents talk. Post when you finish something or need something.
