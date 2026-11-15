@@ -25,8 +25,10 @@ def check(candidate: dict, requirements: dict) -> dict:
 
 
 @traced("composer.design", _design_summary)
-def design(requirements: dict, *, exhaustive: bool = False, on_candidate=None, exclude=None) -> dict:
-    return _api.design(requirements, exhaustive=exhaustive, on_candidate=on_candidate, exclude=exclude)
+def design(requirements: dict, *, exhaustive: bool = False, on_candidate=None, exclude=None, require=None,
+           max_price_usd=None) -> dict:
+    return _api.design(requirements, exhaustive=exhaustive, on_candidate=on_candidate, exclude=exclude,
+                       require=require, max_price_usd=max_price_usd)
 
 
 @traced("composer.compose", lambda r: f"robot.xml {len(r['robot_xml'])} chars; stowed {r['build']['stowed']['width_m']} m wide, "

@@ -9,3 +9,4 @@ class WorkflowState(TypedDict, total=False):
     task: str  # the user's latest request
     assessment: dict[str, Any]  # verdict, skill, reason, missing: see nodes/classify.py
     design: dict[str, Any]  # what the designer returned: the pipeline's run result, or a RobotDesign
+    options: dict[str, Any]  # how the person steered the design search: {"exclude", "require", "max_price_usd"}

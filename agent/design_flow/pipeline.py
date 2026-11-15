@@ -11,14 +11,21 @@ into the snapshot the Robot Design and route pages read.
 Only spaces with a world file can be designed for (WORLDS). Without ANTHROPIC_API_KEY, or with
 STUDIO_STANDIN_TASKS=1, no model reads the job: jobs.tasks_for() turns the classified skill and the job's
 words into tasks on the world's anchors, and the result says so.
+
+request["options"], when given, steers the design search: {"exclude": [{slot: part}], "require": {slot: part},
+"max_price_usd": number}, passed to agent.run as --exclude, --require and --max-price.
+stop(session) kills the session's running pipeline (its whole process group, so the composer's workers
+too); run_pipeline then raises Stopped, and the run folder keeps what it wrote.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import signal
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -51,6 +58,115 @@ WORLDS = {
 # Session (LangGraph thread id) -> its run folder, relative to the repo, set as soon as the run starts,
 # so the studio can follow the run's events.jsonl while it is still going.
 ACTIVE: dict[str, str] = {}
+
+# Session -> the subprocess it is waiting on now (the pipeline, or an export after it), so stop() can kill it.
+PROCS: dict[str, subprocess.Popen] = {}
+STOPPED: set[str] = set()  # sessions told to stop: run_pipeline raises Stopped at its next step
+_LOCK = threading.Lock()
+STOP_MESSAGE = "Stopped by you"
+
+
+class Stopped(RuntimeError):
+    """The person stopped the design run (stop())."""
+
+    def __init__(self, message: str = STOP_MESSAGE):
+        super().__init__(message)
+
+
+def running(session: str) -> bool:
+    """Whether the session has a pipeline subprocess going right now."""
+    proc = PROCS.get(session)
+    return proc is not None and proc.poll() is None
+
+
+def _kill(proc: subprocess.Popen, grace_s: float = 5.0) -> None:
+    """TERM the process group (the run and its worker processes), then KILL what is left after `grace_s`."""
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            os.killpg(proc.pid, sig)
+        except (ProcessLookupError, PermissionError):
+            return
+        deadline = time.monotonic() + grace_s
+        while time.monotonic() < deadline:  # poll, not wait: the run's own thread is in communicate()
+            if proc.poll() is not None:
+                try:
+                    os.killpg(proc.pid, 0)  # workers can outlive the leader for a moment
+                except (ProcessLookupError, PermissionError):
+                    return
+            time.sleep(0.05)
+
+
+def stop(session: str) -> bool:
+    """Stop the session's design run. True when a subprocess was killed; either way the session is marked, so
+    a run between its subprocesses (or about to start one) stops at the next."""
+    with _LOCK:
+        STOPPED.add(session)
+        proc = PROCS.get(session)
+    if proc is None or proc.poll() is not None:
+        return False
+    _kill(proc)
+    return True
+
+
+def clear_stop(session: str) -> None:
+    """Forget an earlier stop, before the session's design runs again (a retry)."""
+    with _LOCK:
+        STOPPED.discard(session)
+
+
+def _end_stopped(out: Path) -> None:
+    """Close the run's event log the way agent.run would have, if the kill came before its run_end."""
+    log = out / "events.jsonl"
+    text = log.read_text() if log.is_file() else ""
+    if any('"kind": "run_end"' in line for line in text.splitlines()):
+        return
+    with log.open("a") as f:
+        f.write(("" if not text or text.endswith("\n") else "\n") + json.dumps({"kind": "run_end", "ok": False, "stopped": True}) + "\n")
+
+
+def _call(cmd: list, session: str | None, out: Path, env: dict, timeout: int) -> subprocess.CompletedProcess:
+    """subprocess.run, but killable through stop(session): the child gets its own process group."""
+    if session in STOPPED:
+        _end_stopped(out)
+        raise Stopped()
+    proc = subprocess.Popen(cmd, cwd=REPO, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                            start_new_session=True)
+    if session:
+        with _LOCK:
+            PROCS[session] = proc
+        if session in STOPPED:  # stopped between the check above and now
+            _kill(proc)
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        _kill(proc)
+        stdout, stderr = proc.communicate()
+        raise subprocess.TimeoutExpired(cmd, timeout, stdout, stderr)
+    finally:
+        if session:
+            with _LOCK:
+                if PROCS.get(session) is proc:
+                    PROCS.pop(session, None)
+    if session in STOPPED:
+        log = out / "pipeline.log"
+        if not log.exists():
+            log.write_text((stdout or "") + "\n--- stderr ---\n" + (stderr or "") + "\n--- stopped by you ---\n")
+        _end_stopped(out)
+        raise Stopped()
+    return subprocess.CompletedProcess(cmd, proc.returncode, stdout, stderr)
+
+
+def steer_flags(options: dict | None) -> list:
+    """agent.run's --exclude, --require and --max-price for the steering options (only those set)."""
+    o = options or {}
+    flags = []
+    if o.get("exclude"):
+        flags += ["--exclude", json.dumps(o["exclude"])]
+    if o.get("require"):
+        flags += ["--require", json.dumps(o["require"])]
+    if o.get("max_price_usd") is not None:
+        flags += ["--max-price", str(float(o["max_price_usd"]))]
+    return flags
 
 
 class NoWorld(ValueError):
@@ -110,6 +226,7 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
     inputs.mkdir(parents=True, exist_ok=True)
     if session:
         ACTIVE[session] = _rel(out)
+    options = request.get("options") or {}
 
     world = REPO / "world" / "scenarios" / f"{scenario}.json"
     cmd = [sys.executable, "-m", "agent.run", "--world", str(world), "--out", str(out)]
@@ -125,10 +242,11 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
         path = inputs / f"{kind}.json"
         path.write_text(json.dumps(rec))
         cmd += [f"--{kind}", str(path)]
+    cmd += steer_flags(options)
 
     env = {**os.environ, "PYTHONPATH": str(REPO)}
     env.setdefault("AGENT_MODEL", STUDIO_MODEL)  # the pipeline's model steps (intake, program): Sonnet unless set
-    done = subprocess.run(cmd, cwd=REPO, env=env, capture_output=True, text=True, timeout=timeout_s)
+    done = _call(cmd, session, out, env, timeout_s)
     (out / "pipeline.log").write_text(done.stdout + "\n--- stderr ---\n" + done.stderr)
     if done.returncode == 3:  # agent.run.EXIT_WAITING: should not happen with --proceed, but say so plainly
         raise RuntimeError("The pipeline stopped to ask questions about the job; see intake.json in " + _rel(out))
@@ -144,7 +262,7 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
         (inputs / "tasks.json").write_text(json.dumps({"tasks": tasks}, indent=1))
         (inputs / "model_intake.json").write_text(json.dumps(asked, indent=1))
         cmd = [c for c in cmd if c not in ("--job", task, "--proceed")] + ["--tasks", str(inputs / "tasks.json")]
-        done = subprocess.run(cmd, cwd=REPO, env=env, capture_output=True, text=True, timeout=timeout_s)
+        done = _call(cmd, session, out, env, timeout_s)
         (out / "pipeline.log").write_text(done.stdout + "\n--- stderr ---\n" + done.stderr)
         fell_back = True
     if not (out / "design.json").exists():
@@ -167,19 +285,22 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
         "summary": lines[1:] if lines and lines[0].startswith("run folder:") else lines,
         "snapshot": None,
     }
+    if options:
+        result["options"] = options
+    if result["infeasible"]:  # why nothing passed, the person's limits among it
+        result["binding"] = [c.get("why") or c.get("check") for c in (design.get("infeasible") or {}).get("binding_checks", [])]
     intake = out / "inputs" / "model_intake.json" if fell_back else out / "intake.json"
     if intake.exists():  # what the model asked and could not cover; the run went on without answers (--proceed)
         said = json.loads(intake.read_text())
         result["questions"] = said.get("questions") or []
         result["unmet"] = said.get("unmet") or []
     if not result["infeasible"]:  # the robot and its motion for the real-room 3D page (agent/tour_export.py, ~3 s)
-        exported = subprocess.run([sys.executable, "-m", "agent.tour_export", str(out)], cwd=REPO, env=env,
-                                  capture_output=True, text=True, timeout=300)
+        exported = _call([sys.executable, "-m", "agent.tour_export", str(out)], session, out, env, 300)
         result["room"] = exported.returncode == 0 and "frames/tour_robot.glb" in exported.stdout
     if not result["infeasible"]:
         snap = out / "snapshot.json"
-        exported = subprocess.run([sys.executable, str(EXPORT), "--run", str(out), "--scenario", scenario, "--out", str(snap)],
-                                  cwd=REPO, env=env, capture_output=True, text=True, timeout=600)
+        exported = _call([sys.executable, str(EXPORT), "--run", str(out), "--scenario", scenario, "--out", str(snap)],
+                         session, out, env, 600)
         if exported.returncode == 0:
             result["snapshot"] = _rel(snap)
         else:

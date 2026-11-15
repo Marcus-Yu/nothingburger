@@ -19,11 +19,14 @@ def check(candidate: dict, requirements: dict) -> dict:
     return _checks.check(candidate.get("parts") or candidate, requirements)
 
 
-def design(requirements: dict, *, exhaustive: bool = False, on_candidate=None, exclude=None) -> dict:
+def design(requirements: dict, *, exhaustive: bool = False, on_candidate=None, exclude=None, require=None,
+           max_price_usd=None) -> dict:
     """The cheapest feasible candidate as a design.json dict, or the infeasible form with the binding checks.
     `on_candidate(progress: dict)` is called as the search goes, for a caller that wants to show it.
-    `exclude` is a list of part patterns ({"lift": ..., "arm": ...}) to leave out: constraints from the loop."""
-    return _design.design(requirements, exhaustive=exhaustive, on_candidate=on_candidate, exclude=exclude)
+    `exclude` is a list of part patterns ({"lift": ..., "arm": ...}) to leave out: constraints from the loop.
+    `require` ({slot: part}) and `max_price_usd` are the person's limits; a candidate must meet both."""
+    return _design.design(requirements, exhaustive=exhaustive, on_candidate=on_candidate, exclude=exclude,
+                          require=require, max_price_usd=max_price_usd)
 
 
 def compose(design: dict, *, requirements: dict | None = None) -> dict:

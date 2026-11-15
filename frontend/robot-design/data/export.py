@@ -266,7 +266,7 @@ def main() -> None:
         run = a.run.resolve()
         sha = git("rev-parse", "HEAD").decode().strip()
         out = a.out or run / "snapshot.json"
-        snap = snapshot(ROOT, run, {"ref": "working tree", "commit": sha, "scenario": a.scenario, "run": str(run)})
+        snap = snapshot(ROOT, run, {"ref": "working tree", "commit": sha, "scenario": a.scenario, "run": str(run.relative_to(ROOT)) if run.is_relative_to(ROOT) else run.name})
         ref = "the working tree"
     else:
         sha = git("rev-parse", a.ref).decode().strip()
