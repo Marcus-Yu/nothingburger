@@ -17,7 +17,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Longest unloaded leg (21.57 m); the step limit of 0.0 m is assumed, not scanned, so watch for thresholds.",
+      "note": "Longest leg (21.57 m) from dock to table C6; the step limit of 0.0 m is assumed, not scanned, so watch for thresholds.",
       "n": 0
     },
     {
@@ -32,7 +32,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets for t1 are assumed, and the table edge is 0.395 m from the base side.",
+      "note": "The middle-room table is only assumed to be C6, so confirm the table identity before contact.",
       "n": 1
     },
     {
@@ -45,10 +45,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_reach",
         "r_t1_payload"
       ],
-      "note": "The 10 N press is assumed, not measured; covers strokes 0-3 of 12.",
+      "note": "The 10 N press force is assumed, not measured, so watch for skating or excess load on the tabletop.",
       "n": 2
     },
     {
@@ -62,7 +61,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Clear the arm from the table before shuffling 0.6 m.",
+      "note": "Backs off 0.1 m before the base moves along the table.",
       "n": 3
     },
     {
@@ -79,7 +78,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.6 m shuffle along table C6; keep the arm stowed.",
+      "note": "Short 0.6 m shuffle along table C6 with only 0.395 m of free floor at the edge.",
       "n": 4
     },
     {
@@ -94,7 +93,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets for t1 are assumed, not verified on site.",
+      "note": "Reach targets are assumed, so check the arm clears the table edge.",
       "n": 5
     },
     {
@@ -107,10 +106,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_reach",
         "r_t1_payload"
       ],
-      "note": "The 10 N press is assumed; covers strokes 4-7 of 12.",
+      "note": "The press force is an assumed 10 N, so verify coverage overlaps strokes 0-3.",
       "n": 6
     },
     {
@@ -124,7 +122,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Retract fully before moving the base.",
+      "note": "Backs off 0.1 m before the next shuffle.",
       "n": 7
     },
     {
@@ -156,7 +154,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets for t1 are assumed, not verified on site.",
+      "note": "Reach targets are assumed rather than measured.",
       "n": 9
     },
     {
@@ -169,10 +167,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_reach",
         "r_t1_payload"
       ],
-      "note": "The 10 N press is assumed; covers strokes 8-11 of 12.",
+      "note": "The 10 N press force is assumed and uncalibrated.",
       "n": 10
     },
     {
@@ -186,7 +183,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Table C6 is complete only if all three standoffs succeeded.",
+      "note": "This completes table C6, so check for missed strips before leaving.",
       "n": 11
     },
     {
@@ -203,7 +200,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "4.9 m to table S3; the step limit is assumed at 0.0 m.",
+      "note": "4.9 m drive to table S3 in the south row; the step height is assumed.",
       "n": 12
     },
     {
@@ -218,7 +215,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "The trajectory for this standoff is missing or failed, so expect this arm plan to fail.",
+      "note": "The free floor is 0.445 m at the S3 edge and the reach targets are assumed.",
       "n": 13
     },
     {
@@ -231,10 +228,9 @@
       "turns": null,
       "requirements": [
         "r_t2_press",
-        "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "There is no valid trajectory here, so strokes 0-2 of S3 may go unwiped; the 10 N press is assumed.",
+      "note": "The 10 N press force is assumed, not measured.",
       "n": 14
     },
     {
@@ -248,7 +244,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "The retreat segment is 0 s, so it was never planned and needs checking before running.",
+      "note": "The back-off is only 0.025 m, so check the cloth clears the surface before the base moves.",
       "n": 15
     },
     {
@@ -265,7 +261,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.45 m shuffle along S3; confirm the arm is stowed after the unplanned retreat.",
+      "note": "0.45 m shuffle along S3.",
       "n": 16
     },
     {
@@ -280,7 +276,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "Reach targets for t2 are assumed, and the table edge is 0.445 m away.",
+      "note": "This approach is long (21.3 s), so watch for a convoluted arm path.",
       "n": 17
     },
     {
@@ -293,10 +289,9 @@
       "turns": null,
       "requirements": [
         "r_t2_press",
-        "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "The 10 N press is assumed; covers strokes 3-5 of 12.",
+      "note": "The press force is an assumed 10 N.",
       "n": 18
     },
     {
@@ -310,7 +305,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "Retract before moving the base.",
+      "note": "Backs off 0.1 m.",
       "n": 19
     },
     {
@@ -342,7 +337,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "The trajectory for this standoff is missing or failed, so expect this arm plan to fail.",
+      "note": "Reach targets are assumed.",
       "n": 21
     },
     {
@@ -355,10 +350,9 @@
       "turns": null,
       "requirements": [
         "r_t2_press",
-        "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "There is no valid trajectory here, so strokes 6-8 of S3 may go unwiped; the 10 N press is assumed.",
+      "note": "The 10 N press force is uncalibrated.",
       "n": 22
     },
     {
@@ -372,7 +366,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "The retreat segment is 0 s, so it was never planned and needs checking before running.",
+      "note": "The back-off is only 0.025 m, so confirm clearance before driving.",
       "n": 23
     },
     {
@@ -389,7 +383,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "1.96 m reposition to the far end of S3; confirm the arm is stowed first.",
+      "note": "1.96 m reposition to the far side of S3.",
       "n": 24
     },
     {
@@ -404,7 +398,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "Reach targets for t2 are assumed, not verified on site.",
+      "note": "This standoff is offset from the row, so check the arm reaches strokes 9-11.",
       "n": 25
     },
     {
@@ -417,10 +411,9 @@
       "turns": null,
       "requirements": [
         "r_t2_press",
-        "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "The 10 N press is assumed; covers strokes 9-11 of 12.",
+      "note": "The 10 N press force is assumed.",
       "n": 26
     },
     {
@@ -434,7 +427,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "Table S3 is likely only partly wiped because of the two failed standoffs.",
+      "note": "This completes table S3, so stow the cloth before the long drive.",
       "n": 27
     },
     {
@@ -451,7 +444,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "9.7 m to the east-corridor table E2.",
+      "note": "9.7 m drive to the east-corridor table E2.",
       "n": 28
     },
     {
@@ -467,7 +460,7 @@
         "r_t3_floor",
         "r_t3_opening"
       ],
-      "note": "The gripper opens at the start, and the bottle is only 0.146 m from the table edge.",
+      "note": "The free floor at the edge is only 0.146 m and the gripper opens at the start, so it needs at least 0.08 m opening.",
       "n": 29
     },
     {
@@ -479,11 +472,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t3_reach",
         "r_t3_opening",
         "r_t3_payload"
       ],
-      "note": "Grip force is not established because the ledger has no force band for the 0.55 kg bottle.",
+      "note": "Grip force is not established: the ledger has no force band, and the 500 ml card is only the closest match to this bottle.",
       "n": 30
     },
     {
@@ -497,7 +489,7 @@
       "requirements": [
         "r_t3_payload"
       ],
-      "note": "Lift 0.15 m and check the bottle is not slipping, given the unestablished grip force.",
+      "note": "Lifts 0.15 m with a 0.55 kg card payload, so watch for slip given the unset grip force.",
       "n": 31
     },
     {
@@ -509,10 +501,9 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t3_floor",
-        "r_t3_payload"
+        "r_t3_floor"
       ],
-      "note": "Retreat while holding the bottle, and keep it inside the stowed height.",
+      "note": "The bottle is held through the retreat, so keep the tool axis vertical to avoid spills.",
       "n": 32
     },
     {
@@ -527,10 +518,9 @@
         "r_width",
         "r_length",
         "r_header",
-        "r_step",
-        "r_t3_payload"
+        "r_step"
       ],
-      "note": "15.3 m carrying the bottle; drive gently because the grip force is unverified.",
+      "note": "15.3 m drive carrying the bottle, so check the stowed height with the held object stays under the 2.05 m header.",
       "n": 33
     },
     {
@@ -544,7 +534,7 @@
       "requirements": [
         "r_t3_payload"
       ],
-      "note": "The way_out drop pose has no planned arm trajectory, so confirm a clear surface.",
+      "note": "The way_out drop point has no scanned placement surface in the ledger, so confirm a stable spot.",
       "n": 34
     },
     {
@@ -558,7 +548,7 @@
       "requirements": [
         "r_t3_opening"
       ],
-      "note": "Open the gripper only once the bottle is resting stably.",
+      "note": "Open the gripper only after the bottle is confirmed resting upright.",
       "n": 35
     },
     {
@@ -575,7 +565,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "2.6 m unloaded return to the dock.",
+      "note": "2.6 m return to the dock with an empty gripper.",
       "n": 36
     }
   ]

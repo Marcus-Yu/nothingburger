@@ -263,7 +263,19 @@ def _attempt(b: _Builder, seed, skill: str, targets: list, turns, press) -> None
             p_now = arm.tool_pos()
             a_now = _axis(targets[-1]) if skill == "wipe" else a_in
             away = a_now if a_now is not None else arm.tool_axis()
-            b.emit(seg, b.line(b.q, p_now, p_now - PRE_APPROACH * away, a_now, a_now))
+            # Back straight off the work before folding. At the edge of the arm's reach the full distance may
+            # not exist along that line, so take the longest of full, half and a quarter that does; with none,
+            # fold from where it is (the joint-space move is still checked for collisions).
+            seg["back_off_m"], clean = 0.0, b.collisions
+            for frac in (1.0, 0.5, 0.25):
+                try:
+                    back_off = b.line(b.q, p_now, p_now - frac * PRE_APPROACH * away, a_now, a_now)
+                except _Fail:
+                    b.collisions = clean
+                    continue
+                b.emit(seg, back_off)
+                seg["back_off_m"] = round(frac * PRE_APPROACH, 3)
+                break
         try:
             b.emit(seg, b.transit(b.q, arm.q_stowed))
         except _Fail:  # direct way home is blocked: go by the pre-approach pose, whose way home is known clear

@@ -17,7 +17,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Dock to corridor sill, 3.3 m; the zero step limit is assumed, not scanned, so watch thresholds.",
+      "note": "Dock to t1 sill (3.30 m); step limit 0.0 m is assumed, not scanned, so stop if any threshold appears.",
       "n": 0
     },
     {
@@ -32,7 +32,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Only 0.066 m of free floor at the sill edge, so check base clearance before the arm moves.",
+      "note": "Base sits only 0.066 m from the free-floor edge here, so check the standoff pose before moving the arm.",
       "n": 1
     },
     {
@@ -47,7 +47,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured on this sill.",
+      "note": "The 10 N press force is assumed, not measured, so watch for skipping or excess load on the sill.",
       "n": 2
     },
     {
@@ -61,7 +61,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Stow the arm fully before the 0.45 m shuffle.",
+      "note": "The arm backs off 0.1 m before the base moves.",
       "n": 3
     },
     {
@@ -78,7 +78,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.45 m shuffle along the sill; keep the base parallel to the wall.",
+      "note": "Short 0.45 m shuffle along the sill; keep the 0.066 m edge margin.",
       "n": 4
     },
     {
@@ -93,7 +93,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets are assumed poses, so watch for a missed sill edge.",
+      "note": "Reach targets are assumed, so confirm the cloth lands on the sill top.",
       "n": 5
     },
     {
@@ -108,7 +108,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed and uncalibrated.",
+      "note": "Strokes 3-5 run at an assumed 10 N press force.",
       "n": 6
     },
     {
@@ -122,7 +122,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Stow the arm before the base moves.",
+      "note": "Back off 0.1 m and clear the sill before driving.",
       "n": 7
     },
     {
@@ -139,7 +139,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.45 m shuffle along the sill.",
+      "note": "0.45 m shuffle along the corridor wall.",
       "n": 8
     },
     {
@@ -154,7 +154,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Floor margin is tight at 0.066 m, so confirm the base did not drift toward the wall.",
+      "note": "Check the pose against the narrow free-floor margin.",
       "n": 9
     },
     {
@@ -169,7 +169,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Strokes 6-8 run at an assumed 10 N press force.",
       "n": 10
     },
     {
@@ -183,7 +183,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Stow the arm before the base moves.",
+      "note": "0.1 m back-off.",
       "n": 11
     },
     {
@@ -215,7 +215,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets are assumed poses, so verify cloth contact on the first stroke.",
+      "note": "Reach targets are assumed, not surveyed.",
       "n": 13
     },
     {
@@ -230,7 +230,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed and uncalibrated.",
+      "note": "Strokes 9-11 run at an assumed 10 N press force.",
       "n": 14
     },
     {
@@ -244,7 +244,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Stow the arm before the base moves.",
+      "note": "0.1 m back-off.",
       "n": 15
     },
     {
@@ -276,7 +276,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Floor margin is tight at 0.066 m.",
+      "note": "Check the pose against the 0.066 m edge margin.",
       "n": 17
     },
     {
@@ -291,7 +291,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Strokes 12-14 run at an assumed 10 N press force.",
       "n": 18
     },
     {
@@ -305,7 +305,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Stow the arm before the base moves.",
+      "note": "0.1 m back-off.",
       "n": 19
     },
     {
@@ -337,7 +337,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets are assumed poses.",
+      "note": "Reach targets are assumed, not surveyed.",
       "n": 21
     },
     {
@@ -352,7 +352,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed and uncalibrated.",
+      "note": "Strokes 15-17 run at an assumed 10 N press force.",
       "n": 22
     },
     {
@@ -366,7 +366,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Stow the arm before the base moves.",
+      "note": "0.1 m back-off.",
       "n": 23
     },
     {
@@ -398,7 +398,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "This is the end of the sill, so check that the reach stays on the surface.",
+      "note": "Final sill standoff; confirm the end of the sill is within reach.",
       "n": 25
     },
     {
@@ -413,7 +413,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "Final 3 strokes at an assumed 10 N; confirm the sill is fully covered.",
+      "note": "Strokes 18-19 finish the sill at an assumed 10 N press force.",
       "n": 26
     },
     {
@@ -427,7 +427,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Stow fully before the long transit.",
+      "note": "Back off 0.1 m and stow the arm under the 2.05 m header before the long drive.",
       "n": 27
     },
     {
@@ -444,7 +444,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "7.3 m transit to the reception ledge through doorways; check the 0.76 m width and 2.05 m header.",
+      "note": "7.29 m drive to the reception ledge through 0.76 m width limits; the step limit is assumed.",
       "n": 28
     },
     {
@@ -459,7 +459,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "Only 0.056 m of free floor at the ledge, so check base clearance first.",
+      "note": "Base sits only 0.056 m from the free-floor edge, so check the pose before reaching.",
       "n": 29
     },
     {
@@ -474,7 +474,7 @@
         "r_t2_press",
         "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured on this ledge.",
+      "note": "Strokes 0-2 of the ledge run at an assumed 10 N press force.",
       "n": 30
     },
     {
@@ -488,7 +488,7 @@
       "requirements": [
         "r_t2_reach"
       ],
-      "note": "The retreat is long at 8.4 s, so wait for full stow before moving.",
+      "note": "0.1 m back-off; the slow 8.4 s retreat is planned.",
       "n": 31
     },
     {
@@ -505,7 +505,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.45 m shuffle along the desk ledge; waiting-room visitors may be nearby.",
+      "note": "0.45 m shuffle along the desk.",
       "n": 32
     },
     {
@@ -520,7 +520,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "Floor margin is tight at 0.056 m.",
+      "note": "Reach targets are assumed, not surveyed.",
       "n": 33
     },
     {
@@ -535,7 +535,7 @@
         "r_t2_press",
         "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed and uncalibrated.",
+      "note": "Strokes 3-5 run at an assumed 10 N press force.",
       "n": 34
     },
     {
@@ -549,7 +549,7 @@
       "requirements": [
         "r_t2_reach"
       ],
-      "note": "Stow the arm before the base moves.",
+      "note": "0.1 m back-off.",
       "n": 35
     },
     {
@@ -566,7 +566,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.45 m shuffle along the ledge.",
+      "note": "0.45 m shuffle along the desk.",
       "n": 36
     },
     {
@@ -581,7 +581,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "Reach targets are assumed poses.",
+      "note": "Check the pose against the 0.056 m edge margin.",
       "n": 37
     },
     {
@@ -596,7 +596,7 @@
         "r_t2_press",
         "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Strokes 6-8 run at an assumed 10 N press force.",
       "n": 38
     },
     {
@@ -610,7 +610,7 @@
       "requirements": [
         "r_t2_reach"
       ],
-      "note": "Stow the arm before the base moves.",
+      "note": "0.1 m back-off.",
       "n": 39
     },
     {
@@ -627,7 +627,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.45 m shuffle along the ledge.",
+      "note": "0.45 m shuffle along the desk.",
       "n": 40
     },
     {
@@ -642,7 +642,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "Floor margin is tight at 0.056 m.",
+      "note": "Reach targets are assumed, not surveyed.",
       "n": 41
     },
     {
@@ -657,7 +657,7 @@
         "r_t2_press",
         "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed and uncalibrated.",
+      "note": "Strokes 9-11 run at an assumed 10 N press force.",
       "n": 42
     },
     {
@@ -671,7 +671,7 @@
       "requirements": [
         "r_t2_reach"
       ],
-      "note": "Stow the arm before the base moves.",
+      "note": "0.1 m back-off.",
       "n": 43
     },
     {
@@ -688,7 +688,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Last 0.45 m shuffle on the ledge.",
+      "note": "Last 0.45 m shuffle on the desk.",
       "n": 44
     },
     {
@@ -703,7 +703,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "This is the end of the ledge, so check that the reach stays on the surface.",
+      "note": "Final ledge standoff; confirm the end of the ledge is within reach.",
       "n": 45
     },
     {
@@ -718,7 +718,7 @@
         "r_t2_press",
         "r_t2_payload"
       ],
-      "note": "Single final stroke at an assumed 10 N.",
+      "note": "Single closing stroke 12 at an assumed 10 N press force.",
       "n": 46
     },
     {
@@ -732,7 +732,7 @@
       "requirements": [
         "r_t2_reach"
       ],
-      "note": "Stow fully before returning to dock.",
+      "note": "Back off 0.1 m and stow the arm under the 2.05 m header before returning to the dock.",
       "n": 47
     },
     {
@@ -749,7 +749,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "5.9 m return to dock; the zero step limit is assumed, not scanned.",
+      "note": "5.92 m return to the dock; the step limit is assumed, not scanned.",
       "n": 48
     }
   ]

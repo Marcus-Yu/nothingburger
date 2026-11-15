@@ -16,7 +16,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Dock to first wipe standoff (4.5 m); step height is assumed 0 m, not scanned, so watch for floor lips or drains.",
+      "note": "Dock to the first wipe standoff (4.5 m); the step limit of 0.0 m is assumed, not scanned, so watch for thresholds.",
       "n": 0
     },
     {
@@ -31,7 +31,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Base edge clearance to the table is only 0.251 m and the wipe reach targets are assumed, not measured.",
+      "note": "Wipe reach targets are assumed and the base sits only 0.25 m from the table edge.",
       "n": 1
     },
     {
@@ -46,7 +46,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "Covers strokes 0-2 of 8 at 10 N, an assumed press force, so check the cloth actually lifts the coolant.",
+      "note": "The 10 N press force is assumed, not measured; the plan runs 5 strokes here although this standoff is labelled strokes 0-2 of 8.",
       "n": 2
     },
     {
@@ -60,7 +60,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Clear the arm from the table before the 0.45 m base shift.",
+      "note": "Back off 0.1 m before driving so the cloth clears the table.",
       "n": 3
     },
     {
@@ -73,9 +73,10 @@
       "turns": null,
       "requirements": [
         "r_width",
+        "r_header",
         "r_step"
       ],
-      "note": "Short 0.45 m sidestep along the table with the 0.251 m edge clearance.",
+      "note": "Short 0.45 m shuffle along the table to the second wipe standoff.",
       "n": 4
     },
     {
@@ -90,7 +91,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets are assumed; confirm the cloth meets the table where expected.",
+      "note": "Reach targets are assumed; confirm the cloth meets the table where the first pass ended.",
       "n": 5
     },
     {
@@ -105,7 +106,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "Covers strokes 3-5 of 8 at an assumed 10 N press.",
+      "note": "The assumed 10 N press runs 5 strokes against a label of strokes 3-5, so expect overlap with the first pass.",
       "n": 6
     },
     {
@@ -119,7 +120,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Lift the cloth clear so wet coolant is not dragged during the base move.",
+      "note": "Back off 0.1 m before driving.",
       "n": 7
     },
     {
@@ -132,9 +133,10 @@
       "turns": null,
       "requirements": [
         "r_width",
+        "r_header",
         "r_step"
       ],
-      "note": "Second 0.45 m sidestep along the table edge.",
+      "note": "0.45 m shuffle to the last wipe standoff.",
       "n": 8
     },
     {
@@ -149,7 +151,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "The last wipe standoff; its reach targets are assumed, not measured.",
+      "note": "Reach targets are assumed, and the table edge is 0.25 m from the base.",
       "n": 9
     },
     {
@@ -164,7 +166,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "Final strokes 6-7 of 8 at an assumed 10 N; check the whole table is clean before the pick.",
+      "note": "3 strokes at an assumed 10 N; check the table is dry before the pick.",
       "n": 10
     },
     {
@@ -178,7 +180,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Wipe done, so stow the cloth clear of the part area.",
+      "note": "Back off 0.1 m before driving.",
       "n": 11
     },
     {
@@ -191,9 +193,10 @@
       "turns": null,
       "requirements": [
         "r_width",
+        "r_header",
         "r_step"
       ],
-      "note": "Moves 0.376 m to the pick standoff, which has only 0.176 m of edge clearance.",
+      "note": "0.38 m to the pick standoff, which sits only 0.18 m from the table edge.",
       "n": 12
     },
     {
@@ -209,7 +212,7 @@
         "r_t2_floor",
         "r_t2_opening"
       ],
-      "note": "The gripper opens at the start; the top-down reach target is assumed, so verify where the housing actually sits.",
+      "note": "The gripper opens at the start and needs at least 0.08 m for the housing; the pick pose is assumed.",
       "n": 13
     },
     {
@@ -224,7 +227,7 @@
         "r_t2_opening",
         "r_t2_payload"
       ],
-      "note": "Grip force is not established because the ledger has no force band, so set it before running a 3.5 kg part.",
+      "note": "Grip force is not established because the ledger has no force band for the 3.5 kg housing.",
       "n": 14
     },
     {
@@ -238,7 +241,7 @@
       "requirements": [
         "r_t2_payload"
       ],
-      "note": "A 0.15 m lift of the 3.5 kg housing, a mass the user gave and did not weigh, so watch for slip.",
+      "note": "Lift 0.15 m with 3.5 kg, a user-given mass, so watch for slip with no grip force set.",
       "n": 15
     },
     {
@@ -253,7 +256,7 @@
         "r_t2_floor",
         "r_t2_payload"
       ],
-      "note": "Retreat with the part held and clear of the table edge.",
+      "note": "Retreat while holding the housing, keeping clear of the table edge.",
       "n": 16
     },
     {
@@ -267,9 +270,10 @@
       "requirements": [
         "r_width",
         "r_header",
-        "r_step"
+        "r_step",
+        "r_t2_payload"
       ],
-      "note": "Carrying 3.5 kg for 5 m to the roller door; the step there is assumed 0 m, so drive slowly over the threshold.",
+      "note": "5 m carry to the roller door; the step limit is assumed, so a lip could jolt the 3.5 kg load.",
       "n": 17
     },
     {
@@ -283,7 +287,7 @@
       "requirements": [
         "r_t2_payload"
       ],
-      "note": "No place pose is planned at way_out, so confirm the drop surface before setting the part down.",
+      "note": "There is no planned place pose at way_out, so confirm the drop surface is clear.",
       "n": 18
     },
     {
@@ -297,7 +301,7 @@
       "requirements": [
         "r_t2_opening"
       ],
-      "note": "Open the gripper only after the part rests stably.",
+      "note": "Open the gripper only once the housing is resting on the surface.",
       "n": 19
     },
     {

@@ -2,12 +2,12 @@
   "source": "model",
   "model": "claude-opus-5-5",
   "job": "The hackathon in the Rabinowitz atrium is over. Wipe down the table in the middle of the room and the one in the south row, then pick up the bottle left on the table by the east corridor and take it out through the south door.",
-  "understood_as": "After the hackathon in the Rabinowitz atrium, wipe down the middle table and the south-row table, then pick up the bottle left on the table by the east corridor and carry it out of the building.",
+  "understood_as": "After the hackathon in the Rabinowitz atrium, wipe the middle table and the south-row table, then pick up the bottle left on the east-corridor table and carry it out of the building through the south door.",
   "steps": [
-    "Wipe the table in the middle of the atrium (table C6).",
-    "Wipe the table in the south row (table S3).",
-    "Pick up the bottle on the table by the east corridor (table E2).",
-    "Carry the bottle out of the building."
+    "Wipe the middle table (table C6) with a cloth.",
+    "Wipe the south-row table (table S3) with a cloth.",
+    "Pick up the bottle on the east-corridor table (E2).",
+    "Carry the bottle out through the exit."
   ],
   "demos": [
     {
@@ -16,24 +16,24 @@
       "why": "Shows the stroke pattern and pressure for wiping a table top with the cloth."
     },
     {
-      "chore": "wipe table",
+      "chore": "hold cloth",
       "kind": "squeeze",
-      "why": "Shows how firmly to hold the cloth so it does not slip or bunch up while pressing on the table."
+      "why": "Shows how firmly to hold the cloth so it does not slip out while pressing and stroking."
     },
     {
       "chore": "pick up bottle",
       "kind": "path",
-      "why": "Shows how a hand approaches and lifts the bottle off the table without knocking it over."
+      "why": "Shows how the hand approaches and lifts the bottle from the table."
     },
     {
-      "chore": "pick up bottle",
+      "chore": "grip bottle",
       "kind": "squeeze",
-      "why": "Shows how hard to grip the bottle so it does not slip out while being carried, or get crushed."
+      "why": "Shows how hard to grip a possibly thin plastic bottle so it neither slips nor gets crushed while being carried."
     }
   ],
   "questions": [
-    "Is the bottle on the east-corridor table the 500 ml water sample bottle? That is the only bottle the system has a card for. If it is a different kind of bottle, please tell me its size and roughly how much it weighs.",
-    "Nobody has located the south door yet, so the plan can only say \"take it out of the building\". If the robot must use the south door specifically, please have that door added to the building's anchors.",
-    "I assumed table C6 is the table in the middle of the atrium. Is that right?"
+    "I took 'the table in the middle of the room' to be table C6. Is that right?",
+    "The only bottle I have a card for is a 500 ml water sample bottle. Is the bottle left on table E2 about that size and weight? If it is much heavier or a different shape, please tell me roughly what it is.",
+    "The plan can only send the bottle to 'the way out'. Please confirm that the located exit is the south door, or have the south door located."
   ]
 }

@@ -7,7 +7,7 @@
       "object": "sample_bottle",
       "demo": "pick sample bottle",
       "carries": true,
-      "why": "The job is to collect the sample bottle from the shelf and take it out of the building to the gate, so it is picked and carried to the way out.",
+      "why": "The bottle must be lifted off the sample shelf and taken out of the building to the gate; no weight was stated, so the card's 0.55 kg is used.",
       "deliver_to": "way_out"
     }
   ]

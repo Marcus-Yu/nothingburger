@@ -2,55 +2,60 @@
   "source": "model",
   "model": "claude-opus-5-5",
   "job": "My mother lives alone and can't bend down any more. The TV remote is on the low footstool by her bed and there is a towel on the edge of the bath, please pick both up. Fetch her pill organiser from the kitchen counter and wipe her bedside table.",
-  "understood_as": "Help an elderly woman who can't bend by picking up her TV remote from the low footstool and the towel from the bath edge, fetching her pill organiser from the kitchen counter, and wiping her bedside table.",
+  "understood_as": "Help an elderly woman who can't bend: pick up her TV remote from the low bedroom footstool and the towel from the bath edge, bring her pill organiser from the kitchen counter, and wipe her bedside table.",
   "steps": [
-    "Wipe the bedside table in the bedroom with a cloth.",
-    "Pick up the TV remote from the low footstool by the bed.",
+    "Wipe the bedside table with a cloth so it is clean first.",
+    "Pick up the TV remote from the low footstool by her bed.",
     "Go to the bathroom and pick up the towel from the edge of the bath.",
-    "Go to the kitchen, pick up the pill organiser and bring it to her."
+    "Go to the kitchen, pick up the pill organiser from the counter and bring it to her.",
+    "Where each item ends up still needs your answer (see questions)."
   ],
   "demos": [
     {
       "chore": "wipe bedside table",
       "kind": "path",
-      "why": "Shows the stroke pattern and how firmly to press the cloth on the bedside table."
+      "why": "Shows the stroke pattern for covering the bedside table without knocking things off."
+    },
+    {
+      "chore": "wipe bedside table",
+      "kind": "squeeze",
+      "why": "Shows how firmly to hold the cloth and press so it doesn't slip or drag items."
     },
     {
       "chore": "pick up remote",
       "kind": "path",
-      "why": "Shows how the hand approaches and lifts the remote off the low footstool."
+      "why": "Shows how to reach down to the low footstool and lift the remote."
     },
     {
       "chore": "pick up remote",
       "kind": "squeeze",
-      "why": "Sets a grip firm enough that the smooth remote does not slip without pressing its buttons."
+      "why": "The remote is small and smooth, so grip force matters to stop it slipping or pressing buttons."
     },
     {
       "chore": "pick up towel",
       "kind": "path",
-      "why": "Shows how to gather the towel off the bath edge without dragging it into the bath."
+      "why": "Shows how to gather the towel off the bath edge without it falling into the bath."
     },
     {
       "chore": "pick up towel",
       "kind": "squeeze",
-      "why": "Sets a grip that holds the soft, floppy towel without it sliding out of the fingers."
+      "why": "Soft fabric can slip out of a light grip, so the right squeeze must be shown."
     },
     {
-      "chore": "fetch pill organiser",
+      "chore": "pick up pill organiser",
       "kind": "path",
-      "why": "Shows how to lift the organiser off the counter and carry it level."
+      "why": "Shows how to lift the organiser off the counter and keep it level while carrying."
     },
     {
-      "chore": "fetch pill organiser",
+      "chore": "pick up pill organiser",
       "kind": "squeeze",
-      "why": "Sets a gentle grip so the lids do not pop open and spill pills, while the organiser does not slip."
+      "why": "Too hard a grip can crack it or pop the lids open and spill pills."
     }
   ],
   "questions": [
-    "Where should the robot put the TV remote once it has picked it up, for example on the bedside table?",
-    "Where should the towel go after it is picked up: a towel rail, a hook, or the laundry basket? No towel rail or laundry basket has been located yet, so please point one out if you want it put there.",
-    "Where should the pill organiser be brought to: her bedside table, or somewhere else? Please tell us the spot so it can be located.",
-    "Where is the cleaning cloth kept? Please show the robot where it is, and say whether the table should be wiped dry or with a damp cloth.",
-    "The towel card we have is for a towel bunched on the floor; please confirm the towel on the bath edge is an ordinary hand towel of similar size, or tell us if it is a large, heavy bath towel."
+    "The robot has no 'put down' or 'hand over' skill and no destination has been located: where should the remote, the towel and the pill organiser end up (e.g. on the bedside table, in a towel rail, handed to her)? Please mark those places so they can be added.",
+    "The only towel card describes a hand towel bunched on the floor; is the towel on the bath edge a similar hand towel, or a larger bath towel that needs its own card?",
+    "Where is the cloth for wiping kept? Its location hasn't been marked, so please point it out or leave one on the bedside table.",
+    "Is the bedside table delicate (e.g. polished wood) or does it hold anything fragile, so we know how hard to press when wiping?"
   ]
 }

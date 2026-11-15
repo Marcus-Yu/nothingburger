@@ -17,7 +17,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Dock to bedside standoff, 5.1 m; the zero step height is assumed rather than scanned, so watch for thresholds.",
+      "note": "Dock to bedside standoff 0 (5.09 m); step height is assumed to be 0 m, not scanned, so watch for thresholds.",
       "n": 0
     },
     {
@@ -32,7 +32,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "The reach targets are assumed and floor clearance on that side is only 0.276 m, so check the base pose before moving the arm.",
+      "note": "Reach targets for the bedside top are assumed, and the floor edge is only 0.276 m from the base side.",
       "n": 1
     },
     {
@@ -48,7 +48,7 @@
         "r_t1_payload",
         "r_t1_reach"
       ],
-      "note": "The 10 N press force is assumed, not measured, and the plan disagrees with itself: the standoff says it covers 3 strokes but the segment has 5, so confirm table coverage.",
+      "note": "The 10 N press force is assumed, not measured, and the plan disagrees on coverage (5 strokes vs 'strokes 0-2 of 3'), so check that the whole top is wiped.",
       "n": 2
     },
     {
@@ -62,7 +62,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Clear the bedside table before driving; floor margin on that side is tight.",
+      "note": "Back off 0.1 m before driving.",
       "n": 3
     },
     {
@@ -79,7 +79,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Short 2.4 m leg to the footstool; the step height is still assumed.",
+      "note": "Short 2.4 m leg to the footstool standoff 1.",
       "n": 4
     },
     {
@@ -95,7 +95,7 @@
         "r_t2_floor",
         "r_t2_opening"
       ],
-      "note": "The gripper opens at the start of approach and needs at least 55 mm; edge clearance is only 0.126 m.",
+      "note": "Gripper opens at the start of the approach; the free floor edge is only 0.126 m away.",
       "n": 5
     },
     {
@@ -110,7 +110,7 @@
         "r_t2_opening",
         "r_t2_reach"
       ],
-      "note": "Grip force is not established because the ledger has no force band for the remote, so watch for slipping or crushing.",
+      "note": "Grip force for the remote is not established because there is no force band in the ledger, so force_n is left unset.",
       "n": 6
     },
     {
@@ -124,7 +124,7 @@
       "requirements": [
         "r_t2_payload"
       ],
-      "note": "Lift is 0.15 m with a 0.15 kg payload from the card; the plan does not say where the remote goes afterwards.",
+      "note": "Lift 0.15 m with a 0.15 kg card payload; no place step is planned, so the remote stays in the gripper.",
       "n": 7
     },
     {
@@ -138,7 +138,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "Retreat clear of the footstool before the long leg.",
+      "note": "Retreat while still holding the remote, because the plan has no drop-off for t2.",
       "n": 8
     },
     {
@@ -155,7 +155,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Longest leg, 8.1 m to the bathroom; check the bathroom door clears the 0.51 m width limit and look for a threshold.",
+      "note": "Longest leg (8.15 m) to the bathroom; the 0.51 m width limit at doorways is the main risk.",
       "n": 9
     },
     {
@@ -171,7 +171,7 @@
         "r_t3_floor",
         "r_t3_opening"
       ],
-      "note": "The bath edge leaves only 0.126 m of floor margin and the gripper must open to at least 70 mm.",
+      "note": "The approach opens the gripper, which would drop the remote picked in t2 unless it was set down first.",
       "n": 10
     },
     {
@@ -186,7 +186,7 @@
         "r_t3_opening",
         "r_t3_reach"
       ],
-      "note": "Grip force is not established because the ledger has no force band for the towel.",
+      "note": "Grip force for the towel is not established because there is no force band in the ledger.",
       "n": 11
     },
     {
@@ -200,7 +200,7 @@
       "requirements": [
         "r_t3_payload"
       ],
-      "note": "Lift is 0.15 m with a 0.3 kg payload from the card; a damp towel may weigh more.",
+      "note": "Lift 0.15 m from the bath edge with a 0.3 kg card payload; no place step is planned for the towel.",
       "n": 12
     },
     {
@@ -214,7 +214,7 @@
       "requirements": [
         "r_t3_floor"
       ],
-      "note": "Retreat clear of the bath edge, which may be wet underfoot.",
+      "note": "Retreat on wet bathroom floor with a 0.126 m edge margin.",
       "n": 13
     },
     {
@@ -231,7 +231,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "5.4 m leg to the kitchen counter; the step height is still assumed.",
+      "note": "5.38 m to the kitchen counter standoff 3.",
       "n": 14
     },
     {
@@ -247,7 +247,7 @@
         "r_t4_floor",
         "r_t4_opening"
       ],
-      "note": "The counter target is at 0.95 m height with 0.126 m edge clearance, and the gripper opens to at least 70 mm.",
+      "note": "Counter target is at 0.95 m; the gripper opens on approach, which would drop the towel if it is still held.",
       "n": 15
     },
     {
@@ -262,7 +262,7 @@
         "r_t4_opening",
         "r_t4_reach"
       ],
-      "note": "Grip force is not established because there is no force band for the organiser, and too much force could pop the lids open.",
+      "note": "Grip force for the pill organiser is not established because there is no force band, and it could open if squeezed.",
       "n": 16
     },
     {
@@ -276,7 +276,7 @@
       "requirements": [
         "r_t4_payload"
       ],
-      "note": "Lift is 0.15 m with a 0.25 kg payload from the card; keep the organiser level to avoid spilling pills.",
+      "note": "Lift 0.15 m with a 0.25 kg card payload; keep it level so the pills do not spill.",
       "n": 17
     },
     {
@@ -290,12 +290,12 @@
       "requirements": [
         "r_t4_floor"
       ],
-      "note": "Retreat while holding the organiser.",
+      "note": "Retreat holding the organiser.",
       "n": 18
     },
     {
       "primitive": "move_base",
-      "task": "t4",
+      "task": null,
       "leg": 4,
       "standoff": null,
       "force_n": null,
@@ -305,10 +305,9 @@
         "r_width",
         "r_length",
         "r_header",
-        "r_step",
-        "r_t4_payload"
+        "r_step"
       ],
-      "note": "7.0 m carrying the organiser; drive gently because the grip force is unverified.",
+      "note": "Carrying leg (7.02 m) to way_out, but the task says the organiser stays in the home, so confirm the destination before deployment.",
       "n": 19
     },
     {
@@ -322,7 +321,7 @@
       "requirements": [
         "r_t4_payload"
       ],
-      "note": "Place at way_out for her; confirm the surface there is stable.",
+      "note": "The place point is way_out, which conflicts with her request; it should be somewhere she can reach in the home, not at the exit.",
       "n": 20
     },
     {
@@ -334,7 +333,7 @@
       "press_n": null,
       "turns": null,
       "requirements": [],
-      "note": "The organiser stays in the home, so check it is seated before opening the gripper.",
+      "note": "Check that the organiser sits stable and upright before the gripper opens.",
       "n": 21
     },
     {
@@ -351,7 +350,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Return 1.2 m to the dock.",
+      "note": "Return to dock (1.2 m) with an empty gripper.",
       "n": 22
     }
   ]

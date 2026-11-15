@@ -180,10 +180,10 @@
       <joint name="joint_th"/>
       <geom name="base_visual" pos="3.55618e-17 1.64799e-17 -1.80411e-15" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" rgba="0.6 0.62 0.65 1" mass="0" mesh="base_mesh"/>
       <geom name="base_box" size="0.274 0.254 0.158" pos="0 0 0.237" type="box" rgba="0 0 0 0" mass="60"/>
-      <geom name="base_caster_0" pos="0.175 0.165 0" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" rgba="0.16 0.17 0.19 1" mass="0" mesh="caster_mesh"/>
-      <geom name="base_caster_1" pos="-0.175 0.165 0" quat="0.5 0.5 0.5 0.5" type="mesh" contype="0" conaffinity="0" rgba="0.16 0.17 0.19 1" mass="0" mesh="caster_mesh"/>
-      <geom name="base_caster_2" pos="-0.175 -0.165 0" quat="0 0 0.707107 0.707107" type="mesh" contype="0" conaffinity="0" rgba="0.16 0.17 0.19 1" mass="0" mesh="caster_mesh"/>
-      <geom name="base_caster_3" pos="0.175 -0.165 0" quat="0.5 0.5 -0.5 -0.5" type="mesh" contype="0" conaffinity="0" rgba="0.16 0.17 0.19 1" mass="0" mesh="caster_mesh"/>
+      <geom name="base_caster_0" pos="0.175 0.165 0" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" rgba="0.1 0.1 0.11 1" mass="0" mesh="caster_mesh"/>
+      <geom name="base_caster_1" pos="-0.175 0.165 0" quat="0.5 0.5 0.5 0.5" type="mesh" contype="0" conaffinity="0" rgba="0.1 0.1 0.11 1" mass="0" mesh="caster_mesh"/>
+      <geom name="base_caster_2" pos="-0.175 -0.165 0" quat="0 0 0.707107 0.707107" type="mesh" contype="0" conaffinity="0" rgba="0.1 0.1 0.11 1" mass="0" mesh="caster_mesh"/>
+      <geom name="base_caster_3" pos="0.175 -0.165 0" quat="0.5 0.5 -0.5 -0.5" type="mesh" contype="0" conaffinity="0" rgba="0.1 0.1 0.11 1" mass="0" mesh="caster_mesh"/>
       <site name="arm_mount" pos="0 0 0.395"/>
       <site name="ego_mount" pos="0.244 0.09 0.425" quat="0.5 0.5 0.5 0.5"/>
       <site name="ego" pos="0.244 0.09 0.425"/>

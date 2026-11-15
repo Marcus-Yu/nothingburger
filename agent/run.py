@@ -82,6 +82,10 @@ def pipeline(state: dict) -> dict:
         state = observe.node("5d program", program.step)(state)
         pr = state["program"]
         observe.emit("program", source=pr["source"], model=pr.get("model"), rejected=pr.get("model_rejected"), steps=pr["steps"])
+        if state.get("walkthrough"):  # film the plan: the robot driving the route and running each arm motion
+            film = viz.walkthrough(state["world"], state["robot_xml"], state["build"], state["route"], state["trajectory"])
+            if film:
+                observe.emit("walkthrough", **film)
     return state
 
 
@@ -199,6 +203,8 @@ def main(argv=None) -> int:
     ap.add_argument("--tasks", help="a task list in JSON; not needed with --job")
     ap.add_argument("--job", help="the job in words; a model turns it into the task list (needs ANTHROPIC_API_KEY)")
     ap.add_argument("--frames", action="store_true", help="also render the robot as the run goes, for the live view in web/")
+    ap.add_argument("--walkthrough", action="store_true",
+                    help="with --frames: also film the robot driving the planned route and doing each task (needs ffmpeg)")
     ap.add_argument("--no-model", action="store_true", help="skip every model step; tasks come from --tasks, the program by rule")
     ap.add_argument("--demo")
     ap.add_argument("--grip")
@@ -215,7 +221,7 @@ def main(argv=None) -> int:
     if a.no_model:
         __import__("os").environ["AGENT_NO_MODEL"] = "1"
     state = {"world": json.loads(Path(a.world).read_text()), "tasks_file": a.tasks, "prepass_radius_m": a.radius,
-             "job": a.job, "use_model": not a.no_model}
+             "job": a.job, "use_model": not a.no_model, "walkthrough": a.walkthrough}
     state["demo_task"] = a.demo_task
     if a.demo:
         state["demo"] = json.loads(Path(a.demo).read_text())

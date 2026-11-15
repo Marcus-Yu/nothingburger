@@ -5,33 +5,33 @@
   "understood_as": "In the CNC cell, wipe the coolant off the fixture table, then lift the finished aluminium housing (about 3.5 kg) off the table and carry it out towards the inspection cart by the roller door.",
   "steps": [
     "Wipe the coolant off the fixture table with a cloth.",
-    "Pick up the finished aluminium housing from the table.",
-    "Carry the housing out by the way out (the roller door) for the inspection cart."
+    "Lift the finished aluminium housing off the table.",
+    "Carry the housing out by the roller door, where the inspection cart is."
   ],
   "demos": [
     {
-      "chore": "wipe coolant off table",
+      "chore": "wipe fixture table",
       "kind": "path",
-      "why": "Shows the stroke pattern and coverage for wiping coolant across the fixture table."
+      "why": "Shows the stroke pattern and coverage for wiping coolant off the fixture table."
     },
     {
-      "chore": "wipe coolant off table",
+      "chore": "wipe fixture table",
       "kind": "squeeze",
-      "why": "Shows how firmly to hold the cloth and press so it does not slip or bunch on the wet, oily surface."
+      "why": "Shows how firmly to hold and press the cloth so it does not slip on the wet, coolant-covered surface."
     },
     {
-      "chore": "lift housing off table",
+      "chore": "lift housing",
       "kind": "path",
-      "why": "Shows how a hand approaches, lifts and clears the housing from the fixture table without knocking the fixtures."
+      "why": "Shows how to approach the housing and lift it clear of the fixture table."
     },
     {
-      "chore": "lift housing off table",
+      "chore": "lift housing",
       "kind": "squeeze",
-      "why": "Shows how hard to pinch a 3.5 kg aluminium housing that may be slick with coolant, so it does not slip or get marked."
+      "why": "Shows how hard to grip a 3.5 kg housing that may be slick with coolant, so it does not slip without marking the finished surface."
     }
   ],
   "questions": [
-    "The inspection cart has not been located in the scan. The plan only takes the housing out by the way out at the roller door. Can someone mark where the cart stands so the robot can set the housing on it?",
-    "Is the inspection cart inside the cell or just outside the roller door? That decides whether the housing really leaves the building or only moves within it."
+    "Nobody has located the inspection cart in this building yet. The robot can carry the housing out by the roller door, but it cannot set it on the cart. Could you add the cart as a located spot, or tell us where the housing should be put down?",
+    "Should the coolant-soaked cloth be left in the cell after wiping, or thrown away somewhere particular?"
   ]
 }

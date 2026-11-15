@@ -9,231 +9,231 @@
     {
       "n": 1,
       "name": "nav.free_floor",
-      "seconds": 0.0066,
+      "seconds": 0.0067,
       "summary": "edge 0.007 m, side [-0.1211, 0.9926]"
     },
     {
       "n": 2,
       "name": "nav.free_floor",
-      "seconds": 0.006,
+      "seconds": 0.0095,
       "summary": "edge 0.0 m, side [0.0, 0.0]"
     },
     {
       "n": 3,
       "name": "composer.design",
-      "seconds": 217.2505,
+      "seconds": 208.5185,
       "summary": "tidybot_arx5+liftkit_900+ur5e+xarm_gripper $49580 91.18 kg"
     },
     {
       "n": 4,
       "name": "composer.compose",
-      "seconds": 0.3071,
-      "summary": "robot.xml 47560 chars; stowed 0.765 m wide, 1.085 m tall; 7 arm joints"
+      "seconds": 0.2949,
+      "summary": "robot.xml 47552 chars; stowed 0.765 m wide, 1.085 m tall; 7 arm joints"
     },
     {
       "n": 5,
       "name": "composer.compose",
-      "seconds": 0.3176,
-      "summary": "robot.xml 47560 chars; stowed 0.765 m wide, 1.285 m tall; 7 arm joints"
+      "seconds": 0.3633,
+      "summary": "robot.xml 47552 chars; stowed 0.765 m wide, 1.285 m tall; 7 arm joints"
     },
     {
       "n": 6,
       "name": "composer.compose",
-      "seconds": 0.3604,
-      "summary": "robot.xml 47557 chars; stowed 0.791 m wide, 1.095 m tall; 7 arm joints"
+      "seconds": 0.3162,
+      "summary": "robot.xml 47549 chars; stowed 0.791 m wide, 1.095 m tall; 7 arm joints"
     },
     {
       "n": 7,
       "name": "composer.compose",
-      "seconds": 0.3127,
-      "summary": "robot.xml 47565 chars; stowed 0.791 m wide, 1.234 m tall; 7 arm joints"
+      "seconds": 0.3039,
+      "summary": "robot.xml 47557 chars; stowed 0.791 m wide, 1.234 m tall; 7 arm joints"
     },
     {
       "n": 8,
       "name": "composer.compose",
-      "seconds": 0.3391,
-      "summary": "robot.xml 47561 chars; stowed 0.765 m wide, 1.535 m tall; 7 arm joints"
+      "seconds": 0.3603,
+      "summary": "robot.xml 47553 chars; stowed 0.765 m wide, 1.535 m tall; 7 arm joints"
     },
     {
       "n": 9,
       "name": "composer.compose",
-      "seconds": 0.3458,
-      "summary": "robot.xml 47557 chars; stowed 0.791 m wide, 1.295 m tall; 7 arm joints"
+      "seconds": 0.3536,
+      "summary": "robot.xml 47549 chars; stowed 0.791 m wide, 1.295 m tall; 7 arm joints"
     },
     {
       "n": 10,
       "name": "composer.compose",
-      "seconds": 0.3391,
-      "summary": "robot.xml 47565 chars; stowed 0.791 m wide, 1.434 m tall; 7 arm joints"
+      "seconds": 0.3385,
+      "summary": "robot.xml 47557 chars; stowed 0.791 m wide, 1.434 m tall; 7 arm joints"
     },
     {
       "n": 11,
       "name": "composer.compose",
-      "seconds": 0.553,
-      "summary": "robot.xml 47558 chars; stowed 0.791 m wide, 1.545 m tall; 7 arm joints"
+      "seconds": 0.6888,
+      "summary": "robot.xml 47550 chars; stowed 0.791 m wide, 1.545 m tall; 7 arm joints"
     },
     {
       "n": 12,
       "name": "composer.compose",
-      "seconds": 0.6381,
-      "summary": "robot.xml 47566 chars; stowed 0.791 m wide, 1.684 m tall; 7 arm joints"
+      "seconds": 0.3429,
+      "summary": "robot.xml 47558 chars; stowed 0.791 m wide, 1.684 m tall; 7 arm joints"
     },
     {
       "n": 13,
       "name": "composer.compose",
-      "seconds": 0.4388,
-      "summary": "robot.xml 27292 chars; stowed 0.594 m wide, 0.886 m tall; 7 arm joints"
+      "seconds": 0.3307,
+      "summary": "robot.xml 27284 chars; stowed 0.594 m wide, 0.886 m tall; 7 arm joints"
     },
     {
       "n": 14,
       "name": "composer.compose",
-      "seconds": 0.4353,
-      "summary": "robot.xml 31262 chars; stowed 0.594 m wide, 0.886 m tall; 7 arm joints"
+      "seconds": 0.3911,
+      "summary": "robot.xml 31254 chars; stowed 0.594 m wide, 0.886 m tall; 7 arm joints"
     },
     {
       "n": 15,
       "name": "composer.compose",
-      "seconds": 0.4594,
-      "summary": "robot.xml 27866 chars; stowed 0.573 m wide, 1.262 m tall; 8 arm joints"
+      "seconds": 0.3753,
+      "summary": "robot.xml 27858 chars; stowed 0.573 m wide, 1.262 m tall; 8 arm joints"
     },
     {
       "n": 16,
       "name": "composer.candidates",
-      "seconds": 0.0039,
+      "seconds": 0.0037,
       "summary": "7140 candidates"
     },
     {
       "n": 17,
       "name": "composer.compose",
-      "seconds": 0.4418,
-      "summary": "robot.xml 33132 chars; stowed 0.623 m wide, 1.372 m tall; 7 arm joints"
+      "seconds": 0.4453,
+      "summary": "robot.xml 33124 chars; stowed 0.623 m wide, 1.372 m tall; 7 arm joints"
     },
     {
       "n": 18,
       "name": "nav.propose",
-      "seconds": 0.0142,
+      "seconds": 0.0127,
       "summary": "36 poses, first [5.0, 2.37, -0.0]"
     },
     {
       "n": 19,
       "name": "motion.reachable",
-      "seconds": 0.2278,
+      "seconds": 0.2468,
       "summary": "ok=True tip 27.63 missed []"
     },
     {
       "n": 20,
       "name": "motion.reachable",
-      "seconds": 0.0244,
+      "seconds": 0.0205,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 21,
       "name": "motion.reachable",
-      "seconds": 0.0044,
+      "seconds": 0.0038,
       "summary": "ok=True tip 45.87 missed []"
     },
     {
       "n": 22,
       "name": "motion.reachable",
-      "seconds": 0.0032,
+      "seconds": 0.0037,
       "summary": "ok=True tip 15.67 missed []"
     },
     {
       "n": 23,
       "name": "motion.reachable",
-      "seconds": 0.037,
+      "seconds": 0.0322,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 24,
       "name": "motion.reachable",
-      "seconds": 0.0214,
+      "seconds": 0.0189,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 25,
       "name": "motion.reachable",
-      "seconds": 0.0298,
+      "seconds": 0.0292,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 26,
       "name": "motion.reachable",
-      "seconds": 0.0029,
+      "seconds": 0.003,
       "summary": "ok=True tip 8.51 missed []"
     },
     {
       "n": 27,
       "name": "nav.propose",
-      "seconds": 0.0136,
+      "seconds": 0.0122,
       "summary": "36 poses, first [7.0, 2.97, 1.5708]"
     },
     {
       "n": 28,
       "name": "motion.reachable",
-      "seconds": 0.0485,
+      "seconds": 0.0438,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 29,
       "name": "motion.reachable",
-      "seconds": 0.0295,
+      "seconds": 0.0243,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 30,
       "name": "motion.reachable",
-      "seconds": 0.0449,
+      "seconds": 0.0388,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 31,
       "name": "motion.reachable",
-      "seconds": 0.0282,
+      "seconds": 0.0247,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 32,
       "name": "motion.reachable",
-      "seconds": 0.0292,
+      "seconds": 0.0271,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 33,
       "name": "motion.reachable",
-      "seconds": 0.0257,
+      "seconds": 0.0258,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 34,
       "name": "motion.reachable",
-      "seconds": 0.0387,
+      "seconds": 0.0356,
       "summary": "ok=False tip 0.0 missed [0]"
     },
     {
       "n": 35,
       "name": "motion.reachable",
-      "seconds": 0.0059,
+      "seconds": 0.0053,
       "summary": "ok=True tip 12.09 missed []"
     },
     {
       "n": 36,
       "name": "nav.plan",
-      "seconds": 0.137,
+      "seconds": 0.1258,
       "summary": "4 legs, 2 doors crossed, 0 failures"
     },
     {
       "n": 37,
       "name": "motion.retarget",
-      "seconds": 0.3519,
+      "seconds": 0.3031,
       "summary": "t1: 3 segments, 3550 samples, max error 0.00048 m"
     },
     {
       "n": 38,
       "name": "motion.retarget",
-      "seconds": 0.0395,
+      "seconds": 0.036,
       "summary": "t2: 3 segments, 301 samples, max error 0.0005 m"
     }
   ],
-  "seconds": 223.713
+  "seconds": 214.517
 }
