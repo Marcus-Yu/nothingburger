@@ -9,5 +9,6 @@ dependencies = [
   "mujoco",    # TODO pin
   "mink",      # TODO pin
   "langgraph", # TODO pin
-  "langsmith", # TODO pin
+  "langchain-anthropic", # Claude for the agent's LLM steps
+  "langsmith>=0.14.9", # TODO pin; >=0.14.9 needed to trace to an agent (LANGSMITH_AGENT_ID)
 ]
