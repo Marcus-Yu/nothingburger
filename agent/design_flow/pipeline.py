@@ -60,6 +60,11 @@ def world_for(world_id: str | None) -> tuple[str, dict]:
     """(scenario, world dict) for a studio space, or NoWorld."""
     world_id = world_id or "rabinowitz-hall"
     scenario = WORLDS.get(world_id)
+    if scenario is None:  # a building from the 3D database: its world is the scenario carrying its model id
+        from agent.design_flow import buildings
+
+        sid = buildings.sid_for_space(world_id)
+        scenario = buildings.scenario_for(sid) if sid else None
     if scenario is None:
         raise NoWorld(f"No world file for the space \"{world_id}\" yet, so the robot can't be designed or pathed there. "
                       f"Spaces with one: {', '.join(sorted(WORLDS))}.")

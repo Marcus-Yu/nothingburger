@@ -5,7 +5,7 @@
    Same steps and endpoints as robots-repo/web/app.js, in the studio's style.
    ===================================================================== */
 import { get, post, backend, onBackend, standInPlan, CATALOG, SLOT_NAMES, partLabel, agent, AGENT_BASE } from './backend.js';
-import { space, setView, onSpaceChange } from './space.js';
+import { space, setView, onSpaceChange, addSpace, setSpace } from './space.js';
 import { openRobotDesign } from './robot-design/robot-design.js';
 import { openAgentTrace } from './agent-trace/agent-trace.js';
 
@@ -322,12 +322,21 @@ function renderAgent(view, s, mine) {
   if (skill) current.skill = skill;
   if (step.kind === 'demo') current.demos = d.demos;
   const named = pretty(skill);
-  const title = step.kind === 'task' ? 'Not a job I can do' : skill ? named[0].toUpperCase() + named.slice(1) : 'Reading the job…';
+  const title = step.kind === 'task' ? 'Not a job I can do' : step.kind === 'building' ? 'Which building?'
+    : skill ? named[0].toUpperCase() + named.slice(1) : 'Reading the job…';
   const kids = [head(s, title, view.job || current.job)];
 
   // 2 the outline
   const outline = section(2, 'The outline');
   outline.querySelector('header').append(current.health.standin ? tag('Stand-in', 'var(--ink-2)') : tag('Agent', 'var(--ok)'));
+  const b = view.building;
+  if (step.kind === 'building') outline.append(buildingAsk(d, s, mine));
+  else if (view.phase === 'building' && view.status === 'working') outline.append(h('p.state.wait', h('i.spin'), ' Finding the building, and reading its scan if it has no world yet'));
+  else if (b) outline.append(h('p.txt', 'Building: ', h('b', b.name), b.address ? ` · ${b.address}` : '', h('span.note', ` (${b.how})`)));
+  if (b && b.sid && b.space && !current.switched && (!space.current || space.current.id !== b.space)) {
+    current.switched = true;   // the agent settled on another building: show its tour
+    setSpace(addSpace(b).id, { quiet: true });
+  }
   if (view.phase === 'classify' && view.status === 'working') outline.append(h('p.state.wait', h('i.spin'), ' Reading the job'));
   else if (step.kind === 'task' && d.rejected) outline.append(h('p.state.warn', d.rejected.reason), h('p.txt', 'Try another job in the prompt bar.'));  else if (skill) outline.append(h('p.txt', `Skill: `, h('b', pretty(skill)), current.demos ? '. Not learned yet, so it needs a demonstration.' : '. Already learned from an earlier demonstration.'));
   const by = (view.assessment && view.assessment.decided_by) || '';
@@ -390,6 +399,27 @@ function syncTrace(view, s) {
   if (!mine || !traceUI.page.open) return;
   if (view.status === 'done' && !traceUI.done) { traceUI.done = true; traceUI.page.finish(view.step.data); }
   if (view.status === 'error' && !traceUI.done) { traceUI.done = true; traceUI.page.fail(view.error); }
+}
+
+/* the agent's question when it cannot tell which building the job is in */
+function buildingAsk(d, s, mine) {
+  const send = async (value, el) => {
+    el.disabled = true;
+    try { await agent.answer(current.agent, value); agentFlow.resume(s, mine); } catch (e) { el.disabled = false; alert(e.message); }
+  };
+  const input = h('input', { type: 'text', 'aria-label': 'Address or name of the building', placeholder: 'An address or a name, e.g. 917 Main St unit 506' });
+  const form = h('form.parts-form', input, h('button.pill.dark.xs', { type: 'submit' }, 'Use it'));
+  form.addEventListener('submit', (e) => { e.preventDefault(); if (input.value.trim()) send(input.value.trim(), form.querySelector('button')); });
+  const picks = (d.candidates || []).map((c) => {
+    const btn = h('button.pill.ghost.xs', { type: 'button', title: c.address || '' }, c.name, c.loaded ? '' : ' · read from Matterport');
+    btn.addEventListener('click', () => send({ sid: c.sid }, btn));
+    return btn;
+  });
+  return h('div',
+    h('p.txt', d.question || 'Which building is this in?'),
+    picks.length ? h('div.row.wrap', picks) : null,
+    h('p.note', picks.length ? 'Or type the address:' : 'It searches the Matterport 3D database (Houston and Los Angeles).'),
+    form);
 }
 
 /* keep polling an existing session after a reply or retry */

@@ -7,6 +7,9 @@
     GET  /sessions/<id>         -> {"session_id", "status": "working" | "waiting" | "done" | "error",
                                     "phase", "step": {"kind", "data"} | null, "error"}
     POST /sessions/<id>/reply   {"recordings"?: {"demo"?, "grip"?}}   answers a demo step; capture fills the rest
+                                {"answer": {"sid"} | text}            answers a building step
+    GET  /buildings?q=<words>   the 3D database (docs/probe/models_index.csv): best matches, with "loaded"
+    POST /buildings/<sid>/load  reads the model into a world (world/matterport.py, ~5 s); {"card", "scenario"}
     POST /sessions/<id>/retry   reruns the step that failed
     GET  /runs/studio/<run>/snapshot.json   the Robot Design page's snapshot of a finished run
     GET  /runs/studio/<run>/events?from=N   the run's events.jsonl from byte N: {"events": [...], "next": N}
@@ -35,7 +38,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 from langchain_core.runnables import RunnableLambda
 
 from agent.design_flow.api import DesignWorkflow, SessionError
-from agent.design_flow import pipeline
+from agent.design_flow import buildings, pipeline
 from agent.design_flow.pipeline import REPO, RUNS, NoWorld
 from agent.design_flow.schemas import TaskAssessment
 
@@ -118,8 +121,12 @@ class Sessions:
         try:  # the classify verdict, and which node is running: a learned skill goes straight to design
             snap = self.workflow._snapshot(sid)
             view["assessment"] = snap.values.get("assessment")
-            if view.get("status") == "working" and "design" in (snap.next or ()):
-                view["phase"] = "design"
+            view["building"] = snap.values.get("building")
+            if view.get("status") == "working":  # the node running now
+                for node, phase in (("design", "design"), ("find_building", "building"), ("classify", "classify")):
+                    if node in (snap.next or ()):
+                        view["phase"] = phase
+                        break
         except Exception:  # noqa: BLE001 - both are niceties
             pass
         return view
@@ -152,9 +159,10 @@ class Sessions:
         self._work(sid, "classify", lambda: self.workflow.reply(sid, job))
         return sid
 
-    def reply(self, sid: str, recordings: dict | None) -> None:
-        self.view(sid)
-        self._work(sid, "design", lambda: self.workflow.reply(sid, recordings or None))
+    def reply(self, sid: str, answer) -> None:
+        """Answer the step the session waits on: recordings for a demo, {"sid"} or text for a building."""
+        waiting = (self.view(sid).get("step") or {}).get("kind")
+        self._work(sid, "building" if waiting == "building" else "design", lambda: self.workflow.reply(sid, answer or None))
 
     def retry(self, sid: str) -> None:
         self.view(sid)
@@ -194,6 +202,9 @@ def make_handler(sessions: Sessions, standin: bool):
                     return self._send(200, sessions.view(parts[1]))
                 except KeyError:
                     return self._send(404, {"detail": "unknown session"})
+            if path == "/buildings":
+                q = parse_qs(urlparse(self.path).query)
+                return self._send(200, {"results": buildings.search((q.get("q") or [""])[0], int((q.get("limit") or ["8"])[0]))})
             if path == "/catalog/names":
                 return self._send(200, catalog_names())
             if path.startswith("/runs/studio/") and path.endswith("/events"):
@@ -229,9 +240,15 @@ def make_handler(sessions: Sessions, standin: bool):
                         return self._send(400, {"detail": "job is empty"})
                     sid = sessions.start(body.get("world") or "rabinowitz-hall", job)
                     return self._send(200, sessions.view(sid))
+                if len(parts) == 3 and parts[0] == "buildings" and parts[2] == "load":
+                    try:
+                        scenario = buildings.load(parts[1])
+                    except (LookupError, RuntimeError, OSError) as e:
+                        return self._send(400, {"detail": str(e)})
+                    return self._send(200, {"card": buildings.get(parts[1]), "scenario": scenario})
                 if len(parts) == 3 and parts[0] == "sessions" and parts[2] in ("reply", "retry"):
                     if parts[2] == "reply":
-                        sessions.reply(parts[1], body.get("recordings"))
+                        sessions.reply(parts[1], body["answer"] if "answer" in body else body.get("recordings"))
                     else:
                         sessions.retry(parts[1])
                     return self._send(200, sessions.view(parts[1]))

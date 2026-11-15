@@ -57,6 +57,13 @@ def _named(job: str, skill: str) -> str | None:
     return next((card for word, card in NAMED.items() if word in text), None)
 
 
+def _by_words(anchors: list, job: str) -> list:
+    """Anchors whose names share a word with the job first ("the table in the kitchen" -> kitchen_top_1)."""
+    words = set(re.findall(r"[a-z0-9]+", job.lower())) - {"the", "a", "in", "on", "at", "of", "top", "table", "down"}
+    score = lambda a: len(words & set(re.findall(r"[a-z0-9]+", a["id"].lower())))
+    return sorted(anchors, key=lambda a: -score(a))
+
+
 def _wants_all(job: str) -> bool:
     return bool(re.search(r"\b(all|every|both|tables|surfaces|counters|them)\b", job.lower()))
 
@@ -69,7 +76,7 @@ def tasks_for(skill: str, job: str, world: dict) -> tuple[list | None, str | Non
     anchors = world.get("anchors", [])
     place = "this space"
     if kind == "wipe":
-        surfaces = [a for a in anchors if a.get("kind") == "surface"]
+        surfaces = _by_words([a for a in anchors if a.get("kind") == "surface"], job)
         if not surfaces:
             return None, f"There’s no table or counter in {place}’s world file to wipe."
         chosen = surfaces if _wants_all(job) else surfaces[:1]
@@ -82,6 +89,7 @@ def tasks_for(skill: str, job: str, world: dict) -> tuple[list | None, str | Non
         return [{"id": "t1", "skill": "twist_out", "anchor": fixtures[0]["id"], "object": "bulb_e26", "carries": False}], None
     items = [(a, _object_for(a["id"])) for a in anchors if a.get("kind") in ("low_item", "counter_item")]
     items = [(a, o) for a, o in items if o]
+    items = [(a, o) for a in _by_words([a for a, _ in items], job) for b, o in items if b is a]
     if not items:
         return None, f"There’s nothing in {place}’s world file for the robot to pick up and carry."
     named = _named(job, skill)

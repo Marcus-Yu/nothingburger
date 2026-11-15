@@ -11,6 +11,8 @@
 Step kinds and their data:
     task    {"question": str, "rejected"?: {"task": str, "reason": str}}
             reply with the task text
+    building {"task", "question": str, "candidates": [database cards]}: which building the job is in
+            reply with {"sid": ...} (a candidate) or text (an address or a name)
     demo    {"task", "skill", "message": str, "needs": ["demo" | "grip"],
              "demos": [{"chore", "kind": "path" | "squeeze", "why", "recording"}]}
             reply with nothing to take the newest recordings for this chore from capture, or with
@@ -41,7 +43,7 @@ class SessionError(ValueError):
 @dataclass(frozen=True)
 class Step:
     session_id: str
-    kind: Literal["task", "demo", "design"]
+    kind: Literal["task", "building", "demo", "design"]
     data: dict[str, Any]
 
 

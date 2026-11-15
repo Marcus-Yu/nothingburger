@@ -79,6 +79,9 @@ export const agent = {
   session: (id) => agentCall(`/sessions/${encodeURIComponent(id)}`),
   reply: (id, recordings) => agentCall(`/sessions/${encodeURIComponent(id)}/reply`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(recordings ? { recordings } : {}) }),
   retry: (id) => agentCall(`/sessions/${encodeURIComponent(id)}/retry`, { method: 'POST' }),
+  answer: (id, value) => agentCall(`/sessions/${encodeURIComponent(id)}/reply`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ answer: value }) }),
+  buildings: (q) => agentCall(`/buildings?q=${encodeURIComponent(q)}&limit=8`, {}, 6000),
+  loadBuilding: (sid) => agentCall(`/buildings/${encodeURIComponent(sid)}/load`, { method: 'POST' }, 120000),
   snapshot: (run) => agentCall(`/${run}/snapshot.json`, {}, 20000),
 };
 

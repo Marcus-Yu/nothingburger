@@ -4,7 +4,8 @@ from typing import Any, TypedDict
 
 
 class WorkflowState(TypedDict, total=False):
-    world: str  # the studio's space id (web/worlds.json), set when the session starts
+    world: str  # the space the job is in: the studio's choice at the start, then find_building's
+    building: dict[str, Any]  # the building find_building settled on: its database card and how it was found
     task: str  # the user's latest request
     assessment: dict[str, Any]  # verdict, skill, reason, missing: see nodes/classify.py
     design: dict[str, Any]  # what the designer returned: the pipeline's run result, or a RobotDesign

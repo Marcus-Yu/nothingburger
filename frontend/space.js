@@ -111,8 +111,24 @@ function fillSelect() {
     }
     sel.append(g);
   };
-  if (scans.length) group('Matterport scans', scans);
+  const db = scans.filter((s) => s.fromDb);
+  const listed = scans.filter((s) => !s.fromDb);
+  if (listed.length) group('Matterport scans', listed);
+  if (db.length) group('From the 3D database', db);
   if (sims.length) group('Simulated', sims);
+}
+
+/* A building picked from the 3D database (frontend/building-search.js, or the agent's find_building
+   step): add it to the space list once, under "From the 3D database". */
+export function addSpace(card) {
+  let s = space.list.find((x) => x.id === card.space || (x.matterport && x.matterport === card.sid));
+  if (!s) {
+    s = { id: card.space, name: card.name, matterport: card.sid, kind: 'scan', fromDb: true,
+          note: [card.address, card.rooms ? `${card.rooms} rooms` : null, 'from the Matterport 3D database'].filter(Boolean).join(' · ') };
+    space.list.push(s);
+    fillSelect();
+  }
+  return s;
 }
 
 export function setSpace(id, { quiet } = {}) {

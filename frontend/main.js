@@ -5,6 +5,7 @@ import { TASKS } from './backend.js';
 import { space, initSpace, setSpace, enterSpace, leaveSpace, onSpaceChange, simUnavailable, preloadSpace, tourReady, peekSpace } from './space.js';
 import { createCampus } from './campus.js';
 import { initFlow, planJob, hideFlow, flowOpen } from './flow.js';
+import { initBuildingSearch } from './building-search.js';
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const P2=Math.PI*2;
@@ -160,6 +161,7 @@ initFlow({
   onOpen:()=>{card.classList.remove('show');API.select(null,false);}
 });
 initSpace({simOK:()=>!root.classList.contains('no-webgl')});
+initBuildingSearch();
 function noGL(){root.classList.add('no-webgl');simUnavailable();}
 
 /* =====================================================================

@@ -75,6 +75,25 @@ def snap_decide(task: str, options: dict[str, str | None], timeout: float = 15.0
             "seconds": round(time.perf_counter() - t0, 2)}
 
 
+def snap_decide_choice(state: str, question: str, options: dict, timeout: float = 15.0) -> tuple:
+    """One multiple-choice question to Snap: (the chosen option's key, its confidence)."""
+    key = os.environ.get("SUBQ_API_KEY")
+    if not key:
+        raise SnapError("SUBQ_API_KEY is not set")
+    body = {"model": SNAP_MODEL, "state": state,
+            "questions": {"pick": {"type": "choice", "instructions": question, "criteria": dict(list(options.items())[:255])}}}
+    req = urllib.request.Request(SNAP_URL, data=json.dumps(body).encode(),
+                                 headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            a = json.load(r)["answers"]["pick"]
+    except urllib.error.HTTPError as e:
+        raise SnapError(f"Snap answered HTTP {e.code}") from e
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError) as e:
+        raise SnapError(f"Snap could not be reached: {e}") from e
+    return a["choice"], a["confidence"]
+
+
 def _options(known: list[str]) -> dict[str, str | None]:
     options = {s: SEED_SKILLS.get(s) for s in known}
     for s, d in SEED_SKILLS.items():
