@@ -2,9 +2,10 @@
    shading, and an ink outline on every piece so it reads as drawn on the drafting sheet.
 
    Sizes come from the cards (a base's outline_m and casters, a lift's retracted_m, an arm's
-   reach_m, a lidar's radius_m and height_m). Shapes are stand-ins: the catalog's meshes are not
-   committed (catalog/_assets/), and the legged bases' sizes live in their simulator models, so
-   Go2 and Spot use toy proportions. Units are metres; the robot faces +Z and its left is +X.
+   reach_m, a lidar's radius_m and height_m). Shapes are stand-ins: the turntable shows the real model
+   (cad.js) once the design workflow server has given it, and this one while it loads or when there
+   is no server. The legged bases' sizes live in their simulator models, so Go2 and Spot use toy
+   proportions. Units are metres; the robot faces +Z and its left is +X.
 
    buildRobot(parts, catalog) -> { root, stages: { body, torso, arm, hand, sensors }, height } */
 import * as THREE from 'three';
@@ -44,6 +45,13 @@ export function solidKit(width = 0.009) {
       return m;
     },
     setOutline(color) { outline.color.setHex(color ?? COLORS.line); },
+    /** Fade the kit's parts (1: solid again). */
+    setOpacity(a) {
+      for (const m of [...Object.values(fills), outline]) {
+        if (m.transparent !== a < 1) { m.transparent = a < 1; m.needsUpdate = true; }
+        m.opacity = a;
+      }
+    },
     dispose() { Object.values(fills).forEach((m) => m.dispose()); outline.dispose(); },
   };
 }
@@ -259,6 +267,7 @@ export function buildRobot(parts, catalog) {
   return {
     root, stages, height,
     flag(stage, color) { kits[stage]?.setOutline(color); },
+    fade(a) { Object.values(kits).forEach((k) => k.setOpacity(a)); },
     dispose() {
       root.traverse((o) => o.geometry?.dispose());
       Object.values(kits).forEach((k) => k.dispose());

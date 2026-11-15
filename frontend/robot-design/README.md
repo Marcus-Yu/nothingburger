@@ -28,7 +28,7 @@ import { openRobotDesign } from './robot-design/robot-design.js';
 openRobotDesign({ scenario: 'jrr', agentBase: 'http://localhost:8020', onDeploy: (snap) => {}, onClose: () => {} });
 ```
 
-Pass `snapshot` instead of `scenario` to hand it a snapshot object directly. `agentBase` is the design workflow server the route view asks for the scanned place's mesh; left out, it tries `http://localhost:8020`. `mountLiveDesign(container, { agentBase, … })` (`live.js`) uses the same address for its pathing map.
+Pass `snapshot` instead of `scenario` to hand it a snapshot object directly. `agentBase` is the design workflow server: the turntable asks it for each robot's real model, the route view for the scanned place's mesh; left out, it tries `http://localhost:8020`. `mountLiveDesign(container, { agentBase, … })` (`live.js`) uses the same address for its turntable and its pathing map.
 
 ## The data
 
@@ -41,15 +41,16 @@ Pass `snapshot` instead of `scenario` to hand it a snapshot object directly. `ag
 
 - **Fields:** they are whitelisted, so no LLM outputs, trace links, frames or video make it into the snapshot. The snapshot is stamped with the ref and commit it came from.
 - **The route search:** the exporter reruns the ref's own `nav.route.plan` on the run's inputs, with its A* instrumented to record the expansion order and parent tree. If the replay doesn't match the recorded `route.json` leg for leg, it refuses to write. The route the page draws is always the recorded one.
-- **Shapes:** the parts are toy shapes sized from the catalog cards (`outline_m`, `retracted_m`, `reach_m`, …). The card meshes aren't committed, and Go2 and Spot use toy proportions.
+- **Shapes:** the robot on the turntable is its real model: the vendors' meshes of the composed robot, which the design workflow server gives as one GLB at `<agentBase>/cad/robot.glb?base=…&lift=…&arm=…&gripper=…&lidar=…&lidar_mount=…&wrist_cam=…&ego_cam=…` (`agent/tools/cad.py`; `cad.js` loads it). The toy shapes sized from the catalog cards (`outline_m`, `retracted_m`, `reach_m`, …; Go2 and Spot use toy proportions) are the fallback: they show while a model loads, and they stay when there is no server, as in the preview above without the design workflow running. The robot driving in the route view is still the toy.
 
 ## Files
 
 | File | What it does |
 | :-- | :-- |
 | `robot-design.js` | The design page: DOM, timeline, Skip, Deploy |
-| `stage.js` | The turntable scene: candidates, failed-part flags, stage-by-stage assembly, 360 finale |
-| `parts.js` | The toy robot built from catalog cards, one outline material per stage |
+| `stage.js` | The turntable scene: candidates, failed-part flags, stage-by-stage assembly, 360 finale; the real model in the toy's place as it arrives |
+| `cad.js` | The real robot model from the design workflow server: the GLB grouped by stage, kept in memory, loads taken in turn |
+| `parts.js` | The toy robot built from catalog cards, one outline material per stage: the stand-in while the real model loads or when there is no server |
 | `plan.js` | Snapshot to stages, recorded checks, funnel, showcase of failed candidates |
 | `route.js` | The route view: DOM and timeline |
 | `route-stage.js` | The bird's-eye scene: building, search replay, route, robot, north arrow and scale bar |

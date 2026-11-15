@@ -5,7 +5,7 @@
    import { openRobotDesign } from './robot-design/robot-design.js';
    const page = openRobotDesign({
      scenario: 'jrr',               // reads ./data/<scenario>.json (data/export.py); or pass `snapshot`
-     agentBase: 'http://localhost:8020',  // the design workflow server: the route view loads the scanned place's mesh from it (that address when left out)
+     agentBase: 'http://localhost:8020',  // the design workflow server: the turntable loads each robot's real model from it, the route view the scanned place's mesh (that address when left out)
      onDeploy: (snap) => {},        // also opens the route view
      onClose: () => {},             // Back or Escape; the page has already removed itself
    });
@@ -14,6 +14,7 @@
 import { createStage } from './stage.js';
 import { stagesFor, showcase, failureOf, funnel, eliminations, money, priceUnsure, cardFor, neverBuilt, tallyText } from './plan.js';
 import { openRoute } from './route.js';
+import { preloadRobot } from './cad.js';
 import { ICON, loadCss, esc, fmt, loadSnapshot, jobLine, trapTab, scrollFade, showRow } from './ui.js';
 
 const TEST_SHOW_MS = 420;   // a candidate on the turntable before its result
@@ -189,7 +190,7 @@ export function openRobotDesign({ scenario = 'jrr', snapshot = null, agentBase =
     for (const c of showcase(snap)) {
       if (skipped || !live()) break;
       showTest(c, total, null);
-      await stage.candidate(c.parts);
+      await stage.candidate(c.parts, { must: true });
       await sleep(TEST_SHOW_MS);
       if (skipped || !live()) break;
       const f = failureOf(c);
@@ -298,7 +299,9 @@ export function openRobotDesign({ scenario = 'jrr', snapshot = null, agentBase =
     snap = s;
     stages = stagesFor(snap);
     renderStatic(root, snap, stages);
-    stage = createStage($('.rd-scene'), { reducedMotion: reduced, catalog: snap.catalog });
+    stage = createStage($('.rd-scene'), { reducedMotion: reduced, catalog: snap.catalog, agentBase });
+    // the real models, fetched while the arithmetic plays: the chosen robot first, then the candidates in the order they show
+    for (const parts of [snap.design.parts, ...showcase(snap).map((c) => c.parts)]) preloadRobot(agentBase, parts, { must: true });
     $('.rd-skip').focus({ preventScroll: true, focusVisible: false });
     play();
   }).catch((err) => {

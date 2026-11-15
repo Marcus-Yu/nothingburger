@@ -3,7 +3,7 @@
 
    import { mountLiveDesign } from './robot-design/live.js';
    const live = mountLiveDesign(container, {
-     agentBase: 'http://localhost:8020',  // the design workflow server: the run's events, the catalog, the scanned place's mesh
+     agentBase: 'http://localhost:8020',  // the design workflow server: the run's events, the catalog, each robot's real model, the scanned place's mesh
      run: 'runs/studio/<run>',            // polls <agentBase>/<run>/events?from=<byte>
      replay: 0,                           // N > 0: fetch the whole log once and play it at N× its own speed
      poll: true,                          // false: the host pushes events with live.feed(events)
@@ -15,7 +15,9 @@
 
    It renders into `container` and sizes to it. Design: each candidate the composer tests shows on
    the turntable, flagged with what failed, at most one every ~0.8 s (the latest wins; the counter
-   counts them all); the robot that passes is assembled. Pathing: the building from run_start seen
+   counts them all); the robot that passes is assembled. Each is the real model (cad.js) when the
+   server has given it in time, fetched from the moment its event arrives, and the toy until then; the
+   chosen robot always ends up as the real one. Pathing: the building from run_start seen
    from above (the scanned place itself once its mesh has loaded: place.js), each standoff as it is
    found, then the route legs, driven. A redesign (robot_fix)
    goes back to the turntable; when the redesigns run out (or one finds nothing) the run keeps the
@@ -26,8 +28,11 @@
 import { ICON, esc, fmt, loadCss } from './ui.js';
 import { failureOf, describeCheck, money, STAGES } from './plan.js';
 import { anchorName } from './route-plan.js';
+import { preloadRobot } from './cad.js';
 
 export const CANDIDATE_MS = 820;   // a tested candidate stays at least this long on the turntable
+const MODEL_WAIT_MS = 2500;        // the chosen robot's real model is waited for this long before it is assembled
+const REAL_WAIT_MS = 900;          // and a candidate's this long, before its time on the turntable starts
 
 /* ---------- pure: the run's files, as the snapshot shapes them ---------- */
 
@@ -653,7 +658,7 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
     if (!turn || stopShown) return;
     stopShown = true;
     if (view === 'turn' && model.design) {
-      turn.candidate(model.design.parts);
+      turn.candidate(model.design.parts, { must: true });
       setCount(model.tested);
       card({ ...model.design, feasible: true }, model.kept ? keptVerdict(model.kept) : CHOSEN);
     }
@@ -701,14 +706,13 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
         setCount(b.n);
         const v = verdictOf(b.c);
         card(b.c, v);
-        turn.candidate(b.c.parts);
-        if (v.state === 'pass') {
-          STAGES.forEach((s) => turn.flag(s.key, 'pick'));
-          await sleep(behind() ? 900 : 1300);
-        } else {
-          if (v.stage) turn.flag(v.stage, 'fail');
-          await sleep(CANDIDATE_MS);
-        }
+        turn.candidate(b.c.parts, { must: v.state === 'pass' });
+        if (v.state === 'pass') STAGES.forEach((s) => turn.flag(s.key, 'pick'));
+        else if (v.stage) turn.flag(v.stage, 'fail');   // the flag carries over when the real model takes the toy's place
+        // its real model is a moment away more often than not: the candidate waits for it a little, so what is flagged is the real robot
+        if (turn.settled) await Promise.race([turn.settled(), sleep(REAL_WAIT_MS)]);
+        if (!on()) return;
+        await sleep(v.state === 'pass' ? (behind() ? 900 : 1300) : CANDIDATE_MS);
         return;
       }
       case 'design': {
@@ -717,6 +721,9 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
         setCount(b.n);
         card({ ...b.design, feasible: true }, b.kept ? keptVerdict(b.kept) : CHOSEN);
         banner('');
+        // the real model is on its way (asked for when the event came in): give it a moment, so the robot is assembled from its real parts
+        if (!behind()) await Promise.race([preloadRobot(agentBase, b.design.parts, { must: true }), sleep(MODEL_WAIT_MS, { cut: true })]);
+        if (!on()) return;
         const a = turn.assemble(b.design.parts);
         for (const s of STAGES) {
           const now = behind();
@@ -816,6 +823,9 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
     for (const e of events || []) {
       for (const b of reduce(model, e)) {
         enqueue(queue, b);
+        // the real model, from the moment the event is in: it may be here by the time the beat plays
+        if (b.kind === 'candidate') preloadRobot(agentBase, b.c.parts, { must: b.c.feasible, near: !b.c.feasible });
+        if (b.kind === 'design') preloadRobot(agentBase, b.design.parts, { must: true });
         if (b.kind === 'reset' || b.kind === 'fix') turn?.spin(false);
         if (b.kind === 'end' && b.stopped) halt();   // at once, not after what was still waiting (enqueue dropped it)
       }
@@ -871,7 +881,7 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
     mods = m;
     catalog = cat;
     names = nm;
-    turn = m.S.createStage($('.rl-turn'), { reducedMotion: reduced, catalog, pane: true });
+    turn = m.S.createStage($('.rl-turn'), { reducedMotion: reduced, catalog, pane: true, agentBase });
     turn.render?.();   // (render and hold are newer than the rest of the stage: a stage.js from the browser's cache may lack them)
     $('.rl-turn').classList.add('on');
     root.dataset.view = 'turn';

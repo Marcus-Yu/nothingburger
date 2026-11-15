@@ -379,6 +379,7 @@ async function agentFlow(job, s, mine, health) {
     if (mine !== seq) return;
     const key = `${view.status}|${view.phase}|${view.error}`;
     if (key !== last) { last = key; renderAgent(view, s, mine); }
+    else syncTrace(view, s);   // the panel is only redrawn on a change, but the trace page opens once the run folder is there and follows every poll
     if (view.status !== 'working') return;
   }
 }
@@ -577,6 +578,7 @@ agentFlow.resume = async (s, mine) => {
     if (mine !== seq) return;
     const key = `${view.status}|${view.phase}|${view.error}`;
     if (key !== last) { last = key; renderAgent(view, s, mine); }
+    else syncTrace(view, s);   // the panel is only redrawn on a change, but the trace page opens once the run folder is there and follows every poll
     if (view.status !== 'working') return;
   }
 };
