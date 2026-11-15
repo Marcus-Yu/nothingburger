@@ -361,6 +361,72 @@ def test_a_failed_arm_path_goes_on_down_the_proposals_after_the_spares(monkeypat
     assert out["trajectory"]["failures"] == [] and out["trajectory"]["tasks"][0]["standoff"] == [4.0, 0.0, 0.0]
 
 
+# --- intake's questions stop the run until the person answers or says to go on ---
+
+def _asking_model(monkeypatch, questions, seen=None):
+    """Stand in for the model at intake: one bulb task, and the given questions."""
+    from agent import llm
+
+    def ask_json(name, system, user, schema, **kw):
+        if seen is not None:
+            seen.append(user)
+        return {"understood_as": "Take the bulb out.", "steps": ["Unscrew the bulb."], "demos": [], "questions": list(questions),
+                "unmet": ["a new bulb is not fitted"],
+                "tasks": [{"skill": "twist_out", "anchor": "living_bulb", "object": "bulb_e26", "carries": False,
+                           "deliver_to": None, "object_mass_kg": None, "demo": None, "why": "asked"}]}
+
+    monkeypatch.setattr(llm, "available", lambda: True)
+    monkeypatch.setattr(llm, "ask_json", ask_json)
+
+
+def test_a_question_stops_the_run_before_anything_is_designed(monkeypatch, capsys):
+    _asking_model(monkeypatch, ["Which bulb goes back in?"])
+    out = SCRATCH / "test_waiting"
+    (out).mkdir(parents=True, exist_ok=True)
+    (out / "design.json").write_text("{}")  # an older run's design must not survive next to open questions
+    code = run.main(["--world", str(CONTRACTS / "world.example.json"), "--job", "change the living room bulb", "--out", str(out)])
+    assert code == run.EXIT_WAITING
+    assert not (out / "design.json").exists() and not (out / "requirements.json").exists()
+    intake = json.loads((out / "intake.json").read_text())
+    assert intake["questions"] == ["Which bulb goes back in?"] and intake["unmet"] == ["a new bulb is not fitted"]
+    events = [json.loads(line) for line in (out / "events.jsonl").read_text().splitlines()]
+    kinds = [e["kind"] for e in events]
+    assert "awaiting_answers" in kinds and "building" not in kinds and "candidates" not in kinds
+    assert events[-1]["kind"] == "run_end" and events[-1]["waiting"] is True
+    assert "Which bulb goes back in?" in capsys.readouterr().out
+
+
+def test_answers_reach_the_model_and_are_kept(monkeypatch, world):
+    from agent.nodes import intake
+
+    seen = []
+    _asking_model(monkeypatch, [], seen)
+    answers = [{"question": "Which bulb goes back in?", "answer": "None, just take it out."}, {"question": "skipped", "answer": "  "}]
+    state = intake.step({"world": world, "job": "change the living room bulb", "answers": answers})
+    assert "Q: Which bulb goes back in?\nA: None, just take it out." in seen[0] and "skipped" not in seen[0]
+    assert state["intake"]["answers"] == answers[:1] and state["intake"]["questions"] == []
+
+
+def test_proceed_goes_past_open_questions_and_says_so(monkeypatch, world):
+    _asking_model(monkeypatch, ["Which bulb goes back in?"])
+    reached = {}
+
+    class Reached(Exception):
+        pass
+
+    def next_step(state):  # stands in for every step after intake
+        reached["intake"] = state["intake"]
+        raise Reached
+
+    monkeypatch.setattr(run.observe, "node", lambda name, step: step if name.startswith("0") else next_step)
+    monkeypatch.setattr(run.viz, "room_view", lambda w: None)
+    job = {"world": world, "job": "change the living room bulb", "use_model": True}
+    with pytest.raises(Reached):
+        run.pipeline({**job, "proceed": True})
+    assert reached["intake"]["proceeded_without_answers"] is True and reached["intake"]["questions"]
+    reached.clear()
+    assert run.pipeline({**job, "proceed": False})["waiting"] is True and not reached
+
 def test_a_demo_belongs_to_the_first_task_its_motion_shows():
     from agent.run import _demo_task
     tasks = [{"id": "t1", "skill": "pick"}, {"id": "t2", "skill": "wipe"}, {"id": "t3", "skill": "wipe"}]

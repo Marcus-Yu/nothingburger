@@ -2,7 +2,7 @@
 
 One job, typed in the studio: **Wipe a surface**. The agent reads it, asks the headset for one wipe and one
 squeeze, designs the robot, plans where it stands and drives in Rabinowitz Hall, then opens the Robot Design
-page and the route view. About **25 s** of generation once the caches are warm (below).
+page, the route view and the robot inside the scanned room in 3D. About **15 s** of generation once rehearsed (below).
 
 ## Once per machine (about 5 min, unattended)
 
@@ -41,7 +41,7 @@ matched to the hall's tables and items by rule (`agent/design_flow/jobs.py`).
 headset. That teaches the skill (its takes are kept in `agent/design_flow/skill_data/`) and caches every robot
 check for that job. The first run takes one to two minutes.
 
-## On stage (about 25 s)
+## On stage (about 15 s)
 
 1. Open http://localhost:8000/#studio. The space is Rabinowitz Hall.
 2. Type **Wipe a surface** (or tap it under the prompt) and press **Design robot**.
@@ -49,6 +49,9 @@ check for that job. The first run takes one to two minutes.
 3. The agent trace opens by itself: the six steps, the robots tried cheapest first and why each fails, then
    where it stands. **Show trace** lists every call.
 4. **Open Robot Design** → watch it assemble → **Deploy** → the route view.
+5. **See it in the real room (3D)** (on the trace page or in the plan panel) opens the plan played inside the
+   Matterport mesh of the atrium. It needs the stitched mesh at `world/_scans/jrr/room.glb` (not committed; see
+   `web/README.md`, "The real room as a mesh"). Without it the button still opens, over a plain floor.
 
 **To film the demonstration live instead**, delete `agent/design_flow/skill_data/wipe_table/` first. The plan
 then asks for the takes (**Ask the headset** for the motion and the squeeze, then **Use these takes → design the
@@ -61,7 +64,7 @@ the request shows (`wipe table`).
 
 | Job | Result |
 | :-- | :-- |
-| Wipe a surface | one table: demo, then a robot in about 25 s |
+| Wipe a surface | one table: demo, then a robot in about 15 s rehearsed |
 | Wipe down the tables | both tables, about 25 s rehearsed |
 | Carry a container outside | the sample bottle, out the south door: about 10 s |
 | Take out a trash bag | refused: no trash bag in the hall's world file (the sample bottle is) |
@@ -69,5 +72,5 @@ the request shows (`wipe table`).
 | Open a box, caretaker jobs | refused: not a skill the pipeline has yet |
 | Replace … | the parts search, as before |
 
-Measured on this machine, 2026-11-15, with warm caches. The design step can still loop once ("redesign") when
-pathing cannot use the first robot; that is part of the 25 s.
+Measured on this machine, 2026-11-15, with warm caches: rehearsal 56 s, on stage 15 s including the 3D export.
+The design step can still loop once ("redesign") when pathing cannot use the first robot.

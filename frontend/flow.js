@@ -428,7 +428,8 @@ function robotResult(d, s) {
   if (d.snapshot) {
     const open = h('button.pill.dark.xs', { type: 'button' }, 'Open Robot Design →');
     open.addEventListener('click', async () => { open.disabled = true; await openDesign(d); open.disabled = false; });
-    out.push(h('div.row', open));
+    const room = d.room ? h('a.pill.ghost.xs', { href: `${AGENT_BASE}/room.html?run=${encodeURIComponent(d.run)}`, target: '_blank', rel: 'noopener' }, 'See it in the real room (3D) ↗') : null;
+    out.push(h('div.row', open, room));
   } else if (d.snapshot_error) {
     out.push(h('p.state.warn', `The run finished but couldn’t be exported for the Robot Design page: ${d.snapshot_error}`));
   }

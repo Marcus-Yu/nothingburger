@@ -36,7 +36,7 @@ const $ = id => document.getElementById(id), q = new URLSearchParams(location.se
 const run = (q.get("run") || "runs/gallery/jrr").replace(/^runs\//, ""), base = `/runs/${run}/`;
 const say = t => { $("msg").textContent = t; };
 const nudge = { dx: +(q.get("dx") || 0), dz: +(q.get("dz") || 0), rot: +(q.get("rot") || 0) };
-let sdk, meta, frames, bodies = [], rootNode, three, frame = 0, playing = false, follow = true, sweeps = [], pose = null, lastMove = 0, mode = "inside", toModel;
+let sdk, meta, frames, bodies = [], rootNode, three, ctx, worldId, frame = 0, playing = false, follow = true, sweeps = [], pose = null, lastMove = 0, mode = "inside", toModel;
 
 function placeRoot() {  // world (metres, Z up) -> the scan's frame (Y up), then the hand nudge about the vertical
   if (!rootNode || !three) return;
@@ -73,6 +73,51 @@ async function lookAtRobot(force) {
   } catch (e) { /* a move was already under way; the next call tries again */ }
 }
 
+// ?capture=1: copy the room mesh the tour displays to world/_scans/<world id>/raw, for world/scenarios/tools/stitch_scan.py.
+// The tour streams the mesh as tiles, finer ones as the camera gets close, so the camera is flown low over every room
+// in dollhouse view and each tile is saved as it appears: its corners, its texture coordinates and its texture, read
+// back from the graphics card. The files stay on this machine and are not committed (the mesh is Matterport's).
+async function captureRoom(world) {
+  while (!bodies.length || !ctx) await new Promise(r => setTimeout(r, 300));
+  const T = ctx.three, R = ctx.renderer, seen = new Set(); let sent = 0;
+  const put = async (name, body) => { const r = await fetch(`/api/scan_put?world=${worldId}&name=${name}`, { method: "POST", body }); if (!r.ok) throw new Error("the server refused " + name); sent++; };
+  const readTexture = async (tex, size) => {
+    const rt = new T.WebGLRenderTarget(size, size), sc = new T.Scene(), cam = new T.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const mat = new T.ShaderMaterial({ uniforms: { t: { value: tex } }, depthTest: false, depthWrite: false,
+      vertexShader: "varying vec2 v; void main(){ v = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }",
+      fragmentShader: "uniform sampler2D t; varying vec2 v; void main(){ gl_FragColor = vec4(texture2D(t, v).rgb, 1.0); }" });
+    const quad = new T.Mesh(new T.PlaneGeometry(2, 2), mat); quad.frustumCulled = false; sc.add(quad);
+    const prev = R.getRenderTarget(), px = new Uint8Array(size * size * 4); R.setRenderTarget(rt); R.render(sc, cam); R.readRenderTargetPixels(rt, 0, 0, size, size, px); R.setRenderTarget(prev);
+    rt.dispose(); mat.dispose(); quad.geometry.dispose();
+    const c = document.createElement("canvas"); c.width = c.height = size; const g = c.getContext("2d"), im = g.createImageData(size, size), row = size * 4;
+    for (let y = 0; y < size; y++) im.data.set(px.subarray((size - 1 - y) * row, (size - y) * row), y * row);  // the card's rows run bottom to top
+    g.putImageData(im, 0, 0); return new Promise(res => c.toBlob(res, "image/jpeg", 0.86));
+  };
+  const grab = async () => {
+    const fresh = [];
+    ctx.scene.traverse(o => { if (!(o.isMesh && /^RoomMesh/.test(o.name))) return; for (let p = o; p; p = p.parent) if (!p.visible) return;
+      const ch = o._chunks && o._chunks[0]; if (!ch) return; const key = `L${ch.lod}_${ch.chunkIndex}_${ch.meshGroup}_${ch.meshSubgroup}`; if (!seen.has(key)) { seen.add(key); fresh.push([key, o, ch]); } });
+    for (const [key, o, ch] of fresh) {
+      const g = o.geometry, P = g.attributes.position, U = g.attributes.uv, n = P.count, pos = new Float32Array(n * 3), uv = new Float32Array(n * 2), v = new T.Vector3(); o.updateWorldMatrix(true, false);
+      for (let i = 0; i < n; i++) { v.set(P.getX(i), P.getY(i), P.getZ(i)).applyMatrix4(o.matrixWorld); pos.set([v.x, v.y, v.z], 3 * i); uv.set([U.getX(i), U.getY(i)], 2 * i); }
+      const idx = g.index ? Uint32Array.from(g.index.array) : Uint32Array.from({ length: n }, (_, i) => i), tex = ch.embeddedTexture || o.material.uniforms.map.value;
+      if (!tex) continue;
+      await put(key + ".jpg", await readTexture(tex, Math.min(2048, (tex.image && tex.image.width) || 2048))); await put(key + ".pos", pos); await put(key + ".uv", uv); await put(key + ".idx", idx);
+    }
+    return fresh.length;
+  };
+  const M = new T.Matrix4().set(...toModel[0], ...toModel[1], ...toModel[2], 0, 0, 0, 1), pts = [];
+  const xy = world.rooms.flatMap(r => r.polygon), lo = [Math.min(...xy.map(p => p[0])), Math.min(...xy.map(p => p[1]))], hi = [Math.max(...xy.map(p => p[0])), Math.max(...xy.map(p => p[1]))];
+  for (let y = lo[1]; y <= hi[1] + 1.5; y += 3) for (let x = lo[0]; x <= hi[0] + 1.5; x += 3) pts.push(new T.Vector3(x, y, 4.5).applyMatrix4(M));
+  follow = false; $("follow").classList.remove("on");
+  for (const [i, p] of pts.entries()) {
+    try { await sdk.Mode.moveTo(sdk.Mode.Mode.DOLLHOUSE, { position: { x: p.x, y: p.y, z: p.z }, rotation: { x: -88, y: 0 }, transition: sdk.Mode.TransitionType.INSTANT }); } catch (e) { }
+    for (let quiet = 0, t0 = performance.now(); quiet < 3 && performance.now() - t0 < 15000;) { await new Promise(r => setTimeout(r, 700)); quiet = (await grab()) ? 0 : quiet + 1; }
+    say(`Capturing the room: view ${i + 1} of ${pts.length}, ${seen.size} tiles saved`);
+  }
+  say(`Captured ${seen.size} tiles (${sent} files) to world/_scans/${worldId}/raw. Next: python world/scenarios/tools/stitch_scan.py ${worldId}`);
+}
+
 (async () => {
   const cfg = await (await fetch("/api/tour")).json();
   if (!cfg.bundle) return say("Matterport's SDK bundle is not here: run  python web/fetch_sdk.py");
@@ -83,7 +128,7 @@ async function lookAtRobot(force) {
   const world = await (await fetch(base + "world.json")).json();
   if (!meta) return say("This run has no tour export: rerun it with --frames --walkthrough");
   if (!world.tour) return say("This world has no Matterport tour and no alignment to one (world.json has no `tour`)");
-  toModel = world.tour.to_model;
+  toModel = world.tour.to_model; worldId = world.id;
   frames = new Float32Array(await (await fetch(base + meta.frames)).arrayBuffer());
   $("seek").max = meta.n - 1;
   $("chapter").innerHTML = meta.chapters.map((c, i) => `<option value="${i}">${c.label.replace(/</g, "&lt;")}</option>`).join("");
@@ -98,7 +143,7 @@ async function lookAtRobot(force) {
   let player;
   await sdk.Scene.register("robots.player", () => player = {
     inputs: { root: null }, outputs: {},
-    onInit() { three = this.context.three; },
+    onInit() { three = this.context.three; ctx = this.context; },
     onInputsUpdated() { },
     onTick(dt) {
       const root = this.inputs.root; if (!root) return;
@@ -118,6 +163,7 @@ async function lookAtRobot(force) {
   const comp = node.addComponent("robots.player");
   comp.bind("root", loader, "objectRoot");
   obj.start();
+  if (q.get("capture")) captureRoom(world).catch(e => say("Capture stopped: " + (e && e.message || e)));
   window.tour = { sdk, get frame() { return frame; }, get ready() { return bodies.length > 0; }, robot: () => robotInModel(), nudge };
 })().catch(e => say("Could not start: " + (e && e.message || e)));
 

@@ -243,6 +243,50 @@ def _plan(state, standoffs):
                 "failures": [{"kind": "route", "reason": f"nav.plan raised {type(e).__name__}: {e}"}]}
 
 
+def _ease_in(state, standoffs, route):
+    """Route fix: where the base cannot get into a stop (squeezed between a table and a wall, a few centimetres too
+    close, or picked at an angle it cannot turn to), try the spot squared to the room and nudged by up to NUDGE_M,
+    nearest first. A nudge is kept when the arm still reaches that stop's targets and the route then gets there.
+    Returns the route to use."""
+    import math
+
+    requirements = state["requirements"]
+    tasks = {t["id"]: t for t in requirements["tasks"]}
+    near = lambda f, pose: f.get("kind") == "footprint" and f.get("spot") and math.hypot(pose[0] - f["spot"][0], pose[1] - f["spot"][1]) < 0.1
+    steps = sorted(((dx, dy) for dx in (-0.04, -0.02, 0, 0.02, 0.04) for dy in (-0.04, -0.02, 0, 0.02, 0.04)), key=lambda d: math.hypot(*d))
+    for s in standoffs:
+        if not any(near(f, s["pose"]) for f in route.get("failures", [])):
+            continue
+        task, was = tasks[s["task"]], dict(s)
+        targets = [g for r in _rows(requirements, task["id"], "reach_targets") for g in r["value"]]
+        mine = [targets[i] for i in s["covers_targets"]] if "covers_targets" in s else targets
+        payload, press = _loads(task, requirements)
+        square = round(was["pose"][2] / (math.pi / 2)) * (math.pi / 2)
+        for dx, dy in steps:
+            for yaw in dict.fromkeys((float(square), was["pose"][2])):
+                pose = [was["pose"][0] + dx, was["pose"][1] + dy, yaw]
+                if pose == was["pose"]:
+                    continue
+                try:
+                    check = motion.reachable(state["robot_xml"], pose, mine, build=state["build"], payload_kg=payload, tool_force_z_n=press,
+                                             obstacles=state["world"].get("obstacles"))
+                except Exception:
+                    continue
+                if not check["ok"]:
+                    continue
+                s.update(pose=pose, q=check.get("q", {}), tip_ratio=check["tip_ratio"])
+                again = _plan(state, standoffs)
+                if not any(near(f, pose) for f in again.get("failures", [])):
+                    s["why"] = (was.get("why") or "") + f"; moved {math.hypot(dx, dy) * 100:.0f} cm and squared to the room, because the base could not get into the first spot"
+                    route = again
+                    break
+                s.update(pose=was["pose"], q=was.get("q", {}), tip_ratio=was.get("tip_ratio"))
+            else:
+                continue
+            break
+    return route
+
+
 def step(state: dict) -> dict:
     """Reads state["world"], ["requirements"], ["build"], ["robot_xml"], optional ["demos"].
     Writes state["route"] (route.json) and state["trajectory"] (trajectory.json)."""
@@ -266,6 +310,7 @@ def step(state: dict) -> dict:
             observe.emit("standoff_failed", task=task["id"], skill=task["skill"], reason=f.get("reason"), notes=f.get("notes", [])[:4])
 
     route = _plan(state, standoffs)
+    route = _ease_in(state, standoffs, route)
     observe.emit("route", legs=[{k: leg.get(k) for k in ("from", "to", "carrying", "length_m", "waypoints")} for leg in route["legs"]],
                  door_clearances=route.get("door_clearances", []))
 

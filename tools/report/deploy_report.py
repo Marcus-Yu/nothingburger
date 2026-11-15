@@ -1,6 +1,6 @@
 """Write the deployment report for a run: what an engineer needs to program the robot.
 
-    python tools/report/deploy_report.py                  # the example run in contracts/examples
+    python tools/report/deploy_report.py                  # the example run in contracts/draft_0_1/examples
     python tools/report/deploy_report.py runs/<run_id>    # a real run folder
 
 Writes <run>/export/DEPLOY.md. Every number comes from a run file; nothing is written by a model.
@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "contracts"))
+sys.path.insert(0, str(ROOT / "contracts" / "draft_0_1"))
 from validate import check  # noqa: E402
 
 NEEDED = ("requirements", "build", "route", "trajectory", "program", "signals", "verdict", "grip")
@@ -286,7 +286,7 @@ def report(run: Path, f: dict[str, dict], errors: list[str], warnings: list[str]
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("run", nargs="?", default=str(ROOT / "contracts" / "examples"))
+    ap.add_argument("run", nargs="?", default=str(ROOT / "contracts" / "draft_0_1" / "examples"))
     ap.add_argument("--force", action="store_true", help="write the report even if validation fails")
     a = ap.parse_args()
     run = Path(a.run)

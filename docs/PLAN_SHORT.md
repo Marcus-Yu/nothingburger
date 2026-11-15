@@ -8,7 +8,7 @@ A compiler from a building and a maintenance job to a robot. Pick a real buildin
 
 ## [Who it is for](PLAN_REVISED.md#task-and-who-it-is-for)
 
-Landlords and other people who maintain property. The robot's shape must fit the building. The demo shows three jobs where grip force matters: taking out a trash bag, changing a light bulb (then inspecting the empty socket) and wiping a surface. They were chosen because we can demonstrate them this weekend; the method carries over to jobs such as filter changes and plumbing. Forces come from a demonstration at home with force gloves, which need calibrating first; a simulated force is never reported as a fact about a real building.
+Landlords and other people who maintain property. The robot's shape must fit the building. The demo shows three jobs where grip force matters: taking out a trash bag, changing a light bulb and wiping a surface. They were chosen because we can demonstrate them this weekend; the method carries over to jobs such as filter changes and plumbing. Forces come from a demonstration at home with force gloves, which need calibrating first; a simulated force is never reported as a fact about a real building.
 
 ## [Tools](PLAN_REVISED.md#tools-we-have)
 

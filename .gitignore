@@ -9,6 +9,8 @@ runs/scratch/
 MUJOCO_LOG.TXT
 .claude/launch.json
 web/_vendor/
+world/_scans
+
 .board.local
 catalog/_cache/
 runs/studio/

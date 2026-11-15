@@ -99,8 +99,8 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
             raise NoWorld(why_not)
         (inputs / "tasks.json").write_text(json.dumps({"tasks": tasks}, indent=1))
         cmd += ["--tasks", str(inputs / "tasks.json"), "--no-model"]
-    else:
-        cmd += ["--job", task]
+    else:  # Claude reads the job; its questions stay on record in intake.json instead of stopping the run
+        cmd += ["--job", task, "--proceed"]
     for kind, rec in (request.get("demo") or {}).items():
         path = inputs / f"{kind}.json"
         path.write_text(json.dumps(rec))
@@ -109,6 +109,8 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
     env = {**os.environ, "PYTHONPATH": str(REPO)}
     done = subprocess.run(cmd, cwd=REPO, env=env, capture_output=True, text=True, timeout=timeout_s)
     (out / "pipeline.log").write_text(done.stdout + "\n--- stderr ---\n" + done.stderr)
+    if done.returncode == 3:  # agent.run.EXIT_WAITING: should not happen with --proceed, but say so plainly
+        raise RuntimeError("The pipeline stopped to ask questions about the job; see intake.json in " + _rel(out))
     if not (out / "design.json").exists():
         raise RuntimeError(f"The design and pathing pipeline stopped (exit {done.returncode}):\n{_tail(done.stderr or done.stdout)}")
 
@@ -128,6 +130,10 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
         "summary": lines[1:] if lines and lines[0].startswith("run folder:") else lines,
         "snapshot": None,
     }
+    if not result["infeasible"]:  # the robot and its motion for the real-room 3D page (agent/tour_export.py, ~3 s)
+        exported = subprocess.run([sys.executable, "-m", "agent.tour_export", str(out)], cwd=REPO, env=env,
+                                  capture_output=True, text=True, timeout=300)
+        result["room"] = exported.returncode == 0 and "frames/tour_robot.glb" in exported.stdout
     if not result["infeasible"]:
         snap = out / "snapshot.json"
         exported = subprocess.run([sys.executable, str(EXPORT), "--run", str(out), "--scenario", scenario, "--out", str(snap)],

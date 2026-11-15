@@ -1423,6 +1423,7 @@ dependencies = [
     { name = "mujoco" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "numpy", version = "2.5.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+    { name = "trimesh" },
 ]
 
 [package.dev-dependencies]
@@ -1440,6 +1441,7 @@ requires-dist = [
     { name = "mink" },
     { name = "mujoco" },
     { name = "numpy" },
+    { name = "trimesh", specifier = ">=5.2.1" },
 ]
 
 [package.metadata.requires-dev]
@@ -1745,6 +1747,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/82/9e/497c1c8ebe5a5b5d1d4a7511aea22c0bb1a97e3170d98abdef0e1b34265a/tenacity-9.2.1.tar.gz", hash = "sha256:a606b5c808d0cded4a359d5b9932d867ff2a6a6b64d37350260fd01bbdf83839", size = 58261, upload-time = "2026-10-07T12:13:01.633Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d6/26/1ff2b0721ac66a3ec5b1402b333110b352ab0a8724052ac279a7b82d40c4/tenacity-9.2.1-py3-none-any.whl", hash = "sha256:9e56f17539296baab7beabb08b92f6ee3d7be92d8be72d763360677c2ad6580e", size = 32310, upload-time = "2026-10-07T12:13:00.102Z" },
+]
+
+[[package]]
+name = "trimesh"
+version = "5.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/08/9466d15653d236624149feb1158c441ecee0631e6a629eaf9567e32285b5/trimesh-5.2.1.tar.gz", hash = "sha256:3719598aea815f47ae2d08d02b8009eba3921f05847332df16a7fffd74dcb08e", size = 890304, upload-time = "2026-11-12T17:37:36.849Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e6/97/a6efa2926335bab3f85cf990a5b5f48abd989719b4015df0e3209675adf7/trimesh-5.2.1-py3-none-any.whl", hash = "sha256:ba4b5dbdf030bbffbb6337d9c67595435a8d1f224f23eb6500e9662f42a3c5df", size = 754230, upload-time = "2026-11-12T17:37:34.205Z" },
 ]
 
 [[package]]

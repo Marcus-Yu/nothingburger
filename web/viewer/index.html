@@ -186,7 +186,7 @@ svg.photo .roomlabel { font-size: .17px; } svg.photo .obstlabel { font-size: .15
     </section>
     <section class="card" id="walkcard" hidden><h2>Watch it work <em id="walknote"></em></h2>
       <div id="walk"><video id="walkvideo" controls muted playsinline preload="metadata"></video>
-        <div id="walknow"></div><a class="btn ghost" id="walktour" hidden target="_blank" rel="noopener" style="display:inline-block;margin:0 0 8px;text-decoration:none">Watch it in the real room (Matterport scan)</a><div id="walkchapters"></div><div class="hint" id="walkhint"></div></div>
+        <div id="walknow"></div><a class="btn ghost" id="walktour" hidden target="_blank" rel="noopener" style="display:inline-block;margin:0 0 8px;text-decoration:none">Watch it in the real room (Matterport scan)</a> <a class="btn ghost" id="walkroom" hidden target="_blank" rel="noopener" style="display:inline-block;margin:0 0 8px;text-decoration:none">Walk around it in 3D (real room mesh)</a><div id="walkchapters"></div><div class="hint" id="walkhint"></div></div>
     </section>
    </div>
     <section class="card" id="reqcard" hidden><h2>Requirements ledger <em id="reqnote"></em></h2><div class="rows" id="reqs"></div></section>
@@ -266,6 +266,7 @@ function reduce(upto) {
       case "tool": { if (e.name === "composer.compose" && cur === "3-4 design and compose") break;  // drawn as the robot, not as a row
         const g = group(cur || "run"), last = g.items[g.items.length - 1];
         if (last && last.tool === e.name) { last.calls.push(e); } else g.items.push({tool: e.name, calls: [e], t: e.t}); break; }
+      case "awaiting_answers": group("0 intake").items.push({cls: "bad", t: e.t, html: `<b>Stopped for ${e.questions.length} answer${e.questions.length > 1 ? "s" : ""}.</b> Nothing is designed until the questions are answered, or the run is told to go on without them. <a href="/story.html?run=${encodeURIComponent(run)}">Answer them</a>.`}); break;
       case "note": add({cls: "", t: e.t, html: `<small>${esc(e.text)}</small>`}); break;
       case "run_end": S.end = e; break;
     }
@@ -320,6 +321,7 @@ function drawWalk(S) {
     v.ontimeupdate = () => { let k = 0; w.chapters.forEach((c, i) => { if (v.currentTime >= c.t) k = i; });
       $("walknow").textContent = w.chapters[k] ? w.chapters[k].label : "";
       $("walkchapters").querySelectorAll(".chap").forEach((b, i) => b.classList.toggle("on", i === k)); }; }
+  $("walkroom").hidden = !(S.tour && S.world && S.world.scan); if (S.tour) $("walkroom").href = `room.html?run=${encodeURIComponent(run)}`;
   $("walktour").hidden = !S.tour; if (S.tour) $("walktour").href = `http://localhost:${location.port}/tour.html?run=${encodeURIComponent(run)}`;
   $("walknote").textContent = `${w.seconds} s`; $("walkhint").textContent = w.note || "";
 }
@@ -390,7 +392,7 @@ function draw() {
   const S = reduce(shown), live = !events.some(e => e.kind === "run_end");
   drawSteps(S); drawRobot(S); drawPlan(S); drawWalk(S); drawTables(S); drawTrace(S);
   const st = $("status"); const end = shown >= events.length ? S.end : null;
-  st.className = "pill " + (end ? (end.ok ? "ok" : "bad") : events.length ? "live" : ""); st.textContent = end ? (end.ok ? `finished in ${end.seconds} s` : "failed") : events.length ? (live ? "running" : "replaying") : "starting";
+  st.className = "pill " + (end ? (end.waiting ? "live" : end.ok ? "ok" : "bad") : events.length ? "live" : ""); st.textContent = end ? (end.waiting ? "waiting for your answers" : end.ok ? `finished in ${end.seconds} s` : "failed") : events.length ? (live ? "running" : "replaying") : "starting";
   $("ls").hidden = !S.url; if (S.url) $("ls").href = S.url;
   if (S.job && document.activeElement !== $("job")) $("job").value = S.job;
   $("scrub").hidden = !events.length; $("pos").max = events.length; $("pos").value = shown;

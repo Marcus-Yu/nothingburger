@@ -105,4 +105,6 @@ Every argument and return value is a plain dict or list in the shape of the matc
 
 Model steps (intake from words, the program) call Claude through `agent/llm.py`; they are off with `--no-model` or no `ANTHROPIC_API_KEY`, and tests never call a model. `python -m web.serve` opens the live run view (see `web/README.md`). `composer.api.design` also takes `on_candidate=`, a progress callback.
 
+A world may name a textured mesh of the real place (`scan` in `world.json`, files in `world/_scans/`, not committed; see `web/README.md`). Pictures show it when it is on disk and drawn boxes otherwise; planning never reads it.
+
 Assets (meshes, simulator models) live in `catalog/_assets/`, which is not committed; `catalog/fetch_assets.py` fills it. Validate any run folder with `python contracts/validate.py <run dir>`.

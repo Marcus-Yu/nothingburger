@@ -11,6 +11,7 @@
     GET  /runs/studio/<run>/snapshot.json   the Robot Design page's snapshot of a finished run
     GET  /runs/studio/<run>/events?from=N   the run's events.jsonl from byte N: {"events": [...], "next": N}
     GET  /catalog/names                     {part id: name} for every catalog card
+    GET  /room.html?run=runs/studio/<run>   the run played inside the scanned room (needs world/_scans/<world>/room.glb)
 
 Each reply runs in a thread, because the design step (the design and pathing pipeline) takes minutes:
 the studio polls GET /sessions/<id>. Sessions live in memory and are lost on restart.
@@ -63,6 +64,10 @@ def standin_classifier():
                 return TaskAssessment(valid=True, skill=skill, reason=f"{reason} (stand-in classifier)")
         return TaskAssessment(valid=False, skill="", reason="The stand-in classifier doesn’t know this chore; with ANTHROPIC_API_KEY set, Claude would read it.")
     return RunnableLambda(classify, name="stand-in classifier")
+
+
+CTYPES = {".json": "application/json", ".jsonl": "application/x-ndjson", ".glb": "model/gltf-binary",
+          ".bin": "application/octet-stream", ".png": "image/png", ".mp4": "video/mp4", ".xml": "application/xml"}
 
 
 def catalog_names() -> dict:
@@ -194,10 +199,17 @@ def make_handler(sessions: Sessions, standin: bool):
                     return self._send(404, {"detail": "not found"})
                 q = parse_qs(urlparse(self.path).query)
                 return self._send(200, read_events(folder / "events.jsonl", int((q.get("from") or ["0"])[0])))
-            if path.startswith("/runs/studio/") and path.endswith("/snapshot.json"):
+            if path == "/room.html":  # the real-room 3D page (web/viewer/room.html), for a studio run
+                return self._send(200, (REPO / "web" / "viewer" / "room.html").read_bytes(), "text/html; charset=utf-8")
+            if path.startswith("/scans/") and path.endswith("/room.glb"):  # the scanned room's mesh (world/_scans, not committed)
+                file = (REPO / "world" / "_scans" / path[len("/scans/"):]).resolve()
+                if file.is_file() and file.name == "room.glb":
+                    return self._send(200, file.read_bytes(), "model/gltf-binary")
+                return self._send(404, {"detail": "no room mesh on this machine"})
+            if path.startswith("/runs/studio/"):  # a studio run's files: snapshot, events, world, the robot export
                 file = (REPO / path.lstrip("/")).resolve()
                 if file.is_relative_to(RUNS.resolve()) and file.is_file():
-                    return self._send(200, file.read_bytes())
+                    return self._send(200, file.read_bytes(), CTYPES.get(file.suffix, "application/octet-stream"))
             return self._send(404, {"detail": "not found"})
 
         def do_POST(self):

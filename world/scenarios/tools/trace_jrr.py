@@ -2,6 +2,7 @@
 Pixel boxes below were read off a 1204 x 999 crop of the tour floor-plan view (floor 2); K is pixels per metre,
 from the tour figure for the floor (92 ft 1 in x 75 ft 2 in). Run from the repo root."""
 import json
+import os
 K = 40.8
 X = lambda px: round((px - 28) / K, 2)
 Y = lambda py: round((975 - py) / K, 2)
@@ -16,12 +17,18 @@ tables = {  # the orange-clothed folding tables, as seen in the tour's floor pla
  "cloth_table_e1": (880, 295, 918, 370), "cloth_table_e2": (965, 395, 1000, 470), "cloth_table_e3": (965, 545, 1000, 620), "cloth_table_e4": (875, 648, 915, 720)}
 TH = 0.74
 obst = [{"id": k, "room": "atrium", "box": box(*v, TH)} for k, v in tables.items()]
+# Once the tour's mesh has been captured, stitch_scan.py measures the alignment and each table top on it; those replace the traced ones.
+FIT = json.load(open("world/scenarios/jrr.fit.json")) if os.path.exists("world/scenarios/jrr.fit.json") else {"tables": {}}
+for o in obst:
+    f = FIT["tables"].get(o["id"])
+    if f:
+        o["box"] = {"min": [*f["min"], 0.0], "max": [*f["max"], f["top_m"]]}
 obst += [{"id": "stairs", "room": "atrium", "box": box(570, 268, 790, 335, 2.0)},
          {"id": "av_corner", "room": "atrium", "box": box(340, 268, 560, 330, 1.2)},
          {"id": "floor_opening_rail", "room": "atrium", "box": box(945, 620, 1025, 770, 1.1)}]
 def top(name, tid):
     b = next(o for o in obst if o["id"] == tid)["box"]; lo, hi = b["min"], b["max"]
-    return {"id": name, "room": "atrium", "kind": "surface", "point": [round((lo[0] + hi[0]) / 2, 2), round((lo[1] + hi[1]) / 2, 2), TH],
+    return {"id": name, "room": "atrium", "kind": "surface", "point": [round((lo[0] + hi[0]) / 2, 2), round((lo[1] + hi[1]) / 2, 2), hi[2]],
             "normal": [0, 0, 1], "source": "manual", "extent": [[lo[0], lo[1]], [hi[0], lo[1]], [hi[0], hi[1]], [lo[0], hi[1]]]}
 e2 = next(o for o in obst if o["id"] == "cloth_table_e2")["box"]
 ax0, ax1, ay0, ay1 = X(340), X(1025), Y(770), Y(268)
@@ -35,8 +42,11 @@ world = {
  "mesh": None,
  "tour": {"matterport": "2K7G7cdukZV",
           # this world's frame (X, Y, Z up) to the tour's own frame (x, y up, z): x = 15.1 - X, y = Z, z = Y - 7.4.
-          "to_model": [[-1, 0, 0, 15.1], [0, 0, 1, 0.0], [0, 1, 0, -7.4]],
-          "note": "robot placed by matching the traced plan to the tour's camera positions and room bounds; expect it to be off by up to about 0.3 m"},
+          "to_model": FIT.get("to_model") or [[-1, 0, 0, 15.1], [0, 0, 1, 0.0], [0, 1, 0, -7.4]],
+          "note": "aligned by fitting the traced tables to the tour's own mesh; the tables the robot works at are measured on that mesh" if FIT.get("to_model") else
+                  "robot placed by matching the traced plan to the tour's camera positions and room bounds; expect it to be off by up to about 0.3 m"},
+ # the tour's mesh, stitched into this world's frame by stitch_scan.py; the folder is not committed, and pictures fall back to drawn boxes without it
+ "scan": {"dir": "world/_scans/jrr", "source": "Matterport tour 2K7G7cdukZV, the mesh the public tour displays"},
  "floors": [{"id": "f2", "z": 0.0}],
  "rooms": [
   {"id": "atrium", "type": "atrium", "floor": "f2", "polygon": [[ax0, ay0], [ax1, ay0], [ax1, ay1], [ax0, ay1]], "ceiling_m": 9.0, "source": "manual", "width_m": round(ay1 - ay0, 2)},
@@ -48,7 +58,7 @@ world = {
  "dock": {"room": "east_corridor", "pose": [round((ax1 + ex1) / 2, 2), 2.0, 1.5708]},
  "way_out": {"doorway": "d_south"},
  "anchors": [top("table_c6_top", "cloth_table_c6"), top("table_s3_top", "cloth_table_s3"),
-             {"id": "bottle_on_table_e2", "room": "atrium", "kind": "low_item", "point": [round(e2["min"][0] + 0.15, 2), round((e2["min"][1] + e2["max"][1]) / 2, 2), TH + 0.1],
+             {"id": "bottle_on_table_e2", "room": "atrium", "kind": "low_item", "point": [round(e2["min"][0] + 0.15, 2), round((e2["min"][1] + e2["max"][1]) / 2, 2), e2["max"][2] + 0.1],
               "normal": [0, 0, 1], "source": "manual"}]}
 json.dump(world, open("world/scenarios/jrr.json", "w"), indent=1)
 json.dump({"note": "the same job as jrr.job.txt, for runs without a model", "tasks": [

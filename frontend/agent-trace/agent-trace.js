@@ -403,7 +403,8 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
         S.route ? h('div', h('dt', 'Route'), h('dd', `${metres()} m`), h('small', `dock → ${stops()} stops${goesOut() ? ' → out' : ''}`)) : null,
         S.taskList.length ? h('div', h('dt', 'Tasks'), h('dd', `${planned} of ${S.taskList.length}`), h('small', 'planned')) : null),
       notYet.length ? h('p.at-note', `Not yet verified: ${notYet.join('; ')}.`) : null,
-      r.snapshot ? go : h('p.at-warn', r.snapshot_error ? `It couldn’t be exported for the Robot Design page: ${r.snapshot_error}` : 'No snapshot was written.'));
+      r.snapshot ? h('div.at-actions', go, r.room ? h('a.at-link', { href: `${agentBase}/room.html?run=${encodeURIComponent(r.run)}`, target: '_blank', rel: 'noopener' }, 'See it in the real room (3D) ↗') : null)
+        : h('p.at-warn', r.snapshot_error ? `It couldn’t be exported for the Robot Design page: ${r.snapshot_error}` : 'No snapshot was written.'));
   }
 
   function traceLine(e) {
