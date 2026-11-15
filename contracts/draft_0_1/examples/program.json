@@ -1,0 +1,362 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "A",
+      "module": "agent.program"
+    }
+  },
+  "program_id": "prog-2",
+  "build_id": "build-2",
+  "route_id": "route-2",
+  "trajectory_id": "traj-2",
+  "tasks": [
+    {
+      "task_id": "bulb",
+      "schedule": "on request",
+      "steps": [
+        {
+          "step_id": "go",
+          "skill": "navigate",
+          "waypoint_id": "under-light",
+          "controller_id": "base",
+          "timeout_s": 60,
+          "on_failure": "ask_human",
+          "postconditions": [
+            {
+              "kind": "action_done",
+              "metric": "base_pose_error_m",
+              "op": "<=",
+              "value": 0.03,
+              "aggregate": "final"
+            }
+          ]
+        },
+        {
+          "step_id": "reach",
+          "skill": "reach",
+          "segment_id": "s-reach",
+          "controller_id": "arm",
+          "timeout_s": 15,
+          "on_failure": "abort",
+          "postconditions": [
+            {
+              "kind": "action_done",
+              "metric": "ee_pose_error_m",
+              "op": "<=",
+              "value": 0.005,
+              "aggregate": "final"
+            }
+          ]
+        },
+        {
+          "step_id": "grasp",
+          "skill": "grasp",
+          "segment_id": "s-grasp",
+          "controller_id": "grip",
+          "timeout_s": 5,
+          "on_failure": "retry",
+          "max_retries": 2,
+          "force": {
+            "band": {
+              "units": "N",
+              "min": 1.5,
+              "max": 3.5,
+              "provenance": "measured_at_home",
+              "calibration_id": "glove-r1-cal-20261114"
+            },
+            "ref": {
+              "file": "grip.json",
+              "pointer": "/bands/0/hold"
+            }
+          },
+          "postconditions": [
+            {
+              "kind": "action_done",
+              "metric": "grip_force_N",
+              "op": "within",
+              "value": [
+                1.5,
+                3.5
+              ],
+              "aggregate": "final"
+            }
+          ]
+        },
+        {
+          "step_id": "unscrew",
+          "skill": "twist",
+          "segment_id": "s-unscrew",
+          "controller_id": "grip",
+          "params": {
+            "turns": 3,
+            "direction": "ccw"
+          },
+          "timeout_s": 20,
+          "on_failure": "ask_human",
+          "force": {
+            "band": {
+              "units": "N",
+              "min": 2.0,
+              "max": 6.0,
+              "provenance": "measured_at_home",
+              "calibration_id": "glove-r1-cal-20261114"
+            },
+            "ref": {
+              "file": "grip.json",
+              "pointer": "/bands/1/hold"
+            }
+          },
+          "preconditions": [
+            {
+              "kind": "outcome_confirmed",
+              "metric": "bulb_in_grip",
+              "op": "==",
+              "value": 1,
+              "aggregate": "initial"
+            }
+          ],
+          "postconditions": [
+            {
+              "kind": "action_done",
+              "metric": "wrist_roll_turns",
+              "op": ">=",
+              "value": 3,
+              "aggregate": "final"
+            },
+            {
+              "kind": "outcome_confirmed",
+              "metric": "bulb_in_socket",
+              "op": "==",
+              "value": 0,
+              "aggregate": "final"
+            }
+          ]
+        },
+        {
+          "step_id": "lower",
+          "skill": "place",
+          "controller_id": "arm",
+          "timeout_s": 15,
+          "on_failure": "ask_human",
+          "postconditions": [
+            {
+              "kind": "outcome_confirmed",
+              "metric": "bulb_in_tray",
+              "op": "==",
+              "value": 1,
+              "aggregate": "final"
+            }
+          ]
+        },
+        {
+          "step_id": "inspect",
+          "skill": "inspect",
+          "segment_id": "s-inspect",
+          "controller_id": "arm",
+          "inspection": {
+            "target": "empty E26 socket and fixture cup",
+            "sensor": "rgb_camera",
+            "look_for": [
+              "scorch_mark",
+              "broken_glass_in_socket",
+              "bent_contact",
+              "loose_fixture"
+            ],
+            "standoff_m": 0.15,
+            "min_resolution_mm": 0.5,
+            "views": 2,
+            "on_finding": "ask_human",
+            "report": "socket_findings"
+          },
+          "timeout_s": 20,
+          "on_failure": "ask_human",
+          "postconditions": [
+            {
+              "kind": "action_done",
+              "metric": "socket_views_captured",
+              "op": ">=",
+              "value": 2,
+              "aggregate": "final"
+            },
+            {
+              "kind": "outcome_confirmed",
+              "metric": "socket_findings_count",
+              "op": "==",
+              "value": 0,
+              "aggregate": "count"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "controllers": [
+    {
+      "controller_id": "base",
+      "kind": "base_velocity",
+      "joints": [
+        "wheel_left",
+        "wheel_right"
+      ],
+      "rate_hz": 50,
+      "gains": {
+        "kp_linear": 1.2,
+        "kp_angular": 2.0
+      },
+      "gains_source": "simulated",
+      "tune_on_hardware": true,
+      "tuning_notes": "Check against real floor friction; sim uses mu = 0.8."
+    },
+    {
+      "controller_id": "arm",
+      "kind": "joint_position_pid",
+      "joints": [
+        "mast_lift",
+        "wrist_roll"
+      ],
+      "rate_hz": 500,
+      "gains": {
+        "kp": [
+          4000,
+          8
+        ],
+        "kd": [
+          200,
+          0.4
+        ],
+        "ki": [
+          0,
+          0
+        ]
+      },
+      "gains_source": "simulated",
+      "tune_on_hardware": true
+    },
+    {
+      "controller_id": "grip",
+      "kind": "gripper_force",
+      "joints": [
+        "finger_close",
+        "wrist_roll"
+      ],
+      "rate_hz": 500,
+      "gains": {
+        "kp_force": 0.002,
+        "ki_force": 0.01
+      },
+      "gains_source": "simulated",
+      "tune_on_hardware": true,
+      "tuning_notes": "Bulb slipped in sim below 1.8 N. Do not exceed 8 N until the glass limit is tested (requirements q-glass-limit)."
+    }
+  ],
+  "safety": {
+    "max_base_speed_mps": 0.5,
+    "max_ee_speed_mps": 0.25,
+    "max_contact_force_N": 8.0,
+    "estop": "Hardware button on the base and a wireless stop.",
+    "refuse_when": [
+      "A person is within 0.5 m of the mast.",
+      "The light switch reads on.",
+      "Grip force leaves its band twice in a row."
+    ]
+  },
+  "tests": [
+    {
+      "test_id": "t-sim-no-slip",
+      "kind": "sim",
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "description": "Bulb does not slip while turning.",
+      "metric": "bulb_slip_rad",
+      "op": "<=",
+      "threshold": 0.2,
+      "criterion": {
+        "file": "requirements.json",
+        "pointer": "/tasks/0/success_criteria/0"
+      },
+      "aggregate": "max"
+    },
+    {
+      "test_id": "t-sim-no-crush",
+      "kind": "sim",
+      "task_id": "bulb",
+      "description": "Peak grip under the glass limit.",
+      "metric": "grip_force_N",
+      "op": "<=",
+      "threshold": 8.0,
+      "criterion": {
+        "file": "requirements.json",
+        "pointer": "/tasks/0/success_criteria/1"
+      },
+      "aggregate": "max"
+    },
+    {
+      "test_id": "t-sim-inspect",
+      "kind": "sim",
+      "task_id": "bulb",
+      "step_id": "inspect",
+      "description": "Both socket views are captured in focus.",
+      "metric": "socket_views_captured",
+      "op": ">=",
+      "threshold": 2,
+      "criterion": {
+        "file": "requirements.json",
+        "pointer": "/tasks/0/success_criteria/2"
+      },
+      "aggregate": "final"
+    },
+    {
+      "test_id": "t-bench-inspect",
+      "kind": "bench",
+      "task_id": "bulb",
+      "step_id": "inspect",
+      "description": "Finds a planted scorch mark.",
+      "metric": "socket_findings_count",
+      "op": ">=",
+      "threshold": 1,
+      "procedure": "Mark a bench socket with a 2 mm scorch dot; run step inspect 10 times; all 10 report scorch_mark and ask a human.",
+      "aggregate": "count"
+    },
+    {
+      "test_id": "t-bench-twist",
+      "kind": "bench",
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "description": "Unscrew a bulb from a socket on a bench stand.",
+      "metric": "bulb_in_socket",
+      "op": "==",
+      "threshold": 0,
+      "procedure": "Mount an E26 socket at 2.47 m; run step unscrew 10 times; all 10 free the bulb with no crack.",
+      "aggregate": "final"
+    },
+    {
+      "test_id": "t-site-fit",
+      "kind": "site",
+      "task_id": "bulb",
+      "description": "Drive the route in the real unit.",
+      "metric": "min_clearance_m",
+      "op": ">=",
+      "threshold": 0.03,
+      "procedure": "Drive dock to under-light at half speed with a spotter.",
+      "aggregate": "min"
+    },
+    {
+      "test_id": "t-sim-free",
+      "kind": "sim",
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "description": "The bulb ends out of the socket.",
+      "metric": "bulb_in_socket",
+      "op": "==",
+      "threshold": 0,
+      "criterion": {
+        "file": "requirements.json",
+        "pointer": "/tasks/0/success_criteria/3"
+      },
+      "aggregate": "final"
+    }
+  ]
+}

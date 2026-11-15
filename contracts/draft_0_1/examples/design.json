@@ -1,0 +1,217 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "A",
+      "module": "agent.design"
+    }
+  },
+  "design_id": "design-2",
+  "iteration": 2,
+  "requirements": {
+    "file": "requirements.json",
+    "pointer": "/design_spec"
+  },
+  "slots": {
+    "base": {
+      "card_id": "base.diff_drive_compact",
+      "params": {
+        "width_m": 0.52,
+        "length_m": 0.6
+      }
+    },
+    "reach": {
+      "card_id": "reach.telescoping_mast",
+      "params": {
+        "stroke_m": 1.4
+      },
+      "mount": "base.top_plate"
+    },
+    "wrist": {
+      "card_id": "wrist.continuous_roll",
+      "params": {},
+      "mount": "reach.carriage"
+    },
+    "gripper": {
+      "card_id": "gripper.three_finger_soft",
+      "params": {
+        "max_aperture_m": 0.09
+      },
+      "mount": "wrist.flange"
+    },
+    "sensors": [
+      {
+        "card_id": "sensor.fingertip_force",
+        "params": {
+          "count": 3
+        },
+        "mount": "gripper.fingertips"
+      },
+      {
+        "card_id": "sensor.wrist_camera",
+        "params": {},
+        "mount": "wrist.flange"
+      }
+    ]
+  },
+  "wrist": {
+    "roll_turns": 3
+  },
+  "checks": [
+    {
+      "check_id": "fit-door",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/base/max_width_m"
+      },
+      "value": 0.52,
+      "op": "<=",
+      "limit": 0.61,
+      "margin": 0.09,
+      "pass": true
+    },
+    {
+      "check_id": "reach-top",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/reach/max_height_m"
+      },
+      "value": 2.55,
+      "op": ">=",
+      "limit": 2.47,
+      "margin": 0.08,
+      "pass": true
+    },
+    {
+      "check_id": "stowed-height",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/base/max_height_stowed_m"
+      },
+      "value": 1.35,
+      "op": "<=",
+      "limit": 1.9,
+      "margin": 0.55,
+      "pass": true
+    },
+    {
+      "check_id": "grip-band",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/gripper/force_bands/0"
+      },
+      "value": 15.0,
+      "op": "covers",
+      "limit": [
+        2.0,
+        6.0
+      ],
+      "pass": true
+    },
+    {
+      "check_id": "aperture",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/gripper/max_aperture_m"
+      },
+      "value": 0.09,
+      "op": ">=",
+      "limit": 0.08,
+      "margin": 0.01,
+      "pass": true
+    },
+    {
+      "check_id": "aperture-min",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/gripper/min_aperture_m"
+      },
+      "value": 0.0,
+      "op": "<=",
+      "limit": 0.04,
+      "margin": 0.04,
+      "pass": true
+    },
+    {
+      "check_id": "length",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/base/max_length_m"
+      },
+      "value": 0.6,
+      "op": "<=",
+      "limit": 0.8,
+      "margin": 0.2,
+      "pass": true
+    },
+    {
+      "check_id": "turn",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/base/min_turn_width_m"
+      },
+      "value": 0.8,
+      "op": "<=",
+      "limit": 1.02,
+      "margin": 0.22,
+      "pass": true
+    },
+    {
+      "check_id": "step",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/base/max_step_m"
+      },
+      "value": 0.02,
+      "op": ">=",
+      "limit": 0.02,
+      "margin": 0.0,
+      "pass": true
+    },
+    {
+      "check_id": "reach-low",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/reach/min_height_m"
+      },
+      "value": 0.3,
+      "op": "<=",
+      "limit": 0.3,
+      "margin": 0.0,
+      "pass": true
+    },
+    {
+      "check_id": "reach-out",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/reach/max_horizontal_m"
+      },
+      "value": 0.3,
+      "op": ">=",
+      "limit": 0.25,
+      "margin": 0.05,
+      "pass": true
+    },
+    {
+      "check_id": "payload",
+      "requirement": {
+        "file": "requirements.json",
+        "pointer": "/design_spec/payload_kg"
+      },
+      "value": 1.0,
+      "op": ">=",
+      "limit": 0.5,
+      "margin": 0.5,
+      "pass": true
+    }
+  ],
+  "constraints_applied": [
+    "c-1"
+  ],
+  "decisions": {
+    "file": "decisions.jsonl",
+    "pointer": ""
+  }
+}

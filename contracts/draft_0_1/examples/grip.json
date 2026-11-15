@@ -1,0 +1,190 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "C",
+      "module": "capture.api"
+    }
+  },
+  "grip_id": "grip-bulb-1",
+  "demo_id": "demo-bulb-1",
+  "glove_id": "glove-r1",
+  "calibration_id": "glove-r1-cal-20261114",
+  "provenance": "measured_at_home",
+  "sensors": [
+    {
+      "sensor_id": "r-thumb",
+      "hand": "right",
+      "finger": "thumb",
+      "joint": "thumb-tip",
+      "adc_bits": 12
+    },
+    {
+      "sensor_id": "r-index",
+      "hand": "right",
+      "finger": "index",
+      "joint": "index-finger-tip",
+      "adc_bits": 12
+    },
+    {
+      "sensor_id": "r-middle",
+      "hand": "right",
+      "finger": "middle",
+      "joint": "middle-finger-tip",
+      "adc_bits": 12
+    }
+  ],
+  "samples": {
+    "rate_hz": 100,
+    "clock": "glove",
+    "t_s": [
+      0.0,
+      0.8,
+      1.6,
+      2.4,
+      3.0
+    ],
+    "raw": [
+      [
+        120,
+        140,
+        90
+      ],
+      [
+        1400,
+        1650,
+        1200
+      ],
+      [
+        1800,
+        2100,
+        1500
+      ],
+      [
+        1750,
+        2000,
+        1450
+      ],
+      [
+        300,
+        280,
+        200
+      ]
+    ],
+    "force_N": [
+      [
+        0.143,
+        0.132,
+        0.098
+      ],
+      [
+        1.472,
+        1.526,
+        1.19
+      ],
+      [
+        1.939,
+        2.086,
+        1.521
+      ],
+      [
+        1.88,
+        1.907,
+        1.466
+      ],
+      [
+        0.359,
+        0.264,
+        0.218
+      ]
+    ],
+    "saturated": [
+      [
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false
+      ],
+      [
+        false,
+        false,
+        false
+      ]
+    ]
+  },
+  "bands": [
+    {
+      "phase_id": "p-grasp",
+      "sensor_ids": [
+        "r-thumb",
+        "r-index",
+        "r-middle"
+      ],
+      "hold": {
+        "units": "N",
+        "min": 1.5,
+        "max": 3.5,
+        "provenance": "measured_at_home",
+        "calibration_id": "glove-r1-cal-20261114"
+      },
+      "peak": {
+        "units": "N",
+        "min": 0,
+        "max": 3.9,
+        "provenance": "measured_at_home",
+        "calibration_id": "glove-r1-cal-20261114"
+      },
+      "hold_duration_s": 0.6,
+      "slip_detected": false
+    },
+    {
+      "phase_id": "p-twist",
+      "sensor_ids": [
+        "r-thumb",
+        "r-index",
+        "r-middle"
+      ],
+      "hold": {
+        "units": "N",
+        "min": 2.0,
+        "max": 6.0,
+        "provenance": "measured_at_home",
+        "calibration_id": "glove-r1-cal-20261114"
+      },
+      "peak": {
+        "units": "N",
+        "min": 0,
+        "max": 7.1,
+        "provenance": "measured_at_home",
+        "calibration_id": "glove-r1-cal-20261114"
+      },
+      "hold_duration_s": 1.8,
+      "slip_detected": false
+    }
+  ],
+  "summary": {
+    "grip_type": "tripod",
+    "contact_fingers": [
+      "thumb",
+      "index",
+      "middle"
+    ],
+    "notes": "Sum of three fingertips. Five samples shown; a real file has one per 10 ms."
+  }
+}

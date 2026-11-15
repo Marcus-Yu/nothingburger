@@ -14,3 +14,12 @@ dependencies = [
   "anthropic",
   "jsonschema",
 ]
+
+[dependency-groups]
+dev = [
+  "jsonschema>=4.18", # contracts/validate.py; 4.18+ has referencing
+]
+
+[tool.pytest.ini_options]
+# world/pathfinder is its own project with its own environment: run its tests from world/pathfinder/backend
+norecursedirs = ["world/pathfinder", ".claude", "runs", "catalog/_assets", "web/_vendor"]

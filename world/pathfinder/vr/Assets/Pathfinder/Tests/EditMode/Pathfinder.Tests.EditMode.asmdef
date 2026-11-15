@@ -1,0 +1,28 @@
+{
+    "name": "Pathfinder.Tests.EditMode",
+    "rootNamespace": "Pathfinder.Tests",
+    "references": [
+        "Pathfinder.Runtime",
+        "Pathfinder.Editor",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Unity.TextMeshPro",
+        "Oculus.Interaction"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

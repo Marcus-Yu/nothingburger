@@ -1,0 +1,236 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "B",
+      "module": "sim.api"
+    }
+  },
+  "program_id": "prog-2",
+  "provenance": "simulated",
+  "sim": {
+    "engine": "mujoco",
+    "engine_version": "PLACEHOLDER",
+    "timestep_s": 0.002,
+    "seed": 7,
+    "scene": {
+      "path": "sim/scene.xml",
+      "sha256": "06e99c010823a29f4b22949b380eda16a461ab96e006217e42ecf04112e46f65",
+      "format": "mjcf"
+    },
+    "robot": {
+      "path": "robot.xml",
+      "sha256": "33486b5a202a3da03eee08822c2ac090101c6008255c548354a24b395405d1c8",
+      "format": "mjcf"
+    },
+    "wall_time_s": 41.0,
+    "notes": "Example values, not from a real run. Inspection ran on a clean socket mesh; the bench test plants the defect."
+  },
+  "signals": [
+    {
+      "name": "base_pose_error_m",
+      "units": "m",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "go",
+      "t_s": [
+        0.0,
+        4.667,
+        9.333,
+        14.0
+      ],
+      "values": [
+        0.8,
+        0.3,
+        0.05,
+        0.012
+      ]
+    },
+    {
+      "name": "min_clearance_m",
+      "units": "m",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "go",
+      "t_s": [
+        0.0,
+        4.667,
+        9.333,
+        14.0
+      ],
+      "values": [
+        0.4,
+        0.21,
+        0.2,
+        0.35
+      ]
+    },
+    {
+      "name": "ee_pose_error_m",
+      "units": "m",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "reach",
+      "t_s": [
+        14.0,
+        18.0,
+        22.0
+      ],
+      "values": [
+        0.5,
+        0.1,
+        0.002
+      ]
+    },
+    {
+      "name": "grip_force_N",
+      "units": "N",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "grasp",
+      "t_s": [
+        22.0,
+        22.5,
+        23.0
+      ],
+      "values": [
+        0.0,
+        1.2,
+        2.6
+      ]
+    },
+    {
+      "name": "grip_force_N",
+      "units": "N",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "t_s": [
+        23.0,
+        24.5,
+        26.0,
+        27.5,
+        29.0
+      ],
+      "values": [
+        3.1,
+        4.2,
+        5.4,
+        4.0,
+        3.3
+      ]
+    },
+    {
+      "name": "bulb_in_grip",
+      "units": "bool",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "t_s": [
+        23.0,
+        25.0,
+        27.0,
+        29.0
+      ],
+      "values": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "wrist_roll_turns",
+      "units": "turns",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "t_s": [
+        23.0,
+        25.0,
+        27.0,
+        29.0
+      ],
+      "values": [
+        0,
+        1.0,
+        2.0,
+        3.02
+      ]
+    },
+    {
+      "name": "bulb_slip_rad",
+      "units": "rad",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "t_s": [
+        23.0,
+        25.0,
+        27.0,
+        29.0
+      ],
+      "values": [
+        0,
+        0.03,
+        0.08,
+        0.05
+      ]
+    },
+    {
+      "name": "bulb_in_socket",
+      "units": "bool",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "t_s": [
+        23.0,
+        25.0,
+        27.0,
+        29.0
+      ],
+      "values": [
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "bulb_in_tray",
+      "units": "bool",
+      "kind": "timeseries",
+      "task_id": "bulb",
+      "step_id": "lower",
+      "t_s": [
+        29.0,
+        33.0,
+        37.0
+      ],
+      "values": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "socket_views_captured",
+      "units": "count",
+      "kind": "scalar",
+      "task_id": "bulb",
+      "step_id": "inspect",
+      "value": 2
+    },
+    {
+      "name": "socket_findings_count",
+      "units": "count",
+      "kind": "findings",
+      "task_id": "bulb",
+      "step_id": "inspect",
+      "findings": [],
+      "synthetic": true
+    }
+  ]
+}

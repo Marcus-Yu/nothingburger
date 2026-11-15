@@ -1,0 +1,387 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.robots.invalid/common.schema.json",
+  "title": "Shared definitions",
+  "description": "Types every contract reuses. Units are SI and in the field name (_m, _s, _N, _kg, _rad). Frames are right-handed, metres, Z up.",
+  "$defs": {
+    "header": {
+      "type": "object",
+      "description": "Every run file starts with these.",
+      "required": [
+        "schema_version",
+        "run_id",
+        "created_at",
+        "producer"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "run_id": {
+          "$ref": "#/$defs/id"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "producer": {
+          "type": "object",
+          "required": [
+            "stream",
+            "module"
+          ],
+          "properties": {
+            "stream": {
+              "enum": [
+                "A",
+                "B",
+                "C"
+              ]
+            },
+            "module": {
+              "type": "string",
+              "description": "e.g. agent.requirements, capture.api, composer.api"
+            },
+            "version": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "vec3_m": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "quat_wxyz": {
+      "type": "array",
+      "description": "Unit quaternion, scalar first.",
+      "items": {
+        "type": "number",
+        "minimum": -1,
+        "maximum": 1
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "frame": {
+      "type": "string",
+      "description": "world = the building scan (Matterport, metres, Z up). capture = the Quest's local-floor space. object:<id> = attached to a demonstrated object. robot:<link> = a robot link. map = the 2D nav map, same origin as world.",
+      "pattern": "^(world|capture|map|object:[a-z0-9_.-]+|robot:[a-z0-9_.-]+)$"
+    },
+    "pose": {
+      "type": "object",
+      "required": [
+        "frame",
+        "position_m",
+        "orientation_wxyz"
+      ],
+      "properties": {
+        "frame": {
+          "$ref": "#/$defs/frame"
+        },
+        "position_m": {
+          "$ref": "#/$defs/vec3_m"
+        },
+        "orientation_wxyz": {
+          "$ref": "#/$defs/quat_wxyz"
+        }
+      },
+      "additionalProperties": false
+    },
+    "pose2d": {
+      "type": "object",
+      "required": [
+        "x_m",
+        "y_m",
+        "yaw_rad"
+      ],
+      "properties": {
+        "x_m": {
+          "type": "number"
+        },
+        "y_m": {
+          "type": "number"
+        },
+        "yaw_rad": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ref": {
+      "type": "object",
+      "description": "Points at a value in another run file: the file name plus a JSON Pointer (RFC 6901).",
+      "required": [
+        "file",
+        "pointer"
+      ],
+      "properties": {
+        "file": {
+          "type": "string",
+          "pattern": "^[a-z_]+\\.(json|jsonl|xml|urdf)$"
+        },
+        "pointer": {
+          "type": "string",
+          "pattern": "^(/.*)?$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "file_ref": {
+      "type": "object",
+      "description": "A file delivered with the run, path relative to the run folder.",
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "format": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "provenance": {
+      "enum": [
+        "measured_at_home",
+        "building_scan",
+        "user_stated",
+        "simulated",
+        "catalog",
+        "default"
+      ],
+      "description": "Where a number came from. A force is only ever measured_at_home or simulated. building_scan is only for geometry. A simulated value is never reported as a fact about a real building."
+    },
+    "source": {
+      "type": "object",
+      "description": "Why a derived value has the value it has.",
+      "required": [
+        "provenance"
+      ],
+      "properties": {
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "force_band": {
+      "type": "object",
+      "description": "Allowed contact force. raw_adc bands are glove counts (0-4095) and can only be replayed on the same glove; sizing a gripper needs N with a calibration.",
+      "required": [
+        "units",
+        "min",
+        "max",
+        "provenance"
+      ],
+      "properties": {
+        "units": {
+          "enum": [
+            "N",
+            "raw_adc"
+          ]
+        },
+        "min": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max": {
+          "type": "number",
+          "minimum": 0
+        },
+        "provenance": {
+          "enum": [
+            "measured_at_home",
+            "simulated"
+          ]
+        },
+        "calibration_id": {
+          "$ref": "#/$defs/id"
+        },
+        "glove_id": {
+          "$ref": "#/$defs/id"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "units": {
+                "const": "N"
+              },
+              "provenance": {
+                "const": "measured_at_home"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "calibration_id"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "units": {
+                "const": "raw_adc"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "glove_id"
+            ],
+            "properties": {
+              "max": {
+                "maximum": 4095
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "measured": {
+      "type": "object",
+      "description": "A number with where it came from.",
+      "required": [
+        "value",
+        "source"
+      ],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        }
+      },
+      "additionalProperties": false
+    },
+    "skill": {
+      "enum": [
+        "navigate",
+        "align",
+        "reach",
+        "grasp",
+        "twist",
+        "lift",
+        "carry",
+        "place",
+        "release",
+        "press_wipe",
+        "inspect",
+        "retract"
+      ],
+      "description": "The fixed set of primitive skills. Natural-language steps are mapped to one of these."
+    },
+    "job": {
+      "enum": [
+        "take_out_trash",
+        "change_light_bulb",
+        "wipe_surface",
+        "other"
+      ]
+    },
+    "inspection": {
+      "type": "object",
+      "description": "What an inspect step looks at and what counts as a finding. The robot reports; it does not judge a finding safe on its own.",
+      "required": [
+        "target",
+        "sensor",
+        "look_for",
+        "standoff_m",
+        "on_finding"
+      ],
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "What is inspected, e.g. the empty E26 socket."
+        },
+        "sensor": {
+          "enum": [
+            "rgb_camera",
+            "depth_camera",
+            "fingertip_force"
+          ],
+          "description": "Must be on the built robot (build.json sensors)."
+        },
+        "look_for": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "description": "Defect classes, e.g. scorch_mark, broken_glass_in_socket, bent_contact."
+        },
+        "standoff_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Sensor-to-target distance."
+        },
+        "min_resolution_mm": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Smallest feature that must be visible."
+        },
+        "views": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "on_finding": {
+          "enum": [
+            "ask_human",
+            "abort",
+            "log_and_continue"
+          ]
+        },
+        "report": {
+          "type": "string",
+          "description": "Signal name the findings are written under in signals.json."
+        }
+      },
+      "additionalProperties": false
+    },
+    "aggregate": {
+      "enum": [
+        "initial",
+        "max",
+        "min",
+        "final",
+        "mean",
+        "count",
+        "any"
+      ],
+      "description": "How a metric is reduced over its step (or the whole task when no step is named), with samples in time order. initial = first sample, used for preconditions. mean is over samples, not weighted by time. count = number of findings, or of samples equal to 1. any = 1 if any sample is 1."
+    }
+  }
+}

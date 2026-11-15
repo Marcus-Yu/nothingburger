@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.robots.invalid/route.schema.json",
+  "title": "route.json: where the base goes",
+  "description": "The base route through the building for one built robot, the standoff pose for each task step, and the clearance at every passage. If no route exists, feasible is false and failure says which passage and by how much, which becomes a constraint. Written by C (nav.plan). Read by A (program, constraints), B (motion, sim), C (views).",
+  "type": "object",
+  "required": ["header", "route_id", "build_id", "world", "map", "feasible", "waypoints", "segments", "standoffs"],
+  "properties": {
+    "header": { "$ref": "common.schema.json#/$defs/header" },
+    "route_id": { "$ref": "common.schema.json#/$defs/id" },
+    "build_id": { "$ref": "common.schema.json#/$defs/id" },
+    "world": { "$ref": "common.schema.json#/$defs/ref" },
+    "map": {
+      "type": "object",
+      "required": ["frame", "resolution_m", "file", "footprint_inflation_m"],
+      "properties": {
+        "frame": { "const": "map" },
+        "resolution_m": { "type": "number", "exclusiveMinimum": 0 },
+        "file": { "$ref": "common.schema.json#/$defs/file_ref", "description": "Occupancy grid (PNG + origin), floor level only." },
+        "floor_id": { "type": "string" },
+        "footprint_inflation_m": { "type": "number", "minimum": 0, "description": "Safety margin added around the robot footprint." }
+      },
+      "additionalProperties": false
+    },
+    "planner": {
+      "type": "object",
+      "properties": {
+        "method": { "enum": ["sweep_graph_astar", "grid_astar", "hybrid_astar"] },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "feasible": { "type": "boolean" },
+    "failure": {
+      "type": "object",
+      "required": ["reason", "passage_id", "needed_m", "available_m"],
+      "properties": {
+        "reason": { "enum": ["too_wide", "cannot_turn", "step_too_high", "target_out_of_reach", "no_standoff"] },
+        "passage_id": { "type": "string" },
+        "needed_m": { "type": "number" },
+        "available_m": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "waypoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["waypoint_id", "pose", "room_id"],
+        "properties": {
+          "waypoint_id": { "$ref": "common.schema.json#/$defs/id" },
+          "pose": { "$ref": "common.schema.json#/$defs/pose2d" },
+          "room_id": { "type": "string" },
+          "sweep_id": { "type": "string", "description": "Matterport scan position nearest to it, if from the sweep graph." },
+          "stop": { "type": "boolean", "default": false }
+        },
+        "additionalProperties": false
+      }
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "length_m", "min_clearance_m"],
+        "properties": {
+          "from": { "$ref": "common.schema.json#/$defs/id" },
+          "to": { "$ref": "common.schema.json#/$defs/id" },
+          "length_m": { "type": "number", "minimum": 0 },
+          "passage_id": { "type": "string", "description": "Doorway or hallway id in world.json it crosses." },
+          "passage_width_m": { "type": "number", "exclusiveMinimum": 0 },
+          "min_clearance_m": { "type": "number", "description": "Smallest gap between robot footprint and walls on this segment. Negative means collision." },
+          "max_speed_mps": { "type": "number", "exclusiveMinimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "standoffs": {
+      "type": "array",
+      "description": "Where the base parks for each step that touches something.",
+      "items": {
+        "type": "object",
+        "required": ["task_id", "step_id", "waypoint_id", "target_object_id", "target_position_m", "reach_used_m"],
+        "properties": {
+          "task_id": { "$ref": "common.schema.json#/$defs/id" },
+          "step_id": { "$ref": "common.schema.json#/$defs/id" },
+          "waypoint_id": { "$ref": "common.schema.json#/$defs/id" },
+          "target_object_id": { "type": "string" },
+          "target_position_m": { "$ref": "common.schema.json#/$defs/vec3_m", "description": "In world frame." },
+          "reach_used_m": { "type": "number", "minimum": 0 },
+          "reach_margin_m": { "type": "number" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "total_length_m": { "type": "number", "minimum": 0 },
+    "estimated_duration_s": { "type": "number", "minimum": 0 }
+  },
+  "if": { "properties": { "feasible": { "const": false } } },
+  "then": { "required": ["failure"] },
+  "additionalProperties": false
+}

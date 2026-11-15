@@ -1,0 +1,65 @@
+[project]
+name = "pathfinder"
+version = "0.1.0"
+description = "Pathfinder parts server backend"
+authors = [
+    { name = "Subham Dash", email = "subhamdash14@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "bleak>=3.1.0",
+    "edge-tts>=7.2.8",
+    "fast-simplification>=0.2.0",
+    "fastapi>=0.141.1",
+    "gradio-client>=2.7.1",
+    "httpx>=0.28.1",
+    "manifold3d>=3.5.4",
+    "numpy>=2.5.3",
+    "onnxruntime>=1.20",
+    "openai>=3.19.2",
+    "pillow>=12.3.0",
+    "pydantic>=2",
+    "pydantic-settings>=2.15.0",
+    "pypdf>=6.19.0",
+    "pyserial>=3.5",
+    "python-multipart>=0.0.32",
+    "rtree>=1.4.1",
+    "scipy>=1.18.1",
+    "trimesh>=5.1.0",
+    "uvicorn[standard]>=0.53.0",
+    "websockets>=17.1",
+]
+
+[project.optional-dependencies]
+# Scene import only (pipeline/: Matterport and Vexcel to a scene package) -- the parts server
+# (server/) never needs these, kept optional so `uv sync` for server-only work stays light.
+pipeline = [
+    "pymeshlab>=2025.7.post1",
+    "scipy>=1.18.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.11,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "server"
+module-root = ""
+
+[tool.pytest.ini_options]
+markers = [
+    "live: hits real external APIs, costs money, skipped by default",
+    "slow: long-running end-to-end test, skipped by default",
+]
+addopts = "-m 'not live and not slow'"
+
+[tool.ruff]
+line-length = 100
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "respx>=0.23.1",
+    "ruff>=0.16.8",
+]

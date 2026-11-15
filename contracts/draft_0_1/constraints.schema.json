@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.robots.invalid/constraints.schema.json",
+  "title": "constraints.json: why the last design failed",
+  "description": "The loop between the two workflows. When pathing finds no route (route.json feasible=false) or the contact run fails (verdict.json), the agent turns the reason into a constraint on design_spec and runs the design again. Append-only across iterations. Written by A (agent). Read by A (agent.design) and B (composer.check).",
+  "type": "object",
+  "required": ["header", "constraints"],
+  "properties": {
+    "header": { "$ref": "common.schema.json#/$defs/header" },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["constraint_id", "iteration", "origin", "reason", "field", "op", "value", "evidence"],
+        "properties": {
+          "constraint_id": { "$ref": "common.schema.json#/$defs/id" },
+          "iteration": { "type": "integer", "minimum": 1, "description": "The design iteration that failed." },
+          "origin": { "enum": ["nav", "motion", "sim", "composer"] },
+          "reason": { "type": "string", "description": "One sentence a person can read." },
+          "field": { "type": "string", "pattern": "^/design_spec/", "description": "JSON Pointer into requirements.json this tightens." },
+          "op": { "enum": ["<=", ">="] },
+          "value": { "type": "number" },
+          "evidence": {
+            "type": "object",
+            "description": "The failing file is archived when the next iteration starts, at iterations/<n>/ inside the run folder.",
+            "required": ["path", "pointer"],
+            "properties": {
+              "path": { "type": "string", "pattern": "^iterations/[0-9]+/[a-z_]+\\.json$" },
+              "pointer": { "type": "string", "pattern": "^(/.*)?$" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

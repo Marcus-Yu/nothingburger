@@ -1,0 +1,183 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "B",
+      "module": "motion.api"
+    }
+  },
+  "trajectory_id": "traj-2",
+  "build_id": "build-2",
+  "route_id": "route-2",
+  "joint_names": [
+    "mast_lift",
+    "wrist_roll",
+    "finger_close"
+  ],
+  "segments": [
+    {
+      "segment_id": "s-reach",
+      "task_id": "bulb",
+      "step_id": "reach",
+      "standoff_waypoint_id": "under-light",
+      "control_mode": "position",
+      "t_s": [
+        0,
+        8
+      ],
+      "q": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.12,
+          0.0,
+          0.0
+        ]
+      ],
+      "ee_target": {
+        "frame": "world",
+        "position_m": [
+          3.2,
+          2.4,
+          2.4
+        ],
+        "orientation_wxyz": [
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "retarget": {
+        "method": "scripted"
+      }
+    },
+    {
+      "segment_id": "s-grasp",
+      "task_id": "bulb",
+      "step_id": "grasp",
+      "demo_phase_id": "p-grasp",
+      "control_mode": "force",
+      "t_s": [
+        0,
+        1
+      ],
+      "q": [
+        [
+          1.19,
+          0.0,
+          0.0
+        ],
+        [
+          1.19,
+          0.0,
+          0.017
+        ]
+      ],
+      "force_target": {
+        "units": "N",
+        "min": 1.5,
+        "max": 3.5,
+        "provenance": "measured_at_home",
+        "calibration_id": "glove-r1-cal-20261114"
+      },
+      "retarget": {
+        "method": "ik_mink",
+        "scale": 1.0,
+        "max_residual_m": 0.004
+      }
+    },
+    {
+      "segment_id": "s-unscrew",
+      "task_id": "bulb",
+      "step_id": "unscrew",
+      "demo_phase_id": "p-twist",
+      "control_mode": "force",
+      "t_s": [
+        0,
+        3,
+        6
+      ],
+      "q": [
+        [
+          1.19,
+          0.0,
+          0.017
+        ],
+        [
+          1.2,
+          -9.42,
+          0.017
+        ],
+        [
+          1.21,
+          -18.85,
+          0.017
+        ]
+      ],
+      "force_target": {
+        "units": "N",
+        "min": 2.0,
+        "max": 6.0,
+        "provenance": "measured_at_home",
+        "calibration_id": "glove-r1-cal-20261114"
+      },
+      "retarget": {
+        "method": "ik_mink",
+        "scale": 1.0,
+        "max_residual_m": 0.006
+      }
+    },
+    {
+      "segment_id": "s-inspect",
+      "task_id": "bulb",
+      "step_id": "inspect",
+      "standoff_waypoint_id": "under-light",
+      "control_mode": "position",
+      "t_s": [
+        0,
+        4,
+        8
+      ],
+      "q": [
+        [
+          1.06,
+          0.0,
+          0.0
+        ],
+        [
+          1.06,
+          1.571,
+          0.0
+        ],
+        [
+          1.06,
+          3.142,
+          0.0
+        ]
+      ],
+      "ee_target": {
+        "frame": "world",
+        "position_m": [
+          3.2,
+          2.4,
+          2.32
+        ],
+        "orientation_wxyz": [
+          1,
+          0,
+          0,
+          0
+        ]
+      },
+      "retarget": {
+        "method": "scripted"
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.robots.invalid/calibration.schema.json",
+  "title": "calibration.json: glove counts to newtons",
+  "description": "One curve per fingertip sensor, fitted by pressing each fingertip on a kitchen scale at known weights. The sensors are non-linear and saturate near 3,500 counts, and differ by about 25% from each other, so each gets its own fit and a valid range. Not per run: kept with the glove and copied into the run folder. Written by C (capture). Read by C (capture) and A, B to check force bands.",
+  "type": "object",
+  "required": ["header", "calibration_id", "glove_id", "method", "performed_at", "sensors"],
+  "properties": {
+    "header": { "$ref": "common.schema.json#/$defs/header" },
+    "calibration_id": { "$ref": "common.schema.json#/$defs/id" },
+    "glove_id": { "$ref": "common.schema.json#/$defs/id" },
+    "method": { "enum": ["kitchen_scale", "load_cell"] },
+    "performed_at": { "type": "string", "format": "date-time" },
+    "scale_resolution_N": { "type": "number", "exclusiveMinimum": 0, "description": "e.g. 1 g on the scale = 0.0098 N." },
+    "sensors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["sensor_id", "points", "model", "valid_raw_range", "rmse_N"],
+        "properties": {
+          "sensor_id": { "$ref": "common.schema.json#/$defs/id" },
+          "points": {
+            "type": "array",
+            "minItems": 5,
+            "items": {
+              "type": "object",
+              "required": ["raw", "force_N"],
+              "properties": {
+                "raw": { "type": "integer", "minimum": 0, "maximum": 4095 },
+                "force_N": { "type": "number", "minimum": 0 },
+                "mass_g": { "type": "number", "minimum": 0 }
+              },
+              "additionalProperties": false
+            }
+          },
+          "model": {
+            "type": "object",
+            "required": ["kind", "params"],
+            "description": "force_N = f(raw). piecewise_linear: params.knots [[raw, N], ...]. power: N = a * raw^b + c, params {a, b, c}.",
+            "properties": {
+              "kind": { "enum": ["piecewise_linear", "power"] },
+              "params": { "type": "object" }
+            },
+            "additionalProperties": false
+          },
+          "valid_raw_range": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0, "maximum": 4095 },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Outside this range the fit is not trusted; above it the reading is marked saturated."
+          },
+          "valid_force_range_N": { "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2, "maxItems": 2 },
+          "rmse_N": { "type": "number", "minimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
