@@ -7,7 +7,7 @@
       "object": "sample_bottle",
       "demo": "pick sample bottle",
       "carries": true,
-      "why": "The job is to collect the sample bottle from its shelf and bring it out of the building to the gate.",
+      "why": "The job is to collect the sample bottle from the shelf and bring it out of the pump house.",
       "deliver_to": "way_out"
     }
   ]

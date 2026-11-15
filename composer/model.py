@@ -50,8 +50,11 @@ def _child(rel: str, drop_free: bool = False):
 
 
 def _rot(quat):
+    """Rotation matrix of a quaternion as written in a model file, which need not be unit length (the UR arms'
+    flange is "-1 1 0 0"). Unnormalised, the matrix comes out scaled and every offset through it too long."""
+    q = np.array(quat, dtype=float)
     m = np.zeros(9)
-    mujoco.mju_quat2Mat(m, np.array(quat, dtype=float))
+    mujoco.mju_quat2Mat(m, q / np.linalg.norm(q))
     return m.reshape(3, 3)
 
 

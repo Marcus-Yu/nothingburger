@@ -173,10 +173,11 @@ def main(wid: str, clean: bool = True) -> None:
         # glass, which scans as splinters, or equipment standing about. The planner still avoids all of them.
         others = [(o["box"]["min"], o["box"]["max"]) for o in world.get("obstacles", []) if o["id"] not in fit and o["box"]["max"][2] >= 1.5]
         floor_h = scan_clean.floor_height(tiles, lo, hi)
-        report = scan_clean.remove_clutter(tiles, fit, others, lo, hi, floor_h)
-        tiles = {k: t for k, t in tiles.items() if len(t["idx"])}
         rooms = [(np.array(r["polygon"], float).min(0), np.array(r["polygon"], float).max(0)) for r in world["rooms"]]
-        patches, more = scan_clean.relight_and_patch(tiles, images, rooms, fit, lo, hi, floor_h)
+        report, cloth = scan_clean.remove_clutter(tiles, images, fit, others, rooms, lo, hi, floor_h)
+        tiles = {k: t for k, t in tiles.items() if len(t["idx"])}
+        patches, more = scan_clean.relight_and_patch(tiles, images, rooms, fit, cloth, lo, hi, floor_h,
+                                                             voids=[(o["box"]["min"], o["box"]["max"]) for o in world.get("obstacles", []) if "opening" in o["id"] or "stairs" in o["id"]])
         report.update(more)
         print("cleaned:", report)
     else:
