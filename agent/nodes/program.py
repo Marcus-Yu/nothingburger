@@ -4,12 +4,19 @@ Claude writes it from the tasks, the route and the arm paths when a model is ava
 it (every leg driven once and in order, every planned piece of arm work present, every cited requirement
 real, every force inside its band). A program that fails the check is not used: the rule-built program
 takes its place and the model's problems are kept alongside. With no model, the rule-built program is used.
+
+The model does not get the plan pasted into one prompt. It works in a workspace (agent/workspace.py): the
+run so far as read-only files under run/, its own plan.md and notes/, and tools to read and write them. Its
+answer is checked inside the same conversation and it is shown the problems, up to two times, before the
+rule-built program takes over. Its files, and the problems the checker found, stay in the workspace for
+the next run of the same job. `--no-workspace` (state["use_workspace"] false) goes back to one request.
 """
 from __future__ import annotations
 
 import json
+import os
 
-from .. import llm
+from .. import llm, workspace
 
 PRIMITIVES = {
     "move_base": "drive one leg of the route (set `leg`)",
@@ -186,16 +193,65 @@ def check(steps: list, plan: dict) -> list:
     return problems
 
 
+WORK = """
+
+The files under run/ for this step:
+- `run/tasks.json`: the tasks, in order.
+- `run/requirements.json`: the ledger, one row per requirement, each with the id you cite.
+- `run/legs.json`: the route's legs by number, and the standoff each one arrives at.
+- `run/standoffs.json`: each standoff by number, with its task, skill and planned arm segments.
+- `run/design.json`: the robot that was chosen and its checks. `run/robot_fixes.json`: designs that were \
+tried and ruled out, and why. `run/intake.json`: how the job was read, with the person's answers.
+`notes/checker_log.md`, when it exists, is kept by code: each line is a problem the checker found in an \
+earlier answer for this job. Read it first and do not repeat those.
+
+On a route with many legs, settle the order in `notes/` leg by leg before you write the answer, and check \
+your draft against the rules above while it is still a note."""
+
+
+def _mount(ws, state: dict, plan: dict) -> None:
+    """The run so far as read-only files."""
+    d = state.get("design") or {}
+    it = state.get("intake") or {}
+    ws.mount("run/tasks.json", plan["tasks"])
+    ws.mount("run/requirements.json", plan["ledger"])
+    ws.mount("run/legs.json", plan["legs"])
+    ws.mount("run/standoffs.json", plan["standoffs"])
+    ws.mount("run/design.json", {k: d.get(k) for k in ("parts", "price_usd", "mass_kg", "labels", "checks") if k in d})
+    ws.mount("run/robot_fixes.json", state.get("robot_fixes") or [])
+    ws.mount("run/intake.json", {k: it[k] for k in ("job", "understood_as", "steps", "answers", "questions", "unmet",
+                                                    "proceeded_without_answers") if k in it})
+
+
+def _log(ws, problems: list) -> None:
+    """Keep what the checker found where the next run of this job will read it."""
+    had = ws.files.get("notes/checker_log.md", "")
+    lines = [line for line in had.splitlines() if line.strip()] + [f"- {p}" for p in problems if f"- {p}" not in had]
+    ws.put("notes/checker_log.md", "\n".join(lines[-80:]) + "\n")
+
+
 def step(state: dict) -> dict:
-    """Reads tasks, requirements, route, trajectory. Writes state["program"] (the program.json dict)."""
+    """Reads tasks, requirements, route, trajectory and state["workspace"]. Writes state["program"] (the
+    program.json dict) and, when the model worked in the workspace, state["workspace"]."""
     plan = _plan(state)
     rule = by_rule(plan)
     program = {"schema": "program/1", "source": "rule", "steps": rule}
+    ws = None
     if state.get("use_model") and llm.available():
+        schema = _schema(sorted(r["id"] for r in plan["ledger"]))
+        stats = {}
         try:
-            user = json.dumps({k: plan[k] for k in ("tasks", "ledger", "legs", "standoffs")}, indent=1)
-            out = llm.ask_json("program: sequence the primitives", SYSTEM, "The plan:\n" + user,
-                               _schema(sorted(r["id"] for r in plan["ledger"])))
+            if state.get("use_workspace", True) and not os.environ.get("AGENT_NO_WORKSPACE"):
+                ws = workspace.Workspace.from_state(state)
+                _mount(ws, state, plan)
+                out = llm.ask_json("program: sequence the primitives", SYSTEM + "\n\n" + workspace.GUIDE + WORK,
+                                   "The run so far is in the workspace:\n" + ws.ls("run/") + "\n\nYour own files from before:\n"
+                                   + (ws.ls("") if ws.own() else "none yet") + "\n\nWrite the task program.",
+                                   schema, tools=workspace.TOOLS, run_tool=ws.call,
+                                   review=lambda a: check(a.get("steps", []), plan), stats=stats, max_tokens=32000)
+            else:
+                user = json.dumps({k: plan[k] for k in ("tasks", "ledger", "legs", "standoffs")}, indent=1)
+                out = llm.ask_json("program: sequence the primitives", SYSTEM, "The plan:\n" + user, schema)
             problems = check(out["steps"], plan)
             if problems:
                 program["model_rejected"] = {"model": llm.model(), "problems": problems}
@@ -203,6 +259,11 @@ def step(state: dict) -> dict:
                 program = {"schema": "program/1", "source": "model", "model": llm.model(), "steps": out["steps"]}
         except llm.ModelStepError as e:
             program["model_rejected"] = {"model": llm.model(), "problems": [str(e)]}
+        if ws is not None:
+            if program.get("model_rejected"):
+                _log(ws, program["model_rejected"]["problems"])
+            program["planning"] = {"workspace": True, "files": list(ws.own()), "tool_calls": len(ws.log),
+                                   **{k: stats[k] for k in ("turns", "revisions") if k in stats}}
     for n, s in enumerate(program["steps"]):
         s["n"] = n
-    return {**state, "program": program}
+    return {**state, "program": program} | ({"workspace": ws.dump()} if ws is not None else {})
