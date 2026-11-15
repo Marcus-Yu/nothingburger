@@ -4,6 +4,30 @@
   "frame": "metres, Z up, right handed; origin at the south-west corner of floor 2's outline in the tour's floor plan, +X east across the picture, +Y up the picture",
   "source": "traced by eye from the public Matterport tour 2K7G7cdukZV (Princeton, Julis Romo Rabinowitz Building, floor 2), not read from the scan: outlines and tables measured on the tour's floor-plan view and scaled by the tour's own figure for the floor (92 ft 1 in by 75 ft 2 in). Only the atrium and the east corridor are traced; the corridor ring, chairs and people are left out; heights are assumed",
   "mesh": null,
+  "tour": {
+    "matterport": "2K7G7cdukZV",
+    "to_model": [
+      [
+        -1,
+        0,
+        0,
+        15.1
+      ],
+      [
+        0,
+        0,
+        1,
+        0.0
+      ],
+      [
+        0,
+        1,
+        0,
+        -7.4
+      ]
+    ],
+    "note": "robot placed by matching the traced plan to the tour's camera positions and room bounds; expect it to be off by up to about 0.3 m"
+  },
   "floors": [
     {
       "id": "f2",

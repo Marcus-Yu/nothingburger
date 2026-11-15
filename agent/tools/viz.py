@@ -314,3 +314,88 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
     except Exception as e:
         observe.emit("note", text=f"walkthrough failed: {type(e).__name__}: {e}")
         return None
+
+
+# ------------------------------------------------------------------ the robot for the real-room tour (web/viewer/tour.html)
+
+TOUR_FACES = 20000  # a mesh with more triangles than this is thinned to about this many for the browser
+
+
+def _geom_mesh(m, g):
+    """One visual geom as a trimesh in its body's frame, coloured, or None for a kind not drawn."""
+    import trimesh
+
+    t, size = int(m.geom_type[g]), m.geom_size[g]
+    if t == mujoco.mjtGeom.mjGEOM_MESH:
+        k = m.geom_dataid[g]
+        v = m.mesh_vert[m.mesh_vertadr[k]: m.mesh_vertadr[k] + m.mesh_vertnum[k]].copy()
+        f = m.mesh_face[m.mesh_faceadr[k]: m.mesh_faceadr[k] + m.mesh_facenum[k]].copy()
+        mesh = trimesh.Trimesh(v, f, process=False)
+        if len(f) > TOUR_FACES:
+            try:
+                mesh = mesh.simplify_quadric_decimation(face_count=TOUR_FACES)
+            except Exception:
+                pass  # no simplifier installed: keep the full mesh
+    elif t == mujoco.mjtGeom.mjGEOM_BOX:
+        mesh = trimesh.creation.box(extents=2 * size)
+    elif t == mujoco.mjtGeom.mjGEOM_CYLINDER:
+        mesh = trimesh.creation.cylinder(radius=size[0], height=2 * size[1], sections=24)
+    elif t == mujoco.mjtGeom.mjGEOM_CAPSULE:
+        mesh = trimesh.creation.capsule(radius=size[0], height=2 * size[1], count=[12, 12])
+    elif t == mujoco.mjtGeom.mjGEOM_SPHERE:
+        mesh = trimesh.creation.icosphere(radius=size[0], subdivisions=2)
+    else:
+        return None
+    T = np.eye(4)
+    R = np.zeros(9)
+    mujoco.mju_quat2Mat(R, m.geom_quat[g])
+    T[:3, :3], T[:3, 3] = R.reshape(3, 3), m.geom_pos[g]
+    mesh.apply_transform(T)
+    rgba = m.mat_rgba[m.geom_matid[g]] if m.geom_matid[g] >= 0 else m.geom_rgba[g]
+    mesh.visual = trimesh.visual.TextureVisuals(material=trimesh.visual.material.PBRMaterial(
+        baseColorFactor=[float(c) for c in rgba[:3]] + [1.0], metallicFactor=0.15, roughnessFactor=0.6))
+    return mesh
+
+
+def tour_export(robot_xml: str, build: dict, route: dict, trajectory: dict) -> dict | None:
+    """What the tour page needs to draw the robot inside the real scan: frames/tour_robot.glb (one node per
+    body, meshes in the body's frame, metres, Z up) and frames/tour_frames.bin (float32, per film frame and
+    per body: position x y z and quaternion w x y z in the world frame). Same timeline as walkthrough().
+    Returns {"glb", "frames", "bodies", "fps", "n", "chapters"} or None."""
+    where = observe.frame_path("tour")
+    if where is None:
+        return None
+    try:
+        import trimesh
+
+        m = mujoco.MjModel.from_xml_string(robot_xml)
+        d = mujoco.MjData(m)
+        scene, bodies = trimesh.Scene(), []
+        for b in range(1, m.nbody):
+            geoms = [g for g in range(m.ngeom) if m.geom_bodyid[g] == b and m.geom_group[g] <= 2 and m.geom_rgba[g][3] > 0.05]
+            meshes = [x for x in (_geom_mesh(m, g) for g in geoms) if x is not None]
+            if not meshes:
+                continue
+            name = f"body{len(bodies)}"
+            scene.graph.update(frame_to=name, frame_from=scene.graph.base_frame, matrix=np.eye(4))
+            for i, mesh in enumerate(meshes):
+                scene.add_geometry(mesh, node_name=f"{name}_g{i}", geom_name=f"{name}_g{i}", parent_node_name=name)
+            bodies.append(b)
+        glb = where[0].with_name("tour_robot.glb")
+        glb.write_bytes(scene.export(file_type="glb"))
+        frames, chapters = _timeline(build, route, trajectory)
+        jadr = {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j): m.jnt_qposadr[j] for j in range(m.njnt)}
+        out = np.zeros((len(frames), len(bodies), 7), dtype=np.float32)
+        for i, (pose, q) in enumerate(frames):
+            mujoco.mj_resetData(m, d)
+            for name, v in {**q, "joint_x": pose[0], "joint_y": pose[1], "joint_th": pose[2]}.items():
+                if name in jadr:
+                    d.qpos[jadr[name]] = v
+            mujoco.mj_kinematics(m, d)
+            out[i, :, :3], out[i, :, 3:] = d.xpos[bodies], d.xquat[bodies]
+        where[0].with_name("tour_frames.bin").write_bytes(out.tobytes())
+        return {"glb": "frames/tour_robot.glb", "frames": "frames/tour_frames.bin", "bodies": len(bodies), "fps": WALK_FPS, "n": len(frames),
+                "chapters": [{"t": round(i / WALK_FPS, 1), "label": label} for i, label in chapters]}
+    except Exception as e:
+        observe.emit("note", text=f"tour export failed: {type(e).__name__}: {e}")
+        return None

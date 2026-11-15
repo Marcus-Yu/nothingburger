@@ -7,7 +7,7 @@
       "object": "cloth",
       "demo": "wipe table",
       "carries": false,
-      "why": "This is the table in the middle of the atrium. I am assuming C6 is the centre table."
+      "why": "This is the table in the middle of the atrium, which the job asks to be wiped."
     },
     {
       "id": "t2",
@@ -16,7 +16,7 @@
       "object": "cloth",
       "demo": "wipe table",
       "carries": false,
-      "why": "This is the table in the south row of the atrium."
+      "why": "This is the table in the south row, which the job asks to be wiped."
     },
     {
       "id": "t3",
@@ -25,7 +25,7 @@
       "object": "sample_bottle",
       "demo": "pick up bottle",
       "carries": true,
-      "why": "This is the bottle left on the table by the east corridor, to be taken out of the building. It comes last.",
+      "why": "The bottle on the east-corridor table must be picked up and taken out of the building, so this is done last.",
       "deliver_to": "way_out"
     }
   ]

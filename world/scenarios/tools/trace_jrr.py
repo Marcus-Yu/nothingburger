@@ -33,6 +33,10 @@ world = {
            "outlines and tables measured on the tour's floor-plan view and scaled by the tour's own figure for the floor (92 ft 1 in by 75 ft 2 in). "
            "Only the atrium and the east corridor are traced; the corridor ring, chairs and people are left out; heights are assumed",
  "mesh": None,
+ "tour": {"matterport": "2K7G7cdukZV",
+          # this world's frame (X, Y, Z up) to the tour's own frame (x, y up, z): x = 15.1 - X, y = Z, z = Y - 7.4.
+          "to_model": [[-1, 0, 0, 15.1], [0, 0, 1, 0.0], [0, 1, 0, -7.4]],
+          "note": "robot placed by matching the traced plan to the tour's camera positions and room bounds; expect it to be off by up to about 0.3 m"},
  "floors": [{"id": "f2", "z": 0.0}],
  "rooms": [
   {"id": "atrium", "type": "atrium", "floor": "f2", "polygon": [[ax0, ay0], [ax1, ay0], [ax1, ay1], [ax0, ay1]], "ceiling_m": 9.0, "source": "manual", "width_m": round(ay1 - ay0, 2)},

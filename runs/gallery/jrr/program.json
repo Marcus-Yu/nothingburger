@@ -17,7 +17,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Long 20.7 m drive to table C6, which is assumed to be the centre atrium table; confirm before wiping, and note the step limit is assumed 0 m, not scanned.",
+      "note": "Long 20.7 m drive from dock to the first t1 standoff; step limit 0.0 m is assumed, not scanned, so watch for thresholds.",
       "n": 0
     },
     {
@@ -32,7 +32,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "The reach targets are assumed, and the base sits 0.395 m from the table edge.",
+      "note": "Base sits 0.395 m from the table edge per scan; reach targets are assumed, not measured.",
       "n": 1
     },
     {
@@ -48,7 +48,7 @@
         "r_t1_reach",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured; watch for skating or excess load on strokes 0-3.",
+      "note": "Strokes 0-3 of 24 at 10 N, an assumed press force that is not calibrated against the table.",
       "n": 2
     },
     {
@@ -62,7 +62,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before driving so the cloth clears the table edge.",
       "n": 3
     },
     {
@@ -79,7 +79,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.6 m shuffle along the table edge to standoff 1.",
+      "note": "Short 0.6 m shuffle along the table side; keep the arm stowed.",
       "n": 4
     },
     {
@@ -94,7 +94,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "The reach targets are assumed.",
+      "note": "Reach targets are assumed, not measured on site.",
       "n": 5
     },
     {
@@ -110,7 +110,7 @@
         "r_t1_reach",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed; this pass covers strokes 4-7.",
+      "note": "Strokes 4-7 at the assumed 10 N press force.",
       "n": 6
     },
     {
@@ -124,7 +124,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before moving the base.",
       "n": 7
     },
     {
@@ -141,7 +141,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.6 m shuffle to standoff 2.",
+      "note": "Short 0.6 m shuffle to the third standoff on the south side of the table.",
       "n": 8
     },
     {
@@ -156,7 +156,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "The reach targets are assumed.",
+      "note": "Reach targets are assumed, not measured on site.",
       "n": 9
     },
     {
@@ -172,7 +172,7 @@
         "r_t1_reach",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed; this pass covers strokes 8-11.",
+      "note": "Strokes 8-11 at the assumed 10 N press force.",
       "n": 10
     },
     {
@@ -186,7 +186,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before driving around the table.",
       "n": 11
     },
     {
@@ -203,7 +203,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "4.55 m drive around to the far side of table C6.",
+      "note": "Drive 4.55 m around the table to the north side; the atrium floor clearance is from the scan.",
       "n": 12
     },
     {
@@ -218,7 +218,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Approaching from the opposite side; the reach targets are assumed.",
+      "note": "Base now faces the table from the opposite side; reach targets are assumed.",
       "n": 13
     },
     {
@@ -234,7 +234,7 @@
         "r_t1_reach",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed; this pass covers strokes 12-15.",
+      "note": "Strokes 12-15 at the assumed 10 N press force.",
       "n": 14
     },
     {
@@ -248,7 +248,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before moving the base.",
       "n": 15
     },
     {
@@ -265,7 +265,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.756 m move to an angled pose (heading -1.83 rad); check clearance to the table corner.",
+      "note": "A 0.756 m move to a standoff angled at -1.83 rad; check the heading before the arm moves.",
       "n": 16
     },
     {
@@ -280,7 +280,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "The angled standoff relies on the assumed reach targets.",
+      "note": "An angled standoff covers 5 strokes; reach targets are assumed.",
       "n": 17
     },
     {
@@ -296,7 +296,7 @@
         "r_t1_reach",
         "r_t1_payload"
       ],
-      "note": "Nine strokes at an assumed 10 N cover strokes 16-20.",
+      "note": "Nine stroke passes for strokes 16-20 at the assumed 10 N press force.",
       "n": 18
     },
     {
@@ -310,7 +310,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before moving the base.",
       "n": 19
     },
     {
@@ -327,7 +327,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.596 m shuffle to the last C6 standoff.",
+      "note": "A 0.596 m move to the last t1 standoff.",
       "n": 20
     },
     {
@@ -342,7 +342,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "The reach targets are assumed.",
+      "note": "Reach targets are assumed, not measured on site.",
       "n": 21
     },
     {
@@ -358,7 +358,7 @@
         "r_t1_reach",
         "r_t1_payload"
       ],
-      "note": "The final strokes 21-23 are pressed at an assumed 10 N.",
+      "note": "Strokes 21-23 finish the table at the assumed 10 N press force.",
       "n": 22
     },
     {
@@ -372,7 +372,7 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Back off 0.1 m; table C6 should now be fully covered.",
+      "note": "Back off 0.1 m; t1 is complete after this step.",
       "n": 23
     },
     {
@@ -389,7 +389,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "4.6 m drive to the south-row table S3.",
+      "note": "Drive 4.65 m to the south-row table; the step limit is assumed to be 0.0 m.",
       "n": 24
     },
     {
@@ -404,7 +404,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "The reach targets are assumed, and the base sits 0.445 m from the table edge.",
+      "note": "Base sits 0.445 m from the table edge per scan; reach targets are assumed.",
       "n": 25
     },
     {
@@ -420,7 +420,7 @@
         "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed; this pass covers strokes 0-3.",
+      "note": "Strokes 0-3 at 10 N, an assumed press force that is not calibrated.",
       "n": 26
     },
     {
@@ -434,7 +434,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before moving the base.",
       "n": 27
     },
     {
@@ -451,7 +451,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.6 m shuffle to standoff 7.",
+      "note": "Short 0.6 m shuffle along the table.",
       "n": 28
     },
     {
@@ -466,7 +466,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "The reach targets are assumed.",
+      "note": "Reach targets are assumed, not measured on site.",
       "n": 29
     },
     {
@@ -482,7 +482,7 @@
         "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed; this pass covers strokes 4-7.",
+      "note": "Strokes 4-7 at the assumed 10 N press force.",
       "n": 30
     },
     {
@@ -496,7 +496,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before moving the base.",
       "n": 31
     },
     {
@@ -513,7 +513,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.6 m shuffle to standoff 8.",
+      "note": "Short 0.6 m shuffle along the table.",
       "n": 32
     },
     {
@@ -528,7 +528,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "The reach targets are assumed.",
+      "note": "Reach targets are assumed, not measured on site.",
       "n": 33
     },
     {
@@ -544,7 +544,7 @@
         "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed; this pass covers strokes 8-11.",
+      "note": "Strokes 8-11 at the assumed 10 N press force.",
       "n": 34
     },
     {
@@ -558,7 +558,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before driving around the table.",
       "n": 35
     },
     {
@@ -575,7 +575,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "4.5 m drive around to the far side of table S3.",
+      "note": "Drive 4.53 m around to the far side of the south table.",
       "n": 36
     },
     {
@@ -590,7 +590,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "The planned strokes from this side fall 5 mm short of full reach.",
+      "note": "Strokes from this side fall 5 mm short of target, so check edge coverage.",
       "n": 37
     },
     {
@@ -606,7 +606,7 @@
         "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "Strokes 12-15 fall 5 mm short, so expect a thin unwiped strip; the 10 N press force is assumed.",
+      "note": "Strokes 12-15 at the assumed 10 N; the plan is 0.005 m short of full reach.",
       "n": 38
     },
     {
@@ -620,7 +620,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before moving the base.",
       "n": 39
     },
     {
@@ -637,7 +637,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.6 m shuffle to standoff 10.",
+      "note": "Short 0.6 m shuffle along the table.",
       "n": 40
     },
     {
@@ -652,7 +652,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "The planned strokes from this standoff also fall 5 mm short.",
+      "note": "Strokes fall 5 mm short of target from this standoff.",
       "n": 41
     },
     {
@@ -668,7 +668,7 @@
         "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "Strokes 16-19 fall 5 mm short; the 10 N press force is assumed.",
+      "note": "Strokes 16-19 at the assumed 10 N; the plan is 0.005 m short of full reach.",
       "n": 42
     },
     {
@@ -682,7 +682,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "Back off 0.1 m before the base moves.",
+      "note": "Back off 0.1 m before moving the base.",
       "n": 43
     },
     {
@@ -699,7 +699,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.6 m shuffle to the last S3 standoff.",
+      "note": "Short 0.6 m shuffle to the last t2 standoff.",
       "n": 44
     },
     {
@@ -714,7 +714,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "The planned strokes from this standoff also fall 5 mm short.",
+      "note": "Strokes fall 5 mm short of target from this standoff.",
       "n": 45
     },
     {
@@ -730,7 +730,7 @@
         "r_t2_reach",
         "r_t2_payload"
       ],
-      "note": "Strokes 20-23 fall 5 mm short; the 10 N press force is assumed.",
+      "note": "Strokes 20-23 finish the table at the assumed 10 N, 0.005 m short.",
       "n": 46
     },
     {
@@ -744,7 +744,7 @@
       "requirements": [
         "r_t2_floor"
       ],
-      "note": "Back off 0.1 m; table S3 is done apart from the thin far-edge strip.",
+      "note": "Back off 0.1 m; t2 is complete after this step.",
       "n": 47
     },
     {
@@ -761,7 +761,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "12 m drive to table E2 by the east corridor.",
+      "note": "Drive 11.96 m to the east-corridor table; the corridor width is from the scan.",
       "n": 48
     },
     {
@@ -777,7 +777,7 @@
         "r_t3_floor",
         "r_t3_opening"
       ],
-      "note": "The gripper opens at the start of the approach, and the base sits only 0.146 m from the table edge.",
+      "note": "The gripper opens at the start; the base is only 0.146 m from the table edge, so check clearance.",
       "n": 49
     },
     {
@@ -789,11 +789,11 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t3_reach",
         "r_t3_opening",
-        "r_t3_payload"
+        "r_t3_payload",
+        "r_t3_reach"
       ],
-      "note": "Grip force is not established because the ledger has no force band; the bottle could slip or be crushed.",
+      "note": "Grip force is not established because the ledger has no force band for the 0.55 kg bottle; verify the grip before lifting.",
       "n": 50
     },
     {
@@ -807,7 +807,7 @@
       "requirements": [
         "r_t3_payload"
       ],
-      "note": "Lift 0.15 m with the 0.55 kg card payload; check for slip under the unestablished grip.",
+      "note": "Lift 0.15 m with a 0.55 kg card payload; watch for slip, since grip force is unverified.",
       "n": 51
     },
     {
@@ -822,12 +822,12 @@
         "r_t3_floor",
         "r_t3_payload"
       ],
-      "note": "Retreat while still holding the bottle.",
+      "note": "Retreat while holding the bottle; keep it clear of the table edge.",
       "n": 52
     },
     {
       "primitive": "move_base",
-      "task": "t3",
+      "task": null,
       "leg": 13,
       "standoff": null,
       "force_n": null,
@@ -837,10 +837,9 @@
         "r_width",
         "r_length",
         "r_header",
-        "r_step",
-        "r_t3_payload"
+        "r_step"
       ],
-      "note": "15 m carry to the way out; grip force is unverified, so watch for the bottle dropping on turns.",
+      "note": "Carry the bottle 15.1 m to the way out; drive gently, since grip force is not established.",
       "n": 53
     },
     {
@@ -854,7 +853,7 @@
       "requirements": [
         "r_t3_payload"
       ],
-      "note": "No place pose is planned at the way out, so confirm a clear, level spot.",
+      "note": "Set the bottle down at the way out; the drop-off pose has no scanned surface in the ledger.",
       "n": 54
     },
     {
@@ -885,7 +884,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "2.6 m return to the dock with an empty gripper.",
+      "note": "Return 2.6 m to the dock empty-handed.",
       "n": 56
     }
   ]

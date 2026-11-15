@@ -139,6 +139,37 @@
      }
     }
    }
+  },
+  "tour": {
+   "type": "object",
+   "description": "A Matterport tour of this place and how this world's frame maps onto it, for web/viewer/tour.html.",
+   "required": [
+    "matterport",
+    "to_model"
+   ],
+   "properties": {
+    "matterport": {
+     "type": "string",
+     "description": "the tour's model id"
+    },
+    "to_model": {
+     "type": "array",
+     "minItems": 3,
+     "maxItems": 3,
+     "items": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+       "type": "number"
+      }
+     },
+     "description": "3 x 4 matrix taking a point [X, Y, Z] in this world (metres, Z up) to the tour's frame (metres, Y up)"
+    },
+    "note": {
+     "type": "string"
+    }
+   }
   }
  }
 }
