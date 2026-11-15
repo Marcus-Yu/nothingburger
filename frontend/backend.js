@@ -70,7 +70,11 @@ async function agentCall(path, options = {}, ms = 8000) {
     clearTimeout(timer);
   }
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.detail || `HTTP ${r.status}`);
+  if (!r.ok) {
+    const err = new Error(j.detail || `HTTP ${r.status}`);
+    err.status = r.status;   // 409 from stop: nothing is running
+    throw err;
+  }
   return j;
 }
 export const agent = {
@@ -79,6 +83,11 @@ export const agent = {
   session: (id) => agentCall(`/sessions/${encodeURIComponent(id)}`),
   reply: (id, recordings) => agentCall(`/sessions/${encodeURIComponent(id)}/reply`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(recordings ? { recordings } : {}) }),
   retry: (id) => agentCall(`/sessions/${encodeURIComponent(id)}/retry`, { method: 'POST' }),
+  /* stop the design running now: the view comes back with status "stopped" (409 if nothing runs) */
+  stop: (id) => agentCall(`/sessions/${encodeURIComponent(id)}/stop`, { method: 'POST' }, 15000),
+  /* stop it and design again in a NEW session (same building, skill learned):
+     body {job?, exclude?: [{slot: part}], require?: {slot: part}, max_price_usd?}; returns the new view (previous: old id) */
+  steer: (id, body) => agentCall(`/sessions/${encodeURIComponent(id)}/steer`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}) }, 20000),
   answer: (id, value) => agentCall(`/sessions/${encodeURIComponent(id)}/reply`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ answer: value }) }),
   buildings: (q) => agentCall(`/buildings?q=${encodeURIComponent(q)}&limit=8`, {}, 6000),
   loadBuilding: (sid) => agentCall(`/buildings/${encodeURIComponent(sid)}/load`, { method: 'POST' }, 120000),

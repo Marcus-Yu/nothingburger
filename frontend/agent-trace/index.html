@@ -4,23 +4,46 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agent trace · Nothingburger</title>
-<meta name="description" content="Preview of the agent trace page on its own: replays a finished studio run. ?run=runs/studio/<id>&speed=20&agent=http://localhost:8020">
+<meta name="description" content="Preview of the agent trace page on its own. Replay: ?run=runs/studio/<id>&speed=20&agent=http://localhost:8020. Live: ?session=<id> (stop and change work). ?wrap=1 shows it over a stand-in for the Matterport tour.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800;900&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>html,body{margin:0;background:#F4EFE7}</style>
+<style>
+  html,body{margin:0;background:#F4EFE7;height:100%}
+  /* ?wrap=1: a still from the Rabinowitz Hall tour stands in for the live Matterport iframe */
+  .tour{position:fixed;inset:0;background:#2A231B url('../assets/jrr-tour/0f2a2fyf5iibscursb5gkyu9a.jpg') center/cover no-repeat;cursor:grab}
+  .tour::after{content:"Stand-in for the Matterport tour";position:absolute;left:16px;bottom:12px;font:500 11px/1 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+</style>
+<!-- the live 3D view (../robot-design/live.js) imports three.js the way the studio does -->
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
 </head>
 <body>
 <script type="module">
   /* Preview only: the studio opens the page by itself while the design step runs. */
   import { openAgentTrace } from './agent-trace.js';
   const q = new URLSearchParams(location.search);
+  const agentBase = (q.get('agent') || 'http://localhost:8020').replace(/\/+$/, '');
+  const wrap = q.get('wrap') === '1';
+  if (wrap) document.body.prepend(Object.assign(document.createElement('div'), { className: 'tour' }));
+  const common = {
+    agentBase, wrap, place: q.get('place') || 'Rabinowitz Hall foyer, Princeton', onClose: () => location.reload(),
+    onPlayInTour: (r) => window.open(`${agentBase}/room.html?run=${encodeURIComponent(r.run)}`, '_blank', 'noopener'),
+  };
+  const sid = q.get('session');
   const run = q.get('run');
-  if (!run) document.body.textContent = 'Add ?run=runs/studio/<id> (a finished studio run).';
+  if (sid) {
+    /* a live session: stop and change work, and the page follows the new session after a change */
+    const view = await fetch(`${agentBase}/sessions/${encodeURIComponent(sid)}`).then((r) => r.json()).catch(() => null);
+    if (!view || !view.session_id) document.body.append('No such session on ' + agentBase);
+    else openAgentTrace({ ...common, run: view.run || null, job: view.job || q.get('job') || '', session: view, watch: true,
+      onSteer: (v) => { const u = new URL(location.href); u.searchParams.set('session', v.session_id); history.replaceState(null, '', u); } });
+  } else if (!run) document.body.append('Add ?run=runs/studio/<id> (a finished studio run), or ?session=<id> for a live one.');
   else openAgentTrace({
-    agentBase: (q.get('agent') || 'http://localhost:8020').replace(/\/+$/, ''), run,
-    job: q.get('job') || 'Wipe down the tables in the atrium', place: 'Rabinowitz Hall foyer, Princeton',
-    replay: Number(q.get('speed') || 20), onClose: () => location.reload(),
+    ...common, run,
+    job: q.get('job') || 'Wipe down the tables in the atrium',
+    replay: Number(q.get('speed') || 20),
   });
 </script>
 </body>
