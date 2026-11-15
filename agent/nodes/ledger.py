@@ -204,6 +204,15 @@ def _building_rows(world: dict, building: dict) -> list:
     return rows
 
 
+def _widest_gripper_m() -> float | None:
+    """The widest opening of any gripper card, or None when the catalog cannot be read."""
+    try:
+        cards = [json.loads(f.read_text(encoding="utf8")) for f in (Path(__file__).resolve().parents[2] / "catalog" / "gripper").glob("*.json")]
+        return max(float(c["stroke_m"]) for c in cards if c.get("stroke_m") is not None)
+    except (OSError, ValueError):
+        return None
+
+
 def _force_band(tid, card, mass, grip):
     """(row or None, conflict or None). Low end: the most of the demo's minimum and the physics minimum
     (pinch: hold the mass with friction 0.5 and a safety factor of 1.5; hook: zero). High end: the demo's peak."""
@@ -289,7 +298,22 @@ def step(state: dict) -> dict:
         if card is not None:
             grasps = skill in ("twist_out", "twist_in", "pick", "place", "carry")
             two = (demo or {}).get("two_handed")
-            if grasps and isinstance(two, dict) and isinstance(two.get("width_m"), (int, float)):
+            widest = _widest_gripper_m()
+            one_hand = (grasps and isinstance(two, dict) and isinstance(two.get("width_m"), (int, float))
+                        and card.get("width_m") is not None and widest is not None and float(two["width_m"]) > widest
+                        and float(card["width_m"]) + OPENING_MARGIN_M <= widest)
+            if one_hand:
+                # The person used two hands, but no gripper in the catalog opens that wide and the robot has one arm.
+                # The object's card gives a hold one gripper can make, so plan that and say so. The weight is the
+                # Payload check's business; the grip band is the harder-pressing hand's (capture.build_grip).
+                rows.append(_row(f"r_{tid}_opening", tid, "gripper_opening_min",
+                                 round(float(card["width_m"]) + OPENING_MARGIN_M, 3), "m", 0.0, "card",
+                                 labels=["two_hand_demo_planned_one_handed"],
+                                 **{"from": f"the demo used two hands {round(float(two['width_m']), 3)} m apart; the widest gripper in the "
+                                            f"catalog opens {widest} m and the robot has one arm, so the hold is planned one-handed on "
+                                            f"{card['id']}'s {card.get('hold', 'grip')} point ({card['width_m']} m plus {OPENING_MARGIN_M} m). "
+                                            "Payload and the force band are checked for that one hold"}))
+            elif grasps and isinstance(two, dict) and isinstance(two.get("width_m"), (int, float)):
                 rows.append(_row(f"r_{tid}_opening", tid, "gripper_opening_min", round(float(two["width_m"]), 3), "m", 0.0,
                                  "demo:home", **{"from": "the demo's two-hand width"}))
             elif grasps and card.get("width_m") is not None:

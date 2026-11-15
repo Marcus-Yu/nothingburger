@@ -22,7 +22,7 @@ OBJECT_CARDS = REPO / "catalog" / "object"
 
 # skill-name words -> pipeline skill, verbs before nouns ("pick_up_bottle_on_table" is a pick, not a wipe)
 KINDS = [
-    (("mow",), "navigate"),  # the verb only: "pick up the toys on the lawn" is a pick
+    (("mow", "vacuum", "hoover", "sweep_floor", "patrol"), "navigate"),  # the verb only: "pick up the toys on the lawn" is a pick
     (("wipe", "clean", "dust", "polish", "scrub"), "wipe"),
     (("carry", "move", "take_out", "garbage", "trash", "bin", "bag", "bottle", "pick", "fetch", "container", "bring"), "pick"),
     (("bulb", "lamp", "light", "unscrew"), "twist_out"),
@@ -77,6 +77,33 @@ def _wants_all(job: str) -> bool:
     return bool(re.search(r"\b(all|every|both|tables|surfaces|counters|them)\b", job.lower()))
 
 
+FLOOR_CLEAR_M = 0.5   # passes keep this far from furniture
+FLOOR_ROOMS = 3       # rooms covered when the job says "all": a longer route adds minutes to a studio run
+
+
+def _floor_tasks(job: str, world: dict, place: str) -> tuple[list | None, str | None]:
+    """Back-and-forth passes over rooms' floors, around the furniture: the robot drives, the arm does nothing."""
+    from agent.tools import nav  # nav.api.cover, reached the way every agent step reaches nav
+
+    rooms = [r for r in world.get("rooms", []) if r.get("polygon") and r.get("type") not in ("closet", "outside")]
+    words = set(re.findall(r"[a-z]+", job.lower()))
+    named = [r for r in rooms if words & (set(re.findall(r"[a-z]+", r["id"].lower())) - {"room"})]
+    chosen = named or (rooms if _wants_all(job) or "house" in words or "floors" in words else rooms[:1])
+    tasks = []
+    for r in chosen:
+        keep = [[o["box"]["min"][0] - FLOOR_CLEAR_M, o["box"]["min"][1] - FLOOR_CLEAR_M,
+                 o["box"]["max"][0] + FLOOR_CLEAR_M, o["box"]["max"][1] + FLOOR_CLEAR_M]
+                for o in world.get("obstacles", []) if o.get("room") == r["id"] and o["box"]["min"][2] < 1.0]
+        t = nav.cover({"id": r["id"], "polygon": [list(p[:2]) for p in r["polygon"]], "keep_out": keep}, f"t{len(tasks) + 1}")
+        if t:
+            t["note"] = (f"{len(t['waypoints']) // 2} passes {t['lane_m']} m apart over {r['id']}, {FLOOR_CLEAR_M} m clear of furniture. "
+                         "The catalog has no vacuum head: this plans where the base drives, and the head is assumed.")
+            tasks.append(t)
+        if len(tasks) >= FLOOR_ROOMS:
+            break
+    return (tasks, None) if tasks else (None, f"No room in {place}’s world file has enough open floor for a pass.")
+
+
 def tasks_for(skill: str, job: str, world: dict) -> tuple[list | None, str | None]:
     """(tasks, None) when the job can be planned on this world, else (None, a reason for the person)."""
     kind = pipeline_skill(skill)
@@ -87,6 +114,8 @@ def tasks_for(skill: str, job: str, world: dict) -> tuple[list | None, str | Non
     if kind == "navigate":
         from agent.tools import nav  # nav.api.cover, reached the way every agent step reaches nav
 
+        if not re.search(r"(^|[^a-z])mow", f"{job} {skill}".lower()):  # vacuum, sweep the floor, patrol: the rooms' floors
+            return _floor_tasks(job, world, place)
         lawns = [a for a in world.get("areas", []) if a.get("kind") == "lawn"]
         if not lawns:
             return None, f"There’s no lawn marked in {place}’s world file, so mowing can’t be planned here."
