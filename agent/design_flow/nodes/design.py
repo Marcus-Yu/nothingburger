@@ -19,6 +19,8 @@ def make_design(designer: Runnable, store: SkillStore):
             request["skill"] = state["assessment"]["skill"]
         if state.get("world"):
             request["world"] = state["world"]
+        if state.get("options"):  # the person's steering: {"exclude", "require", "max_price_usd"}
+            request["options"] = state["options"]
         proposal = designer.invoke(request)
         return {"design": proposal if isinstance(proposal, dict) else proposal.model_dump()}
 

@@ -39,6 +39,7 @@ The studio opens in a Matterport scan from the backend's `GET /worlds` (the list
 
 - **Matterport scans** show full page as the public Matterport tour. On localhost, when the backend's `GET /web-config` returns a Showcase SDK key, Walk, Dollhouse and Floor plan buttons appear. The key stays in the backend's `.env` and is fetched at runtime.
 - **Outside** shows the Vexcel aerial model when the backend has that space's scene package.
+- **Outdoor lots (Vexcel aerial)** have no tour: a space with `aerial` (a picture in `assets/aerial/`) and no `matterport` opens on its Vexcel aerial photo, with the ground the robot may use outlined in white and its dock as an orange dot. Its own `jobs` are the suggestions under the prompt. Five are listed: `lawn-palmetto`, `trash-palmetto`, `pooldeck-lakes`, `parcel-eastland` and `lawn-sanpedro`; open one with `?space=lawn-palmetto#studio`. Mowing needs no demonstration, so **Mow the lawn** goes straight to the robot (about 10 s); the other jobs ask the headset first, like any skill not yet learned. The pictures and world files come from `python world/scenarios/tools/aerial_worlds.py` (see `web/README.md`, "Outdoor runs on Vexcel aerial photos").
 - **Sample apartment** is the apartment drawn in code, where you drive the robot yourself.
 - **i** shows notes about the space and the backend status.
 
@@ -118,3 +119,17 @@ These are copies, so change them together with the originals:
 The building is drawn to be recognisable: JRR Hall is Charles Klauder's 1929 Frick Chemistry Laboratory, so the walls carry its Collegiate Gothic elevation (purple-grey argillite, Indiana limestone courses, quoins and window surrounds, steel casements; `facade.js` is a stylised bay, not a survey of each window). The roof is the aerial photo itself. Trees are placed where the photo shows canopy (`trees` in the site file); the reflecting pool's corners are read off the photo.
 
 The inside is the CoStar team's Matterport scan of JRR Hall (`2K7G7cdukZV`), shown in our own viewer from 66 panoramas with every detected person removed (`assets/jrr-tour/README.md` has the method and its limits). It opens at the scan point just inside the main entrance doors, in the restored Gothic arcade, facing the atrium, and starts loading once the visitor is about halfway down the landing. Other scans (La Mirada) still use the Matterport embed. To go back to the embed for JRR Hall, remove its entry from `LOCAL_TOURS` in `space.js`.
+
+## The robot in the live tour (`tour-robot.js`)
+
+`playInTour({ sdk, agentBase, run, mount, model })` plays a finished studio run inside the tour on screen: it adds the run's `frames/tour_robot.glb` to the tour's own three.js scene, poses every body each frame from `frames/tour_frames.bin` (placed with `world.tour.to_model`), and moves the viewpoint between the scan positions to keep the robot in view. It is a port of `web/viewer/tour.html`. A glass bar (Play, scrub, 1× 2× 4×, step, Follow, Close) sits bottom-centre at `--tour-robot-bottom` (default 148px, above the prompt bar). `player.stop()`, or Close, takes the robot and the bar away. It returns `{ ok, error, fallback, stop, state }` and never throws; a run without a tour export, a world without `tour`, or a run planned in another tour than the one loaded (`model`, else `sdk.Model.getData()`) is said in the bar.
+
+**It needs Matterport's SDK bundle.** Adding objects uses `sdk.Scene`, which exists only in the SDK bundle (a self-hosted `showcase.html`, fetched by `web/fetch_sdk.py`). The embed SDK that `space.js` connects (`latest.js` with `MP_SDK.connect(iframe, key, '')`) has no `Scene` namespace (checked: its namespaces are App, Camera, Floor, Label, Mattertag, Mode, Model, Sweep, Tag, … and no Scene). With it, or with no SDK at all (the JRR Hall panorama viewer, or no key from `/web-config`), the bar says so and links to `room.html?run=...` on the design server instead (`player.fallback`). For the studio to show the robot in the tour itself it would have to:
+
+1. serve the bundle from its own origin (e.g. `web/_vendor/matterport` at `/mp/`): `iframe.contentWindow.MP_SDK` must be same-origin;
+2. load `/mp/showcase.html?m=<id>&applicationKey=<key>&play=1&qs=1&title=0&brand=0` in `#tour` instead of `my.matterport.com/show/`, and connect with `await iframe.contentWindow.MP_SDK.connect(iframe.contentWindow)`;
+3. keep everything else in `space.js` (the bundle SDK has the same Camera, Sweep and Mode calls).
+
+Pinned bundle 26.5.4 plays JRR Hall (`2K7G7cdukZV`) but stays in its loading phase on La Mirada (`zvKHR9DHNjJ`, page error `620624`), so a newer bundle may be needed for that scan.
+
+`tour-robot-test.html?model=<id>&run=runs/studio/<run>` tries it on its own (`&key=` when `/web-config` has no key, `&agent=` for another design server, `&bundle=/mp/` to use a bundle served from the same origin).

@@ -175,6 +175,7 @@ def test_furniture_from_mesh(model, tmp_path):
     assert x0 - 0.01 <= min(xs) <= x0 + 0.1 and x1 - 0.1 <= max(xs) <= x1 + 0.01
     assert y0 - 0.01 <= min(ys) <= y0 + 0.1 and y1 - 0.1 <= max(ys) <= y1 + 0.01
 
+    json.loads(json.dumps(world), parse_constant=lambda name: pytest.fail(f"{name} in the world"))   # no Infinity, no NaN
     scan = [o for o in world["obstacles"] if o["source"] == "mesh"]
     table = [o for o in scan if o["box"]["min"][2] == 0.0]
     lamp = [o for o in scan if o["box"]["min"][2] > 1.5]

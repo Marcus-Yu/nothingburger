@@ -31,7 +31,21 @@
 .at-back svg{width:20px;height:20px}
 .at-back:hover{background:#fff;transform:translateX(-2px)}
 .at-title{font:900 clamp(28px,3vw,44px)/.95 var(--display);letter-spacing:-.045em;padding-top:4px}
-.at-job{display:block;margin-top:.45em;font-size:.4em;font-weight:800;line-height:1.2;letter-spacing:-.015em;color:var(--sub)}
+.at-head{min-width:0}
+.at-job{margin-top:8px;font:800 clamp(13px,1.2vw,17.6px)/1.2 var(--display);letter-spacing:-.015em;color:var(--sub)}
+.at-jobq{all:unset;cursor:pointer;border-radius:6px;display:inline;box-decoration-break:clone}
+.at-jobq span{display:inline-block;margin-left:5px;vertical-align:-1px;opacity:.45;transition:opacity .2s}
+.at-jobq span svg{width:12px;height:12px}
+.at-jobq:hover span,.at-jobq:focus-visible span{opacity:.8}
+.at-jobq:hover{text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:3px}
+.at-jobq:disabled{cursor:default;text-decoration:none}
+.at-jobq:disabled span{display:none}
+.at-jobq:focus-visible{outline:2px solid var(--gold-ink);outline-offset:2px}
+.at-where{font-weight:800}
+.at-jobedit{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.at-jobedit input{flex:1 1 260px;min-width:0;font:600 15px/1.2 var(--body);color:var(--ink);padding:8px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:#FFFDFA}
+.at-with{margin-top:6px;font:400 12.5px/1.35 var(--body);color:var(--ink-2)}
+.at-with b{font-weight:600;color:var(--ink)}
 .at-right{position:absolute;top:var(--top);right:var(--gutter);display:flex;gap:8px;align-items:center}
 .at-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
   color:var(--sub);border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);background:color-mix(in srgb,var(--gold) 9%,transparent)}
@@ -41,6 +55,11 @@
 .at-time{padding:8px 13px;border-radius:999px;font:500 14px/1 var(--mono);font-variant-numeric:tabular-nums}
 .at-tbtn{padding:9px 15px;border-radius:999px;font:600 13.5px/1 var(--body);color:var(--ink);cursor:pointer;transition:background .2s}
 .at-tbtn:hover,.at-tbtn[aria-expanded="true"]{background:#fff}
+.at-stopbtn{display:inline-flex;align-items:center;gap:7px;color:var(--error)}
+.at-stopbtn i{width:9px;height:9px;border-radius:2px;background:currentColor}
+.at-stopbtn:disabled{color:var(--ink-2);cursor:not-allowed;opacity:.65}
+.at-stopbtn:disabled:hover{background:var(--glass)}
+.at-tbtn[hidden]{display:none}
 @keyframes at-pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,154,46,.55)}50%{box-shadow:0 0 0 5px rgba(201,154,46,0)}}
 
 /* ---------- body: steps rail + focus card ---------- */
@@ -65,6 +84,9 @@
 .at-steps li[data-state="run"] b{color:var(--ink)}
 .at-steps li[data-state="run"] small{color:var(--gold-ink)}
 .at-steps li[data-state="skip"]{opacity:.5}
+.at-steps li[data-state="halt"] .at-dot{border-color:var(--error);color:var(--error);background:var(--paper)}
+.at-steps li[data-state="halt"] b{color:var(--ink)}
+.at-steps li[data-state="halt"] small{color:var(--error)}
 
 .at-focus{border-radius:30px;padding:28px 30px 26px;max-height:100%;overflow:auto;scrollbar-width:thin}
 .at-kicker{font:600 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink)}
@@ -90,6 +112,12 @@
 .at-test-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font:600 12px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
 .at-test-h span{letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums}
 .at-parts{margin-top:8px;font:700 17px/1.35 var(--display);letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.at-parts.chips{display:flex;flex-wrap:wrap;gap:6px;-webkit-line-clamp:none;overflow:visible;margin-top:10px}
+.at-part{font:600 13.5px/1.2 var(--body);color:var(--ink);padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.6);cursor:pointer;
+  transition:border-color .2s,background .2s;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-part:hover{border-color:color-mix(in srgb,var(--gold) 70%,transparent);background:#fff}
+.at-part[aria-expanded="true"]{border-color:var(--gold-ink);background:#fff}
+.at-test.slim{min-height:0}
 .at-parts.small{font-size:15px;color:var(--ink-2);margin-top:12px}
 .at-stamp{margin-top:12px;padding:10px 12px;border-radius:14px;font-size:14px}
 .at-stamp b{font-weight:600}
@@ -128,6 +156,47 @@
   font:700 16px/1 var(--display);letter-spacing:-.01em;cursor:pointer;transition:background .2s,transform .2s}
 .at-go svg{width:18px;height:18px}
 .at-go:hover{background:#2C2720;transform:translateX(2px)}
+.at-go.ghost{background:rgba(255,255,255,.7);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.at-go.ghost:hover{background:#fff}
+.at-go:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* ---------- the live controls: one quiet row at the foot of the focus card ---------- */
+.at-ctl{position:sticky;bottom:-26px;margin:20px -30px -26px;padding:11px 30px 13px;border-top:1px solid var(--line);
+  background:rgba(249,246,241,.96);border-radius:0 0 30px 30px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.at-cbtn{font:600 13px/1 var(--body);color:var(--ink);padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.6);cursor:pointer;transition:background .2s;white-space:nowrap}
+.at-cbtn:hover{background:#fff}
+.at-cbtn.dark{background:var(--ink);color:var(--on-ink);border-color:var(--ink)}
+.at-cbtn.dark:hover{background:#2C2720}
+.at-cbtn.plain{border-color:transparent;background:transparent;color:var(--ink-2)}
+.at-cbtn:disabled{opacity:.5;cursor:not-allowed}
+.at-cbtn:disabled:hover{background:rgba(255,255,255,.6)}
+.at-budget{display:flex;align-items:center;gap:6px}
+.at-budget label{display:flex;align-items:center;gap:8px;font:500 12.5px/1 var(--body);color:var(--ink-2)}
+.at-dollar{display:inline-flex;align-items:center;gap:2px;padding:0 4px 0 10px;border-radius:999px;border:1px solid var(--line);background:#FFFDFA;font:500 13px/1 var(--mono);color:var(--ink-2)}
+.at-dollar input{width:78px;border:0;background:transparent;padding:7px 4px;font:500 13px/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.at-dollar input:focus{outline:none}
+.at-dollar:focus-within{border-color:var(--gold-ink)}
+.at-dollar input:disabled{cursor:not-allowed}
+.at-chint{margin-left:auto;font-size:12.5px;color:var(--ink-2)}
+.at-cmsg{flex-basis:100%;font-size:13px;color:var(--error)}
+.at-cmsg[data-kind="info"]{color:var(--ink-2)}
+.at-cmsg:empty{display:none}
+
+.at-menu{position:absolute;z-index:5;min-width:220px;max-width:min(320px,calc(100vw - 16px));padding:6px;border-radius:16px;background:rgba(251,248,243,.98);
+  box-shadow:0 0 0 1px var(--line),0 18px 44px -18px rgba(45,32,12,.45);display:grid;gap:2px}
+.at-menu p{padding:8px 10px 4px;font:600 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.at-menu button{all:unset;padding:9px 10px;border-radius:10px;font:600 14px/1.25 var(--body);color:var(--ink);cursor:pointer}
+.at-menu button:hover,.at-menu button:focus-visible{background:color-mix(in srgb,var(--gold) 14%,transparent);outline:none}
+.at-menu button:first-of-type{color:var(--error)}
+.at-menu button:disabled{opacity:.45;cursor:not-allowed;background:none}
+.at-menu small{padding:4px 10px 6px;font-size:12px;line-height:1.35;color:var(--ink-2)}
+
+/* ---------- the robot in 3D (../robot-design/live.js), beside the card ---------- */
+.at-body.with-live{grid-template-columns:minmax(220px,260px) minmax(0,560px) minmax(260px,1fr);justify-content:stretch}
+.at-live{align-self:stretch;border-radius:30px;overflow:hidden;min-height:300px;position:relative;
+  background:var(--glass);border:1px solid rgba(255,255,255,.75);box-shadow:0 0 0 1px var(--line),0 24px 60px -36px rgba(45,32,12,.45)}
+.at-live[hidden]{display:none}
+.at.trace-open .at-body.with-live{padding-right:0}
 
 /* ---------- the raw trace ---------- */
 .at-drawer{position:absolute;top:clamp(80px,11vh,96px);right:var(--gutter);bottom:var(--top);width:min(400px,34vw);border-radius:26px;padding:18px 0 0;
@@ -176,5 +245,64 @@
   .at-funnel small{display:none}
   .at-funnel.result{grid-template-columns:1fr 1fr}
   .at-why li{grid-template-columns:110px 1fr 28px}
+  .at-top{flex-wrap:wrap;gap:10px 12px;padding-right:0}
+  .at-head{flex-basis:100%}
+  .at-title{font-size:26px}
+  .at-body{top:186px}
+  .at-right .at-stopbtn{padding:8px 11px}
+  .at-right .at-chip.stop{display:inline-flex}
+  .at-body.with-live{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
+  .at-live{order:1;min-height:0;height:240px;border-radius:20px}
+  .at-body.with-live .at-focus{order:2}
+  .at-focus{padding:20px 18px 20px}
+  .at-ctl{position:static;margin:16px -18px -20px;padding:10px 18px 12px}   /* on a phone it scrolls with the card instead of covering it */
+  .at-chint{display:none}
+}
+
+/* ---------- wrapped around the live Matterport tour: glass cards over the scan ---------- */
+.at.wrap{background:none;pointer-events:none}
+.at.wrap .at-top,.at.wrap .at-right,.at.wrap .at-rail,.at.wrap .at-focus,.at.wrap .at-drawer,.at.wrap .at-menu{pointer-events:auto}
+.at.wrap .at-top{max-width:min(560px,calc(100vw - 2*var(--gutter) - 460px));align-items:center;gap:12px}
+.at.wrap .at-head{padding:12px 18px 12px;border-radius:22px;background:var(--glass);backdrop-filter:blur(18px) saturate(1.1);-webkit-backdrop-filter:blur(18px) saturate(1.1);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 0 0 1px var(--line),0 24px 60px -36px rgba(45,32,12,.45)}
+.at.wrap .at-title{font-size:22px;padding-top:0;letter-spacing:-.035em}
+.at.wrap .at-job{margin-top:5px;font-size:13px}
+.at.wrap .at-body{left:auto;right:var(--gutter);top:calc(var(--top) + 58px);width:min(430px,calc(100vw - 2*var(--gutter)));
+  grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:10px;align-content:start;height:auto;bottom:auto;max-height:calc(100% - var(--top) * 2 - 58px)}
+.at.wrap.trace-open .at-body{padding-right:0}
+.at.wrap .at-rail{padding:10px 14px;border-radius:20px}
+.at.wrap .at-rail h2{display:none}
+.at.wrap .at-steps{margin-top:0;grid-auto-flow:column;grid-template-columns:repeat(6,auto);justify-content:space-between;align-items:center}
+.at.wrap .at-steps li{grid-template-columns:auto;padding:0}
+.at.wrap .at-steps li::after{display:none}
+.at.wrap .at-steps li>div{display:none}
+.at.wrap .at-steps li:is([data-state="run"],[data-state="halt"]){grid-template-columns:auto auto;gap:8px;align-items:center}
+.at.wrap .at-steps li:is([data-state="run"],[data-state="halt"])>div{display:block}
+.at.wrap .at-steps li:is([data-state="run"],[data-state="halt"]) small{display:none}
+.at.wrap .at-focus{min-height:0;max-height:100%;padding:20px 20px 20px;border-radius:24px}
+.at.wrap .at-h{font-size:24px}
+.at.wrap .at-lede{font-size:14.5px}
+.at.wrap .at-funnel{gap:6px}
+.at.wrap .at-funnel div{padding:10px}
+.at.wrap .at-funnel dd{font-size:20px}
+.at.wrap .at-funnel small{display:none}
+.at.wrap .at-why li{grid-template-columns:120px 1fr 28px}
+.at.wrap .at-test{min-height:0}
+.at.wrap .at-ctl{bottom:-20px;margin:16px -20px -20px;padding:10px 20px 12px;border-radius:0 0 24px 24px}
+.at.wrap .at-chint{display:none}
+.at.wrap .at-chip{background:rgba(249,246,241,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.at.wrap .at-live{height:240px;min-height:0;margin:-8px -8px 16px;border-radius:18px;box-shadow:inset 0 0 0 1px var(--line);border:0;background:rgba(23,20,15,.04)}
+.at.wrap .at-drawer{right:auto;left:var(--gutter);top:calc(var(--top) + 96px);width:min(380px,calc(100vw - 2*var(--gutter) - 460px))}
+.at.wrap .at-actions.first{margin-top:16px}
+.at.wrap .at-actions.first .at-go{padding:12px 18px;font-size:15px}
+.at.away{opacity:0!important;visibility:hidden}
+.at.away *{pointer-events:none!important}
+@media (max-width:860px){
+  .at.wrap .at-top{max-width:none;right:var(--gutter);padding-right:0}
+  .at.wrap .at-title{font-size:18px}
+  .at.wrap .at-head{padding:10px 14px}
+  .at.wrap .at-body{top:auto;bottom:var(--top)!important;left:var(--gutter);width:auto;max-height:58vh;overflow:visible}
+  .at.wrap .at-live{display:none}   /* on a phone the tour itself is the picture */
+  .at.wrap .at-drawer{left:var(--gutter);right:var(--gutter);width:auto;top:120px}
 }
 @media (prefers-reduced-motion:reduce){.at *{animation:none!important;transition:none!important}}

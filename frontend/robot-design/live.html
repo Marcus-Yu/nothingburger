@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Robot Design · Nothingburger</title>
+<meta name="description" content="The robot design played live from a run's event log. ?run=runs/studio/<run> (required), &speed=N replays a finished run at N× (0 or absent: follow it live), &agent=<design workflow URL>, &size=card shows it in a 560×420 card.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800;900&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#F4EFE7}
+  #live{position:fixed;inset:0}
+  body.card{display:grid;place-items:center}
+  body.card #live{position:relative;inset:auto;width:560px;height:420px;border-radius:28px;overflow:hidden;
+    box-shadow:0 0 0 1px rgba(23,20,15,.11),0 24px 60px -36px rgba(45,32,12,.5)}
+  .missing{font:500 15px/1.5 system-ui,sans-serif;color:#5D564C;padding:32px}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<div id="live"></div>
+<script type="module">
+  /* Test page: the live view on its own, following a run or replaying a finished one. */
+  import { mountLiveDesign } from './live.js';
+  const q = new URLSearchParams(location.search);
+  const run = q.get('run');
+  if (q.get('size') === 'card') document.body.classList.add('card');
+  if (!run) {
+    document.getElementById('live').innerHTML = '<p class="missing">Add ?run=runs/studio/&lt;run&gt; (and &amp;speed=20 to replay a finished run).</p>';
+  } else {
+    window.live = mountLiveDesign(document.getElementById('live'), {
+      agentBase: q.get('agent') || 'http://localhost:8020',
+      run,
+      replay: Number(q.get('speed') || 0),
+    });
+  }
+</script>
+</body>
+</html>

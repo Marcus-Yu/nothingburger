@@ -1,0 +1,12 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "pick",
+      "anchor": "parcel",
+      "object": "parcel_small",
+      "carries": true,
+      "deliver_to": "way_out"
+    }
+  ]
+}

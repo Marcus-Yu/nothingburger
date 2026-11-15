@@ -1,0 +1,562 @@
+{
+  "schema": "build/1",
+  "parts": {
+    "base": "go2",
+    "lift": "none",
+    "arm": "piper",
+    "gripper": "piper_gripper",
+    "lidar": "rplidar_s2",
+    "lidar_mount": "base_front",
+    "wrist_cam": true,
+    "ego_cam": "base_front"
+  },
+  "robot_xml": "robot.xml",
+  "mass_kg": 17.91,
+  "price_usd": 7389,
+  "base": {
+    "kind": "legged",
+    "holonomic": true,
+    "step_max_m": 0.16,
+    "payload_kg": 8.0,
+    "footprint": [
+      [
+        -0.411,
+        -0.192
+      ],
+      [
+        0.342,
+        -0.192
+      ],
+      [
+        0.342,
+        0.192
+      ],
+      [
+        -0.411,
+        0.192
+      ]
+    ],
+    "inscribed_radius_m": 0.192,
+    "circumscribed_radius_m": 0.454,
+    "support": [
+      [
+        -0.195,
+        -0.142
+      ],
+      [
+        0.192,
+        -0.142
+      ],
+      [
+        0.192,
+        0.142
+      ],
+      [
+        -0.195,
+        0.142
+      ]
+    ]
+  },
+  "stowed": {
+    "width_m": 0.654,
+    "length_m": 0.754,
+    "height_m": 0.568,
+    "qpos": {
+      "arm/joint1": -1.7188,
+      "arm/joint2": 3.10096,
+      "arm/joint3": -1.77024,
+      "arm/joint4": 0.62943,
+      "arm/joint5": 0.81826,
+      "arm/joint6": 2.14914,
+      "base/FL_hip_joint": 0.0,
+      "base/FL_thigh_joint": 0.9,
+      "base/FL_calf_joint": -1.8,
+      "base/FR_hip_joint": 0.0,
+      "base/FR_thigh_joint": 0.9,
+      "base/FR_calf_joint": -1.8,
+      "base/RL_hip_joint": 0.0,
+      "base/RL_thigh_joint": 0.9,
+      "base/RL_calf_joint": -1.8,
+      "base/RR_hip_joint": 0.0,
+      "base/RR_thigh_joint": 0.9,
+      "base/RR_calf_joint": -1.8
+    },
+    "keyframe": "stowed"
+  },
+  "reach_envelope": [
+    {
+      "height_m": 0.0,
+      "tool_axis": "down",
+      "min_distance_m": 0.228,
+      "max_distance_m": 0.352
+    },
+    {
+      "height_m": 0.05,
+      "tool_axis": "down",
+      "min_distance_m": 0.17,
+      "max_distance_m": 0.4
+    },
+    {
+      "height_m": 0.1,
+      "tool_axis": "down",
+      "min_distance_m": 0.224,
+      "max_distance_m": 0.46
+    },
+    {
+      "height_m": 0.15,
+      "tool_axis": "down",
+      "min_distance_m": 0.119,
+      "max_distance_m": 0.509
+    },
+    {
+      "height_m": 0.2,
+      "tool_axis": "down",
+      "min_distance_m": 0.112,
+      "max_distance_m": 0.504
+    },
+    {
+      "height_m": 0.25,
+      "tool_axis": "down",
+      "min_distance_m": 0.078,
+      "max_distance_m": 0.503
+    },
+    {
+      "height_m": 0.3,
+      "tool_axis": "down",
+      "min_distance_m": 0.075,
+      "max_distance_m": 0.501
+    },
+    {
+      "height_m": 0.35,
+      "tool_axis": "down",
+      "min_distance_m": 0.001,
+      "max_distance_m": 0.51
+    },
+    {
+      "height_m": 0.4,
+      "tool_axis": "down",
+      "min_distance_m": 0.006,
+      "max_distance_m": 0.451
+    },
+    {
+      "height_m": 0.45,
+      "tool_axis": "down",
+      "min_distance_m": 0.041,
+      "max_distance_m": 0.452
+    },
+    {
+      "height_m": 0.5,
+      "tool_axis": "down",
+      "min_distance_m": 0.105,
+      "max_distance_m": 0.406
+    },
+    {
+      "height_m": 0.85,
+      "tool_axis": "up",
+      "min_distance_m": 0.039,
+      "max_distance_m": 0.039
+    },
+    {
+      "height_m": 0.9,
+      "tool_axis": "up",
+      "min_distance_m": 0.032,
+      "max_distance_m": 0.051
+    },
+    {
+      "height_m": 0.95,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.451
+    },
+    {
+      "height_m": 1.0,
+      "tool_axis": "up",
+      "min_distance_m": 0.002,
+      "max_distance_m": 0.457
+    },
+    {
+      "height_m": 1.05,
+      "tool_axis": "up",
+      "min_distance_m": 0.002,
+      "max_distance_m": 0.452
+    },
+    {
+      "height_m": 1.1,
+      "tool_axis": "up",
+      "min_distance_m": 0.004,
+      "max_distance_m": 0.4
+    },
+    {
+      "height_m": 1.15,
+      "tool_axis": "up",
+      "min_distance_m": 0.004,
+      "max_distance_m": 0.354
+    },
+    {
+      "height_m": 1.2,
+      "tool_axis": "up",
+      "min_distance_m": 0.002,
+      "max_distance_m": 0.301
+    },
+    {
+      "height_m": 1.25,
+      "tool_axis": "up",
+      "min_distance_m": 0.002,
+      "max_distance_m": 0.202
+    },
+    {
+      "height_m": 1.3,
+      "tool_axis": "up",
+      "min_distance_m": 0.003,
+      "max_distance_m": 0.003
+    },
+    {
+      "height_m": 0.25,
+      "tool_axis": "side",
+      "min_distance_m": 0.574,
+      "max_distance_m": 0.608
+    },
+    {
+      "height_m": 0.3,
+      "tool_axis": "side",
+      "min_distance_m": 0.097,
+      "max_distance_m": 0.602
+    },
+    {
+      "height_m": 0.35,
+      "tool_axis": "side",
+      "min_distance_m": 0.08,
+      "max_distance_m": 0.662
+    },
+    {
+      "height_m": 0.4,
+      "tool_axis": "side",
+      "min_distance_m": 0.062,
+      "max_distance_m": 0.741
+    },
+    {
+      "height_m": 0.45,
+      "tool_axis": "side",
+      "min_distance_m": 0.089,
+      "max_distance_m": 0.751
+    },
+    {
+      "height_m": 0.5,
+      "tool_axis": "side",
+      "min_distance_m": 0.144,
+      "max_distance_m": 0.75
+    },
+    {
+      "height_m": 0.55,
+      "tool_axis": "side",
+      "min_distance_m": 0.28,
+      "max_distance_m": 0.752
+    },
+    {
+      "height_m": 0.6,
+      "tool_axis": "side",
+      "min_distance_m": 0.179,
+      "max_distance_m": 0.753
+    },
+    {
+      "height_m": 0.65,
+      "tool_axis": "side",
+      "min_distance_m": 0.154,
+      "max_distance_m": 0.701
+    },
+    {
+      "height_m": 0.7,
+      "tool_axis": "side",
+      "min_distance_m": 0.112,
+      "max_distance_m": 0.705
+    },
+    {
+      "height_m": 0.75,
+      "tool_axis": "side",
+      "min_distance_m": 0.051,
+      "max_distance_m": 0.707
+    },
+    {
+      "height_m": 0.8,
+      "tool_axis": "side",
+      "min_distance_m": 0.008,
+      "max_distance_m": 0.65
+    },
+    {
+      "height_m": 0.85,
+      "tool_axis": "side",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.602
+    },
+    {
+      "height_m": 0.9,
+      "tool_axis": "side",
+      "min_distance_m": 0.071,
+      "max_distance_m": 0.551
+    },
+    {
+      "height_m": 0.95,
+      "tool_axis": "side",
+      "min_distance_m": 0.081,
+      "max_distance_m": 0.502
+    },
+    {
+      "height_m": 1.0,
+      "tool_axis": "side",
+      "min_distance_m": 0.132,
+      "max_distance_m": 0.451
+    },
+    {
+      "height_m": 1.05,
+      "tool_axis": "side",
+      "min_distance_m": 0.22,
+      "max_distance_m": 0.359
+    }
+  ],
+  "reach_envelope_note": "One row per height (above the floor) and tool_axis. tool_axis 'down': the tool's approach axis points straight down; 'up': straight up; 'side': level, along the robot's +X. min/max_distance_m: horizontal distance from the base centre to the tool, over the lift's travel, base parked. Sampled from the composed model on a 0.05 m grid; poses with the arm in the floor, the base or the lift are left out.",
+  "joints": [
+    {
+      "name": "joint_x",
+      "type": "slide",
+      "range": null
+    },
+    {
+      "name": "joint_y",
+      "type": "slide",
+      "range": null
+    },
+    {
+      "name": "joint_th",
+      "type": "hinge",
+      "range": null
+    },
+    {
+      "name": "base/FL_hip_joint",
+      "type": "hinge",
+      "range": [
+        -1.0472,
+        1.0472
+      ]
+    },
+    {
+      "name": "base/FL_thigh_joint",
+      "type": "hinge",
+      "range": [
+        -1.5708,
+        3.4907
+      ]
+    },
+    {
+      "name": "base/FL_calf_joint",
+      "type": "hinge",
+      "range": [
+        -2.7227,
+        -0.8378
+      ]
+    },
+    {
+      "name": "base/FR_hip_joint",
+      "type": "hinge",
+      "range": [
+        -1.0472,
+        1.0472
+      ]
+    },
+    {
+      "name": "base/FR_thigh_joint",
+      "type": "hinge",
+      "range": [
+        -1.5708,
+        3.4907
+      ]
+    },
+    {
+      "name": "base/FR_calf_joint",
+      "type": "hinge",
+      "range": [
+        -2.7227,
+        -0.8378
+      ]
+    },
+    {
+      "name": "base/RL_hip_joint",
+      "type": "hinge",
+      "range": [
+        -1.0472,
+        1.0472
+      ]
+    },
+    {
+      "name": "base/RL_thigh_joint",
+      "type": "hinge",
+      "range": [
+        -0.5236,
+        4.5379
+      ]
+    },
+    {
+      "name": "base/RL_calf_joint",
+      "type": "hinge",
+      "range": [
+        -2.7227,
+        -0.8378
+      ]
+    },
+    {
+      "name": "base/RR_hip_joint",
+      "type": "hinge",
+      "range": [
+        -1.0472,
+        1.0472
+      ]
+    },
+    {
+      "name": "base/RR_thigh_joint",
+      "type": "hinge",
+      "range": [
+        -0.5236,
+        4.5379
+      ]
+    },
+    {
+      "name": "base/RR_calf_joint",
+      "type": "hinge",
+      "range": [
+        -2.7227,
+        -0.8378
+      ]
+    },
+    {
+      "name": "arm/joint1",
+      "type": "hinge",
+      "range": [
+        -2.618,
+        2.618
+      ]
+    },
+    {
+      "name": "arm/joint2",
+      "type": "hinge",
+      "range": [
+        0.0,
+        3.14
+      ]
+    },
+    {
+      "name": "arm/joint3",
+      "type": "hinge",
+      "range": [
+        -2.697,
+        0.0
+      ]
+    },
+    {
+      "name": "arm/joint4",
+      "type": "hinge",
+      "range": [
+        -1.832,
+        1.832
+      ]
+    },
+    {
+      "name": "arm/joint5",
+      "type": "hinge",
+      "range": [
+        -1.22,
+        1.22
+      ]
+    },
+    {
+      "name": "arm/joint6",
+      "type": "hinge",
+      "range": [
+        -3.14,
+        3.14
+      ]
+    },
+    {
+      "name": "arm/joint7",
+      "type": "slide",
+      "range": [
+        0.0,
+        0.035
+      ]
+    },
+    {
+      "name": "arm/joint8",
+      "type": "slide",
+      "range": [
+        -0.035,
+        0.0
+      ]
+    }
+  ],
+  "arm_joints": [
+    "arm/joint1",
+    "arm/joint2",
+    "arm/joint3",
+    "arm/joint4",
+    "arm/joint5",
+    "arm/joint6"
+  ],
+  "wrist_roll": {
+    "joint": "arm/joint6",
+    "turns": 0.999
+  },
+  "tool_site": "tool",
+  "sensors": [
+    {
+      "kind": "lidar",
+      "part": "rplidar_s2",
+      "site": "lidar",
+      "mount": "base_front",
+      "dim": "2d"
+    },
+    {
+      "kind": "depth_camera",
+      "part": "d435i",
+      "site": "ego",
+      "mount": "base_front"
+    },
+    {
+      "kind": "depth_camera",
+      "part": "d435i",
+      "site": "wrist",
+      "mount": "wrist"
+    }
+  ],
+  "assembly": [
+    {
+      "step": 1,
+      "part": "go2",
+      "onto": "floor"
+    },
+    {
+      "step": 2,
+      "part": "piper",
+      "onto": "go2:top"
+    },
+    {
+      "step": 3,
+      "part": "piper_gripper",
+      "onto": "piper:integrated"
+    },
+    {
+      "step": 4,
+      "part": "rplidar_s2",
+      "onto": "go2:front"
+    },
+    {
+      "step": 5,
+      "part": "d435i",
+      "onto": "go2:front",
+      "as": "ego camera"
+    },
+    {
+      "step": 6,
+      "part": "d435i",
+      "onto": "piper_gripper:wrist",
+      "as": "wrist camera"
+    }
+  ]
+}

@@ -48,3 +48,9 @@ def propose(world: dict, build: dict, task: dict, *, requirements: dict | None =
 @traced("nav.plan", lambda r: f"{len(r['legs'])} legs, {len(r['door_clearances'])} doors crossed, {len(r['failures'])} failures")
 def plan(world: dict, build: dict, *, requirements: dict, standoffs: list) -> dict:
     return _api.plan(world, build, requirements=requirements, standoffs=standoffs)
+
+
+@traced("nav.cover", lambda r: "no pass fits" if r is None else f"{len(r['waypoints']) // 2} passes, {r['lane_m']} m apart")
+def cover(area: dict, id_: str = "t1") -> dict | None:
+    """The navigate task whose waypoints are back-and-forth passes over one of the world's `areas` (mowing)."""
+    return _api.cover(area, id_)

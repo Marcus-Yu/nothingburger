@@ -196,7 +196,8 @@ def furniture(obj_path: str | Path, plan: dict) -> dict:
             closed = ndimage.binary_closing(cells, np.ones((3, 3), bool))     # fill one-cell nicks and holes
             c_top = np.where(closed, ndimage.maximum_filter(c_top, size=3), -np.inf)
             cells = closed
-            c_low = coarse(np.where(solid, lows_at, np.inf), np.min) if hanging else None
+            # a cell the closing filled has no reading of its own: it takes its neighbours' underside
+            c_low = ndimage.minimum_filter(coarse(np.where(solid, lows_at, np.inf), np.min), size=3) if hanging else None
             for i0, j0, i1, j1, tall in _rectangles(np.where(cells, c_top, np.nan), STEP_M):
                 low = float(np.min(c_low[i0:i1, j0:j1])) if hanging else 0.0
                 obstacles.append({"id": f"scan_{len(obstacles) + 1}", "room": rooms[int(c_room[i0:i1, j0:j1].max())]["id"],

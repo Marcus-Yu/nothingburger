@@ -36,7 +36,7 @@ let worlds = [];
 
 async function loadWorlds() {
   try { config = await api("/web-config"); } catch { config = {}; }
-  worlds = await api("/worlds");
+  worlds = (await api("/worlds")).filter((w) => w.matterport);  // outdoor lots (aerial photo, no tour) are shown by frontend/ only
   for (const w of worlds) $("world").append(new Option(w.name, w.id));
   showWorld();
 }

@@ -1,0 +1,548 @@
+<mujoco model="robot">
+  <compiler angle="radian"/>
+
+  <option integrator="implicitfast"/>
+
+  <size nkey="1"/>
+
+  <visual>
+    <headlight ambient="0.45 0.45 0.45"/>
+  </visual>
+
+  <default>
+    <default class="base/main">
+      <default class="base/go2">
+        <joint armature="0.01" damping="2" frictionloss="0.2" axis="0 1 0"/>
+        <geom condim="1" friction="0.6" margin="0.001"/>
+        <general ctrlrange="-23.7 23.7"/>
+        <default class="base/abduction">
+          <joint range="-1.0472 1.0472" axis="1 0 0"/>
+        </default>
+        <default class="base/hip">
+          <default class="base/front_hip">
+            <joint range="-1.5708 3.4907"/>
+          </default>
+          <default class="base/back_hip">
+            <joint range="-0.5236 4.5379"/>
+          </default>
+        </default>
+        <default class="base/knee">
+          <joint range="-2.7227 -0.83776"/>
+          <general ctrlrange="-45.43 45.43"/>
+        </default>
+        <default class="base/visual">
+          <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+        </default>
+        <default class="base/collision">
+          <geom group="3"/>
+          <default class="base/foot">
+            <geom size="0.022 0 0" condim="6" priority="1" friction="0.8 0.02 0.01" solimp="0.015 1 0.022"/>
+          </default>
+        </default>
+      </default>
+    </default>
+    <default class="arm/main">
+      <default class="arm/piper">
+        <joint armature="0.005" frictionloss="0.3"/>
+        <general forcerange="-100 100" input="pos" biastype="affine" biasprm="0 -1"/>
+        <default class="arm/finger">
+          <joint type="slide" frictionloss="0"/>
+          <general forcerange="-10 10"/>
+        </default>
+        <default class="arm/visual">
+          <geom type="mesh" contype="0" conaffinity="0" group="2" density="0"/>
+        </default>
+        <default class="arm/collision">
+          <geom type="capsule" group="3"/>
+        </default>
+      </default>
+    </default>
+    <default class="sens/ego/main">
+      <default class="sens/ego/d435i">
+        <material specular="0" shininess="0.25"/>
+        <default class="sens/ego/visual">
+          <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+        </default>
+        <default class="sens/ego/collision">
+          <geom type="mesh" group="3"/>
+        </default>
+      </default>
+    </default>
+    <default class="sens/wrist/main">
+      <default class="sens/wrist/d435i">
+        <material specular="0" shininess="0.25"/>
+        <default class="sens/wrist/visual">
+          <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+        </default>
+        <default class="sens/wrist/collision">
+          <geom type="mesh" group="3"/>
+        </default>
+      </default>
+    </default>
+  </default>
+
+  <asset>
+    <material name="base/metal" rgba="0.9 0.95 0.95 1"/>
+    <material name="base/black" rgba="0 0 0 1"/>
+    <material name="base/white"/>
+    <material name="base/gray" rgba="0.671705 0.692426 0.77427 1"/>
+    <material name="arm/gray_mat" rgba="0.59 0.59 0.59 1"/>
+    <material name="arm/light_gray_mat" rgba="0.98 0.98 0.98 1"/>
+    <material name="arm/light_medium_gray_mat" rgba="0.85 0.85 0.85 1"/>
+    <material name="arm/dark_gray_mat" rgba="0.086 0.086 0.086 1"/>
+    <material name="arm/darker_gray_mat" rgba="0.14 0.14 0.14 1"/>
+    <material name="arm/white_mat"/>
+    <material name="arm/red_mat" rgba="0.82 0.15 0.15 1"/>
+    <material name="arm/black_mat" rgba="0 0 0 1"/>
+    <material name="arm/light_blue" rgba="0.79 0.82 0.93 1"/>
+    <material name="sens/ego/Black_Acrylic" class="sens/ego/d435i" rgba="0.07036 0.07036 0.07036 1"/>
+    <material name="sens/ego/Cameras_Gray" class="sens/ego/d435i" rgba="0.296138 0.296138 0.296138 1"/>
+    <material name="sens/ego/IR_Emitter_Lens" class="sens/ego/d435i" rgba="0.28744 0.665387 0.327778 1"/>
+    <material name="sens/ego/IR_Lens" class="sens/ego/d435i" rgba="0.035601 0.035601 0.035601 1"/>
+    <material name="sens/ego/IR_Rim" class="sens/ego/d435i" rgba="0.799102 0.806952 0.799103 1"/>
+    <material name="sens/ego/Metal_Casing" class="sens/ego/d435i"/>
+    <material name="sens/ego/RGB_Pupil" class="sens/ego/d435i" rgba="0.08714 0.002866 0.009346 1"/>
+    <material name="sens/wrist/Black_Acrylic" class="sens/wrist/d435i" rgba="0.07036 0.07036 0.07036 1"/>
+    <material name="sens/wrist/Cameras_Gray" class="sens/wrist/d435i" rgba="0.296138 0.296138 0.296138 1"/>
+    <material name="sens/wrist/IR_Emitter_Lens" class="sens/wrist/d435i" rgba="0.28744 0.665387 0.327778 1"/>
+    <material name="sens/wrist/IR_Lens" class="sens/wrist/d435i" rgba="0.035601 0.035601 0.035601 1"/>
+    <material name="sens/wrist/IR_Rim" class="sens/wrist/d435i" rgba="0.799102 0.806952 0.799103 1"/>
+    <material name="sens/wrist/Metal_Casing" class="sens/wrist/d435i"/>
+    <material name="sens/wrist/RGB_Pupil" class="sens/wrist/d435i" rgba="0.08714 0.002866 0.009346 1"/>
+    <mesh name="base/base_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/base_0.obj"/>
+    <mesh name="base/base_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/base_1.obj"/>
+    <mesh name="base/base_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/base_2.obj"/>
+    <mesh name="base/base_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/base_3.obj"/>
+    <mesh name="base/base_4" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/base_4.obj"/>
+    <mesh name="base/hip_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/hip_0.obj"/>
+    <mesh name="base/hip_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/hip_1.obj"/>
+    <mesh name="base/thigh_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/thigh_0.obj"/>
+    <mesh name="base/thigh_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/thigh_1.obj"/>
+    <mesh name="base/thigh_mirror_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/thigh_mirror_0.obj"/>
+    <mesh name="base/thigh_mirror_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/thigh_mirror_1.obj"/>
+    <mesh name="base/calf_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/calf_0.obj"/>
+    <mesh name="base/calf_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/calf_1.obj"/>
+    <mesh name="base/calf_mirror_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/calf_mirror_0.obj"/>
+    <mesh name="base/calf_mirror_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/calf_mirror_1.obj"/>
+    <mesh name="base/foot" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/unitree_go2/assets/foot.obj"/>
+    <mesh name="arm/link2_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_0.obj"/>
+    <mesh name="arm/link2_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_1.obj"/>
+    <mesh name="arm/link2_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_2.obj"/>
+    <mesh name="arm/link2_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_3.obj"/>
+    <mesh name="arm/link2_4" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_4.obj"/>
+    <mesh name="arm/link2_5" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_5.obj"/>
+    <mesh name="arm/link2_6" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_6.obj"/>
+    <mesh name="arm/link2_7" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_7.obj"/>
+    <mesh name="arm/link2_8" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_8.obj"/>
+    <mesh name="arm/link2_9" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_9.obj"/>
+    <mesh name="arm/link2_10" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_10.obj"/>
+    <mesh name="arm/link2_11" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_11.obj"/>
+    <mesh name="arm/link2_12" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_12.obj"/>
+    <mesh name="arm/link2_13" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_13.obj"/>
+    <mesh name="arm/link2_14" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_14.obj"/>
+    <mesh name="arm/link2_15" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_15.obj"/>
+    <mesh name="arm/link2_16" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_16.obj"/>
+    <mesh name="arm/link2_17" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_17.obj"/>
+    <mesh name="arm/link2_18" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_18.obj"/>
+    <mesh name="arm/link2_19" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_19.obj"/>
+    <mesh name="arm/link2_20" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_20.obj"/>
+    <mesh name="arm/link2_21" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_21.obj"/>
+    <mesh name="arm/link2_22" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_22.obj"/>
+    <mesh name="arm/link2_23" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_23.obj"/>
+    <mesh name="arm/link2_24" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_24.obj"/>
+    <mesh name="arm/link2_25" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_25.obj"/>
+    <mesh name="arm/link2_26" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_26.obj"/>
+    <mesh name="arm/link2_27" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_27.obj"/>
+    <mesh name="arm/link2_28" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_28.obj"/>
+    <mesh name="arm/link2_29" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_29.obj"/>
+    <mesh name="arm/link2_30" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_30.obj"/>
+    <mesh name="arm/link2_31" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_31.obj"/>
+    <mesh name="arm/link3_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_0.obj"/>
+    <mesh name="arm/link3_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_1.obj"/>
+    <mesh name="arm/link3_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_2.obj"/>
+    <mesh name="arm/link3_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_3.obj"/>
+    <mesh name="arm/link3_4" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_4.obj"/>
+    <mesh name="arm/link3_5" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_5.obj"/>
+    <mesh name="arm/link3_7" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_7.obj"/>
+    <mesh name="arm/link3_8" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_8.obj"/>
+    <mesh name="arm/link3_9" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_9.obj"/>
+    <mesh name="arm/link3_10" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_10.obj"/>
+    <mesh name="arm/link3_11" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_11.obj"/>
+    <mesh name="arm/link3_12" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_12.obj"/>
+    <mesh name="arm/link3_13" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_13.obj"/>
+    <mesh name="arm/link3_14" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_14.obj"/>
+    <mesh name="arm/link3_15" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_15.obj"/>
+    <mesh name="arm/link3_16" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_16.obj"/>
+    <mesh name="arm/link3_17" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_17.obj"/>
+    <mesh name="arm/link3_18" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_18.obj"/>
+    <mesh name="arm/link3_19" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_19.obj"/>
+    <mesh name="arm/link3_20" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_20.obj"/>
+    <mesh name="arm/link3_21" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_21.obj"/>
+    <mesh name="arm/link3_22" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_22.obj"/>
+    <mesh name="arm/link3_23" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_23.obj"/>
+    <mesh name="arm/link3_24" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_24.obj"/>
+    <mesh name="arm/link3_25" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_25.obj"/>
+    <mesh name="arm/link3_26" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_26.obj"/>
+    <mesh name="arm/link3_27" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_27.obj"/>
+    <mesh name="arm/link3_28" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3_28.obj"/>
+    <mesh name="arm/link4_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link4_2.obj"/>
+    <mesh name="arm/link4_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link4_3.obj"/>
+    <mesh name="arm/link4_4" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link4_4.obj"/>
+    <mesh name="arm/link4_5" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link4_5.obj"/>
+    <mesh name="arm/link4_6" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link4_6.obj"/>
+    <mesh name="arm/link5_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link5_2.obj"/>
+    <mesh name="arm/link5_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link5_3.obj"/>
+    <mesh name="arm/link5_4" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link5_4.obj"/>
+    <mesh name="arm/link5_5" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link5_5.obj"/>
+    <mesh name="arm/link5_6" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link5_6.obj"/>
+    <mesh name="arm/link5_7" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link5_7.obj"/>
+    <mesh name="arm/link5_8" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link5_8.obj"/>
+    <mesh name="arm/base_link" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/base_link.stl"/>
+    <mesh name="arm/link1" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link1.stl"/>
+    <mesh name="arm/link2" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2.stl"/>
+    <mesh name="arm/link2_gray" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link2_gray.stl"/>
+    <mesh name="arm/link3" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link3.stl"/>
+    <mesh name="arm/link4" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link4.stl"/>
+    <mesh name="arm/link5" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link5.stl"/>
+    <mesh name="arm/link6" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link6.stl"/>
+    <mesh name="arm/link7" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link7.stl"/>
+    <mesh name="arm/link8" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/agilex_piper/assets/link8.stl"/>
+    <mesh name="sens/ego/d435i_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_0.obj"/>
+    <mesh name="sens/ego/d435i_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_1.obj"/>
+    <mesh name="sens/ego/d435i_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_2.obj"/>
+    <mesh name="sens/ego/d435i_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_3.obj"/>
+    <mesh name="sens/ego/d435i_4" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_4.obj"/>
+    <mesh name="sens/ego/d435i_5" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_5.obj"/>
+    <mesh name="sens/ego/d435i_6" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_6.obj"/>
+    <mesh name="sens/ego/d435i_7" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_7.obj"/>
+    <mesh name="sens/ego/d435i_8" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_8.obj"/>
+    <mesh name="sens/wrist/d435i_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_0.obj"/>
+    <mesh name="sens/wrist/d435i_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_1.obj"/>
+    <mesh name="sens/wrist/d435i_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_2.obj"/>
+    <mesh name="sens/wrist/d435i_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_3.obj"/>
+    <mesh name="sens/wrist/d435i_4" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_4.obj"/>
+    <mesh name="sens/wrist/d435i_5" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_5.obj"/>
+    <mesh name="sens/wrist/d435i_6" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_6.obj"/>
+    <mesh name="sens/wrist/d435i_7" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_7.obj"/>
+    <mesh name="sens/wrist/d435i_8" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/docs-location-c729fe/catalog/_assets/menagerie/realsense_d435i/assets/d435i_8.obj"/>
+  </asset>
+
+  <worldbody>
+    <geom name="floor" size="6 6 0.1" type="plane" rgba="0.85 0.85 0.82 1"/>
+    <light pos="1 -1 4" dir="-0.19245 0.19245 -0.96225"/>
+    <body name="base_link">
+      <joint name="joint_x" type="slide" axis="1 0 0"/>
+      <joint name="joint_y" type="slide" axis="0 1 0"/>
+      <joint name="joint_th"/>
+      <geom name="base_dummy" size="0.001" pos="0 0 0.297281" contype="0" conaffinity="0" rgba="0 0 0 0" mass="0"/>
+      <site name="legged_mount" pos="0 0 0.297281"/>
+      <site name="arm_mount" pos="0 0 0.393519"/>
+      <site name="ego_mount" pos="0.272181 0.09 0.423519" quat="0.5 0.5 0.5 0.5"/>
+      <site name="ego" pos="0.272181 0.09 0.423519"/>
+      <frame pos="0 0 0.297281">
+        <body name="base/base" childclass="base/go2">
+          <inertial pos="0.021112 0 -0.005366" quat="-0.000543471 0.713435 -0.00173769 0.700719" mass="6.921" diaginertia="0.107027 0.0980771 0.0244531"/>
+          <geom class="base/visual" pos="-1.55431e-15 -3.79471e-19 3.26128e-16" quat="1 0 0 0" material="base/black" mesh="base/base_0"/>
+          <geom class="base/visual" pos="-1.66533e-15 4.36391e-18 3.26128e-16" quat="1 0 0 0" material="base/black" mesh="base/base_1"/>
+          <geom class="base/visual" material="base/black" mesh="base/base_2"/>
+          <geom class="base/visual" pos="-4.64906e-16 -6.245e-17 -2.56739e-16" quat="1 0 0 0" material="base/white" mesh="base/base_3"/>
+          <geom class="base/visual" pos="-7.91034e-16 6.07153e-18 6.28837e-18" quat="1 0 0 0" material="base/gray" mesh="base/base_4"/>
+          <geom class="base/collision" size="0.1881 0.04675 0.057" type="box"/>
+          <geom class="base/collision" size="0.05 0.045" pos="0.285 0 0.01" type="cylinder"/>
+          <geom class="base/collision" size="0.047" pos="0.293 0 -0.06"/>
+          <site name="base/imu" pos="-0.02557 0 0.04232"/>
+          <body name="base/FL_hip" pos="0.1934 0.0465 0">
+            <inertial pos="-0.0054 0.00194 -0.000105" quat="0.497014 0.499245 0.505462 0.498237" mass="0.678" diaginertia="0.00088403 0.000596003 0.000479967"/>
+            <joint name="base/FL_hip_joint" class="base/abduction"/>
+            <geom class="base/visual" quat="1 0 0 0" material="base/metal" mesh="base/hip_0"/>
+            <geom class="base/visual" quat="1 0 0 0" material="base/gray" mesh="base/hip_1"/>
+            <geom class="base/collision" size="0.046 0.02" pos="0 0.08 0" quat="0.707107 0.707107 0 0" type="cylinder"/>
+            <body name="base/FL_thigh" pos="0 0.0955 0">
+              <inertial pos="-0.00374 -0.0223 -0.0327" quat="0.829533 0.0847635 -0.0200632 0.551623" mass="1.152" diaginertia="0.00594973 0.00584149 0.000878787"/>
+              <joint name="base/FL_thigh_joint" class="base/front_hip"/>
+              <geom class="base/visual" quat="1 0 0 0" material="base/metal" mesh="base/thigh_0"/>
+              <geom class="base/visual" quat="1 0 0 0" material="base/gray" mesh="base/thigh_1"/>
+              <geom class="base/collision" size="0.1065 0.01225 0.017" pos="0 0 -0.1065" quat="0.707107 0 0.707107 0" type="box"/>
+              <body name="base/FL_calf" pos="0 0 -0.213">
+                <inertial pos="0.00629595 -0.000622121 -0.141417" quat="0.710672 0.00154099 -0.00450087 0.703508" mass="0.241352" diaginertia="0.0014901 0.00146356 5.31397e-05"/>
+                <joint name="base/FL_calf_joint" class="base/knee"/>
+                <geom class="base/visual" pos="-1.99493e-17 9.21572e-19 3.33067e-16" quat="1 0 0 0" material="base/gray" mesh="base/calf_0"/>
+                <geom class="base/visual" pos="4.51028e-17 -1.87025e-18 2.02616e-15" quat="1 0 0 0" material="base/black" mesh="base/calf_1"/>
+                <geom class="base/collision" size="0.012 0.06" pos="0.008 0 -0.06" quat="0.994493 0 -0.104807 0" type="cylinder"/>
+                <geom class="base/collision" size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder"/>
+                <geom class="base/visual" pos="0 0 -0.213" quat="1 0 0 0" material="base/black" mesh="base/foot"/>
+                <geom name="base/FL" class="base/foot" pos="-0.002 0 -0.213"/>
+              </body>
+            </body>
+          </body>
+          <body name="base/FR_hip" pos="0.1934 -0.0465 0">
+            <inertial pos="-0.0054 -0.00194 -0.000105" quat="0.498237 0.505462 0.499245 0.497014" mass="0.678" diaginertia="0.00088403 0.000596003 0.000479967"/>
+            <joint name="base/FR_hip_joint" class="base/abduction"/>
+            <geom class="base/visual" quat="4.63268e-05 1 0 0" material="base/metal" mesh="base/hip_0"/>
+            <geom class="base/visual" quat="4.63268e-05 1 0 0" material="base/gray" mesh="base/hip_1"/>
+            <geom class="base/collision" size="0.046 0.02" pos="0 -0.08 0" quat="0.707107 0.707107 0 0" type="cylinder"/>
+            <body name="base/FR_thigh" pos="0 -0.0955 0">
+              <inertial pos="-0.00374 0.0223 -0.0327" quat="0.551623 -0.0200632 0.0847635 0.829533" mass="1.152" diaginertia="0.00594973 0.00584149 0.000878787"/>
+              <joint name="base/FR_thigh_joint" class="base/front_hip"/>
+              <geom class="base/visual" quat="1 0 0 0" material="base/metal" mesh="base/thigh_mirror_0"/>
+              <geom class="base/visual" quat="1 0 0 0" material="base/gray" mesh="base/thigh_mirror_1"/>
+              <geom class="base/collision" size="0.1065 0.01225 0.017" pos="0 0 -0.1065" quat="0.707107 0 0.707107 0" type="box"/>
+              <body name="base/FR_calf" pos="0 0 -0.213">
+                <inertial pos="0.00629595 0.000622121 -0.141417" quat="0.703508 -0.00450087 0.00154099 0.710672" mass="0.241352" diaginertia="0.0014901 0.00146356 5.31397e-05"/>
+                <joint name="base/FR_calf_joint" class="base/knee"/>
+                <geom class="base/visual" pos="-1.64799e-17 2.03288e-19 2.77556e-16" quat="1 0 0 0" material="base/gray" mesh="base/calf_mirror_0"/>
+                <geom class="base/visual" pos="4.42354e-17 1.78893e-18 1.94289e-15" quat="1 0 0 0" material="base/black" mesh="base/calf_mirror_1"/>
+                <geom class="base/collision" size="0.013 0.06" pos="0.01 0 -0.06" quat="0.995004 0 -0.0998334 0" type="cylinder"/>
+                <geom class="base/collision" size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder"/>
+                <geom class="base/visual" pos="0 0 -0.213" quat="1 0 0 0" material="base/black" mesh="base/foot"/>
+                <geom name="base/FR" class="base/foot" pos="-0.002 0 -0.213"/>
+              </body>
+            </body>
+          </body>
+          <body name="base/RL_hip" pos="-0.1934 0.0465 0">
+            <inertial pos="0.0054 0.00194 -0.000105" quat="0.505462 0.498237 0.497014 0.499245" mass="0.678" diaginertia="0.00088403 0.000596003 0.000479967"/>
+            <joint name="base/RL_hip_joint" class="base/abduction"/>
+            <geom class="base/visual" quat="4.63268e-05 0 1 0" material="base/metal" mesh="base/hip_0"/>
+            <geom class="base/visual" quat="4.63268e-05 0 1 0" material="base/gray" mesh="base/hip_1"/>
+            <geom class="base/collision" size="0.046 0.02" pos="0 0.08 0" quat="0.707107 0.707107 0 0" type="cylinder"/>
+            <body name="base/RL_thigh" pos="0 0.0955 0">
+              <inertial pos="-0.00374 -0.0223 -0.0327" quat="0.829533 0.0847635 -0.0200632 0.551623" mass="1.152" diaginertia="0.00594973 0.00584149 0.000878787"/>
+              <joint name="base/RL_thigh_joint" class="base/back_hip"/>
+              <geom class="base/visual" quat="1 0 0 0" material="base/metal" mesh="base/thigh_0"/>
+              <geom class="base/visual" quat="1 0 0 0" material="base/gray" mesh="base/thigh_1"/>
+              <geom class="base/collision" size="0.1065 0.01225 0.017" pos="0 0 -0.1065" quat="0.707107 0 0.707107 0" type="box"/>
+              <body name="base/RL_calf" pos="0 0 -0.213">
+                <inertial pos="0.00629595 -0.000622121 -0.141417" quat="0.710672 0.00154099 -0.00450087 0.703508" mass="0.241352" diaginertia="0.0014901 0.00146356 5.31397e-05"/>
+                <joint name="base/RL_calf_joint" class="base/knee"/>
+                <geom class="base/visual" pos="-1.99493e-17 9.21572e-19 3.33067e-16" quat="1 0 0 0" material="base/gray" mesh="base/calf_0"/>
+                <geom class="base/visual" pos="4.51028e-17 -1.87025e-18 2.02616e-15" quat="1 0 0 0" material="base/black" mesh="base/calf_1"/>
+                <geom class="base/collision" size="0.013 0.06" pos="0.01 0 -0.06" quat="0.995004 0 -0.0998334 0" type="cylinder"/>
+                <geom class="base/collision" size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder"/>
+                <geom class="base/visual" pos="0 0 -0.213" quat="1 0 0 0" material="base/black" mesh="base/foot"/>
+                <geom name="base/RL" class="base/foot" pos="-0.002 0 -0.213"/>
+              </body>
+            </body>
+          </body>
+          <body name="base/RR_hip" pos="-0.1934 -0.0465 0">
+            <inertial pos="0.0054 -0.00194 -0.000105" quat="0.499245 0.497014 0.498237 0.505462" mass="0.678" diaginertia="0.00088403 0.000596003 0.000479967"/>
+            <joint name="base/RR_hip_joint" class="base/abduction"/>
+            <geom class="base/visual" quat="2.14617e-09 4.63268e-05 4.63268e-05 -1" material="base/metal" mesh="base/hip_0"/>
+            <geom class="base/visual" quat="2.14617e-09 4.63268e-05 4.63268e-05 -1" material="base/gray" mesh="base/hip_1"/>
+            <geom class="base/collision" size="0.046 0.02" pos="0 -0.08 0" quat="0.707107 0.707107 0 0" type="cylinder"/>
+            <body name="base/RR_thigh" pos="0 -0.0955 0">
+              <inertial pos="-0.00374 0.0223 -0.0327" quat="0.551623 -0.0200632 0.0847635 0.829533" mass="1.152" diaginertia="0.00594973 0.00584149 0.000878787"/>
+              <joint name="base/RR_thigh_joint" class="base/back_hip"/>
+              <geom class="base/visual" quat="1 0 0 0" material="base/metal" mesh="base/thigh_mirror_0"/>
+              <geom class="base/visual" quat="1 0 0 0" material="base/gray" mesh="base/thigh_mirror_1"/>
+              <geom class="base/collision" size="0.1065 0.01225 0.017" pos="0 0 -0.1065" quat="0.707107 0 0.707107 0" type="box"/>
+              <body name="base/RR_calf" pos="0 0 -0.213">
+                <inertial pos="0.00629595 0.000622121 -0.141417" quat="0.703508 -0.00450087 0.00154099 0.710672" mass="0.241352" diaginertia="0.0014901 0.00146356 5.31397e-05"/>
+                <joint name="base/RR_calf_joint" class="base/knee"/>
+                <geom class="base/visual" pos="-1.64799e-17 2.03288e-19 2.77556e-16" quat="1 0 0 0" material="base/gray" mesh="base/calf_mirror_0"/>
+                <geom class="base/visual" pos="4.42354e-17 1.78893e-18 1.94289e-15" quat="1 0 0 0" material="base/black" mesh="base/calf_mirror_1"/>
+                <geom class="base/collision" size="0.013 0.06" pos="0.01 0 -0.06" quat="0.995004 0 -0.0998334 0" type="cylinder"/>
+                <geom class="base/collision" size="0.011 0.0325" pos="0.02 0 -0.148" quat="0.999688 0 0.0249974 0" type="cylinder"/>
+                <geom class="base/visual" pos="0 0 -0.213" quat="1 0 0 0" material="base/black" mesh="base/foot"/>
+                <geom name="base/RR" class="base/foot" pos="-0.002 0 -0.213"/>
+              </body>
+            </body>
+          </body>
+        </body>
+      </frame>
+      <frame pos="0 0 0.393519">
+        <body name="arm/base_link" childclass="arm/piper" gravcomp="1">
+          <inertial pos="-0.00979275 1.82906e-06 0.04101" quat="0.692988 -0.137524 -0.137826 0.69416" mass="0.162549" diaginertia="0.000269445 0.000227478 0.000221437"/>
+          <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/base_link"/>
+          <geom class="arm/collision" size="0.0357691 0.024065" pos="-0.0107422 1.86147e-06 0.0395259" quat="0.536726 0.460902 0.460261 0.536334"/>
+          <body name="arm/link1" pos="0 0 0.123" quat="0.707105 0 0 -0.707108" gravcomp="1">
+            <inertial pos="0.00131676 0.000310289 -0.00922875" quat="0.557105 0.432155 0.377373 0.600388" mass="0.097868" diaginertia="9.25942e-05 8.3083e-05 7.69469e-05"/>
+            <joint name="arm/joint1" range="-2.618 2.618"/>
+            <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link1"/>
+            <geom class="arm/collision" size="0.0271645 0.0182943" pos="0.00101464 -0.000188218 -0.00563398" quat="0.51914 0.484099 0.499514 0.496616"/>
+            <body name="arm/link2" quat="0.499998 0.5 -0.500002 -0.5" gravcomp="1">
+              <inertial pos="0.148794 -0.00242027 0.00175155" quat="-0.0249063 0.70684 0.00803509 0.706889" mass="0.290889" diaginertia="0.00177549 0.00173142 0.00014552"/>
+              <joint name="arm/joint2" range="0 3.14"/>
+              <geom class="arm/visual" pos="-7.49401e-16 1.0842e-17 6.91857e-18" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link2_0"/>
+              <geom class="arm/visual" pos="-2.10942e-15 -1.83881e-16 3.40006e-16" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link2_1"/>
+              <geom class="arm/visual" pos="-2.33147e-15 -2.11636e-16 -3.88578e-16" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link2_2"/>
+              <geom class="arm/visual" pos="-3.55618e-17 3.25261e-18 3.53884e-16" quat="1 0 0 0" material="arm/dark_gray_mat" mesh="arm/link2_3"/>
+              <geom class="arm/visual" pos="-3.46945e-17 3.03577e-18 -3.1225e-16" quat="1 0 0 0" material="arm/dark_gray_mat" mesh="arm/link2_4"/>
+              <geom class="arm/visual" pos="-2.22045e-15 -3.33067e-16 3.747e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_5"/>
+              <geom class="arm/visual" pos="-1.72085e-15 -1.07553e-16 2.77556e-16" quat="1 0 0 0" material="arm/dark_gray_mat" mesh="arm/link2_6"/>
+              <geom class="arm/visual" pos="-2.27596e-15 -2.28983e-16 3.33067e-16" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link2_7"/>
+              <geom class="arm/visual" pos="-1.44329e-15 -2.15106e-16 2.70617e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_8"/>
+              <geom class="arm/visual" pos="-1.4988e-15 -9.36751e-17 2.15106e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_9"/>
+              <geom class="arm/visual" pos="-1.60982e-15 -1.45717e-16 2.28983e-16" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link2_10"/>
+              <geom class="arm/visual" pos="-2.38698e-15 -2.35922e-16 3.33067e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_11"/>
+              <geom class="arm/visual" pos="-1.66533e-15 -9.02056e-17 -2.42861e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_12"/>
+              <geom class="arm/visual" pos="-1.66533e-15 -1.00614e-16 -2.91434e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_13"/>
+              <geom class="arm/visual" pos="-2.27596e-15 -2.498e-16 -4.02456e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_14"/>
+              <geom class="arm/visual" pos="-1.44329e-15 -1.35308e-16 -2.28983e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_15"/>
+              <geom class="arm/visual" pos="-1.94289e-15 -2.56739e-16 -2.91434e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_16"/>
+              <geom class="arm/visual" pos="-2.44249e-15 -3.53884e-16 -3.53884e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_17"/>
+              <geom class="arm/visual" pos="-9.02056e-16 1.30104e-17 1.49186e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_18"/>
+              <geom class="arm/visual" pos="-6.66134e-16 8.23994e-18 1.21431e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_19"/>
+              <geom class="arm/visual" pos="-1.33227e-15 9.02056e-17 1.76942e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_20"/>
+              <geom class="arm/visual" pos="-7.49401e-16 4.51028e-17 9.36751e-17" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link2_21"/>
+              <geom class="arm/visual" pos="-8.32667e-16 2.1684e-17 -1.21431e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_22"/>
+              <geom class="arm/visual" pos="-5.41234e-16 3.81639e-17 -1.07553e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_23"/>
+              <geom class="arm/visual" pos="-6.38378e-16 4.0766e-17 -1.21431e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_24"/>
+              <geom class="arm/visual" pos="-1.66533e-15 -1.59595e-16 2.98372e-16" quat="1 0 0 0" material="arm/dark_gray_mat" mesh="arm/link2_25"/>
+              <geom class="arm/visual" pos="-2.498e-15 -2.56739e-16 -4.64906e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link2_26"/>
+              <geom class="arm/visual" pos="-1.4988e-15 -1.52656e-16 -2.77556e-16" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link2_27"/>
+              <geom class="arm/visual" pos="-1.13798e-15 4.51028e-17 1.94289e-16" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link2_28"/>
+              <geom class="arm/visual" pos="-8.32667e-16 2.1684e-17 -1.14492e-16" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link2_29"/>
+              <geom class="arm/visual" pos="-1.13798e-15 4.51028e-17 -1.49186e-16" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link2_30"/>
+              <geom class="arm/visual" pos="-8.88178e-16 -9.16151e-18 -8.23994e-18" quat="1 0 0 0" material="arm/light_medium_gray_mat" mesh="arm/link2_31"/>
+              <geom class="arm/collision" size="0.0354545 0.136662" pos="0.152179 -0.00040773 0.000313761" quat="0.486718 0.483816 0.516937 0.511668"/>
+              <body name="arm/link3" pos="0.28358 0.028726 0" quat="0.998726 0 0 0.0504536" gravcomp="1">
+                <inertial pos="-0.0996835 0.0349477 0.000508026" quat="0.0777021 0.702287 -0.0990541 0.700674" mass="0.290848" diaginertia="0.000241946 0.000222224 0.000100384"/>
+                <joint name="arm/joint3" range="-2.697 0"/>
+                <geom class="arm/visual" pos="7.91034e-16 -3.40006e-16 1.63064e-16" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link3_0"/>
+                <geom class="arm/visual" pos="5.96745e-16 -2.77556e-16 1.35308e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link3_1"/>
+                <geom class="arm/visual" pos="5.96745e-16 -2.42861e-16 1.31839e-16" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_2"/>
+                <geom class="arm/visual" pos="5.27356e-16 -2.22045e-16 1.17961e-16" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_3"/>
+                <geom class="arm/visual" pos="5.13478e-16 -2.15106e-16 1.11022e-16" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_4"/>
+                <geom class="arm/visual" pos="6.80012e-16 -2.70617e-16 1.31839e-16" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_5"/>
+                <geom class="arm/visual" pos="7.07767e-16 -3.05311e-16 -1.49186e-16" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link3_7"/>
+                <geom class="arm/visual" pos="6.38378e-16 -2.63678e-16 -1.11022e-16" quat="1 0 0 0" material="arm/white_mat" mesh="arm/link3_8"/>
+                <geom class="arm/visual" pos="8.74301e-16 -3.88578e-16 -1.63064e-16" quat="1 0 0 0" material="arm/red_mat" mesh="arm/link3_9"/>
+                <geom class="arm/visual" pos="5.82867e-16 -2.28983e-16 -1.11022e-16" quat="1 0 0 0" material="arm/white_mat" mesh="arm/link3_10"/>
+                <geom class="arm/visual" pos="5.96745e-16 -2.498e-16 -1.21431e-16" quat="1 0 0 0" material="arm/white_mat" mesh="arm/link3_11"/>
+                <geom class="arm/visual" pos="5.68989e-16 -2.498e-16 -1.21431e-16" quat="1 0 0 0" material="arm/white_mat" mesh="arm/link3_12"/>
+                <geom class="arm/visual" pos="4.16334e-16 -1.8735e-16 -1.00614e-16" quat="1 0 0 0" material="arm/white_mat" mesh="arm/link3_13"/>
+                <geom class="arm/visual" pos="5.68989e-16 -2.498e-16 2.13113e-18" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_14"/>
+                <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_15"/>
+                <geom class="arm/visual" pos="5.41234e-16 -2.22045e-16 3.10861e-18" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_16"/>
+                <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_17"/>
+                <geom class="arm/visual" pos="6.38378e-16 -2.08167e-16 8.67362e-19" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_18"/>
+                <geom class="arm/visual" pos="4.44089e-16 -1.45717e-16 -3.79471e-18" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_19"/>
+                <geom class="arm/visual" pos="4.996e-16 -1.52656e-16 2.36661e-18" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_20"/>
+                <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_21"/>
+                <geom class="arm/visual" pos="4.0377e-19 -1.34996e-19 -2.63678e-16" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_22"/>
+                <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_23"/>
+                <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_24"/>
+                <geom class="arm/visual" material="arm/gray_mat" mesh="arm/link3_25"/>
+                <geom class="arm/visual" material="arm/gray_mat" mesh="arm/link3_26"/>
+                <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_27"/>
+                <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link3_28"/>
+                <geom class="arm/collision" size="0.0246371 0.102428" pos="-0.0767504 0.02843 0.000535139" quat="0.569519 0.572735 0.410029 0.423674"/>
+                <body name="arm/link4" pos="-0.24221 0.068514 0" quat="0.544767 -0.544769 -0.450809 0.450808" gravcomp="1">
+                  <inertial pos="0.000276465 -0.00102804 -0.00472831" quat="0.492305 0.505285 0.503294 0.499017" mass="0.127087" diaginertia="4.87057e-05 4.10595e-05 3.82001e-05"/>
+                  <joint name="arm/joint4" range="-1.832 1.832"/>
+                  <geom class="arm/visual" pos="1.12757e-17 -2.38524e-17 3.1572e-16" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link4_2"/>
+                  <geom class="arm/visual" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link4_3"/>
+                  <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link4_4"/>
+                  <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link4_5"/>
+                  <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link4_6"/>
+                  <geom class="arm/collision" size="0.0238936 0.016908" pos="0.000761852 -0.00691041 -0.0082418" quat="0.955364 0.287171 -0.06124 0.0325818"/>
+                  <body name="arm/link5" quat="0.707105 0.707108 0 0" gravcomp="1">
+                    <inertial pos="8.82262e-05 0.0566829 -0.0019612" quat="0.507447 0.490986 0.506887 0.494466" mass="0.144711" diaginertia="0.001 0.001 0.001"/>
+                    <joint name="arm/joint5" range="-1.22 1.22"/>
+                    <geom class="arm/visual" quat="1 0 0 0" material="arm/black_mat" mesh="arm/link5_2"/>
+                    <geom class="arm/visual" pos="-2.11758e-19 -3.26128e-16 -2.60209e-16" quat="1 0 0 0" material="arm/black_mat" mesh="arm/link5_3"/>
+                    <geom class="arm/visual" quat="1 0 0 0" material="arm/darker_gray_mat" mesh="arm/link5_4"/>
+                    <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link5_5"/>
+                    <geom class="arm/visual" quat="1 0 0 0" material="arm/light_gray_mat" mesh="arm/link5_6"/>
+                    <geom class="arm/visual" pos="-7.18284e-19 -2.35922e-16 -1.43115e-17" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link5_7"/>
+                    <geom class="arm/visual" pos="3.05647e-18 -2.498e-16 -4.77049e-18" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link5_8"/>
+                    <geom class="arm/collision" size="0.0224253 0.0337559" pos="0.000165456 0.0435329 -0.00463601" quat="0.351921 0.544329 -0.638336 0.415192"/>
+                    <body name="arm/link6" pos="0 0.091 0.0014165" quat="0 0 -0.707105 -0.707108" gravcomp="1">
+                      <inertial pos="0.0010312 0.0121761 0.0315481" quat="0.0230402 0.707091 0.0373344 0.70576" mass="1.2" diaginertia="0.001 0.001 0.001"/>
+                      <joint name="arm/joint6" range="-3.14 3.14"/>
+                      <geom class="arm/visual" pos="4.44523e-18 -2.62518e-18 -2.28983e-16" quat="0.707105 0 0 0.707108" material="arm/gray_mat" mesh="arm/link6"/>
+                      <geom class="arm/collision" size="0.0264136 0.0296273" pos="-0.000316499 -5.15037e-08 0.0332864" quat="0.00759712 -0.00727331 0.707074 0.707062"/>
+                      <site name="tool" pos="0 0 0.135"/>
+                      <site name="wrist_mount" pos="0.06 0 0.015"/>
+                      <site name="wrist" pos="0.06 0 0.015"/>
+                      <body name="arm/link7" pos="0 0 0.13503" quat="1.89468e-08 1.89469e-08 0.707108 0.707105" gravcomp="1">
+                        <inertial pos="-0.000277778 -0.0467673 -0.00921029" quat="0.46134 0.536174 -0.553273 0.439968" mass="0.0264823" diaginertia="0.001 0.001 0.001"/>
+                        <joint name="arm/joint7" class="arm/finger" range="0 0.035" axis="0 0 -1"/>
+                        <geom class="arm/visual" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link7"/>
+                        <geom class="arm/collision" size="0.012 0.015 0.0025" pos="0 -0.015 -0.0025" type="box" rgba="1 0 0 0.2"/>
+                        <geom class="arm/collision" size="0.015 0.015 0.0025" pos="0 -0.045 -0.0025" type="box" rgba="0 0 1 0.2"/>
+                      </body>
+                      <body name="arm/link8" pos="0 0 0.13503" quat="1.89468e-08 -1.89469e-08 -0.707108 0.707105" gravcomp="1">
+                        <inertial pos="0.000277817 0.0467674 -0.0092103" quat="0.553273 0.439968 -0.46134 0.536174" mass="0.0264822" diaginertia="0.001 0.001 0.001"/>
+                        <joint name="arm/joint8" class="arm/finger" range="-0.035 0"/>
+                        <geom class="arm/visual" pos="-2.46656e-18 -2.56739e-16 5.37764e-17" quat="1 0 0 0" material="arm/gray_mat" mesh="arm/link8"/>
+                        <geom class="arm/collision" size="0.012 0.015 0.0025" pos="0 0.015 -0.0025" type="box" rgba="1 0 0 0.2"/>
+                        <geom class="arm/collision" size="0.015 0.015 0.0025" pos="0 0.045 -0.0025" type="box" rgba="0 0 1 0.2"/>
+                      </body>
+                      <frame pos="0.06 0 0.015">
+                        <body name="sens/wrist/d435i" childclass="sens/wrist/d435i">
+                          <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0" material="sens/wrist/IR_Lens" mesh="sens/wrist/d435i_0"/>
+                          <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0" material="sens/wrist/IR_Emitter_Lens" mesh="sens/wrist/d435i_1"/>
+                          <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0" material="sens/wrist/IR_Rim" mesh="sens/wrist/d435i_2"/>
+                          <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0" material="sens/wrist/IR_Lens" mesh="sens/wrist/d435i_3"/>
+                          <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0" material="sens/wrist/Cameras_Gray" mesh="sens/wrist/d435i_4"/>
+                          <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0" material="sens/wrist/Black_Acrylic" mesh="sens/wrist/d435i_5"/>
+                          <geom class="sens/wrist/visual" pos="-2.91434e-16 -6.09864e-20 4.68375e-17" quat="1 0 0 0" mass="0" material="sens/wrist/Black_Acrylic" mesh="sens/wrist/d435i_6"/>
+                          <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0" material="sens/wrist/RGB_Pupil" mesh="sens/wrist/d435i_7"/>
+                          <geom class="sens/wrist/visual" quat="1 0 0 0" mass="0.072" material="sens/wrist/Metal_Casing" mesh="sens/wrist/d435i_8"/>
+                          <geom class="sens/wrist/collision" size="0.00968864 0.0334784" pos="0.00145113 -0.000319327 -0.0135412" quat="0.029024 0.708312 0.0275527 0.704764" type="capsule" mass="0"/>
+                        </body>
+                      </frame>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </frame>
+      <body name="sens/lidar" pos="0.242181 0 0.423519">
+        <geom name="sens/lidar_body" size="0.0385 0.02" type="cylinder" contype="0" conaffinity="0" rgba="0.85 0.3 0.1 1" mass="0.19"/>
+        <site name="lidar"/>
+      </body>
+      <frame pos="0.272181 0.09 0.423519" quat="0.5 0.5 0.5 0.5">
+        <body name="sens/ego/d435i" childclass="sens/ego/d435i">
+          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Lens" mesh="sens/ego/d435i_0"/>
+          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Emitter_Lens" mesh="sens/ego/d435i_1"/>
+          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Rim" mesh="sens/ego/d435i_2"/>
+          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Lens" mesh="sens/ego/d435i_3"/>
+          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/Cameras_Gray" mesh="sens/ego/d435i_4"/>
+          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/Black_Acrylic" mesh="sens/ego/d435i_5"/>
+          <geom class="sens/ego/visual" pos="-2.91434e-16 -6.09864e-20 4.68375e-17" quat="1 0 0 0" mass="0" material="sens/ego/Black_Acrylic" mesh="sens/ego/d435i_6"/>
+          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/RGB_Pupil" mesh="sens/ego/d435i_7"/>
+          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0.072" material="sens/ego/Metal_Casing" mesh="sens/ego/d435i_8"/>
+          <geom class="sens/ego/collision" size="0.00968864 0.0334784" pos="0.00145113 -0.000319327 -0.0135412" quat="0.029024 0.708312 0.0275527 0.704764" type="capsule" mass="0"/>
+        </body>
+      </frame>
+    </body>
+  </worldbody>
+
+  <contact>
+    <exclude body1="arm/base_link" body2="arm/link1"/>
+  </contact>
+
+  <equality>
+    <joint joint1="arm/joint8" joint2="arm/joint7" polycoef="0 -1 0 0 0"/>
+  </equality>
+
+  <actuator>
+    <general name="base/FL_hip" class="base/abduction" joint="base/FL_hip_joint"/>
+    <general name="base/FL_thigh" class="base/hip" joint="base/FL_thigh_joint"/>
+    <general name="base/FL_calf" class="base/knee" joint="base/FL_calf_joint"/>
+    <general name="base/FR_hip" class="base/abduction" joint="base/FR_hip_joint"/>
+    <general name="base/FR_thigh" class="base/hip" joint="base/FR_thigh_joint"/>
+    <general name="base/FR_calf" class="base/knee" joint="base/FR_calf_joint"/>
+    <general name="base/RL_hip" class="base/abduction" joint="base/RL_hip_joint"/>
+    <general name="base/RL_thigh" class="base/hip" joint="base/RL_thigh_joint"/>
+    <general name="base/RL_calf" class="base/knee" joint="base/RL_calf_joint"/>
+    <general name="base/RR_hip" class="base/abduction" joint="base/RR_hip_joint"/>
+    <general name="base/RR_thigh" class="base/hip" joint="base/RR_thigh_joint"/>
+    <general name="base/RR_calf" class="base/knee" joint="base/RR_calf_joint"/>
+    <general name="arm/joint1" class="arm/piper" joint="arm/joint1" ctrlrange="-2.618 2.618" gainprm="80" biasprm="0 -80 -5"/>
+    <general name="arm/joint2" class="arm/piper" joint="arm/joint2" ctrlrange="0 3.14" gainprm="80" biasprm="0 -80 -5"/>
+    <general name="arm/joint3" class="arm/piper" joint="arm/joint3" ctrlrange="-2.697 0" gainprm="80" biasprm="0 -80 -5"/>
+    <general name="arm/joint4" class="arm/piper" joint="arm/joint4" ctrlrange="-1.832 1.832" gainprm="40" biasprm="0 -40 -5"/>
+    <general name="arm/joint5" class="arm/piper" joint="arm/joint5" ctrlrange="-1.22 1.22" gainprm="10" biasprm="0 -10 -1.5"/>
+    <general name="arm/joint6" class="arm/piper" joint="arm/joint6" ctrlrange="-3.14 3.14" gainprm="10" biasprm="0 -10 -1.5"/>
+    <general name="arm/gripper" class="arm/finger" joint="arm/joint7" ctrlrange="0 0.035" gainprm="40" biasprm="0 -40 -5"/>
+  </actuator>
+
+  <keyframe>
+    <key name="stowed" qpos="0 0 0 0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8 0 0.9 -1.8 -1.7188 3.10096 -1.77024 0.62943 0.81826 2.14914 0 0" ctrl="0 0 0 0 0 0 0 0 0 0 0 0 -1.7188 3.10096 -1.77024 0.62943 0.81826 2.14914 0"/>
+  </keyframe>
+</mujoco>

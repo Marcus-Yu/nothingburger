@@ -37,7 +37,7 @@ function buildDom(snap) {
         <button class="rd-link rd-again" type="button">Watch again</button>
       </div>
     </div>
-    <p class="rd-source">${esc(snap.world.source ? 'Floor plan traced by eye from the Matterport tour' : 'Floor plan from the run')} · search replayed with the run’s own planner (${esc((snap.source?.commit || '').slice(0, 7))}), matching the recorded route</p>`;
+    <p class="rd-source">${esc(/aerial photo/i.test(snap.world.source || '') ? 'Ground traced by eye on a Vexcel aerial photo' : snap.world.source ? 'Floor plan traced by eye from the Matterport tour' : 'Floor plan from the run')} · search replayed with the run’s own planner (${esc((snap.source?.commit || '').slice(0, 7))}), matching the recorded route</p>`;
   return root;
 }
 

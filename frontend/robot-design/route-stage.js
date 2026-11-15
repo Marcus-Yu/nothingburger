@@ -18,7 +18,7 @@ import { paperWorld, grid, lines, contactShadow, tweens, easeInOut, disposeScene
 
 const WALL_H = 0.5;          // walls are cut low so the bird's-eye view sees inside
 const WALL_T = 0.12;
-const at = (x, y, z = 0) => new THREE.Vector3(x, z, -y);
+export const at = (x, y, z = 0) => new THREE.Vector3(x, z, -y);
 
 /* ---------- the building ---------- */
 
@@ -59,7 +59,7 @@ function wallRuns(world) {
   return runs;
 }
 
-function building(world, kit) {
+export function building(world, kit) {
   const g = new THREE.Group();
   const tones = [0xEFE7DA, 0xE7DDCC, 0xEBE2D3];
   world.rooms.forEach((room, i) => g.add(roomFloor(room, tones[i % tones.length])));
@@ -80,7 +80,7 @@ function building(world, kit) {
 }
 
 /* A task's marker: a gold disc and a short post. */
-function pin(kit, color = 'gold') {
+export function pin(kit, color = 'gold') {
   const g = new THREE.Group();
   const disc = kit.mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.04, 32), color);
   disc.position.y = 0.02;
@@ -125,7 +125,7 @@ function droppedLine(points) {
   return { group: g2, line, cross };
 }
 
-function routeTube(waypoints, radius = 0.07) {
+export function routeTube(waypoints, radius = 0.07) {
   const pts = [];
   waypoints.forEach(([x, y]) => {
     const p = at(x, y, 0.06);

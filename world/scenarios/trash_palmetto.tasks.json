@@ -1,0 +1,13 @@
+{
+ "note": "the same job as trash_palmetto.job.txt, for runs without a model",
+ "tasks": [
+  {
+   "id": "t1",
+   "skill": "pick",
+   "anchor": "trash_bag",
+   "object": "trash_bag",
+   "carries": true,
+   "deliver_to": "way_out"
+  }
+ ]
+}

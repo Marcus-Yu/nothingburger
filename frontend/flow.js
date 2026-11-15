@@ -316,6 +316,7 @@ async function agentFlow(job, s, mine, health) {
 }
 
 function renderAgent(view, s, mine) {
+  if (view.run) current.run = view.run;
   const step = view.step || {};
   const d = step.data || {};
   const skill = d.skill || (view.assessment && view.assessment.skill) || (current.skill ?? '');
@@ -338,7 +339,7 @@ function renderAgent(view, s, mine) {
     setSpace(addSpace(b).id, { quiet: true });
   }
   if (view.phase === 'classify' && view.status === 'working') outline.append(h('p.state.wait', h('i.spin'), ' Reading the job'));
-  else if (step.kind === 'task' && d.rejected) outline.append(h('p.state.warn', d.rejected.reason), h('p.txt', 'Try another job in the prompt bar.'));  else if (skill) outline.append(h('p.txt', `Skill: `, h('b', pretty(skill)), current.demos ? '. Not learned yet, so it needs a demonstration.' : '. Already learned from an earlier demonstration.'));
+  else if (step.kind === 'task' && d.rejected) outline.append(h('p.state.warn', d.rejected.reason), h('p.txt', 'Try another job in the prompt bar.'));  else if (skill) outline.append(h('p.txt', `Skill: `, h('b', pretty(skill)), current.demos ? '. Not learned yet, so it needs a demonstration.' : view.assessment && view.assessment.no_demo ? '. Needs no demonstration: the robot only drives a pattern over the ground.' : '. Already learned from an earlier demonstration.'));
   const by = (view.assessment && view.assessment.decided_by) || '';
   if (by && view.phase !== 'classify') outline.append(h('p.note', `Decided by ${by}`));
   kids.push(outline);
@@ -373,6 +374,14 @@ function renderAgent(view, s, mine) {
     });
     robot.append(h('p.state.warn', view.error), h('div.row', again));
   }
+  if (view.status === 'stopped') {
+    robot.append(h('p.state.warn', view.error || 'Stopped by you'),
+      h('p.txt', 'Change the job, rule out a part or set a price on the trace page, and it designs again here.'));
+    // a stopped view can come back without its run folder: the panel remembers the last one it saw
+    if (view.run || current.run) robot.append(h('div.row', h('button.pill.dark.xs', { type: 'button', onclick: () => openTrace({ ...view, run: view.run || current.run }, s) }, 'Change and run again →')));
+  }
+  const changed = optionsText(view.options);
+  if (changed) robot.querySelector('header').after(h('p.note', `${view.status === 'working' ? 'Re-designing with' : 'Designed with'}: ${changed}`));
   if (view.run && view.phase === 'design' && view.status === 'working') {
     robot.append(h('div.row', h('button.pill.ghost.xs', { type: 'button', onclick: () => openTrace(view, s) }, 'Watch the agent work →')));
   }
@@ -381,15 +390,34 @@ function renderAgent(view, s, mine) {
   syncTrace(view, s);
 }
 
-/* the agent trace page: opens by itself once per session when the design step starts */
+/* the steer options a session was started with, in words: "no ur5e; under $30,000" */
+function optionsText(o) {
+  if (!o) return '';
+  const bits = [];
+  if (o.job) bits.push(`the job “${o.job}”`);
+  const ex = Array.isArray(o.exclude) ? o.exclude.flatMap((x) => Object.values(x || {})) : Object.values(o.exclude || {}).flat();
+  ex.forEach((id) => bits.push(`no ${pretty(id)}`));
+  Object.values(o.require || {}).forEach((id) => bits.push(`keep ${pretty(id)}`));
+  if (o.max_price_usd > 0) bits.push(`under $${Math.round(o.max_price_usd).toLocaleString()}`);
+  return bits.join('; ');
+}
+
+/* the agent trace page: opens by itself once per session when the design step starts.
+   Over a Matterport scan it wraps the live tour (a glass overlay) instead of covering it. */
 let traceUI = null;   // { sid, page }
+let tourPlay = null;  // the robot playing in the tour, while it plays
 function openTrace(view, s) {
   if (traceUI && traceUI.page.open) traceUI.page.close();
   hideFlow();
+  const sc = space.current;
+  const wrap = !!(sc && sc.kind === 'scan' && !sc.aerial);
   const page = openAgentTrace({
     agentBase: AGENT_BASE, run: view.run, job: view.job || current.job, place: s ? s.name : '',
-    onClose: () => { if (!document.querySelector('.rd')) showFlow(); },
-    onOpenDesign: (r) => { page.close(); openDesign(r); },
+    session: view, client: agent, wrap,
+    onClose: () => { stopTourPlay(); if (!document.querySelector('.rd')) showFlow(); },
+    onOpenDesign: (r) => { stopTourPlay(); page.close(); openDesign(r); },
+    onSteer: (next) => steered(next, s),
+    onPlayInTour: (r) => playInTourFor(r, page),
   });
   traceUI = { sid: view.session_id, page, auto: true };
 }
@@ -397,8 +425,53 @@ function syncTrace(view, s) {
   const mine = traceUI && traceUI.sid === view.session_id;
   if (!mine && view.run && view.phase === 'design' && view.status === 'working') { openTrace(view, s); return; }
   if (!mine || !traceUI.page.open) return;
+  traceUI.page.update(view);
   if (view.status === 'done' && !traceUI.done) { traceUI.done = true; traceUI.page.finish(view.step.data); }
   if (view.status === 'error' && !traceUI.done) { traceUI.done = true; traceUI.page.fail(view.error); }
+  if (view.status === 'stopped' && !traceUI.done) { traceUI.done = true; traceUI.page.halt(view); }
+  if (view.status === 'waiting' && !traceUI.done) { traceUI.done = true; traceUI.page.wait(view); }   // the new session wants an answer in the panel
+}
+
+/* the trace page stopped the design and started a new session with the person's changes:
+   follow it here too, so the plan panel and "Open Robot Design" use the new result */
+function steered(next, s) {
+  if (!current || !next || !next.session_id) return;
+  const mine = ++seq;   // retires the poll loop of the old session
+  current.agent = next.session_id;
+  current.run = null;
+  if (next.job) current.job = next.job;
+  current.demos = null;  // the skill is learned: the new session asks for no demonstration
+  if (traceUI) { traceUI.sid = next.session_id; traceUI.done = false; }
+  renderAgent({ ...next, status: next.status || 'working', phase: next.phase || 'design' }, s, mine);
+  agentFlow.resume(s, mine);
+}
+
+/* "Play it in the tour": frontend/tour-robot.js drives the finished robot inside the live
+   Matterport tour; without it (or without the SDK) the run opens in room.html */
+async function playInTourFor(r, page) {
+  const room = () => window.open(`${AGENT_BASE}/room.html?run=${encodeURIComponent(r.run)}`, '_blank', 'noopener');
+  const mod = await import('./tour-robot.js').catch(() => null);
+  if (!mod || typeof mod.playInTour !== 'function' || !space.sdk) { room(); return; }
+  stopTourPlay();
+  try {
+    tourPlay = await mod.playInTour({ sdk: space.sdk, agentBase: AGENT_BASE, run: r.run });
+  } catch (e) {
+    console.warn('tour robot', e);
+    room();
+    return;
+  }
+  page.hide(true);
+  const back = h('button.pill.dark.xs', { type: 'button', style: 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80' }, 'Back to the agent');
+  back.addEventListener('click', () => { stopTourPlay(); page.hide(false); });
+  document.body.append(back);
+  const player = tourPlay;
+  tourPlay = { stop: () => player && player.stop && player.stop(), back };
+}
+function stopTourPlay() {
+  if (!tourPlay) return;
+  try { if (tourPlay.stop) tourPlay.stop(); } catch { /* already stopped */ }
+  if (tourPlay.back) tourPlay.back.remove();
+  tourPlay = null;
 }
 
 /* the agent's question when it cannot tell which building the job is in */

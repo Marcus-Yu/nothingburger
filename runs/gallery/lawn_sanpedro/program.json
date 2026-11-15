@@ -1,0 +1,384 @@
+{
+  "schema": "program/1",
+  "source": "rule",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "dock to t1.1",
+      "n": 0
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.1 to t1.2",
+      "n": 1
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.2 to t1.3",
+      "n": 2
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 3,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.3 to t1.4",
+      "n": 3
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 4,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.4 to t1.5",
+      "n": 4
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 5,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.5 to t1.6",
+      "n": 5
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 6,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.6 to t1.7",
+      "n": 6
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 7,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.7 to t1.8",
+      "n": 7
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 8,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.8 to t1.9",
+      "n": 8
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 9,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.9 to t1.10",
+      "n": 9
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 10,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.10 to t1.11",
+      "n": 10
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 11,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.11 to t1.12",
+      "n": 11
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 12,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.12 to t1.13",
+      "n": 12
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 13,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.13 to t1.14",
+      "n": 13
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 14,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.14 to t1.15",
+      "n": 14
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 15,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.15 to t1.16",
+      "n": 15
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 16,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.16 to t1.17",
+      "n": 16
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 17,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.17 to t1.18",
+      "n": 17
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 18,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.18 to t1.19",
+      "n": 18
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 19,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.19 to t1.20",
+      "n": 19
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 20,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.20 to t1.21",
+      "n": 20
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 21,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.21 to t1.22",
+      "n": 21
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 22,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.22 to t1.23",
+      "n": 22
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 23,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.23 to t1.24",
+      "n": 23
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 24,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.24 to t1.25",
+      "n": 24
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 25,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.25 to t1.26",
+      "n": 25
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 26,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_step"
+      ],
+      "note": "t1.26 to dock",
+      "n": 26
+    }
+  ]
+}

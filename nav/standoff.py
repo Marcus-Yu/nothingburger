@@ -66,7 +66,7 @@ def propose(world: dict, build: dict, task: dict, *, requirements: dict | None =
     reach = grid.reachable(r_in, dock[0], dock[1])
     if reach is None:
         return []
-    walls = G.from_world(dict(world, obstacles=[]), (0.0, 0.0))  # for "no wall between pose and anchor"
+    walls = G.from_world(dict(world, obstacles=[]), (0.0, 0.0), ground=False)  # for "no wall between pose and anchor"
     r_max = max((float(e["max_distance_m"]) for e in build.get("reach_envelope", [])), default=RING_START_M)
     radii = np.arange(RING_START_M, r_max + 1e-9, RING_STEP_M)
     angles = np.deg2rad(np.arange(0, 360, RING_ANGLE_DEG))

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot in the tour (test)</title>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  #tour { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; }
+  #status { position: fixed; top: 12px; left: 12px; z-index: 70; max-width: min(560px, calc(100% - 24px)); padding: 8px 12px; border-radius: 14px; font: 500 12px/1.4 var(--mono); }
+  :root { --tour-robot-bottom: 16px; }
+</style>
+</head>
+<body>
+<iframe id="tour" title="3D tour of the space" allow="fullscreen; xr-spatial-tracking"></iframe>
+<p id="status" class="glass">Starting…</p>
+<script type="module">
+/* Test page for tour-robot.js.
+     tour-robot-test.html?model=<matterport id>&run=runs/studio/<run>
+   Connects the tour the way space.js does (Matterport embed + the embed SDK, latest.js) and calls playInTour.
+   Options: &agent=<design server, default http://localhost:8020>
+            &key=<SDK key, when GET http://localhost:8004/web-config has none>
+            &bundle=<path to Matterport's SDK bundle served from this origin, e.g. /mp/> to connect with the bundle
+             SDK instead (its showcase.html in the iframe); only the bundle SDK has sdk.Scene.
+            &qs=0 turns off the bundle's quick start. */
+import { playInTour } from './tour-robot.js';
+
+const q = new URLSearchParams(location.search);
+const model = q.get('model'), run = q.get('run'), agentBase = q.get('agent') || 'http://localhost:8020', bundle = q.get('bundle');
+const status = document.getElementById('status'), iframe = document.getElementById('tour');
+const say = (t) => { status.textContent = t; console.info('[tour-test]', t); };
+window.tourTest = { playInTour, agentBase, run, model };
+
+async function sdkKey() {
+  try { const c = await (await fetch('http://localhost:8004/web-config')).json(); if (c.matterport_sdk_key) return c.matterport_sdk_key; } catch { /* backend down */ }
+  return q.get('key');
+}
+function loadEmbedSdk() {
+  if (window.MP_SDK) return Promise.resolve();
+  return new Promise((ok, fail) => {
+    const tag = Object.assign(document.createElement('script'), { src: 'https://static.matterport.com/showcase-sdk/latest.js', onload: ok, onerror: () => fail(new Error('Showcase SDK script did not load')) });
+    document.head.append(tag);
+  });
+}
+const playingNow = (sdk) => new Promise((done) => {
+  let fired = false;
+  sdk.App.state.subscribe((st) => { if (!fired && st.phase === sdk.App.Phase.PLAYING) { fired = true; done(); } });
+});
+
+(async () => {
+  if (!model || !run) return say('Add ?model=<matterport id>&run=runs/studio/<run> to the address.');
+  if (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return say('The Showcase SDK key only works from localhost.');
+  const key = await sdkKey();
+  if (!key) return say('No Showcase SDK key: GET http://localhost:8004/web-config has none (set MATTERPORT_SDK_KEY for the Pathfinder backend) and no &key= was given.');
+  let sdk;
+  if (bundle) {
+    say('Loading the tour (SDK bundle)…');
+    iframe.src = `${bundle.replace(/\/?$/, '/')}showcase.html?m=${encodeURIComponent(model)}&applicationKey=${encodeURIComponent(key)}&play=1&qs=${q.get('qs') ?? '1'}&title=0&brand=0&help=0`;
+    await new Promise((r) => { iframe.onload = r; });
+    sdk = await iframe.contentWindow.MP_SDK.connect(iframe.contentWindow);
+  } else {
+    say('Loading the tour (embed SDK)…');
+    iframe.src = `https://my.matterport.com/show/?m=${encodeURIComponent(model)}&play=1&qs=1&brand=0&title=0&help=0&applicationKey=${encodeURIComponent(key)}`;
+    await loadEmbedSdk();
+    sdk = await window.MP_SDK.connect(iframe, key, '');
+  }
+  window.tourTest.sdk = sdk;
+  await playingNow(sdk);
+  say(`Tour playing (${bundle ? 'bundle' : 'embed'} SDK; sdk.Scene ${sdk.Scene ? 'present' : 'absent'}). Adding the robot…`);
+  const player = await playInTour({ sdk, agentBase, run, model, mount: document.body });
+  window.tourTest.player = player;
+  say(player.error ? `playInTour: ${player.error}${player.fallback ? ` · fallback ${player.fallback}` : ''}` : `playInTour started for ${run}`);
+})().catch((e) => say('Could not start: ' + (e && e.message || e)));
+</script>
+</body>
+</html>

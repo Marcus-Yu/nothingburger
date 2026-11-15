@@ -3,9 +3,14 @@
     uv run --env-file .env python -m agent.design_flow.serve            # port 8020
     uv run python -m agent.design_flow.serve --standin                  # no API key: rule classifier, scenario tasks
 
-    POST /sessions              {"world": space id, "job": text}  -> {"session_id", "status": "working"}
-    GET  /sessions/<id>         -> {"session_id", "status": "working" | "waiting" | "done" | "error",
-                                    "phase", "step": {"kind", "data"} | null, "error"}
+    POST /sessions              {"world": space id, "job": text, "options"?: steering}  -> the session's view
+    GET  /sessions/<id>         -> {"session_id", "status": "working" | "waiting" | "done" | "error" | "stopped",
+                                    "phase", "step": {"kind", "data"} | null, "error", "run"?, "options"?, "previous"?}
+    POST /sessions/<id>/stop    stops the running design: status "stopped", phase "design", error "Stopped by you";
+                                "run" stays set. 409 when nothing is running. -> the view
+    POST /sessions/<id>/steer   {"job"?, "exclude"?: [{slot: part}], "require"?: {slot: part}, "max_price_usd"?: number}
+                                stops the design if running, then starts a new session in the same world with the job
+                                (the old one if not given) and these options -> the new view, with "previous": old id
     POST /sessions/<id>/reply   {"recordings"?: {"demo"?, "grip"?}}   answers a demo step; capture fills the rest
                                 {"answer": {"sid"} | text}            answers a building step
     GET  /buildings?q=<words>   the 3D database (docs/probe/models_index.csv): best matches, with "loaded"
@@ -14,6 +19,10 @@
     GET  /runs/studio/<run>/snapshot.json   the Robot Design page's snapshot of a finished run
     GET  /runs/studio/<run>/events?from=N   the run's events.jsonl from byte N: {"events": [...], "next": N}
     GET  /catalog/names                     {part id: name} for every catalog card
+    GET  /catalog/cards                     {slot: [card, ...]} (frontend/robot-design/data/export.py's catalog())
+
+Steering options (slots: base, lift, arm, gripper, lidar, lidar_mount, wrist_cam, ego_cam):
+    {"exclude": [{slot: part id, ...}], "require": {slot: part id}, "max_price_usd": number | null}
     GET  /room.html?run=runs/studio/<run>   the run played inside the scanned room (needs world/_scans/<world>/room.glb)
 
 Each reply runs in a thread, because the design step (the design and pathing pipeline) takes minutes:
@@ -28,6 +37,7 @@ reading the job. Its answers say so.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import threading
@@ -39,16 +49,17 @@ from langchain_core.runnables import RunnableLambda
 
 from agent.design_flow.api import DesignWorkflow, SessionError
 from agent.design_flow import buildings, pipeline
-from agent.design_flow.pipeline import REPO, RUNS, NoWorld
+from agent.design_flow.pipeline import EXPORT, REPO, RUNS, NoWorld, Stopped
 from agent.design_flow.schemas import TaskAssessment
 
 PORT = 8020
 
 # The --standin classifier: the first keyword group a task matches names its skill.
 STANDIN_SKILLS = [
+    (("mow", "cut the grass", "cut the lawn"), "mow_lawn", "Mow the lawn."),
     (("trash", "garbage"), "take_out_garbage", "Take the trash out."),
     (("wipe", "clean", "table", "counter", "surface"), "wipe_table", "Wipe the tables down."),
-    (("bottle", "pick", "carry", "take out", "move", "bin", "container"), "move_bin", "Pick it up and carry it out."),
+    (("bottle", "pick", "carry", "take out", "move", "bin", "container", "bring", "parcel", "towel", "deliver"), "move_bin", "Pick it up and carry it out."),
     (("bulb", "light", "lamp"), "change_bulb", "Change the light bulb."),
     (("open", "box", "lid"), "open_box", "Open it."),
 ]
@@ -83,6 +94,52 @@ def catalog_names() -> dict:
         if card.get("id") and card.get("name"):
             names[card["id"]] = card["name"]
     return names
+
+
+_EXPORT = None
+
+
+def catalog_cards() -> dict:
+    """{slot: [card, ...]} from the working tree's catalog, as the Robot Design page's snapshot carries them."""
+    global _EXPORT
+    if _EXPORT is None:  # export.py is a script, not a package module: load it by path
+        spec = importlib.util.spec_from_file_location("robot_design_export", EXPORT)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _EXPORT = mod
+    cards = _EXPORT.catalog(REPO)
+    for slot in cards.values():
+        for c in slot:
+            c.setdefault("name", c.get("id"))
+    return cards
+
+
+STEER_SLOTS = ("base", "lift", "arm", "gripper", "lidar", "lidar_mount", "wrist_cam", "ego_cam")
+
+
+def steering(body: dict) -> dict:
+    """The steering options in a request body, checked; ValueError says what is wrong. Only those set are kept."""
+    def pattern(p, what):
+        if not isinstance(p, dict) or not p:
+            raise ValueError(f"{what} must be a non-empty object of slot -> part id")
+        bad = sorted(set(p) - set(STEER_SLOTS))
+        if bad:
+            raise ValueError(f"{what}: unknown slots {bad}; slots are {', '.join(STEER_SLOTS)}")
+        return dict(p)
+
+    out = {}
+    if body.get("exclude"):
+        if not isinstance(body["exclude"], list):
+            raise ValueError("exclude must be a list of {slot: part id} patterns")
+        out["exclude"] = [pattern(p, "each exclude pattern") for p in body["exclude"]]
+    if body.get("require"):
+        out["require"] = pattern(body["require"], "require")
+    if body.get("max_price_usd") is not None:
+        v = body["max_price_usd"]
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or v <= 0:
+            raise ValueError("max_price_usd must be a positive number")
+        out["max_price_usd"] = v
+    return out
 
 
 def read_events(path: Path, start: int) -> dict:
@@ -135,29 +192,65 @@ class Sessions:
         with self.lock:
             self.by_id.setdefault(sid, {}).update(fields)
 
+    def _stopped(self, sid: str) -> None:
+        self._set(sid, status="stopped", phase="design", error=pipeline.STOP_MESSAGE)
+
     def _work(self, sid: str, phase: str, call) -> None:
         self._set(sid, status="working", phase=phase, error=None)
 
         def go():
             try:
                 step = call()
+            except Stopped:
+                self._stopped(sid)
+                return
             except (SessionError, NoWorld) as e:
+                if sid in pipeline.STOPPED:
+                    return self._stopped(sid)
                 self._set(sid, status="error", error=str(e))
                 return
             except Exception as e:  # noqa: BLE001 - shown to the user, who can retry
+                if sid in pipeline.STOPPED:  # the graph may wrap the Stopped it raised
+                    return self._stopped(sid)
                 self._set(sid, status="error", error=f"{type(e).__name__}: {e}")
                 return
+            if sid in pipeline.STOPPED:  # the stop came as the run was finishing: it still reads as stopped
+                return self._stopped(sid)
             done = step.kind == "design"
             self._set(sid, status="done" if done else "waiting", phase=step.kind, step={"kind": step.kind, "data": step.data})
 
         threading.Thread(target=go, daemon=True).start()
 
-    def start(self, world: str, job: str) -> str:
-        step = self.workflow.start(world=world)
+    def start(self, world: str, job: str, options: dict | None = None) -> str:
+        step = self.workflow.start(world=world, options=options or None)
         sid = step.session_id
-        self._set(sid, world=world, job=job, step=None)
+        self._set(sid, world=world, job=job, step=None, **({"options": options} if options else {}))
         self._work(sid, "classify", lambda: self.workflow.reply(sid, job))
         return sid
+
+    def stop(self, sid: str) -> bool:
+        """Stop the session's running design. False when nothing is running (the view is unchanged)."""
+        view = self.view(sid)
+        designing = view.get("status") == "working" and view.get("phase") == "design"
+        if not (pipeline.running(sid) or designing):
+            return False
+        self._stopped(sid)  # before the kill returns, so the view says so at once and go() can't say otherwise
+        pipeline.stop(sid)
+        return True
+
+    def steer(self, sid: str, job: str | None, options: dict) -> str:
+        """Stop the session's design if it runs, then start a new session in the same world with the job and
+        the steering options. A learned skill goes straight to design (the store kept its recordings)."""
+        old = self.view(sid)
+        self.stop(sid)
+        world = None
+        try:
+            world = self.workflow._snapshot(sid).values.get("world")  # what find_building settled on
+        except Exception:  # noqa: BLE001
+            pass
+        new = self.start(world or old.get("world") or "rabinowitz-hall", job or old.get("job") or "", options)
+        self._set(new, previous=sid)
+        return new
 
     def reply(self, sid: str, answer) -> None:
         """Answer the step the session waits on: recordings for a demo, {"sid"} or text for a building."""
@@ -166,6 +259,7 @@ class Sessions:
 
     def retry(self, sid: str) -> None:
         self.view(sid)
+        pipeline.clear_stop(sid)  # a stopped design can be run again
         self._work(sid, "retry", lambda: self.workflow.retry(sid))
 
 
@@ -207,6 +301,8 @@ def make_handler(sessions: Sessions, standin: bool):
                 return self._send(200, {"results": buildings.search((q.get("q") or [""])[0], int((q.get("limit") or ["8"])[0]))})
             if path == "/catalog/names":
                 return self._send(200, catalog_names())
+            if path == "/catalog/cards":
+                return self._send(200, catalog_cards())
             if path.startswith("/runs/studio/") and path.endswith("/events"):
                 folder = (REPO / path.lstrip("/")[: -len("/events")]).resolve()
                 if not folder.is_relative_to(RUNS.resolve()):
@@ -238,8 +334,27 @@ def make_handler(sessions: Sessions, standin: bool):
                     job = (body.get("job") or "").strip()
                     if not job:
                         return self._send(400, {"detail": "job is empty"})
-                    sid = sessions.start(body.get("world") or "rabinowitz-hall", job)
+                    try:
+                        options = steering(body.get("options") or {})
+                    except ValueError as e:
+                        return self._send(400, {"detail": str(e)})
+                    sid = sessions.start(body.get("world") or "rabinowitz-hall", job, options)
                     return self._send(200, sessions.view(sid))
+                if len(parts) == 3 and parts[0] == "sessions" and parts[2] == "stop":
+                    if not sessions.stop(parts[1]):
+                        return self._send(409, {"detail": "nothing is running in this session", **sessions.view(parts[1])})
+                    return self._send(200, sessions.view(parts[1]))
+                if len(parts) == 3 and parts[0] == "sessions" and parts[2] == "steer":
+                    try:
+                        options = steering(body)
+                    except ValueError as e:
+                        return self._send(400, {"detail": str(e)})
+                    job = body.get("job")
+                    if job is not None and (not isinstance(job, str) or not job.strip()):
+                        return self._send(400, {"detail": "job must be non-empty text"})
+                    sessions.view(parts[1])  # 404 for an unknown session, before anything is stopped
+                    new = sessions.steer(parts[1], job.strip() if job else None, options)
+                    return self._send(200, {**sessions.view(new), "previous": parts[1]})
                 if len(parts) == 3 and parts[0] == "buildings" and parts[2] == "load":
                     try:
                         scenario = buildings.load(parts[1])

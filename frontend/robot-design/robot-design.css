@@ -209,3 +209,48 @@
 @media (prefers-reduced-motion:reduce){
   .rd,.rd *{transition:none!important;animation:none!important}
 }
+
+/* ---------- live: the design as the run goes, inside a host's container (live.js) ---------- */
+.rd.rd-live{position:relative;inset:auto;z-index:auto;width:100%;height:100%;min-height:240px;opacity:1;transition:none;
+  font-size:14px;line-height:1.5;container-type:size;border-radius:inherit}
+.rd-live [hidden]{display:none!important}
+.rd-live .rl-map,.rd-live[data-view="map"] .rl-turn,.rd-live:not([data-view="map"]) .rl-tags{display:none}
+.rd-live[data-view="map"] .rl-map{display:block}
+.rd-live[data-view] .rd-scene{animation:rl-fade .5s ease both}
+/* in a card the test card covers the left: the turntable takes the rest, its grid fading in at the seam */
+.rd-live .rl-turn{left:30%;width:70%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);mask-image:linear-gradient(90deg,transparent,#000 22%)}
+@keyframes rl-fade{from{opacity:0}}
+.rd-live .rl-tags{overflow:hidden}
+.rd-live .rt-tag{padding:3px 8px 3px 3px;font-size:11.5px;gap:5px}
+.rd-live .rt-tag b{width:17px;height:17px;font-size:10.5px}
+.rl-head{position:absolute;top:14px;left:16px;right:118px;pointer-events:none}
+.rl-phase{font:800 19px/1.1 var(--display);letter-spacing:-.03em;color:var(--ink);text-wrap:balance}
+.rl-job{margin-top:4px;font:700 12.5px/1.3 var(--display);letter-spacing:-.01em;color:var(--sub);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rl-job:empty{display:none}
+.rl-count,.rl-card,.rl-banner{background:var(--glass);backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 0 0 1px var(--line),0 18px 44px -30px rgba(45,32,12,.5)}
+.rl-count{position:absolute;top:12px;right:12px;padding:6px 12px;border-radius:999px;font:500 11.5px/1.2 var(--mono);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.rl-count b{font:800 14px/1 var(--display);letter-spacing:-.02em;color:var(--ink);margin-right:2px}
+.rl-card{position:absolute;left:12px;bottom:12px;width:min(250px,calc(100% - 24px));padding:10px 12px 11px;border-radius:18px;animation:rd-rise .3s ease both}
+.rl-funnel{display:none;font:500 10.5px/1.4 var(--mono);color:var(--ink-2);letter-spacing:.01em}
+.rl-card .rd-test-parts{margin-top:0;font-size:12.5px;line-height:1.3}
+.rl-card .rd-test-price{margin-top:2px;font-size:11.5px}
+.rl-card .rd-stamp{margin-top:8px;padding:6px 9px;border-radius:10px;font-size:12.5px;line-height:1.35}
+.rl-card .rd-stamp svg{width:13px;height:13px}
+.rl-banner{position:absolute;left:16px;top:clamp(64px,18cqh,84px);max-width:min(380px,calc(100% - 32px));padding:7px 12px;border-radius:12px;
+  font:500 12.5px/1.4 var(--body);color:var(--ink);animation:rd-rise .3s ease both}
+.rl-banner[data-tone="warn"]{box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 55%,transparent),0 18px 44px -30px rgba(45,32,12,.5);color:var(--gold-ink)}
+.rl-banner[data-tone="stop"]{background:var(--ink);color:var(--on-ink);font:600 13px/1.2 var(--body);border-color:var(--ink)}
+@container (min-width:900px){
+  .rd-live .rl-turn{left:0;width:100%;-webkit-mask-image:none;mask-image:none}
+  .rl-funnel{display:block;margin-bottom:4px}
+  .rl-head{top:26px;left:32px;right:200px}
+  .rl-phase{font-size:32px}
+  .rl-job{font-size:15px}
+  .rl-count{top:26px;right:28px;padding:8px 16px;font-size:12.5px}
+  .rl-count b{font-size:18px}
+  .rl-card{left:28px;bottom:28px;width:330px;padding:16px 18px;border-radius:24px}
+  .rl-card .rd-test-parts{font-size:15px;line-height:1.35}
+  .rl-card .rd-stamp{font-size:13.5px}
+  .rl-banner{left:32px;top:120px;font-size:14px}
+}

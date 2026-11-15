@@ -226,7 +226,7 @@ def main(wid: str, clean: bool = True) -> None:
         # to show in the furniture's place).
         for part, band in (("lo", keep & (zmax < LOW_M)), ("hi", keep & (zmax >= LOW_M) & (zmax < HIGH_M))):
             for layer, sel in (("", band & ~furn), ("_furn", band & furn)):
-                if sel.sum() < (8 if not layer else 1):
+                if sel.sum() < 8:  # MuJoCo will not load a mesh of a triangle or two
                     continue
                 p, uv, f = compact(t["w"], t["uv"], t["idx"][sel])
                 piece(f"{k}_{part}{layer}", k, p, uv, f, images[k], part)

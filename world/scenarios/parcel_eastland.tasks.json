@@ -1,0 +1,13 @@
+{
+ "note": "the same job as parcel_eastland.job.txt, for runs without a model",
+ "tasks": [
+  {
+   "id": "t1",
+   "skill": "pick",
+   "anchor": "parcel",
+   "object": "parcel_small",
+   "carries": true,
+   "deliver_to": "way_out"
+  }
+ ]
+}
