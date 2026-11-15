@@ -321,7 +321,9 @@ def run_pipeline(request: dict, runs: Path = RUNS, standin_tasks: bool | None = 
         result["unmet"] = said.get("unmet") or []
     if not result["infeasible"]:  # the robot and its motion for the real-room 3D page (agent/tour_export.py, ~3 s)
         exported = _call([sys.executable, "-m", "agent.tour_export", str(out)], session, out, env, 300)
-        result["room"] = exported.returncode == 0 and "frames/tour_robot.glb" in exported.stdout
+        scan = (world_doc.get("scan") or {}).get("dir")
+        mesh = bool(scan) and (REPO / scan / "room.glb").exists()  # the 3D room page needs the room's mesh on disk
+        result["room"] = exported.returncode == 0 and "frames/tour_robot.glb" in exported.stdout and mesh
     if not result["infeasible"]:
         snap = out / "snapshot.json"
         exported = _call([sys.executable, str(EXPORT), "--run", str(out), "--scenario", scenario, "--out", str(snap)],

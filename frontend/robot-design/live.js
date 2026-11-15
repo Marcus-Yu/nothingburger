@@ -8,13 +8,17 @@
      replay: 0,                           // N > 0: fetch the whole log once and play it at N× its own speed
      poll: true,                          // false: the host pushes events with live.feed(events)
    });
-   live.feed(events);   live.destroy();
+   live.feed(events);   live.stop();   live.destroy();
+
+   live.stop() is for a host that stops the run itself and may never read the log's last line: it does
+   what a `run_end` with `stopped: true` does (the view holds still on what it has, and says Stopped).
 
    It renders into `container` and sizes to it. Design: each candidate the composer tests shows on
    the turntable, flagged with what failed, at most one every ~0.8 s (the latest wins; the counter
    counts them all); the robot that passes is assembled. Pathing: the building from run_start seen
    from above, each standoff as it is found, then the route legs, driven. A redesign (robot_fix)
-   goes back to the turntable.
+   goes back to the turntable; when the redesigns run out (or one finds nothing) the run keeps the
+   best robot it had, and so does the view.
 
    The pure part (events to a model, beats, the queue, the replay schedule) is exported and tested
    without a browser (live.test.mjs); three.js and the scenes load only when something is mounted. */
@@ -74,11 +78,44 @@ export const stepKey = (step) => String(step || '').split(' ')[0];
 
 export function newModel() {
   return { job: null, world: null, tasks: [], step: null, tested: 0, round: 1, funnel: null, design: null,
-    standoffs: [], route: null, infeasible: null, ended: null };
+    standoffs: [], route: null, stuck: [], badPaths: 0, attempts: [], kept: null, infeasible: null, ended: null };
+}
+
+const sameParts = (a, b) => ['base', 'lift', 'arm', 'gripper'].every((k) => (a?.[k] ?? null) === (b?.[k] ?? null));
+
+/** The attempt agent/run.py goes back to when the redesigns run out: the fewest tasks stuck, then the
+    fewest failed arm paths, then the lowest price (the earliest on a tie). */
+export function bestAttempt(attempts) {
+  const score = (a) => [a.stuck, a.badPaths, a.design.price_usd ?? Infinity];
+  const less = (x, y) => { for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] < y[i]; return false; };
+  return attempts.reduce((best, a) => (!best || less(score(a), score(best)) ? a : best), null);
+}
+
+/* Go back to an earlier attempt's robot, its standoffs and its route. */
+function keep(m, a, why) {
+  Object.assign(m, { design: a.design, standoffs: a.standoffs, route: a.route, infeasible: null, kept: { of: m.attempts.length, why } });
+  return [{ kind: 'design', design: m.design, n: m.tested, kept: m.kept }];
+}
+
+const shortName = (n) => String(n).split(',')[0].replace(/\s*\([^)]*\)\s*$/, '');   // "Ewellix LIFTKIT-0S, 500 mm stroke" -> "Ewellix LIFTKIT-0S"
+
+/** A steer event in words: "without UFACTORY xArm 7, keeping Unitree Go2, under $30,000".
+    exclude is a list of patterns ({ slot: part }, or a part id); require is { slot: part }. `names` maps a part id to its name. */
+export function steerText(e = {}, names = {}) {
+  const name = (id) => shortName(names?.[id] || id);
+  const ids = (p) => (p && typeof p === 'object' ? Object.values(p) : [p]).filter((v) => v != null && v !== '');
+  const bits = [];
+  const out = [].concat(e.exclude || []).map((p) => ids(p).map(name).join(' + ')).filter(Boolean);
+  if (out.length) bits.push(`without ${out.join(' or ')}`);
+  const must = (Array.isArray(e.require) ? e.require : [e.require]).flatMap(ids).map(name);
+  if (must.length) bits.push(`keeping ${must.join(' and ')}`);
+  if (e.max_price_usd) bits.push(`under ${money(e.max_price_usd)}`);
+  return bits.join(', ');
 }
 
 /** Fold one event into the model; returns the beats it adds (most events add none). */
 export function reduce(m, e) {
+  if (m.ended?.stopped && e?.kind !== 'run_start') return [];   // a stopped run stays stopped: what trails in after it is not played
   switch (e?.kind) {
     case 'run_start':
       Object.assign(m, newModel(), { job: e.job || null, world: e.world ? worldView(e.world) : null });
@@ -98,21 +135,31 @@ export function reduce(m, e) {
       const c = { parts: e.parts || {}, price_usd: e.price_usd, mass_kg: e.mass_kg, feasible: Boolean(e.feasible), failed: e.failed || [] };
       return [{ kind: 'candidate', c, n: m.tested }];
     }
-    case 'design':
-      m.design = { parts: e.parts, price_usd: e.price_usd, mass_kg: e.mass_kg, stowed: e.stowed };
+    case 'design': {
+      const d = { parts: e.parts, price_usd: e.price_usd, mass_kg: e.mass_kg, stowed: e.stowed };
+      if (e.kept) {   // the run went back to an earlier attempt, and says which
+        if (m.kept && sameParts(m.design?.parts, d.parts)) return [];   // the one already shown
+        if (m.design && !m.kept) m.attempts.push({ design: m.design, standoffs: m.standoffs, route: m.route, stuck: m.stuck.length, badPaths: m.badPaths });   // the last attempt, which no robot_fix closed
+        const a = m.attempts.find((x) => sameParts(x.design.parts, d.parts));
+        return keep(m, a || { design: d, standoffs: m.standoffs, route: m.route }, String(e.kept));
+      }
+      Object.assign(m, { design: d, infeasible: null, kept: null });
       return [{ kind: 'design', design: m.design, n: m.tested }];
+    }
     case 'robot_fix':
+      if (m.design) m.attempts.push({ design: m.design, standoffs: m.standoffs, route: m.route, stuck: m.stuck.length, badPaths: m.badPaths });
       m.round += 1;
-      Object.assign(m, { design: null, standoffs: [], route: null });
+      Object.assign(m, { design: null, standoffs: [], route: null, stuck: [], badPaths: 0, kept: null });
       return [{ kind: 'fix', why: e.why || 'the robot could not do the job', ruled_out: e.ruled_out || {} }];
     case 'steer': {
-      const bits = [];
-      if (e.exclude?.length) bits.push(`without ${[].concat(e.exclude).join(', ')}`);
-      if (e.require?.length) bits.push(`with ${[].concat(e.require).join(', ')}`);
-      if (e.max_price_usd) bits.push(`under ${money(e.max_price_usd)}`);
-      return bits.length ? [{ kind: 'note', text: `Steered: ${bits.join(', ')}` }] : [];
+      const steer = { exclude: e.exclude || null, require: e.require || null, max_price_usd: e.max_price_usd || null };
+      const text = steerText(steer);
+      return text ? [{ kind: 'note', text: `Steered: ${text}`, steer }] : [];   // the player words it again once it has the part names
     }
     case 'infeasible': {
+      // a redesign that finds nothing does not end the run: agent/run.py goes on with the best attempt so far
+      const best = bestAttempt(m.attempts);
+      if (best) return keep(m, best, 'no other combination passes every check');
       m.infeasible = e;
       const b = (e.binding_checks || [])[0];
       const d = b ? describeCheck({ ...b, status: 'fail' }) : null;
@@ -121,13 +168,19 @@ export function reduce(m, e) {
     case 'standoff':
       m.standoffs.push({ task: e.task, pose: e.pose, covers: e.covers });
       return [{ kind: 'standoff', task: e.task, pose: e.pose }];
-    case 'standoff_failed': return [{ kind: 'standoff_failed', task: e.task, reason: e.reason || '' }];
+    case 'standoff_failed':
+      if (!m.stuck.includes(e.task)) m.stuck.push(e.task);
+      return [{ kind: 'standoff_failed', task: e.task, reason: e.reason || '' }];
+    case 'arm_path':
+      if (e.ok === false) m.badPaths += 1;
+      return [];
     case 'route':
       m.route = { legs: e.legs || [] };
       return [{ kind: 'route', legs: m.route.legs }];
     case 'run_end':
       m.ended = { ok: e.ok !== false, stopped: Boolean(e.stopped) };
-      return [{ kind: 'end', ...m.ended, infeasible: Boolean(m.infeasible), routed: Boolean(m.route) }];
+      // never "no robot passes" when the run has a robot and its route
+      return [{ kind: 'end', ...m.ended, infeasible: Boolean(m.infeasible) && !(m.design && m.route), routed: Boolean(m.route) }];
     default: return [];
   }
 }
@@ -137,9 +190,14 @@ const STALE_ON_FIX = new Set(['candidate', 'funnel', 'design', 'pathing', 'stand
 /** Add a beat to the queue the player works through.
     - a failed candidate replaces a failed candidate still waiting (the latest wins; its count is the latest);
     - a redesign makes everything still waiting from the attempt it ends stale (the player catches up);
-    - a reset empties the queue. */
+    - a reset empties the queue; a stop drops what was still waiting from its run: nothing plays after it. */
 export function enqueue(q, b) {
   if (b.kind === 'reset') { q.length = 0; q.push(b); return q; }
+  if (b.kind === 'end' && b.stopped) {
+    const from = q.map((x) => x.kind).lastIndexOf('reset') + 1;   // a reset still waiting has to play: it clears the run before
+    q.splice(from, q.length - from, b);
+    return q;
+  }
   if (b.kind === 'fix') {
     let cut = q.length;
     for (let i = q.length - 1; i >= 0 && q[i].kind !== 'reset'; i--) cut = i;
@@ -177,15 +235,18 @@ function buildDom() {
     <header class="rl-head">
       <p class="rl-phase" aria-live="polite">Waiting for the run</p>
       <p class="rl-job"></p>
+      <p class="rl-brief"></p>
     </header>
     <p class="rl-count" hidden><b>0</b> tested</p>
-    <div class="rl-card" hidden aria-live="polite">
-      <p class="rl-funnel"></p>
-      <p class="rd-test-parts rl-parts"></p>
-      <p class="rd-test-price rl-price"></p>
-      <p class="rd-stamp rl-stamp" hidden></p>
-    </div>
-    <p class="rl-banner" hidden></p>`;
+    <div class="rl-side">
+      <p class="rl-banner" hidden></p>
+      <div class="rl-card" hidden aria-live="polite">
+        <p class="rl-funnel"></p>
+        <p class="rd-test-parts rl-parts"></p>
+        <p class="rd-test-price rl-price"></p>
+        <p class="rd-stamp rl-stamp" hidden></p>
+      </div>
+    </div>`;
   return root;
 }
 
@@ -334,11 +395,11 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
     return out;
   }
 
-  let raf = 0, onFrame = () => {};
+  let raf = 0, onFrame = () => {}, held = false;
   function loop(now) {
     raf = requestAnimationFrame(loop);
     if (!canvas.clientWidth) return;
-    tw.tick(now);
+    if (!held) tw.tick(now);
     renderer.render(scene, camera);
     onFrame();
   }
@@ -349,6 +410,10 @@ function createMap(canvas, mods, { world, tasks, parts, catalog, reducedMotion }
 
   return {
     standoff, failed, setRoute, draw, drive, finishAll, labels,
+    /** Draw a frame now, so the canvas is not empty when it is first shown. */
+    render() { if (canvas.clientWidth) { renderer.render(scene, camera); onFrame(); } },
+    /** Stop where it is: nothing moves again (it still redraws, for a resize or a drag). */
+    hold() { held = true; },
     set onFrame(f) { onFrame = f; },
     get legs() { return legs.length; },
     legLength: (i) => legs[i].leg.length_m || 0,
@@ -386,6 +451,19 @@ async function loadCatalog(agentBase, signal) {
   return snap.catalog;
 }
 
+/** Part id -> name, for wording a steer: the server's own list, filled in from the catalog cards. */
+async function loadNames(agentBase, signal, catalog) {
+  const names = {};
+  for (const cards of Object.values(catalog || {})) if (Array.isArray(cards)) for (const c of cards) if (c?.id && c.name) names[c.id] = c.name;
+  try {
+    const r = await fetch(`${String(agentBase).replace(/\/+$/, '')}/catalog/names`, { signal });
+    if (r.ok) Object.assign(names, await r.json());
+  } catch (err) { if (signal.aborted) throw err; }
+  return names;
+}
+
+const FADE_MS = 460;   // the cross-fade between the turntable and the map (robot-design.css)
+
 /* ---------- the mount ---------- */
 
 export function mountLiveDesign(container, { agentBase = 'http://localhost:8020', run = '', replay = 0, poll = true } = {}) {
@@ -393,6 +471,7 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const root = buildDom();
   container.append(root);
+  if (!root.clientHeight) root.style.minHeight = '240px';   // a container with no height of its own; otherwise it is the host's size, however small
   const $ = (s) => root.querySelector(s);
   const abort = new AbortController();
   const timers = new Set();
@@ -400,8 +479,9 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
 
   const model = newModel();
   const queue = [];
-  let catalog = null, mods = null, turn = null, map = null, view = 'turn';
+  let catalog = null, names = {}, mods = null, turn = null, map = null, view = 'turn';
   let wake = null;   // wakes the player when a beat is queued
+  let epoch = 0;     // goes up when the run is stopped: a beat still playing from before does nothing more
 
   /* ---------- HUD ---------- */
   const setPhase = (text) => { if (text) $('.rl-phase').textContent = text; };
@@ -416,11 +496,14 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
     box.dataset.state = verdict?.state || 'testing';
     $('.rl-parts').textContent = c ? partsLine(catalog, c.parts) : '';
     $('.rl-price').textContent = c ? [c.price_usd != null ? money(c.price_usd) : null, c.mass_kg ? `${Math.round(c.mass_kg)} kg` : null].filter(Boolean).join(' · ') : '';
+    // the same in one line, for a pane too low for the card (robot-design.css shows one or the other)
+    $('.rl-brief').textContent = c ? [c.price_usd != null ? money(c.price_usd) : null, partsLine(catalog, c.parts)].filter(Boolean).join(' · ') : '';
     const st = $('.rl-stamp');
     st.hidden = !verdict;
     if (verdict) {
       st.classList.toggle('ok', verdict.state === 'pass');
-      st.innerHTML = `${verdict.state === 'pass' ? ICON.check : ICON.cross}<span>${esc(verdict.text)}${verdict.more ? ` <em>+${verdict.more} more</em>` : ''}</span>`;
+      st.classList.toggle('kept', verdict.state === 'kept');
+      st.innerHTML = `${verdict.state === 'fail' ? ICON.cross : ICON.check}<span>${esc(verdict.text)}${verdict.more ? ` <em>+${verdict.more} more</em>` : ''}</span>`;
     }
   }
   let bannerTimer = 0;
@@ -433,30 +516,82 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
     if (text && ms) bannerTimer = setTimeout(() => { b.hidden = true; }, ms);
   }
 
-  /* ---------- the two views ---------- */
+  /* in a tall pane the card lies along the bottom and the turntable takes what is above it: the room
+     kept for the card is the tallest it has been, so the turntable does not jump at every candidate */
+  let cardH = 0;
+  const cardRo = new ResizeObserver(() => {
+    const h = $('.rl-card').offsetHeight;
+    if (h > cardH) { cardH = h; root.style.setProperty('--rl-card-h', `${h}px`); }
+  });
+  cardRo.observe($('.rl-card'));
+
+  /* ---------- the two views ----------
+     The canvases are stacked, the map above the turntable. Going to the map, it draws a frame and
+     fades in over the turntable, which stops drawing once it is covered; going back, the turntable
+     draws first and the map fades off it. The box never shows empty in between. */
+  let coverTimer = 0;
+  let leaving = null;   // the map fading out: { map, canvas, timer }
+  function endLeave() {
+    if (!leaving) return;
+    clearTimeout(leaving.timer);
+    timers.delete(leaving.timer);
+    leaving.map.dispose();
+    leaving.canvas.remove();
+    leaving = null;
+  }
   function show(which) {
     if (view === which) return;
     view = which;
     root.dataset.view = which;
     $('.rl-tags').innerHTML = '';
+    clearTimeout(coverTimer);
+    timers.delete(coverTimer);
+    const t = $('.rl-turn');
+    if (which === 'map') {
+      map?.render();
+      $('.rl-map').classList.add('on');
+      coverTimer = setTimeout(() => { timers.delete(coverTimer); if (view === 'map' && !dead) t.classList.add('gone'); }, FADE_MS + 60);
+      timers.add(coverTimer);
+    } else {
+      t.classList.remove('gone');
+      turn.resize();
+      turn.render?.();
+    }
   }
   /* each map gets a fresh canvas: a WebGL context is not reused across renderers */
-  function dropMap() {
-    if (map) {
-      map.dispose();
-      const old = $('.rl-map'), fresh = old.cloneNode(false);
-      old.replaceWith(fresh);
-    }
-    map = null;
+  function dropMap({ fade = false } = {}) {
     $('.rl-tags').innerHTML = '';
+    if (!map) return;
+    endLeave();
+    const gone = map, old = $('.rl-map'), fresh = old.cloneNode(false);
+    map = null;
+    fresh.classList.remove('on');
+    old.after(fresh);
+    old.classList.replace('rl-map', 'rl-map-out');
+    if (!fade || reduced) { gone.dispose(); old.remove(); return; }
+    gone.hold();
+    old.classList.remove('on');   // fades off the turntable, then goes
+    const timer = setTimeout(endLeave, FADE_MS + 60);
+    timers.add(timer);
+    leaving = { map: gone, canvas: old, timer };
+  }
+  /** Back to an empty turntable; true if the view was elsewhere. */
+  function toTurn() {
+    if (view === 'turn') return false;
+    turn.reset();
+    show('turn');
+    dropMap({ fade: true });
+    return true;
   }
   function buildMap(design) {
     dropMap();
     if (!model.world || !design) return null;
-    map = createMap($('.rl-map'), mods, { world: model.world, tasks: model.tasks, parts: design.parts, catalog, reducedMotion: reduced });
+    const mp = createMap($('.rl-map'), mods, { world: model.world, tasks: model.tasks, parts: design.parts, catalog, reducedMotion: reduced });
+    map = mp;
     const tags = $('.rl-tags');
-    map.onFrame = () => {
-      for (const p of map.labels()) {
+    mp.onFrame = () => {
+      if (map !== mp) return;   // fading out: its labels are gone
+      for (const p of mp.labels()) {
         let t = tags.querySelector(`[data-id="${p.id}"]`);
         if (!t) {
           t = document.createElement('span');
@@ -483,23 +618,52 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
      (Pathing beats don't hurry the assembly they follow, nor the HUD-only ones anything.) */
   const URGENT = new Set(['reset', 'fix', 'candidate', 'design', 'infeasible']);
   const behind = () => queue.some((b) => URGENT.has(b.kind));
-  /* a tween that a new beat cuts short */
+  /* a tween that a new beat cuts short (a stop ends the wait and leaves the tween where it is) */
   const until = (promise, finish) => new Promise((done) => {
     let over = false;
+    const my = epoch;
     const end = () => { if (over) return; over = true; if (wake === cut) wake = null; done(); };
-    const cut = () => { finish(); end(); };
+    const cut = () => { if (my === epoch) finish(); end(); };
     promise.then(end);
     if (behind()) cut(); else wake = cut;
   });
 
-  let robot = null;   // the winner being assembled on the turntable
+  const CHOSEN = { state: 'pass', text: 'Chosen: the cheapest robot that passes every check' };
+  const keptVerdict = (kept) => ({ state: 'kept', text: kept.of > 1 ? `Kept: the best of the ${kept.of} designs tried` : 'Kept: the one design that got a route' });
+
+  /* Stopped: nothing moves again until another run starts. The pane holds what it has; a robot
+     already designed stands whole on the turntable rather than half assembled, or not there yet. */
+  let stopShown = false;
+  function showStopped() {
+    root.classList.add('ended', 'stopped');
+    setPhase('Stopped');
+    banner('');
+    if (!turn || stopShown) return;
+    stopShown = true;
+    if (view === 'turn' && model.design) {
+      turn.candidate(model.design.parts);
+      setCount(model.tested);
+      card({ ...model.design, feasible: true }, model.kept ? keptVerdict(model.kept) : CHOSEN);
+    }
+    turn.hold?.();
+    turn.spin(false);
+    map?.hold();
+  }
+  function halt() {
+    if (dead) return;
+    epoch += 1;
+    showStopped();
+    wake?.();
+  }
+
   async function play(b) {
+    const my = epoch, on = () => !dead && my === epoch;   // false once the run was stopped, or the view destroyed
     switch (b.kind) {
       case 'reset':
-        show('turn');
+        toTurn();
         dropMap();
         turn.reset();
-        robot = null;
+        stopShown = false;
         setJob();
         setPhase('Starting');
         setCount(0);
@@ -513,15 +677,15 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
         setPhase(b.title);
         return;
       case 'note':
-        banner(b.text, 'note', 4000);
+        banner(b.steer ? `Steered: ${steerText(b.steer, names)}` : b.text, 'note', 4000);
         return;
       case 'funnel':
-        if (view !== 'turn') { show('turn'); dropMap(); turn.reset(); }
+        toTurn();
         $('.rl-funnel').textContent = `${fmt(b.considered)} combinations · ${fmt(b.passed)} pass the arithmetic`;
         $('.rl-card').hidden = false;
         return;
       case 'candidate': {
-        if (view !== 'turn') { show('turn'); dropMap(); turn.reset(); }
+        toTurn();
         setCount(b.n);
         const v = verdictOf(b.c);
         card(b.c, v);
@@ -536,16 +700,18 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
         return;
       }
       case 'design': {
-        if (view !== 'turn') { show('turn'); dropMap(); turn.reset(); }
-        setPhase('Assembling the robot');
+        toTurn();
+        setPhase(b.kept ? 'Keeping the best robot' : 'Assembling the robot');
         setCount(b.n);
-        card({ ...b.design, feasible: true }, { state: 'pass', text: 'Chosen: the cheapest robot that passes every check' });
+        card({ ...b.design, feasible: true }, b.kept ? keptVerdict(b.kept) : CHOSEN);
         banner('');
         const a = turn.assemble(b.design.parts);
         for (const s of STAGES) {
           const now = behind();
           await a.reveal(s.key, { now });
+          if (!on()) return;
           if (!now) await sleep(110);
+          if (!on()) return;
         }
         turn.spin(true);
         if (!behind()) await sleep(900, { cut: true });
@@ -562,8 +728,9 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
       case 'standoff':
         if (!map && !buildMap(model.design)) return;
         show('map');
+        $('.rl-card').hidden = true;
         await until(map.standoff(b.pose), map.finishAll);
-        if (!behind() && !dead) await sleep(220);
+        if (!behind() && on()) await sleep(220);
         return;
       case 'standoff_failed':
         if (!map) return;
@@ -573,7 +740,8 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
       case 'route': {
         if (!map && !buildMap(model.design)) return;
         show('map');
-        const mp = map, gone = () => dead || map !== mp;   // destroyed, or a redesign replaced the map
+        $('.rl-card').hidden = true;
+        const mp = map, gone = () => !on() || map !== mp;   // stopped or destroyed, or a redesign replaced the map
         const n = mp.setRoute(b.legs);
         const total = b.legs.reduce((s, l) => s + (l.length_m || 0), 0);
         setPhase(`Driving the route: ${n} ${n === 1 ? 'leg' : 'legs'}, ${total.toFixed(1)} m`);
@@ -590,28 +758,29 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
       case 'fix': {
         const out = Object.values(b.ruled_out).filter(Boolean);
         const named = out.some((id) => b.why.includes(id));
-        banner(`Redesign: ${b.why}${out.length && !named ? ` (ruled out ${out.join(', ')})` : ''}`, 'warn');
+        banner(`Redesign: ${b.why}${out.length && !named ? ` (ruled out ${out.join(', ')})` : ''}`, 'warn', 6000);
         setPhase('Redesigning the robot');
+        $('.rl-card').hidden = true;   // the robot it is about has had its verdict; a low pane has room for the note or the card
         await sleep(behind() ? 900 : 1600);
-        show('turn');
-        dropMap();
+        if (!on()) return;
+        toTurn();
         turn.reset();
         $('.rl-card').hidden = true;
         return;
       }
       case 'infeasible':
-        if (view !== 'turn') { show('turn'); dropMap(); }
+        toTurn();
         setPhase('No robot passes');
         $('.rl-card').hidden = false;
         $('.rl-card').dataset.state = 'fail';
         $('.rl-stamp').hidden = false;
-        $('.rl-stamp').classList.remove('ok');
+        $('.rl-stamp').classList.remove('ok', 'kept');
         $('.rl-stamp').innerHTML = `${ICON.cross}<span>${esc(b.text)}</span>`;
         banner('');
         return;
       case 'end':
+        if (b.stopped) { showStopped(); return; }
         root.classList.add('ended');
-        if (b.stopped) { root.classList.add('stopped'); setPhase('Stopped'); banner('Stopped', 'stop'); return; }
         setPhase(b.infeasible ? 'No robot passes' : b.routed ? 'Designed and routed' : 'Designed');
         return;
       default:
@@ -636,6 +805,7 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
       for (const b of reduce(model, e)) {
         enqueue(queue, b);
         if (b.kind === 'reset' || b.kind === 'fix') turn?.spin(false);
+        if (b.kind === 'end' && b.stopped) halt();   // at once, not after what was still waiting (enqueue dropped it)
       }
     }
     if (wake && behind()) wake();
@@ -684,11 +854,14 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
     tick();
   }
 
-  const ready = Promise.all([loadMods(), loadCatalog(agentBase, abort.signal)]).then(([m, cat]) => {
+  const ready = Promise.all([loadMods(), loadCatalog(agentBase, abort.signal).then(async (cat) => [cat, await loadNames(agentBase, abort.signal, cat)])]).then(([m, [cat, nm]]) => {
     if (dead) return;
     mods = m;
     catalog = cat;
-    turn = m.S.createStage($('.rl-turn'), { reducedMotion: reduced, catalog });
+    names = nm;
+    turn = m.S.createStage($('.rl-turn'), { reducedMotion: reduced, catalog, pane: true });
+    turn.render?.();   // (render and hold are newer than the rest of the stage: a stage.js from the browser's cache may lack them)
+    $('.rl-turn').classList.add('on');
     root.dataset.view = 'turn';
     pump();
   }).catch((err) => {
@@ -700,6 +873,8 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
 
   return {
     feed: ingest,
+    /** The host stopped the run: hold still and say so, as a `run_end` with `stopped: true` does. */
+    stop() { if (!model.ended?.stopped) ingest([{ kind: 'run_end', ok: false, stopped: true }]); },
     ready,
     element: root,
     get model() { return model; },
@@ -711,6 +886,8 @@ export function mountLiveDesign(container, { agentBase = 'http://localhost:8020'
       timers.clear();
       clearTimeout(bannerTimer);
       wake?.();
+      cardRo.disconnect();
+      endLeave();
       dropMap();
       turn?.dispose();
       root.remove();

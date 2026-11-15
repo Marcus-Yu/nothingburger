@@ -1,11 +1,16 @@
 /* The robot stage: a drafting grid on the ground, a turntable drawn as an ink ring with degree
    ticks, and the robot on it.
 
-   createStage(canvas, { reducedMotion, catalog }) -> an object the page drives:
+   createStage(canvas, { reducedMotion, catalog, pane }) -> an object the page drives:
      candidate(parts)   show one whole candidate robot (the search)
      flag(stage, tone)  outline a stage's parts: 'fail' (red), 'pick' (gold) or null (ink)
      assemble(parts)    the winner, hidden; then reveal(stage) drops each stage in
-     finale()  spin(on)  nudge(rad)  tilt(rad)  reset()  resize()  dispose() */
+     hold()             stop where it is: no turning, no sway, until reset()
+     render()           draw a frame now (a canvas shown again is not left empty until the next frame)
+     finale()  spin(on)  nudge(rad)  tilt(rad)  reset()  resize()  dispose()
+
+   pane: the canvas is a pane of its own inside a host (live.js), whatever its shape: a narrow one is
+   framed like any other, not like the page on a phone, where the search card sits above the robot. */
 import * as THREE from 'three';
 import { buildRobot, COLORS } from './parts.js';
 import { paperWorld, grid, lines, contactShadow, tweens, easeInOut, disposeScene } from './drafting.js';
@@ -42,7 +47,7 @@ function pulseRing() {
 
 const TONE = { fail: COLORS.error, pick: COLORS.gold };
 
-export function createStage(canvas, { reducedMotion = false, catalog }) {
+export function createStage(canvas, { reducedMotion = false, catalog, pane = false }) {
   const { renderer, scene } = paperWorld(canvas);
   // the fine grid stays near the turntable: far out it aliases into streaks
   scene.add(grid(4, 0.25, 0.05), grid(12, 1, 0.13));
@@ -58,6 +63,7 @@ export function createStage(canvas, { reducedMotion = false, catalog }) {
   let view = 'build';       // 'build' or 'finale'
   let robot = null;         // the built robot on the turntable
   let spinning = false, spinV = 0;
+  let held = false;         // hold(): nothing moves by itself
 
   // camera angle: a fixed bearing from the front-right, and a height the visitor can drag between
   // just above the floor and nearly overhead
@@ -69,7 +75,7 @@ export function createStage(canvas, { reducedMotion = false, catalog }) {
   function frame() {
     const w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
     const aspect = w / h;
-    compact = aspect < 0.9;
+    compact = !pane && aspect < 0.9;
     camera.aspect = aspect;
     const finale = view === 'finale';
     const tall = finale && robot ? Math.max(robot.height * SCALE, 1.2) : 2.5;     // the search shows robots up to ~2.5 tall
@@ -171,6 +177,14 @@ export function createStage(canvas, { reducedMotion = false, catalog }) {
 
   function spin(on) { spinning = on && !reducedMotion; }
 
+  /** Stop where it is: what was moving lands, and nothing turns or sways again until reset(). */
+  function hold() {
+    tw.finishAll();
+    held = true;
+    spinning = false;
+    spinV = 0;
+  }
+
   /* Drag sideways to turn the turntable (with a little coast), up and down to change the
      camera's height angle: dragging down looks from higher up, as in most 3D viewers. */
   let drag = null, touched = false;   // once dragged, the search sway stops
@@ -207,8 +221,8 @@ export function createStage(canvas, { reducedMotion = false, catalog }) {
     if (!canvas.offsetParent && !canvas.clientWidth) return;   // hidden behind the route view
     const dt = Math.min((now - last) / 1000, 0.05);
     last = now;
-    tw.tick(now);
-    if (!drag) {
+    if (!held) tw.tick(now);
+    if (!drag && !held) {
       if (spinning && Math.abs(spinV) < 0.002) table.rotation.y += dt * ((Math.PI * 2) / 16);   // one turn every 16 s
       else if (view === 'build' && !touched && Math.abs(spinV) < 0.002) table.rotation.y = 0.35 * Math.sin(now / 2600);   // a slow sway while searching
       table.rotation.y += spinV;
@@ -216,6 +230,7 @@ export function createStage(canvas, { reducedMotion = false, catalog }) {
     }
     renderer.render(scene, camera);
   }
+  function render() { if (canvas.clientWidth) renderer.render(scene, camera); }
 
   const ro = new ResizeObserver(resize);
   ro.observe(canvas);
@@ -224,6 +239,7 @@ export function createStage(canvas, { reducedMotion = false, catalog }) {
 
   function reset() {
     tw.finishAll();
+    held = false;
     clearRobot();
     touched = false;
     view = 'build';
@@ -241,7 +257,7 @@ export function createStage(canvas, { reducedMotion = false, catalog }) {
   }
 
   return {
-    candidate, flag, assemble, clearRobot, finale, spin, nudge, tilt, resize, reset, dispose,
+    candidate, flag, assemble, clearRobot, finale, spin, hold, render, nudge, tilt, resize, reset, dispose,
     get compact() { return compact; },
   };
 }

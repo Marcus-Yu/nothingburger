@@ -249,7 +249,16 @@ html.scan-on #labels{display:none}
 .space-note[hidden]{display:none}
 /* inside a tour: only the way back stays in the corner, plus a quiet key hint */
 html.scan-on .spacebar{top:54px;padding:0;background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
-html.scan-on .spacebar>:not(.sb-back),html.scan-on .space-note{display:none!important}
+/* the space picker and the building search stay reachable inside a tour, as quiet pills beside the way back */
+html.scan-on .spacebar>:not(.sb-back):not(.sb-space):not(.sb-find),html.scan-on .space-note{display:none!important}
+html.scan-on .spacebar{gap:8px;flex-wrap:nowrap}
+html.scan-on .sb-space,html.scan-on .sb-find{height:42px;background:rgba(255,253,250,.94);border:1px solid rgba(23,20,15,.12);border-radius:999px;box-shadow:0 8px 24px -12px rgba(23,20,15,.45)}
+html.scan-on .sb-space{padding:0 12px;display:flex;align-items:center;gap:8px;max-width:min(300px,46vw)}
+html.scan-on .sb-space select{max-width:100%;border:0;background:none;font:600 13px/1 var(--body);color:var(--ink)}
+html.scan-on .tour-hint{top:108px;left:12px}
+html.scan-on .building-panel{top:104px}
+/* while the agent trace is open over the tour, the studio's own prompt bar steps aside */
+html.tracing .prompt,html.tracing .composer,html.tracing .tour-hint{visibility:hidden}
 html.scan-on .sb-back{width:42px;height:42px;background:rgba(255,253,250,.94);border-color:rgba(23,20,15,.12);box-shadow:0 8px 24px -12px rgba(23,20,15,.45)}
 .tour-hint{position:absolute;top:63px;left:66px;margin:0;display:none;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:rgba(23,20,15,.55);color:#FBF8F3;font:500 12px/1 var(--body);pointer-events:none}
 .tour-hint kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 4px;border-radius:5px;border:1px solid rgba(251,248,243,.4);font:500 11px/1 var(--mono);color:#FBF8F3}

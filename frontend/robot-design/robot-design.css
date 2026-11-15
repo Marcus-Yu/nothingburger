@@ -159,7 +159,14 @@
 .rt .rd-row{padding:9px 0}
 .rt .rd-from{margin-top:1px}
 .rt-tag.rt-mark{padding:2px 6px;background:none;box-shadow:none;font:500 11.5px/1 var(--mono);color:var(--ink)}
-.rt .rd-source{top:calc(var(--top) + 118px);bottom:auto;left:calc(var(--gutter) + 62px);max-width:min(460px,36vw)}
+/* where the plan and the search come from: in the panel, under the trips, not over the map */
+.rt-source{flex:none;margin:0;padding:10px 0 12px;border-top:1px solid var(--line);font:500 11px/1.45 var(--mono);color:var(--ink-2)}
+/* a narrow panel in a low window has no room for it without squeezing the trips out */
+@media (max-width:1100px),(max-height:700px){.rt-source{display:none}}
+/* the buttons under the map, not under the panel */
+@media (min-width:761px){
+  .rt .rd-dock{left:calc((100% - min(370px,30vw) - var(--gutter)) / 2);width:min(560px,calc(100% - min(370px,30vw) - 2 * var(--gutter) - 32px))}
+}
 .rt-no{display:inline-grid;place-items:center;flex:none;width:19px;height:19px;margin-right:8px;border-radius:999px;background:var(--gold);color:var(--ink);font:800 11.5px/1 var(--display);font-style:normal}
 .rt .rd-row[data-state="done"] .rt-no{background:var(--ok);color:var(--on-ink)}
 
@@ -211,15 +218,21 @@
 }
 
 /* ---------- live: the design as the run goes, inside a host's container (live.js) ---------- */
-.rd.rd-live{position:relative;inset:auto;z-index:auto;width:100%;height:100%;min-height:240px;opacity:1;transition:none;
-  font-size:14px;line-height:1.5;container-type:size;border-radius:inherit}
+.rd.rd-live{position:relative;inset:auto;z-index:auto;width:100%;height:100%;opacity:1;transition:none;
+  font-size:14px;line-height:1.5;container-type:size;border-radius:inherit;
+  --rl-pad:12px;--rl-w:clamp(164px,44cqw,300px)}   /* the card's width in a wide pane: the turntable has the rest */
 .rd-live [hidden]{display:none!important}
-.rd-live .rl-map,.rd-live[data-view="map"] .rl-turn,.rd-live:not([data-view="map"]) .rl-tags{display:none}
-.rd-live[data-view="map"] .rl-map{display:block}
-.rd-live[data-view] .rd-scene{animation:rl-fade .5s ease both}
-/* in a card the test card covers the left: the turntable takes the rest, its grid fading in at the seam */
-.rd-live .rl-turn{left:30%;width:70%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22%);mask-image:linear-gradient(90deg,transparent,#000 22%)}
-@keyframes rl-fade{from{opacity:0}}
+/* the two canvases are stacked, the map above the turntable: one fades in over the other, which is
+   kept (and still drawn) until it is covered, so the box is never empty between them */
+.rd-live .rd-scene{opacity:0;pointer-events:none;transition:opacity .45s ease}
+.rd-live .rd-scene.on{opacity:1;pointer-events:auto}
+.rd-live .rd-scene.gone{display:none}
+.rd-live:not([data-view="map"]) .rl-tags{display:none}
+.rd-live.stopped .rd-scene{filter:saturate(.5)}
+/* a wide pane: the card at the bottom left, the turntable in the space beside it, clear of the card
+   with any robot on it; its grid fades in at the seam */
+.rd-live .rl-turn{left:calc(var(--rl-w) + var(--rl-pad));width:calc(100% - var(--rl-w) - var(--rl-pad));
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 14%);mask-image:linear-gradient(90deg,transparent,#000 14%)}
 .rd-live .rl-tags{overflow:hidden}
 .rd-live .rt-tag{padding:3px 8px 3px 3px;font-size:11.5px;gap:5px}
 .rd-live .rt-tag b{width:17px;height:17px;font-size:10.5px}
@@ -227,30 +240,64 @@
 .rl-phase{font:800 19px/1.1 var(--display);letter-spacing:-.03em;color:var(--ink);text-wrap:balance}
 .rl-job{margin-top:4px;font:700 12.5px/1.3 var(--display);letter-spacing:-.01em;color:var(--sub);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .rl-job:empty{display:none}
+.rl-brief{display:none;margin-top:3px;font:500 11px/1.4 var(--mono);color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rl-count,.rl-card,.rl-banner{background:var(--glass);backdrop-filter:blur(18px) saturate(1.15);-webkit-backdrop-filter:blur(18px) saturate(1.15);
   border:1px solid rgba(255,255,255,.75);box-shadow:0 0 0 1px var(--line),0 18px 44px -30px rgba(45,32,12,.5)}
 .rl-count{position:absolute;top:12px;right:12px;padding:6px 12px;border-radius:999px;font:500 11.5px/1.2 var(--mono);color:var(--ink-2);font-variant-numeric:tabular-nums}
 .rl-count b{font:800 14px/1 var(--display);letter-spacing:-.02em;color:var(--ink);margin-right:2px}
-.rl-card{position:absolute;left:12px;bottom:12px;width:min(250px,calc(100% - 24px));padding:10px 12px 11px;border-radius:18px;animation:rd-rise .3s ease both}
+/* notes and the card stack at the bottom left, the note above the card */
+.rl-side{position:absolute;left:var(--rl-pad);bottom:var(--rl-pad);width:min(380px,calc(100% - 2 * var(--rl-pad)));display:flex;flex-direction:column;align-items:flex-start;gap:8px;pointer-events:none}
+.rl-side>*{pointer-events:auto}
+.rl-card{width:var(--rl-w);padding:10px 12px 11px;border-radius:18px;animation:rd-rise .3s ease both}
 .rl-funnel{display:none;font:500 10.5px/1.4 var(--mono);color:var(--ink-2);letter-spacing:.01em}
-.rl-card .rd-test-parts{margin-top:0;font-size:12.5px;line-height:1.3}
+.rl-card .rd-test-parts{margin-top:0;font-size:12.5px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
 .rl-card .rd-test-price{margin-top:2px;font-size:11.5px}
 .rl-card .rd-stamp{margin-top:8px;padding:6px 9px;border-radius:10px;font-size:12.5px;line-height:1.35}
 .rl-card .rd-stamp svg{width:13px;height:13px}
-.rl-banner{position:absolute;left:16px;top:clamp(64px,18cqh,84px);max-width:min(380px,calc(100% - 32px));padding:7px 12px;border-radius:12px;
-  font:500 12.5px/1.4 var(--body);color:var(--ink);animation:rd-rise .3s ease both}
+.rd-stamp.kept{color:var(--gold-ink);background:color-mix(in srgb,var(--gold) 10%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 45%,transparent)}
+.rl-banner{max-width:100%;padding:7px 12px;border-radius:12px;font:500 12.5px/1.4 var(--body);color:var(--ink);animation:rd-rise .3s ease both}
+.rd-live:not([data-view="map"]) .rl-banner{max-width:var(--rl-w)}   /* beside the turntable, never over it */
 .rl-banner[data-tone="warn"]{box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 55%,transparent),0 18px 44px -30px rgba(45,32,12,.5);color:var(--gold-ink)}
-.rl-banner[data-tone="stop"]{background:var(--ink);color:var(--on-ink);font:600 13px/1.2 var(--body);border-color:var(--ink)}
+/* a short pane has room under the heading for the note or the card, not both: the card has it while it shows */
+@container (max-height:330px){
+  .rl-side:has(.rl-card:not([hidden])) .rl-banner{display:none}
+}
+/* a tall pane: the card along the bottom, the turntable in the space above it */
+@container (max-aspect-ratio:1/1){
+  .rd-live .rl-turn{left:0;width:100%;height:calc(100% - var(--rl-card-h,128px) - var(--rl-pad));
+    -webkit-mask-image:linear-gradient(0deg,transparent,#000 12%);mask-image:linear-gradient(0deg,transparent,#000 12%)}
+  .rl-side{width:calc(100% - 2 * var(--rl-pad))}
+  .rl-card{width:min(100%,440px)}
+  .rd-live:not([data-view="map"]) .rl-banner{max-width:min(100%,440px)}
+}
 @container (min-width:900px){
-  .rd-live .rl-turn{left:0;width:100%;-webkit-mask-image:none;mask-image:none}
   .rl-funnel{display:block;margin-bottom:4px}
   .rl-head{top:26px;left:32px;right:200px}
   .rl-phase{font-size:32px}
   .rl-job{font-size:15px}
   .rl-count{top:26px;right:28px;padding:8px 16px;font-size:12.5px}
   .rl-count b{font-size:18px}
-  .rl-card{left:28px;bottom:28px;width:330px;padding:16px 18px;border-radius:24px}
+  .rl-side{left:28px;bottom:28px}
+  .rl-card{padding:16px 18px;border-radius:24px}
   .rl-card .rd-test-parts{font-size:15px;line-height:1.35}
   .rl-card .rd-stamp{font-size:13.5px}
-  .rl-banner{left:32px;top:120px;font-size:14px}
+  .rl-banner{font-size:14px}
+}
+/* a full page: the turntable in the middle of it, the card well to its left */
+@container (min-width:1100px) and (min-aspect-ratio:1/1){
+  .rd-live .rl-turn{left:0;width:100%;-webkit-mask-image:none;mask-image:none}
+  .rl-card{width:330px}
+  .rd-live:not([data-view="map"]) .rl-banner{max-width:330px}
+}
+/* a strip (a host that folds the pane away when the run is over): the state and the robot in one line each
+   on the left, the turntable or the map in what is left; no card, no notes, no counter */
+@container (max-height:190px){
+  .rl-side,.rl-count{display:none}
+  .rl-head{top:10px;left:14px;right:auto;width:calc(46% - 14px)}
+  .rl-phase{font-size:16px}
+  .rl-job{font-size:11.5px;-webkit-line-clamp:1}
+  .rd-live:has(.rl-card:not([hidden])) .rl-brief{display:block}
+  .rd-live .rl-turn{left:46%;width:54%;height:100%;-webkit-mask-image:linear-gradient(90deg,transparent,#000 14%);mask-image:linear-gradient(90deg,transparent,#000 14%)}
+  .rd-live .rl-map,.rd-live .rl-map-out,.rd-live .rl-tags{left:46%;width:54%}
+  .rd-live .rt-tag span{display:none}
 }

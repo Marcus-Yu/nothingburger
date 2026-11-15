@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Live Robot Design · Nothingburger</title>
-<meta name="description" content="The robot design played live from a run's event log. ?run=runs/studio/<run> (required), &speed=N replays a finished run at N× (0 or absent: follow it live), &agent=<design workflow URL>, &size=card shows it in a 560×420 card.">
+<meta name="description" content="The robot design played live from a run's event log. ?run=runs/studio/<run> (required), &speed=N replays a finished run at N× (0 or absent: follow it live), &agent=<design workflow URL>, &size=card shows it in a 560×420 card, &w=420&h=250 in a card of that size.">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +28,9 @@
   import { mountLiveDesign } from './live.js';
   const q = new URLSearchParams(location.search);
   const run = q.get('run');
-  if (q.get('size') === 'card') document.body.classList.add('card');
+  const w = Number(q.get('w')), h = Number(q.get('h'));
+  if (q.get('size') === 'card' || (w > 0 && h > 0)) document.body.classList.add('card');
+  if (w > 0 && h > 0) Object.assign(document.getElementById('live').style, { width: `${w}px`, height: `${h}px` });   // the pane a host gives it
   if (!run) {
     document.getElementById('live').innerHTML = '<p class="missing">Add ?run=runs/studio/&lt;run&gt; (and &amp;speed=20 to replay a finished run).</p>';
   } else {

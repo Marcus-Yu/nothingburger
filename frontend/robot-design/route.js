@@ -28,6 +28,7 @@ function buildDom(snap) {
       <p class="rd-summary">${t.length_m.toFixed(1)} m in ${snap.route.legs.length} legs. To find them the planner expanded ${fmt(t.expanded)} grid cells and dropped ${t.dropped} long branches.</p>
       <ol class="rd-rows rt-trips" aria-live="polite"></ol>
       <div class="rt-doors">${doorLines(snap).map((d) => `<p><b>${esc(d.door)}</b> ${esc(d.text)}</p>`).join('')}</div>
+      <p class="rd-note rt-source">${esc(/aerial photo/i.test(snap.world.source || '') ? 'Ground traced by eye on a Vexcel aerial photo' : snap.world.source ? 'Floor plan traced by eye from the Matterport tour' : 'Floor plan from the run')} · search replayed with the run’s own planner (${esc((snap.source?.commit || '').slice(0, 7))}), matching the recorded route</p>
     </aside>
     <div class="rd-dock">
       <button class="rd-btn rd-skip" type="button">Skip to the route</button>
@@ -36,8 +37,7 @@ function buildDom(snap) {
         <button class="rd-link rt-robot" type="button">Back to the robot</button>
         <button class="rd-link rd-again" type="button">Watch again</button>
       </div>
-    </div>
-    <p class="rd-source">${esc(/aerial photo/i.test(snap.world.source || '') ? 'Ground traced by eye on a Vexcel aerial photo' : snap.world.source ? 'Floor plan traced by eye from the Matterport tour' : 'Floor plan from the run')} · search replayed with the run’s own planner (${esc((snap.source?.commit || '').slice(0, 7))}), matching the recorded route</p>`;
+    </div>`;
   return root;
 }
 
@@ -56,7 +56,20 @@ export function openRoute({ snap, mount = document.body, reducedMotion = false, 
   const trips = tripsFor(snap);
   const taskNumber = Object.fromEntries(snap.tasks.map((t, i) => [t.id, i + 1]));
   $('.rt-trips').innerHTML = trips.map((t, i) => `<li class="rd-row" data-i="${i}" data-state="wait">${tripRow(t, t.kind === 'work' ? taskNumber[t.task] : 0)}</li>`).join('');
-  const stage = createRouteStage($('.rd-scene'), { snap, reducedMotion });
+  /* what the page puts over the map, in px in from each edge: the heading, the route panel, the buttons */
+  const insets = () => {
+    const R = root.getBoundingClientRect();
+    const head = $('.rd-top').getBoundingClientRect(), panel = $('.rt-panel').getBoundingClientRect(), dock = $('.rd-dock').getBoundingClientRect();
+    const phone = R.width <= 760;                 // there the panel is a strip above the buttons, shown once a trip starts
+    const side = !phone && panel.width > 0;       // otherwise it runs down the right-hand side
+    return {
+      top: head.bottom - R.top,
+      left: head.left - R.left,
+      right: side ? R.right - panel.left : head.left - R.left,
+      bottom: R.bottom - dock.top + (phone ? 96 : 0),
+    };
+  };
+  const stage = createRouteStage($('.rd-scene'), { snap, reducedMotion, insets });
   const unfade = scrollFade($('.rt-trips'));
   requestAnimationFrame(() => root.classList.add('in'));
 

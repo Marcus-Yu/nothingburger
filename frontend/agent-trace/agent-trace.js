@@ -7,7 +7,9 @@
      - one focus card for the step running now,
      - the raw trace (every tool and model call) behind a toggle.
 
-     const trace = openAgentTrace({ agentBase, run, job, place, onClose, session, client, onSteer });
+     const trace = openAgentTrace({ agentBase, run, job, place, placeOf, onClose, session, client, onSteer });
+   `place` is the name of the place the job is in; `placeOf(view)` names it from a later session view
+   (the agent may settle on another building than the one open in the studio).
      trace.finish(result)   // the session finished: result is the pipeline's dict
      trace.fail(message)    // the session stopped on an error
      trace.halt(view)       // the session was stopped (by this page or elsewhere)
@@ -72,6 +74,15 @@ const CHECKS = {
   'tip-over': 'Stays upright', 'door header': 'Clears door headers', 'lidar present': 'Has a lidar', 'lidar view': 'Lidar can see',
   'wrist camera': 'Wrist camera', 'ego camera': 'Forward camera',
 };
+
+/* what a "<check> not verified: …" label on a design is about, as a phrase */
+const UNVERIFIED = {
+  force: 'grip force', press: 'wiping pressure', reach: 'reach', opening: 'the gripper opening', payload: 'payload', 'base payload': 'the load on the base',
+  twist: 'the twist', doorway: 'the doorway width', 'door header': 'the door header', turn: 'room to turn in the corridors', steps: 'the steps on the way',
+  'tip-over': 'staying upright', 'lidar present': 'the lidar', 'lidar view': 'what the lidar sees', 'wrist camera': 'the wrist camera', 'ego camera': 'the forward camera',
+};
+const listed = (a) => (a.length < 3 ? a.join(' and ') : `${a.slice(0, -1).join(', ')} and ${a.at(-1)}`);
+const partsKey = (p) => PART_SLOTS.map((k) => (p && typeof p[k] === 'string' ? p[k] : '')).join('|');
 
 function loadCss() {
   if (document.getElementById(CSS_ID)) return;
@@ -153,13 +164,27 @@ function failRows(failed, tasks) {
   }));
 }
 
-export function openAgentTrace({ agentBase, run, job, place: where = '', onClose = () => {}, onOpenDesign = () => {}, mount = document.body, replay = 0,
+export function openAgentTrace({ agentBase, run, job, place: where = '', placeOf = null, onClose = () => {}, onOpenDesign = () => {}, mount = document.body, replay = 0,
   session = null, client = null, onSteer = () => {}, watch = false, wrap = false, onPlayInTour = () => {} }) {
   loadCss();
+  // a building's own name, unless it is only the id of the space it stands in
+  const nameOf = placeOf || ((v) => { const b = v && v.building; return b && b.name && b.name !== b.space ? b.name : ''; });
+  let how = '';   // how the building was settled: "named in the job", "chosen in the studio"
+  const readPlace = (v) => {
+    if (!v || typeof v !== 'object') return false;
+    const was = `${where}|${how}`;
+    let name = '';
+    try { name = nameOf(v) || ''; } catch { name = ''; }
+    if (name) where = name;
+    if (v.building && v.building.how) how = String(v.building.how);
+    return was !== `${where}|${how}`;
+  };
+  readPlace(session);
   const fresh = () => ({
     from: 0, events: [], steps: {}, tasks: {}, taskList: [], now: null,
     funnel: null, built: 0, failedBy: {}, last: null, shown: null, shownAt: 0, standoffs: {}, arms: {}, route: null, program: null,
     design: null, infeasible: null, building: null, requirements: 0, llm: null, fixes: [], ended: null, wonAt: 0,
+    attempts: [],   // each robot a redesign set aside, with its route: the run may go back to one of them
   });
   const S = { ...fresh(), names: {}, t0: Date.now(), result: null, error: null, stopped: false, traceOpen: false, closed: false };
   let sid = session && typeof session === 'object' ? session.session_id : session;
@@ -176,6 +201,7 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
   const chip = h('span.at-chip.live', 'Live');
   const title = h('h1.at-title', 'Building your robot');
   const jobBox = h('div.at-job');
+  const placeLine = h('p.at-place', { hidden: true });
   const withLine = h('p.at-with', { hidden: true });
   const time = h('span.at-time', '0:00');
   const stopBtn = h('button.at-tbtn.at-stopbtn', { type: 'button' }, h('i', { 'aria-hidden': 'true' }), 'Stop');
@@ -195,14 +221,22 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
   const traceRows = h('ol.at-rows');
   const drawer = h('aside.at-drawer', { 'aria-label': 'Trace' },
     h('header', h('h2', 'Trace'), h('p', 'Every step, tool call and model call, newest first.')), traceRows);
-  const body = h('div.at-body', h('nav.at-rail', h('h2', 'The steps'), stepsList), focus, wrap ? null : liveEl);
+  // wrapped around the tour, the top-left corner is the studio's (its way back, the space picker): the heading
+  // heads the column of cards on the right, and the way back sits in the row of controls above it
+  const head = h('div.at-head', title, jobBox, placeLine, withLine);
+  const top = wrap ? null : h('div.at-top', back, head);
+  const body = h('div.at-body', wrap ? head : null, h('nav.at-rail', h('h2', 'The steps'), stepsList), focus, wrap ? null : liveEl);
   const opener = document.activeElement;
   const root = h(wrap ? 'div.at.wrap' : 'div.at', { role: 'dialog', 'aria-modal': wrap ? 'false' : 'true', 'aria-label': 'The agent at work', tabindex: '-1' }, status,
-    h('div.at-top', back, h('div.at-head', title, jobBox, withLine)),
-    h('div.at-right', chip, time, stopBtn, traceBtn),
+    top,
+    h('div.at-right', wrap ? back : null, chip, time, stopBtn, traceBtn),
     body,
     drawer);
   mount.append(root);
+  // on the paper page the cards start below the heading, however many lines it runs to
+  const headroom = top && typeof ResizeObserver === 'function'
+    ? new ResizeObserver(() => root.style.setProperty('--head', `${Math.ceil(top.offsetTop + top.offsetHeight)}px`)) : null;
+  if (headroom) headroom.observe(top);
   requestAnimationFrame(() => { root.classList.add('in'); root.focus({ preventScroll: true }); });
   const say = (text) => { if (status.textContent !== text) status.textContent = text; };
 
@@ -211,6 +245,7 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
     S.closed = true;
     closeMenu();
     unmountLive();
+    if (headroom) headroom.disconnect();
     root.classList.remove('in');
     setTimeout(() => root.remove(), 400);
     document.removeEventListener('keydown', onKey);
@@ -220,6 +255,7 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
   };
   const onKey = (e) => {
     if (e.key !== 'Escape') return;
+    if (!root.classList.contains('away')) e.stopPropagation();   // this Escape is the page's: the studio behind it must not also leave on it
     if (menu) { const b = menu.opener; closeMenu(); if (b && b.isConnected) b.focus(); return; }
     if (editing) { drawJob(false); return; }
     if (S.traceOpen) toggleTrace(false); else close();
@@ -259,7 +295,8 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
     if (!editing) {
       const q = h('button.at-jobq', { type: 'button' }, `“${job}”`, h('span', { 'aria-hidden': 'true', html: '<svg viewBox="0 0 16 16"><path d="M10.5 2.5l3 3-8 8H2.5v-3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>' }));
       q.addEventListener('click', () => drawJob(true));
-      jobBox.replaceChildren(q, where ? h('span.at-where', ` · ${where}`) : '');
+      jobBox.replaceChildren(q);
+      drawPlace();
       drawControls();
       return;
     }
@@ -276,6 +313,11 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
     jobBox.replaceChildren(form);
     input.focus();
     input.select();
+  }
+  /* under the job: where it is, and how the agent knows ("917 Main St Unit 506 · named in the job") */
+  function drawPlace() {
+    placeLine.hidden = !where && !how;
+    placeLine.replaceChildren(...[where ? h('b', where) : null, how ? h('span', where ? ` · ${how}` : cap(how)) : null].filter(Boolean));
   }
   editBtn.addEventListener('click', () => drawJob(true));
   budget.addEventListener('submit', (e) => {
@@ -412,6 +454,7 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
     S.options = v.options && hasOptions(v.options) ? v.options : sent;
     if (sent.job) job = sent.job;
     else if (v.job) job = v.job;
+    readPlace(v);
     run = v.run || null;
     chip.textContent = 'Live';
     chip.className = 'at-chip live';
@@ -517,13 +560,24 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
         if (!e.feasible) for (const c of new Set((e.failed || []).map((f) => f.check))) S.failedBy[c] = (S.failedBy[c] || 0) + 1;
         break;
       case 'robot_fix':  // pathing failed on that robot: design runs again, so drop what came after it
+        if (S.design) S.attempts.push({ design: S.design, route: S.route, standoffs: S.standoffs, arms: S.arms });
         S.fixes.push({ ...e, at: S.built });
         S.design = null; S.route = null; S.program = null; S.standoffs = {}; S.arms = {}; S.wonAt = 0;
         delete S.steps['5 pathing']; delete S.steps['5d program'];
         break;
       // the latest of the two wins: a redesign can say "infeasible" and then keep the best earlier attempt
-      case 'design': S.design = e; S.infeasible = null; break;
-      case 'infeasible': S.infeasible = e; S.design = null; break;
+      case 'design': {
+        S.design = e; S.infeasible = null;
+        const a = e.kept && S.attempts.find((x) => partsKey(x.design.parts) === partsKey(e.parts));   // back to an earlier robot: its route comes with it
+        if (a) keep(a);
+        break;
+      }
+      case 'infeasible': {
+        // when the redesigns run out, the run goes back to the best robot it set aside (agent/run.py): that is the design
+        const a = bestAttempt();
+        if (a) keep(a); else { S.infeasible = e; S.design = null; }
+        break;
+      }
       case 'standoff': (S.standoffs[e.task] ||= []).push(e); break;
       case 'standoff_failed': (S.standoffs[e.task] ||= []).push({ ...e, failed: true }); break;
       case 'arm_path': (S.arms[e.task] ||= []).push(e); break;
@@ -531,9 +585,58 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
       case 'program': S.program = e; break;
       case 'llm_start': S.llm = { name: e.name, model: e.model, running: true }; break;
       case 'llm': S.llm = { name: e.name, model: e.model, seconds: e.seconds, error: e.error, running: false }; break;
-      case 'run_end': S.ended = e; break;
+      case 'run_end': if (!e.stopped) S.ended = e; break;   // a stopped run is cut short, not finished: its step stays open
       default: break;
     }
+  }
+
+  /* the robot a redesign set aside is the design again, with the route and arm paths it had */
+  function keep(a) {
+    S.design = a.design; S.infeasible = null;
+    if (a.route) {
+      S.route = a.route; S.standoffs = a.standoffs; S.arms = a.arms;
+      S.steps['5 pathing'] = { ...(S.steps['5 pathing'] || {}), state: 'done' };
+    }
+  }
+  /* as agent/run.py scores them: fewest tasks stuck, then fewest failed arm paths, then the lowest price */
+  function bestAttempt() {
+    const score = (a) => {
+      const stuck = S.taskList.filter((t) => t.skill !== 'navigate' && (!(a.standoffs[t.id] || []).some((x) => !x.failed) || (a.standoffs[t.id] || []).some((x) => x.failed))).length;
+      const bad = Object.values(a.arms).flat().filter((x) => !x.ok).length;
+      return [stuck, bad, a.design.price_usd || 0];
+    };
+    const less = (x, y) => { for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] < y[i]; return false; };
+    let best = null;
+    for (const a of S.attempts) if (a.route && (!best || less(score(a), score(best)))) best = a;
+    return best;
+  }
+  /* the session's answer beats the log: when it has a robot, the page shows that robot and says nothing else */
+  function reconcile() {
+    const r = S.result;
+    if (!r || r.infeasible) return;
+    S.infeasible = null;
+    if (S.design && (!r.parts || partsKey(S.design.parts) === partsKey(r.parts))) return;
+    const a = S.attempts.find((x) => partsKey(x.design.parts) === partsKey(r.parts));
+    if (a) keep(a);
+    else S.design = { parts: r.parts || {}, price_usd: r.price_usd, mass_kg: r.mass_kg, labels: [] };
+  }
+
+  /* one read of the run's log at a time (the poll, and the last read when the session ends): resolves to how many events came */
+  let reading = Promise.resolve();
+  function readLog(g = gen) {
+    const next = reading.then(async () => {
+      if (S.closed || g !== gen || !run) return 0;
+      const r = await fetch(`${agentBase}/${run}/events?from=${S.from}`).then((x) => x.json());
+      if (g !== gen) return 0;   // a steer came in while this was on its way
+      if (r.reset) { Object.assign(S, fresh()); unmountLive(); }   // the run started over in the same folder
+      const got = r.events || [];
+      got.forEach(take);
+      if (r.next != null) S.from = r.next;
+      feedLive(got);
+      return got.length;
+    }).catch(() => 0);   // the server is busy or restarting: the next read tries again
+    reading = next;
+    return next;
   }
 
   /* replay: a finished run's log fed in at `replay` times its real speed (the preview page uses it) */
@@ -564,13 +667,8 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
 
   async function poll(g = gen) {
     if (S.closed || g !== gen || !run) return;
-    try {
-      const r = await fetch(`${agentBase}/${run}/events?from=${S.from}`).then((x) => x.json());
-      if (g !== gen) return;   // a steer came in while this was on its way
-      if (r.reset) { Object.assign(S, fresh()); unmountLive(); }   // the run started over in the same folder
-      if (r.events && r.events.length) { r.events.forEach(take); S.from = r.next; render(); feedLive(r.events); }
-    } catch { /* the server is busy or restarting: try again */ }
-    if (!S.result && !S.error && !S.stopped && g === gen) setTimeout(() => poll(g), POLL_MS);
+    if (await readLog(g)) render();
+    if (!S.closed && !S.result && !S.error && !S.stopped && g === gen) setTimeout(() => poll(g), POLL_MS);
   }
 
   const ticker = setInterval(() => {
@@ -587,6 +685,7 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
       case '3-4 design and compose':
         if (S.result && !S.result.infeasible && S.result.price_usd != null) return `${money(S.result.price_usd)}${S.result.mass_kg != null ? ` · ${Math.round(S.result.mass_kg)} kg` : ''}`;   // the session's answer beats the log
         if (S.result && S.result.infeasible) return 'No robot fits';
+        if (S.result) return 'Robot found';
         if (S.design) return `${money(S.design.price_usd)} · ${Math.round(S.design.mass_kg)} kg`;
         if (S.infeasible) return 'No robot fits';
         return S.built ? `${S.built} robots tested${stepClock(key)}` : null;
@@ -610,11 +709,20 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
   }
 
   function drawSteps() {
-    stepsList.replaceChildren(...STEPS.map((s, i) => {
+    const robot = !!S.result && !S.result.infeasible;
+    const over = !!S.ended || !!S.result;   // nothing is running any more
+    const states = STEPS.map((s, i) => {
       const st = S.steps[s.key] || {};
       const has = (s.key === '5 pathing' && S.route) || (s.key === '5d program' && S.program) || (s.key === '3-4 design and compose' && S.design);
-      let state = st.state === 'done' ? 'done' : st.state === 'run' && !S.ended ? 'run' : S.ended && !st.state ? (has ? 'done' : 'skip') : 'wait';
-      if (state === 'run' && (S.stopped || S.error)) state = 'halt';   // the rail freezes where it stopped
+      if (st.state === 'done' || (robot && i < 5)) return 'done';   // a robot in the answer was designed and routed, whatever the log's last word
+      if (st.state === 'run' && !over) return S.stopped || S.error ? 'halt' : 'run';   // the rail freezes where it stopped
+      if (over) return has || st.state === 'run' ? 'done' : 'skip';
+      return 'wait';
+    });
+    // stopped between two steps: the one it would have started next is where it stopped
+    if ((S.stopped || S.error) && !over && !states.includes('halt')) { const at = states.findIndex((x) => x !== 'done'); if (at >= 0) states[at] = 'halt'; }
+    stepsList.replaceChildren(...STEPS.map((s, i) => {
+      const state = states[i];
       const meta = state === 'halt' ? (S.stopped ? 'Stopped here' : 'Stopped on an error') : stepMeta(s.key);
       return h('li', { 'data-state': state },
         h('span.at-dot', { html: state === 'done' ? '<svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '' }, state === 'done' ? null : String(i + 1)),
@@ -749,15 +857,23 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
     return out;
   }
 
+  /* what the design could not check, in words: "the doorway width and the door header (building-wide); grip force on the bottle" */
   function caveats() {
     const labels = (S.design && S.design.labels) || [];
-    const what = { force: 'grip force', press: 'wiping pressure' };
-    return labels.map((l) => {
-      const m = l.match(/^(\w+) not verified: (.+)$/);
-      if (!m) return l;
-      const where = m[2].split(/,\s*/).map((t) => (!S.tasks[t] ? t : S.tasks[t].skill === 'pick' ? `the ${thing(S.tasks[t].object)}` : S.tasks[t].short));
-      return `${what[m[1]] || m[1]} on ${where.join(' and ')}`;
-    });
+    const wide = [], by = new Map(), other = [];
+    for (const l of labels) {
+      const m = String(l).match(/^(.+?) not verified: (.+)$/);   // "<check> not verified: <task ids, or 'building'>"
+      if (!m) { other.push(String(l)); continue; }
+      const what = UNVERIFIED[m[1]] || m[1];
+      const ids = m[2].split(/,\s*/).filter(Boolean);
+      if (ids.includes('building') && !wide.includes(what)) wide.push(what);
+      const where = [...new Set(ids.filter((t) => t !== 'building').map((t) => (!S.tasks[t] ? t : S.tasks[t].skill === 'pick' ? `the ${thing(S.tasks[t].object)}` : S.tasks[t].short)))];
+      if (!where.length) continue;
+      const key = where.join('|');
+      if (!by.has(key)) by.set(key, { what: [], where });
+      by.get(key).what.push(what);
+    }
+    return [wide.length ? `${listed(wide)} (building-wide)` : null, ...[...by.values()].map((g) => `${listed(g.what)} on ${listed(g.where)}`), ...other].filter(Boolean);
   }
 
   function finished() {
@@ -779,12 +895,13 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
     const top = wrap ? h('div.at-actions.first', play, r.snapshot ? go : null) : null;   // over the tour, the way into it comes first
     if (top) { play = null; }
     return card('Done', 'Found a robot that can do it',
-      h('p.at-lede', `The cheapest of ${S.built} robots tested in simulation that passes every check.`),
+      h('p.at-lede', S.built > 1 ? `The cheapest of ${fmt(S.built)} robots tested in simulation that passes every check.`
+        : S.built === 1 ? 'The first robot tested in simulation passes every check.' : 'It passes every check in simulation.'),
       top,
       partChips(r.parts || {}, 'done'),
       h('dl.at-funnel.result',
-        h('div', h('dt', 'Price'), h('dd', money(r.price_usd))),
-        h('div', h('dt', 'Mass'), h('dd', `${Math.round(r.mass_kg)} kg`)),
+        r.price_usd != null ? h('div', h('dt', 'Price'), h('dd', money(r.price_usd))) : null,
+        r.mass_kg != null ? h('div', h('dt', 'Mass'), h('dd', `${Math.round(r.mass_kg)} kg`)) : null,
         S.route ? h('div', h('dt', 'Route'), h('dd', `${metres()} m`), h('small', `dock → ${stopsText()}${goesOut() ? ' → out' : ''}`)) : null,
         S.taskList.length ? h('div', h('dt', 'Tasks'), h('dd', `${planned} of ${S.taskList.length}`), h('small', 'planned')) : null),
       notYet.length ? h('p.at-note', `Not yet verified: ${notYet.join('; ')}.`) : null,
@@ -809,7 +926,7 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
       case 'arm_path': return [e.ok ? 'tool' : 'warn', `arm motion at ${S.tasks[e.task]?.short || e.task}: ${e.ok ? 'ok' : e.why}`];
       case 'note': return ['note', e.text];
       case 'robot_fix': return ['warn', `redesign: ${e.why}`];
-      case 'run_end': return ['step', `run finished${e.seconds ? ` in ${e.seconds} s` : ''}`];
+      case 'run_end': return ['step', e.stopped ? 'run stopped' : `run finished${e.seconds ? ` in ${e.seconds} s` : ''}`];
       default: return null;
     }
   }
@@ -828,6 +945,10 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
 
   function render() {
     if (S.closed) return;
+    reconcile();
+    root.classList.toggle('over', !!(S.result || S.error || S.stopped));
+    root.classList.toggle('found', !!S.result && !S.result.infeasible);
+    root.classList.toggle('stopped', !!S.stopped);
     drawSteps();
     // the card is redrawn on every batch of events: keep keyboard focus on the same part chip
     const a = document.activeElement;
@@ -857,11 +978,7 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
       // read what is left of the log before drawing the result
       if (replay || !run) { render(); drawTrace(); return; }
       const g = gen;
-      fetch(`${agentBase}/${run}/events?from=${S.from}`).then((x) => x.json()).then((r) => {
-        if (g !== gen) return;
-        if (r.reset) { Object.assign(S, fresh()); unmountLive(); }   // the folder was rewritten: read it from the top
-        (r.events || []).forEach(take); S.from = r.next; feedLive(r.events || []);
-      }).catch(() => {}).finally(() => { if (g === gen) { render(); drawTrace(); } });
+      readLog(g).then(() => { if (g === gen) { render(); drawTrace(); } });
     },
     fail(message) {
       S.error = message || 'The design stopped on an error.';
@@ -881,17 +998,22 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
       if (view) api.update(view);
       if (S.stopped || S.result) return;
       S.stopped = true;
+      if (live && live.stop) { try { live.stop(); } catch { /* the view's problem */ } }   // freeze the 3D pane too
       closeMenu();
       chip.textContent = 'Stopped';
       chip.className = 'at-chip stop';
       title.textContent = 'Design stopped';
       render();
+      // read what it got to before it stopped, so the rail freezes on the right step
+      const g = gen;
+      if (!replay && run) readLog(g).then((n) => { if (n && g === gen) render(); });
     },
     update(view) {
       if (!view || (view.session_id && sid && view.session_id !== sid)) return;
       if (view.options && hasOptions(view.options)) S.options = view.options;
       if (view.previous) S.previous = view.previous;
       if (view.run && !run) run = view.run;   // never forget a run because a later view leaves it out
+      if (readPlace(view)) drawPlace();   // the agent settled on another building than the one it was opened in
       drawControls();
       drawWith();
     },

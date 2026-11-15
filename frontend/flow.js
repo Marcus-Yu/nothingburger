@@ -86,10 +86,10 @@ export async function planJob(job) {
   render(plan, s);
 }
 
-function head(s, title, job) {
+function head(s, title, job, name = '') {
   return h('div',
     h('div.card-head',
-      h('div', tag(s ? (s.kind === 'scan' ? s.name : 'Sample apartment') : 'Studio'), h('h2', title)),
+      h('div', tag(name || (s ? (s.kind === 'scan' ? s.name : 'Sample apartment') : 'Studio')), h('h2', title)),
       h('button.x', { type: 'button', 'aria-label': 'Close', onclick: hideFlow }, '×')),
     job.trim().toLowerCase() === title.toLowerCase() ? null : h('p.quote', `“${job}”`));
 }
@@ -298,6 +298,14 @@ function startWatch(plan, auto) {
 const PART_SLOTS = [['base', 'Base'], ['lift', 'Lift'], ['arm', 'Arm'], ['gripper', 'Gripper'], ['lidar', 'Lidar'], ['wrist_cam', 'Wrist camera'], ['ego_cam', 'Forward camera']];
 const pretty = (id) => String(id || '').replace(/_/g, ' ');
 
+/* the name of the place a session works in: the building the agent settled on when that is not the
+   space the job was typed in ("… at 917 Main St unit 506", typed with another building open) */
+function placeName(view, s) {
+  const b = (view && view.building) || (current && current.building);
+  if (b && b.name && b.space && (!s || b.space !== s.id)) return b.name;
+  return s ? s.name : (b && b.name) || '';
+}
+
 async function agentFlow(job, s, mine, health) {
   let view;
   try {
@@ -319,6 +327,7 @@ async function agentFlow(job, s, mine, health) {
 
 function renderAgent(view, s, mine) {
   if (view.run) current.run = view.run;
+  if (view.building) current.building = view.building;   // a later view (after a steer) can come without it
   const step = view.step || {};
   const d = step.data || {};
   const skill = d.skill || (view.assessment && view.assessment.skill) || (current.skill ?? '');
@@ -327,7 +336,7 @@ function renderAgent(view, s, mine) {
   const named = pretty(skill);
   const title = step.kind === 'task' ? 'Not a job I can do' : step.kind === 'building' ? 'Which building?'
     : skill ? named[0].toUpperCase() + named.slice(1) : 'Reading the job…';
-  const kids = [head(s, title, view.job || current.job)];
+  const kids = [head(s, title, view.job || current.job, placeName(view, s))];
 
   // 2 the outline
   const outline = section(2, 'The outline');
@@ -363,7 +372,7 @@ function renderAgent(view, s, mine) {
   // 4 the robot
   const robot = section(4, 'The robot');
   if (view.phase === 'design' && view.status === 'working') {
-    robot.append(h('p.state.wait', h('i.spin'), ` Designing the robot and planning its route in ${s.name}. This takes a few minutes.`));
+    robot.append(h('p.state.wait', h('i.spin'), ` Designing the robot and planning its route in ${placeName(view, s)}. This takes a few minutes.`));
   } else if (view.status === 'done') {
     robot.append(...robotResult(d, s));
   }
@@ -408,20 +417,23 @@ function optionsText(o) {
    Over a Matterport scan it wraps the live tour (a glass overlay) instead of covering it. */
 let traceUI = null;   // { sid, page }
 let tourPlay = null;  // the robot playing in the tour, while it plays
+/* `tracing` on <html> while the trace page lies over the tour: styles.css moves the prompt bar and the key hint out of its way */
+const tracing = (on) => document.documentElement.classList.toggle('tracing', !!on);
 function openTrace(view, s) {
   if (traceUI && traceUI.page.open) traceUI.page.close();
   hideFlow();
   const sc = space.current;
   const wrap = !!(sc && sc.kind === 'scan' && !sc.aerial);
   const page = openAgentTrace({
-    agentBase: AGENT_BASE, run: view.run, job: view.job || current.job, place: s ? s.name : '',
+    agentBase: AGENT_BASE, run: view.run, job: view.job || current.job, place: placeName(view, s), placeOf: (v) => placeName(v, s),
     session: view, client: agent, wrap,
-    onClose: () => { stopTourPlay(); if (!document.querySelector('.rd')) showFlow(); },
+    onClose: () => { stopTourPlay(); tracing(false); if (!document.querySelector('.rd')) showFlow(); },
     onOpenDesign: (r) => { stopTourPlay(); page.close(); openDesign(r); },
     onSteer: (next) => steered(next, s),
     onPlayInTour: (r) => playInTourFor(r, page),
   });
   traceUI = { sid: view.session_id, page, auto: true };
+  tracing(wrap);
 }
 function syncTrace(view, s) {
   const mine = traceUI && traceUI.sid === view.session_id;
@@ -463,8 +475,9 @@ async function playInTourFor(r, page) {
     return;
   }
   page.hide(true);
+  tracing(false);   // the tour is the page while the robot plays in it
   const back = h('button.pill.dark.xs', { type: 'button', style: 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80' }, 'Back to the agent');
-  back.addEventListener('click', () => { stopTourPlay(); page.hide(false); });
+  back.addEventListener('click', () => { stopTourPlay(); page.hide(false); tracing(page.open); });
   document.body.append(back);
   const player = tourPlay;
   tourPlay = { stop: () => player && player.stop && player.stop(), back };

@@ -41,7 +41,9 @@
 .at-jobq:disabled{cursor:default;text-decoration:none}
 .at-jobq:disabled span{display:none}
 .at-jobq:focus-visible{outline:2px solid var(--gold-ink);outline-offset:2px}
-.at-where{font-weight:800}
+.at-place{margin-top:5px;font:400 13px/1.35 var(--body);color:var(--ink-2)}
+.at-place b{font-weight:600;color:var(--ink)}
+.at-place[hidden],.at-with[hidden]{display:none}
 .at-jobedit{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .at-jobedit input{flex:1 1 260px;min-width:0;font:600 15px/1.2 var(--body);color:var(--ink);padding:8px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--gold) 55%,transparent);background:#FFFDFA}
 .at-with{margin-top:6px;font:400 12.5px/1.35 var(--body);color:var(--ink-2)}
@@ -63,7 +65,7 @@
 @keyframes at-pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,154,46,.55)}50%{box-shadow:0 0 0 5px rgba(201,154,46,0)}}
 
 /* ---------- body: steps rail + focus card ---------- */
-.at-body{position:absolute;left:var(--gutter);right:var(--gutter);top:clamp(130px,19vh,170px);bottom:var(--top);
+.at-body{position:absolute;left:var(--gutter);right:var(--gutter);top:max(clamp(130px,19vh,170px),calc(var(--head,0px) + 16px));bottom:var(--top);
   display:grid;grid-template-columns:minmax(240px,300px) minmax(0,640px);gap:24px;justify-content:center;align-items:start;transition:padding .35s ease}
 .at.trace-open .at-body{padding-right:min(420px,36vw)}
 
@@ -162,7 +164,8 @@
 
 /* ---------- the live controls: one quiet row at the foot of the focus card ---------- */
 .at-ctl{position:sticky;bottom:-26px;margin:20px -30px -26px;padding:11px 30px 13px;border-top:1px solid var(--line);
-  background:rgba(249,246,241,.96);border-radius:0 0 30px 30px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+  background:#F9F6F1;border-radius:0 0 30px 30px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.at-ctl::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:18px;margin-bottom:1px;pointer-events:none;background:linear-gradient(rgba(249,246,241,0),#F9F6F1)}
 .at-cbtn{font:600 13px/1 var(--body);color:var(--ink);padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.6);cursor:pointer;transition:background .2s;white-space:nowrap}
 .at-cbtn:hover{background:#fff}
 .at-cbtn.dark{background:var(--ink);color:var(--on-ink);border-color:var(--ink)}
@@ -215,7 +218,7 @@
 .at-rows li[data-kind="warn"] span{color:var(--error)}
 
 @media (max-height:820px) and (min-width:861px){
-  .at-body{top:118px}
+  .at-body{top:max(118px,calc(var(--head,0px) + 14px))}
   .at-funnel dd{font-size:22px}
   .at-focus{padding:22px 26px 20px}
   .at-test{min-height:164px}
@@ -227,16 +230,17 @@
   .at-right{gap:6px}
   .at-right .at-time,.at-right .at-chip{display:none}
   .at-tbtn{padding:8px 12px;font-size:12.5px}
-  .at-body{grid-template-columns:1fr;grid-template-rows:auto 1fr;overflow:auto;top:150px;gap:12px}
+  .at-body{grid-template-columns:1fr;grid-template-rows:auto 1fr;overflow:auto;gap:12px}
   .at-rail{padding:12px 14px;border-radius:20px}
   .at-rail h2{display:none}
   .at-steps{margin-top:0;grid-auto-flow:column;grid-template-columns:repeat(6,auto);justify-content:space-between;align-items:center}
   .at-steps li{grid-template-columns:auto;padding:0}
   .at-steps li::after{display:none}
   .at-steps li>div{display:none}
-  .at-steps li[data-state="run"]{grid-template-columns:auto auto;gap:8px;align-items:center}
-  .at-steps li[data-state="run"]>div{display:block}
+  .at-steps li:is([data-state="run"],[data-state="halt"]){grid-template-columns:auto auto;gap:8px;align-items:center}
+  .at-steps li:is([data-state="run"],[data-state="halt"])>div{display:block}
   .at-steps li[data-state="run"] small{display:none}
+  .at-steps li[data-state="halt"] small{min-height:0}
   .at-drawer{width:auto;left:var(--gutter)}
   .at.trace-open .at-body{padding-right:0}
   .at-funnel{grid-template-columns:repeat(3,1fr);gap:6px}
@@ -248,7 +252,7 @@
   .at-top{flex-wrap:wrap;gap:10px 12px;padding-right:0}
   .at-head{flex-basis:100%}
   .at-title{font-size:26px}
-  .at-body{top:186px}
+  .at-body{top:max(186px,calc(var(--head,0px) + 12px))}
   .at-right .at-stopbtn{padding:8px 11px}
   .at-right .at-chip.stop{display:inline-flex}
   .at-body.with-live{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
@@ -259,16 +263,25 @@
   .at-chint{display:none}
 }
 
-/* ---------- wrapped around the live Matterport tour: glass cards over the scan ---------- */
-.at.wrap{background:none;pointer-events:none}
-.at.wrap .at-top,.at.wrap .at-right,.at.wrap .at-rail,.at.wrap .at-focus,.at.wrap .at-drawer,.at.wrap .at-menu{pointer-events:auto}
-.at.wrap .at-top{max-width:min(560px,calc(100vw - 2*var(--gutter) - 460px));align-items:center;gap:12px}
-.at.wrap .at-head{padding:12px 18px 12px;border-radius:22px;background:var(--glass);backdrop-filter:blur(18px) saturate(1.1);-webkit-backdrop-filter:blur(18px) saturate(1.1);
+/* ---------- wrapped around the live Matterport tour: glass cards over the scan ----------
+   One column on the right: the controls (with the way back), the heading, the steps, the focus card.
+   The top-left corner is the studio's own (its way back, the space picker, the building search), and
+   flow.js puts `tracing` on <html> while this is open so the studio's prompt bar steps aside. */
+.at.wrap{background:none;pointer-events:none;--col:min(430px,calc(100vw - 2*var(--gutter)),calc(100vw - var(--gutter) - 500px))}   /* never over the studio's strip, up to 500px from the left */
+.at.wrap .at-right>*,.at.wrap .at-head,.at.wrap .at-rail,.at.wrap .at-focus,.at.wrap .at-drawer,.at.wrap .at-menu{pointer-events:auto}
+.at.wrap .at-right{width:var(--col)}
+.at.wrap .at-back{width:42px;height:42px;margin-right:auto}
+.at.wrap .at-head{padding:12px 16px 12px;border-radius:20px;background:var(--glass);backdrop-filter:blur(18px) saturate(1.1);-webkit-backdrop-filter:blur(18px) saturate(1.1);
   border:1px solid rgba(255,255,255,.75);box-shadow:0 0 0 1px var(--line),0 24px 60px -36px rgba(45,32,12,.45)}
 .at.wrap .at-title{font-size:22px;padding-top:0;letter-spacing:-.035em}
-.at.wrap .at-job{margin-top:5px;font-size:13px}
-.at.wrap .at-body{left:auto;right:var(--gutter);top:calc(var(--top) + 58px);width:min(430px,calc(100vw - 2*var(--gutter)));
-  grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);gap:10px;align-content:start;height:auto;bottom:auto;max-height:calc(100% - var(--top) * 2 - 58px)}
+.at.wrap .at-job{margin-top:5px;font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.at.wrap .at-job:has(form){display:block;overflow:visible}
+.at.wrap .at-jobedit input{flex-basis:150px;font-size:14px;padding:7px 10px}
+.at.wrap .at-jobedit .at-cbtn{padding:8px 10px}
+.at.wrap .at-place,.at.wrap .at-with{margin-top:3px;font-size:12.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.at.wrap .at-place[hidden],.at.wrap .at-with[hidden]{display:none}
+.at.wrap .at-body{left:auto;right:var(--gutter);top:calc(var(--top) + 50px);width:var(--col);
+  grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);gap:8px;align-content:start;height:auto;bottom:auto;max-height:calc(100% - var(--top) * 2 - 50px)}
 .at.wrap.trace-open .at-body{padding-right:0}
 .at.wrap .at-rail{padding:10px 14px;border-radius:20px}
 .at.wrap .at-rail h2{display:none}
@@ -278,7 +291,9 @@
 .at.wrap .at-steps li>div{display:none}
 .at.wrap .at-steps li:is([data-state="run"],[data-state="halt"]){grid-template-columns:auto auto;gap:8px;align-items:center}
 .at.wrap .at-steps li:is([data-state="run"],[data-state="halt"])>div{display:block}
-.at.wrap .at-steps li:is([data-state="run"],[data-state="halt"]) small{display:none}
+.at.wrap .at-steps li[data-state="run"] small{display:none}
+.at.wrap .at-steps li[data-state="halt"] b{font-size:14px;line-height:1.2}
+.at.wrap .at-steps li[data-state="halt"] small{font-size:12px;line-height:1.25;min-height:0}
 .at.wrap .at-focus{min-height:0;max-height:100%;padding:20px 20px 20px;border-radius:24px}
 .at.wrap .at-h{font-size:24px}
 .at.wrap .at-lede{font-size:14.5px}
@@ -286,23 +301,41 @@
 .at.wrap .at-funnel div{padding:10px}
 .at.wrap .at-funnel dd{font-size:20px}
 .at.wrap .at-funnel small{display:none}
+.at.wrap .at-funnel.result{margin-top:14px;grid-template-columns:repeat(auto-fit,minmax(72px,1fr))}
+.at.wrap .at-funnel.result div{padding:9px 10px}
+.at.wrap .at-funnel.result dd{font-size:17px;margin-top:6px}
 .at.wrap .at-why li{grid-template-columns:120px 1fr 28px}
 .at.wrap .at-test{min-height:0}
+.at.wrap .at-parts.chips{gap:5px}
+.at.wrap .at-part{font-size:12.5px;padding:5px 10px}
 .at.wrap .at-ctl{bottom:-20px;margin:16px -20px -20px;padding:10px 20px 12px;border-radius:0 0 24px 24px}
 .at.wrap .at-chint{display:none}
 .at.wrap .at-chip{background:rgba(249,246,241,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
 .at.wrap .at-live{height:240px;min-height:0;margin:-8px -8px 16px;border-radius:18px;box-shadow:inset 0 0 0 1px var(--line);border:0;background:rgba(23,20,15,.04)}
-.at.wrap .at-drawer{right:auto;left:var(--gutter);top:calc(var(--top) + 96px);width:min(380px,calc(100vw - 2*var(--gutter) - 460px))}
-.at.wrap .at-actions.first{margin-top:16px}
-.at.wrap .at-actions.first .at-go{padding:12px 18px;font-size:15px}
+.at.wrap .at-drawer{right:auto;left:12px;top:112px;bottom:76px;width:min(380px,calc(100vw - var(--gutter) - var(--col) - 36px))}
+.at.wrap .at-actions.first{margin-top:14px;gap:8px}
+.at.wrap .at-actions.first .at-go{padding:12px 16px;font-size:15px;gap:8px}
+/* found or stopped: the heading above already says so, and the card is short of room for what it holds */
+.at.wrap:is(.found,.stopped) :is(.at-kicker,.at-h){display:none}
+.at.wrap:is(.found,.stopped) .at-lede{margin-top:0;font-size:14px}
+.at.wrap.found .at-actions.first{margin-top:10px}
+.at.wrap.found .at-parts.chips{margin-top:8px}
+.at.wrap.found .at-funnel.result{margin-top:10px}
+.at.wrap.stopped .at-test{margin-top:14px;padding-top:12px}
+.at.wrap.stopped .at-card .at-actions{display:none}   /* "Change and run again" is "Edit the job" in the bar right below */
+.at.wrap.found .at-note{margin-top:8px;font-size:13px;line-height:1.4}
+.at.wrap:is(.found,.stopped) .at-part{font-size:12px;padding:4px 9px}
+.at.wrap.over .at-live{height:clamp(132px,calc(100vh - 668px),240px);margin-bottom:12px}   /* when it is over the card holds the result: on a short screen the 3D view leaves it the room */
 .at.away{opacity:0!important;visibility:hidden}
 .at.away *{pointer-events:none!important}
 @media (max-width:860px){
-  .at.wrap .at-top{max-width:none;right:var(--gutter);padding-right:0}
+  .at.wrap .at-right{width:auto}   /* the way back joins the controls on the right: the studio's own strip is on the left */
+  .at.wrap .at-back{margin-right:0}
   .at.wrap .at-title{font-size:18px}
   .at.wrap .at-head{padding:10px 14px}
-  .at.wrap .at-body{top:auto;bottom:var(--top)!important;left:var(--gutter);width:auto;max-height:58vh;overflow:visible}
+  .at.wrap .at-job,.at.wrap .at-place,.at.wrap .at-with{-webkit-line-clamp:1}
+  .at.wrap .at-body{top:auto;bottom:var(--top)!important;left:var(--gutter);width:auto;max-height:62vh;overflow:visible}
   .at.wrap .at-live{display:none}   /* on a phone the tour itself is the picture */
-  .at.wrap .at-drawer{left:var(--gutter);right:var(--gutter);width:auto;top:120px}
+  .at.wrap .at-drawer{left:var(--gutter);right:var(--gutter);width:auto;top:120px;bottom:var(--top)}
 }
 @media (prefers-reduced-motion:reduce){.at *{animation:none!important;transition:none!important}}

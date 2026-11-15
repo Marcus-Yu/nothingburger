@@ -4,14 +4,18 @@
    World frame (world.json): metres, Z up, +X east, +Y north. Three.js: Y up, so a world point
    (x, y, z) is drawn at (x, z, -y): north is up the screen from the starting view.
 
-   createRouteStage(canvas, { snap, reducedMotion }) -> an object the page drives:
+   createRouteStage(canvas, { snap, reducedMotion, insets }) -> an object the page drives:
      search(i, ms)    reveal leg i's explored cells and dropped branches over ms
      settle(i)        dim leg i's search to a faint trace
      draw(i, ms)      draw leg i's chosen route
      drive(i, ms)     drive the robot along leg i
      pulse(stop)      ring the robot's spot (a task done)
      labels()         screen positions for the place labels
-     finishAll()  reset()  nudge()  tilt()  dispose() */
+     finishAll()  reset()  nudge()  tilt()  dispose()
+
+   insets(w, h) -> { top, right, bottom, left }: how many px of each edge of the canvas the page covers
+   (its heading, the route panel, the buttons). The building, the route, the dock and the scale bar
+   are framed in what is left, so none of them sits under the page's own things. */
 import * as THREE from 'three';
 import { buildRobot, solidKit, COLORS } from './parts.js';
 import { paperWorld, grid, lines, contactShadow, tweens, easeInOut, disposeScene } from './drafting.js';
@@ -166,7 +170,7 @@ const niceLength = (span) => [1, 2, 5, 10, 20, 50].find((v) => v >= span / 5) ||
 
 /* ---------- the stage ---------- */
 
-export function createRouteStage(canvas, { snap, reducedMotion = false }) {
+export function createRouteStage(canvas, { snap, reducedMotion = false, insets = () => ({ top: 0, right: 0, bottom: 0, left: 0 }) }) {
   const { renderer, scene } = paperWorld(canvas);
   const world = snap.world;
   const xs = world.rooms.flatMap((r) => r.polygon.map((p) => p[0])), ys = world.rooms.flatMap((r) => r.polygon.map((p) => p[1]));
@@ -225,25 +229,70 @@ export function createRouteStage(canvas, { snap, reducedMotion = false }) {
   const camera = new THREE.PerspectiveCamera(32, 1, 0.5, 400);
   const AZ0 = 0, EL0 = 1.02, EL_MIN = 0.35, EL_MAX = 1.5;
   let az = AZ0, el = EL0;
+  let dist = span * 2.2, shift = [0, 0];   // how far the camera sits, and how far (px) the picture is moved to clear the page's things
+
+  const aim = (a, e, d) => {
+    camera.position.set(centre.x + Math.sin(a) * Math.cos(e) * d, Math.sin(e) * d, centre.z + Math.cos(a) * Math.cos(e) * d);
+    camera.lookAt(centre);
+    camera.updateMatrixWorld(true);
+  };
+
+  /* Everything that has to be seen, as points: the floor and the tops of the walls and furniture, the
+     route, the pins, and where the page hangs its labels (the dock, the way out, north, the scale bar's ends). */
+  function sights() {
+    const pts = [];
+    for (const r of world.rooms) for (const [x, y] of r.polygon) pts.push(at(x, y, 0), at(x, y, WALL_H));
+    for (const o of world.obstacles) for (const x of [o.min[0], o.max[0]]) for (const y of [o.min[1], o.max[1]]) pts.push(at(x, y, o.max[2]));
+    for (const L of legs) for (const [x, y] of L.leg.waypoints) pts.push(at(x, y, 0.06));
+    const [dx, dy] = world.dock.pose;
+    for (const [ox, oy] of [[-0.8, 0], [0.8, 0], [0, -0.8], [0, 0.8]]) pts.push(at(dx + ox, dy + oy, 0.02));
+    return pts.concat(labelPoints().map((l) => l.v));
+  }
+
+  /* Choose the distance and the shift once per size, from the starting angle: the sights fill the part
+     of the canvas the page leaves free. Turning and tilting afterwards keeps both, so a drag does not zoom. */
+  function fit() {
+    const w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
+    placeFurniture(w / h < 0.9);
+    const ins = insets(w, h);
+    const padX = THREE.MathUtils.clamp(w * 0.035, 12, 44);   // room for a label hung on the outermost point
+    let x0 = ins.left + padX, x1 = w - ins.right - padX, y0 = ins.top + 30, y1 = h - ins.bottom - 8;
+    if (x1 - x0 < 120) { x0 = padX; x1 = w - padX; }
+    if (y1 - y0 < 120) { y0 = 30; y1 = h - 8; }
+    camera.aspect = w / h;
+    camera.clearViewOffset();
+    camera.updateProjectionMatrix();
+    const pts = sights();
+    const seen = () => {
+      const b = { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity };
+      for (const p of pts) {
+        const v = p.clone().project(camera);
+        const x = (v.x * 0.5 + 0.5) * w, y = (-v.y * 0.5 + 0.5) * h;
+        b.x0 = Math.min(b.x0, x); b.x1 = Math.max(b.x1, x); b.y0 = Math.min(b.y0, y); b.y1 = Math.max(b.y1, y);
+      }
+      return b;
+    };
+    dist = span * 2.2 + 6;
+    for (let i = 0; i < 6; i++) {
+      aim(AZ0, EL0, dist);
+      const b = seen();
+      dist *= Math.max((b.x1 - b.x0) / (x1 - x0), (b.y1 - b.y0) / (y1 - y0));
+    }
+    aim(AZ0, EL0, dist);
+    const b = seen();
+    shift = [(x0 + x1) / 2 - (b.x0 + b.x1) / 2, (y0 + y1) / 2 - (b.y0 + b.y1) / 2];
+    camera.far = Math.max(400, dist * 3);
+    scene.fog.near = dist * 1.2;
+    scene.fog.far = dist * 2.6;
+  }
 
   function frame() {
     const w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
-    const aspect = w / h;
-    camera.aspect = aspect;
-    const compact = aspect < 0.9;
-    placeFurniture(compact);
-    const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const fitW = (box.x1 - box.x0) * (compact ? 1.08 : 1.75), fitH = (box.y1 - box.y0) * (compact ? 1.55 : 1.18);
-    const dist = Math.max(fitH / 2 / t, fitW / 2 / (t * aspect));
-    // leave the right of the screen for the route panel on wide screens, the bottom for it on phones
-    const look = centre.clone().add(new THREE.Vector3(compact ? 0 : (box.x1 - box.x0) * 0.18, 0, (box.y1 - box.y0) * (compact ? 0.16 : 0.07)));
-    camera.position.set(look.x + Math.sin(az) * Math.cos(el) * dist, Math.sin(el) * dist, look.z + Math.cos(az) * Math.cos(el) * dist);
-    camera.lookAt(look);
-    scene.fog.near = dist * 1.2;
-    scene.fog.far = dist * 2.6;
-    camera.updateProjectionMatrix();
+    camera.aspect = w / h;
+    camera.setViewOffset(w, h, -shift[0], -shift[1], w, h);   // the picture moved by `shift`, the perspective untouched
+    aim(az, el, dist);
   }
-  function resize() { renderer.setSize(canvas.clientWidth, canvas.clientHeight, false); frame(); }
+  function resize() { renderer.setSize(canvas.clientWidth, canvas.clientHeight, false); fit(); frame(); }
   const tilt = (rad) => { el = THREE.MathUtils.clamp(el + rad, EL_MIN, EL_MAX); frame(); };
   const nudge = (rad) => { az += rad; frame(); };
   let drag = null;
@@ -337,19 +386,25 @@ export function createRouteStage(canvas, { snap, reducedMotion = false }) {
     frame();
   }
 
-  /** Screen positions for the page's labels: each task's pin, the dock and the way out. */
+  /* Where the page's labels hang: each task's pin, the dock, the way out, north and the scale bar's ends. */
+  function labelPoints() {
+    const out = Object.entries(pins).map(([id, p]) => ({ id, v: p.position.clone().add(new THREE.Vector3(0, 1.6 * k, 0)) }));
+    out.push({ id: 'dock', v: at(world.dock.pose[0] + 1.6 * k, world.dock.pose[1] + 0.4 * k, 0.3) });
+    const fp = furniture.group.position;
+    out.push({ id: 'north', v: furniture.north.clone().add(fp) }, { id: 'scale0', v: furniture.zero.clone().add(fp) }, { id: 'scale', v: furniture.end.clone().add(fp) });
+    const door = world.doorways.find((d) => d.id === world.way_out?.doorway);
+    if (door) out.push({ id: 'way_out', v: at(door.position[0] - 2.2 * k, door.position[1] - 0.9 * k, 0.3) });
+    return out;
+  }
+
+  /** Screen positions for the page's labels. */
   function labels() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
     const out = [];
-    const put = (id, v) => { const p = v.clone().project(camera); if (p.z < 1) out.push({ id, x: (p.x * 0.5 + 0.5) * w, y: (-p.y * 0.5 + 0.5) * h }); };
-    for (const [id, p] of Object.entries(pins)) put(id, p.position.clone().add(new THREE.Vector3(0, 1.6 * k, 0)));
-    put('dock', at(world.dock.pose[0] + 1.6 * k, world.dock.pose[1] + 0.4 * k, 0.3));
-    const fp = furniture.group.position;
-    put('north', furniture.north.clone().add(fp));
-    put('scale0', furniture.zero.clone().add(fp));
-    put('scale', furniture.end.clone().add(fp));
-    const door = world.doorways.find((d) => d.id === world.way_out?.doorway);
-    if (door) put('way_out', at(door.position[0] - 2.2 * k, door.position[1] - 0.9 * k, 0.3));
+    for (const { id, v } of labelPoints()) {
+      const p = v.project(camera);
+      if (p.z < 1) out.push({ id, x: (p.x * 0.5 + 0.5) * w, y: (-p.y * 0.5 + 0.5) * h });
+    }
     return out;
   }
 
