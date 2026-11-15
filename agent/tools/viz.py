@@ -147,9 +147,14 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
     wb.add_light(pos=[(x0 + x1) / 2 - 2.0, (y0 + y1) / 2 - 1.5, 7.0], dir=[0.25, 0.2, -1.0], diffuse=[0.42, 0.42, 0.40], specular=[0, 0, 0],
                  type=mujoco.mjtLightType.mjLIGHT_DIRECTIONAL, castshadow=not scan)  # the scan's rough surfaces shadow themselves in blocks
     box = mujoco.mjtGeom.mjGEOM_BOX
-    if scan:  # the real room: its mesh carries its own light, so it is shown bright and the drawn floor, walls and furniture are left out
-        spec.visual.headlight.ambient = [0.80, 0.80, 0.80]
-        spec.visual.headlight.diffuse = [0.10, 0.10, 0.10]
+    if scan:  # the real room: the drawn floor, walls and furniture are left out
+        # Its textures already hold the room's light, so it is drawn at its own colours whichever way a surface
+        # faces: almost all of what reaches the eye is the material's own glow (emission), next to which the
+        # lights add a few percent. The robot keeps ordinary shading from the same lights.
+        spec.visual.headlight.ambient = [0.45, 0.45, 0.45]
+        spec.visual.headlight.diffuse = [0.35, 0.35, 0.35]
+        spec.add_texture(name="scan_sky", type=mujoco.mjtTexture.mjTEXTURE_SKYBOX, builtin=mujoco.mjtBuiltin.mjBUILTIN_GRADIENT,
+                         rgb1=[0.90, 0.92, 0.94], rgb2=[0.80, 0.82, 0.84], width=64, height=64)
         root, listing = scan
         seen = {}
         for i, t in enumerate(listing["tiles"]):
@@ -157,7 +162,7 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
                 continue
             if t["texture"] not in seen:
                 spec.add_texture(name=f"scan_t{i}", type=mujoco.mjtTexture.mjTEXTURE_2D, file=str(root / t["texture"]))
-                mat = spec.add_material(name=f"scan_m{i}", specular=0, shininess=0)
+                mat = spec.add_material(name=f"scan_m{i}", specular=0, shininess=0, rgba=[SCAN_DIM, SCAN_DIM, SCAN_DIM, 1], emission=(1 - 0.45 * SCAN_DIM) / SCAN_DIM)
                 tex = [""] * int(mujoco.mjtTextureRole.mjNTEXROLE)
                 tex[int(mujoco.mjtTextureRole.mjTEXROLE_RGB)] = f"scan_t{i}"
                 mat.textures = tex
@@ -189,7 +194,10 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
         cloth = wb.add_body(name="towel", mocap=True, pos=[0, 0, -5])
         cloth.add_geom(type=box, size=[v / 2 for v in TOWEL], rgba=[*TOWEL_RGB, 1], contype=0, conaffinity=0)
     if not top:  # the film looks across the floor, so there has to be something beyond the building
-        wb.add_geom(type=box, pos=[(x0 + x1) / 2, (y0 + y1) / 2, -0.06], size=[x1 - x0 + 20, y1 - y0 + 20, 0.01], rgba=[0.20, 0.21, 0.22, 1],
+        wb.add_geom(type=box, pos=[(x0 + x1) / 2, (y0 + y1) / 2, -0.06], size=[x1 - x0 + 20, y1 - y0 + 20, 0.01],
+                    rgba=[0.78, 0.79, 0.80, 1] if scan else [0.20, 0.21, 0.22, 1], contype=0, conaffinity=0)
+    elif scan:  # from above, where the scan has nothing (inside walls, outside the building) is a light grey, not black
+        wb.add_geom(type=box, pos=[(x0 + x1) / 2, (y0 + y1) / 2, -0.4], size=[(x1 - x0) / 2 + 1, (y1 - y0) / 2 + 1, 0.01], rgba=[0.80, 0.81, 0.82, 1],
                     contype=0, conaffinity=0)
     m = spec.compile()
     d = mujoco.MjData(m)
@@ -309,6 +317,7 @@ def _timeline(build: dict, route: dict, trajectory: dict):
     return frames, chapters
 
 
+SCAN_DIM = 0.08        # the scan's materials reflect this little light and glow for the rest: see _top_scene
 TOWEL = (0.30, 0.22, 0.012)   # the wiping cloth shown in the film and the 3D page: length, width, thickness in metres
 TOWEL_RGB = (0.93, 0.96, 0.99)
 
@@ -399,7 +408,8 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
 
 # ------------------------------------------------------------------ the robot for the real-room tour (web/viewer/tour.html)
 
-TOUR_FACES = 20000  # a mesh with more triangles than this is thinned to about this many for the browser
+TOUR_FACES = 40000      # a mesh over TOUR_THIN_OVER triangles is thinned to about this many for the browser
+TOUR_THIN_OVER = 120000
 
 
 def _geom_mesh(m, g):
@@ -412,7 +422,7 @@ def _geom_mesh(m, g):
         v = m.mesh_vert[m.mesh_vertadr[k]: m.mesh_vertadr[k] + m.mesh_vertnum[k]].copy()
         f = m.mesh_face[m.mesh_faceadr[k]: m.mesh_faceadr[k] + m.mesh_facenum[k]].copy()
         mesh = trimesh.Trimesh(v, f, process=False)
-        if len(f) > TOUR_FACES:
+        if len(f) > TOUR_THIN_OVER:  # thinning a part made of thin sections (the base frame) tears it, so only the heaviest are thinned
             try:
                 mesh = mesh.simplify_quadric_decimation(face_count=TOUR_FACES)
             except Exception:

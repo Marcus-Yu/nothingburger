@@ -44,7 +44,7 @@ let meta, frames, bodies = [], frame = 0, playing = false, follow = true, rooms 
 
 const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.xr.enabled = true; document.body.prepend(renderer.domElement);
-const scene = new THREE.Scene(); scene.background = new THREE.Color(0x111111);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0xdde2e6);  // where the scan has nothing: a light sky, not a black void
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 200);
 const rig = new THREE.Group(); rig.add(camera); scene.add(rig);  // in a headset the rig is where you stand
 const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.495; controls.minDistance = 0.6; controls.maxDistance = 14; controls.enablePan = false;
