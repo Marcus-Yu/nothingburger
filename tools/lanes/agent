@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Start an agent in a lane, from the repo root so .claude/settings.json (and its hooks) load.
+#   tools/lanes/agent backend            # Claude Code
+#   tools/lanes/agent frontend codex     # any other agent command
+set -euo pipefail
+root="$(cd "$(dirname "$0")/../.." && pwd)"
+lane="${1:-}"
+python3 "$root/tools/lanes/lanes.py" check-lane "$lane" || { echo "usage: tools/lanes/agent <lane> [command...]" >&2; exit 1; }
+shift
+python3 "$root/tools/lanes/lanes.py" install-git-hook  # idempotent; adds the pre-commit lane check
+cd "$root"
+export AGENT_LANE="$lane"
+[ $# -gt 0 ] || set -- claude
+exec "$@"
