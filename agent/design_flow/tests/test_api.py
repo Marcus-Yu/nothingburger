@@ -250,7 +250,7 @@ class PipelineDesignerTest(unittest.TestCase):
         from agent.design_flow.pipeline import NoWorld, run_pipeline
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(NoWorld):
-                run_pipeline({"task": "wipe", "demo": {}, "world": "la-mirada"}, runs=Path(tmp))
+                run_pipeline({"task": "wipe", "demo": {}, "world": "a-space-nobody-loaded"}, runs=Path(tmp))
             self.assertEqual(list(Path(tmp).iterdir()), [])
 
 

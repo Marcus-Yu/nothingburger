@@ -1,0 +1,12 @@
+{
+ "note": "the same job as la_mirada.job.txt, for runs without a model",
+ "tasks": [
+  {
+   "id": "t1",
+   "skill": "wipe",
+   "anchor": "kitchen_top_1",
+   "object": "cloth",
+   "carries": false
+  }
+ ]
+}
