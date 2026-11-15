@@ -54,6 +54,7 @@ def render(robot_xml: str, qpos: dict | None, label: str, *, pose=None, size: in
         seg = r.render()[:, :, 0]
         r.close()
         alpha = np.where((seg >= 0) & (seg != floor), 255, 0).astype(np.uint8)
+        rgb[alpha == 0] = 0  # only the robot is kept; blank the rest so the file stays small over a photographed room
         Image.fromarray(np.dstack([rgb, alpha]), "RGBA").save(where[0])
         return where[1]
     except Exception as e:  # a missing GL context or a model that will not load must not stop the run
@@ -112,10 +113,25 @@ def _wall_runs(world: dict):
     return out
 
 
+def _scan(world: dict):
+    """(folder, listing) of the real place's textured mesh when the world names one and it is on disk, else None."""
+    import json
+    from pathlib import Path
+
+    if not world.get("scan"):
+        return None
+    root = Path(__file__).resolve().parents[2] / world["scan"]["dir"]
+    try:
+        return root, json.loads((root / "scan.json").read_text())
+    except (OSError, ValueError):
+        return None
+
+
 def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
     """(model, data, renderer, camera, robot geom mask) for the world seen from straight above (parallel
     projection), cached."""
-    key = (world.get("id"), len(str(world)), hash(robot_xml), top)
+    scan = _scan(world)
+    key = (world.get("id"), len(str(world)), hash(robot_xml), top, bool(scan))
     if key in _top:
         return _top[key]
     spec = mujoco.MjSpec.from_string(robot_xml) if robot_xml else mujoco.MjSpec()
@@ -129,18 +145,35 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
     wb = spec.worldbody
     x0, y0, x1, y1 = top_extent(world)
     wb.add_light(pos=[(x0 + x1) / 2 - 2.0, (y0 + y1) / 2 - 1.5, 7.0], dir=[0.25, 0.2, -1.0], diffuse=[0.42, 0.42, 0.40], specular=[0, 0, 0],
-                 type=mujoco.mjtLightType.mjLIGHT_DIRECTIONAL, castshadow=True)
+                 type=mujoco.mjtLightType.mjLIGHT_DIRECTIONAL, castshadow=not scan)  # the scan's rough surfaces shadow themselves in blocks
     box = mujoco.mjtGeom.mjGEOM_BOX
-    for r in world["rooms"]:
+    if scan:  # the real room: its mesh carries its own light, so it is shown bright and the drawn floor, walls and furniture are left out
+        spec.visual.headlight.ambient = [0.80, 0.80, 0.80]
+        spec.visual.headlight.diffuse = [0.10, 0.10, 0.10]
+        root, listing = scan
+        seen = {}
+        for i, t in enumerate(listing["tiles"]):
+            if top and t["part"] != "lo":  # from above, only what is below head height, or the upper floors hide the room
+                continue
+            if t["texture"] not in seen:
+                spec.add_texture(name=f"scan_t{i}", type=mujoco.mjtTexture.mjTEXTURE_2D, file=str(root / t["texture"]))
+                mat = spec.add_material(name=f"scan_m{i}", specular=0, shininess=0)
+                tex = [""] * int(mujoco.mjtTextureRole.mjNTEXROLE)
+                tex[int(mujoco.mjtTextureRole.mjTEXROLE_RGB)] = f"scan_t{i}"
+                mat.textures = tex
+                seen[t["texture"]] = f"scan_m{i}"
+            spec.add_mesh(name=f"scan_g{i}", file=str(root / t["mesh"]), inertia=mujoco.mjtMeshInertia.mjMESH_INERTIA_SHELL)
+            wb.add_geom(type=mujoco.mjtGeom.mjGEOM_MESH, meshname=f"scan_g{i}", material=seen[t["texture"]], contype=0, conaffinity=0)
+    for r in [] if scan else world["rooms"]:
         p = np.array(r["polygon"], dtype=float)
         lo, hi = p.min(0), p.max(0)
         rgb = FLOORS.get(r.get("type"), (0.74, 0.72, 0.68))
         wb.add_geom(type=box, pos=[*(lo + hi) / 2, -0.02], size=[*(hi - lo) / 2, 0.02], rgba=[*rgb, 1], contype=0, conaffinity=0)
-    for ax, ay, bx, by in _wall_runs(world):
+    for ax, ay, bx, by in [] if scan else _wall_runs(world):
         length, yaw = float(np.hypot(bx - ax, by - ay)), float(np.arctan2(by - ay, bx - ax))
         wb.add_geom(type=box, pos=[(ax + bx) / 2, (ay + by) / 2, WALL_H / 2], size=[length / 2 + WALL_T / 2, WALL_T / 2, WALL_H / 2],
                     quat=[np.cos(yaw / 2), 0, 0, np.sin(yaw / 2)], rgba=[0.93, 0.92, 0.89, 1], contype=0, conaffinity=0)
-    for o in world.get("obstacles", []):
+    for o in [] if scan else world.get("obstacles", []):
         lo, hi = np.array(o["box"]["min"], dtype=float), np.array(o["box"]["max"], dtype=float)
         rgb = next((c for k, c in FURNITURE if k in o["id"]), (0.60, 0.58, 0.55))
         if "table" in o["id"] and hi[2] - lo[2] > 0.5:  # a table is a top on four legs, not a solid block
@@ -188,6 +221,7 @@ def room_view(world: dict) -> dict | None:
         seg = r.render()[:, :, 0]
         r.disable_segmentation_rendering()
         alpha = np.where(seg >= 0, 255, 0).astype(np.uint8)  # nothing outside the building
+        rgb[alpha == 0] = 0  # only the robot is kept; blank the rest so the file stays small over a photographed room
         Image.fromarray(np.dstack([rgb, alpha]), "RGBA").save(where[0])
         return {"frame": where[1], "extent": [round(v, 3) for v in top_extent(world)]}
     except Exception as e:
@@ -220,6 +254,7 @@ def robot_top(world: dict, robot_xml: str, qpos: dict | None, pose, label: str) 
         r.disable_segmentation_rendering()
         ids = np.flatnonzero(robot & (m.geom_rgba[:, 3] > 0.05))
         alpha = np.where(np.isin(seg, ids), 255, 0).astype(np.uint8)
+        rgb[alpha == 0] = 0  # only the robot is kept; blank the rest so the file stays small over a photographed room
         Image.fromarray(np.dstack([rgb, alpha]), "RGBA").save(where[0])
         return where[1]
     except Exception as e:

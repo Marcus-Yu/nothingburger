@@ -9,3 +9,4 @@ runs/scratch/
 MUJOCO_LOG.TXT
 .claude/launch.json
 web/_vendor/
+world/_scans/

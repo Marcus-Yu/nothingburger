@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot in the room</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #eee; font: 14px/1.4 -apple-system, "Segoe UI", Inter, sans-serif; overflow: hidden; }
+  canvas { position: fixed; inset: 0; display: block; }
+  #bar { position: fixed; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+         background: rgba(15, 16, 15, .86); border: 1px solid #333; border-radius: 12px; padding: 8px 10px; }
+  #bar button, #bar select { font: inherit; color: #eee; background: #262925; border: 1px solid #3a3d38; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+  #bar button.on { border-color: #6cc3cc; color: #6cc3cc; }
+  #seek { flex: 1 1 200px; accent-color: #6cc3cc; }
+  #now { flex: 1 1 100%; font-weight: 600; min-height: 1.3em; }
+  #msg { flex: 1 1 100%; color: #9a988f; font-size: 12px; }
+  #time { font-variant-numeric: tabular-nums; color: #9a988f; }
+</style>
+<div id="bar">
+  <div id="now">Loading the room</div>
+  <button id="play">Play</button>
+  <input id="seek" type="range" min="0" max="1" value="0" step="1" aria-label="Position in the job">
+  <span id="time">0:00</span>
+  <select id="speed" aria-label="Speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+  <select id="chapter" aria-label="Jump to a step"></select>
+  <button id="follow" class="on" title="Keep the view centred on the robot">Follow</button>
+  <button id="eye" title="Stand next to the robot at eye height">Stand by it</button>
+  <button id="above" title="Look at the whole room from above">From above</button>
+  <button id="vr" hidden title="Stand in the room in a headset">Enter VR</button>
+  <div id="msg"></div>
+</div>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
+<script type="module">
+// The planned job played inside a mesh of the real room, seen from anywhere: drag to look around, scroll to move in and out,
+// right-drag to slide. The room is world/_scans/<world>/room.glb (stitched from the place's Matterport tour, not committed);
+// the robot and its motion are the run's frames/tour_robot.glb and tour_frames.bin. Positions are played back, not simulated.
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const $ = id => document.getElementById(id), q = new URLSearchParams(location.search);
+const run = (q.get("run") || "runs/gallery/jrr").replace(/^runs\//, ""), base = `/runs/${run}/`;
+const say = t => { $("msg").textContent = t; };
+let meta, frames, bodies = [], frame = 0, playing = false, follow = true;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.xr.enabled = true; document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x111111);
+const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 200);
+const rig = new THREE.Group(); rig.add(camera); scene.add(rig);  // in a headset the rig is where you stand
+const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.495; controls.minDistance = 0.6; controls.maxDistance = 40;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x9a8f80, 1.6)); const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(3, 8, 2); scene.add(sun);
+const world = new THREE.Group(); world.rotation.x = -Math.PI / 2; scene.add(world);  // the plan's frame has Z up; three.js has Y up
+addEventListener("resize", () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+
+const robotAt = () => { const o = Math.floor(frame) * bodies.length * 7; return new THREE.Vector3(frames[o], frames[o + 2], -frames[o + 1]); };
+function show(i) {
+  frame = Math.max(0, Math.min(meta.n - 1, i)); const k = Math.floor(frame) * bodies.length * 7;
+  bodies.forEach((b, j) => { if (!b) return; const o = k + j * 7; b.position.set(frames[o], frames[o + 1], frames[o + 2]); b.quaternion.set(frames[o + 4], frames[o + 5], frames[o + 6], frames[o + 3]); });
+  const t = frame / meta.fps; $("seek").value = Math.floor(frame); $("time").textContent = `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+  let c = 0; meta.chapters.forEach((ch, n) => { if (t >= ch.t) c = n; });
+  $("now").textContent = meta.chapters[c] ? meta.chapters[c].label : ""; if ($("chapter").selectedIndex !== c) $("chapter").selectedIndex = c;
+}
+function view(dist, height) {  // put the camera `dist` from the robot at `height`, on the side it is now
+  const p = robotAt(), d = camera.position.clone().sub(controls.target).setY(0); if (d.lengthSq() < 1e-6) d.set(1, 0, 1);
+  d.setLength(dist); controls.target.set(p.x, 0.8, p.z); camera.position.set(p.x + d.x, height, p.z + d.z);
+}
+
+(async () => {
+  const events = (await (await fetch(base + "events.jsonl")).text()).split("\n").filter(Boolean).map(l => JSON.parse(l));
+  meta = events.filter(e => e.kind === "tour").pop();
+  if (!meta) return say("This run has no robot export: rerun it with --frames --walkthrough");
+  const w = await (await fetch(base + "world.json")).json();
+  frames = new Float32Array(await (await fetch(base + meta.frames)).arrayBuffer());
+  $("seek").max = meta.n - 1;
+  $("chapter").innerHTML = meta.chapters.map((c, i) => `<option value="${i}">${c.label.replace(/</g, "&lt;")}</option>`).join("");
+  const load = url => new Promise((res, rej) => new GLTFLoader().load(url, g => res(g.scene), undefined, rej));
+  const robot = await load(base + meta.glb); world.add(robot);
+  bodies = Array.from({ length: meta.bodies }, (_, i) => robot.getObjectByName(`body${i}`));
+  show(0); camera.position.set(robotAt().x + 3, 2.2, robotAt().z + 3); view(4.5, 2.4);
+  say("Loading the room");
+  try {
+    const room = await load(`/scans/${w.id}/room.glb`);
+    room.traverse(o => { if (o.isMesh) { const m = o.material; o.material = new THREE.MeshBasicMaterial({ map: m.map }); m.dispose(); } });  // the scan's colours already hold the room's light
+    world.add(room); say("The real room, from its Matterport scan. Drag to look around, scroll to move in and out, right-drag to slide. The motion is the plan played back, not a simulation.");
+  } catch (e) { say("This world has no room mesh on this machine (world/_scans is not committed): see web/README.md for how to capture it"); }
+  if (navigator.xr && await navigator.xr.isSessionSupported("immersive-vr").catch(() => false)) $("vr").hidden = false;
+})().catch(e => say("Could not start: " + (e && e.message || e)));
+
+let last = performance.now();
+renderer.setAnimationLoop(now => {
+  const dt = Math.min(now - last, 100); last = now;
+  if (playing && bodies.length) { const before = robotAt(); show(frame + dt / 1000 * meta.fps * (+$("speed").value));
+    if (follow) { const d = robotAt().sub(before); controls.target.add(d); camera.position.add(d); if (renderer.xr.isPresenting) rig.position.add(d); }
+    if (frame >= meta.n - 1) { playing = false; $("play").textContent = "Play"; } }
+  if (!renderer.xr.isPresenting) controls.update();
+  renderer.render(scene, camera);
+});
+
+$("play").onclick = () => { if (!bodies.length) return; if (frame >= meta.n - 1) show(0); playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; };
+$("seek").oninput = e => { if (bodies.length) { show(+e.target.value); if (follow) view(camera.position.distanceTo(controls.target), camera.position.y); } };
+$("chapter").onchange = e => { if (bodies.length) { show(meta.chapters[+e.target.value].t * meta.fps + 1); if (follow) view(camera.position.distanceTo(controls.target), camera.position.y); } };
+$("follow").onclick = () => { follow = !follow; $("follow").classList.toggle("on", follow); };
+$("eye").onclick = () => bodies.length && view(2.2, 1.6);
+$("above").onclick = () => bodies.length && view(4, 14);
+$("vr").onclick = async () => {  // stand two metres from the robot, on the floor
+  const s = await navigator.xr.requestSession("immersive-vr", { optionalFeatures: ["local-floor"] }); renderer.xr.setReferenceSpaceType("local-floor"); await renderer.xr.setSession(s);
+  const p = robotAt(); camera.position.set(0, 0, 0); rig.position.set(p.x + 2, 0, p.z); s.addEventListener("end", () => { rig.position.set(0, 0, 0); view(4.5, 2.4); });
+};
+</script>
+</html>

@@ -170,6 +170,22 @@
      "type": "string"
     }
    }
+  },
+  "scan": {
+   "type": "object",
+   "description": "A textured mesh of the real place, already in this world's frame, that pictures show instead of drawn boxes. For looks only: planning uses `obstacles`. Pictures fall back to boxes when the folder is not on disk.",
+   "required": [
+    "dir"
+   ],
+   "properties": {
+    "dir": {
+     "type": "string",
+     "description": "folder under the repo holding scan.json (the list of mesh pieces and textures) and room.glb, written by world/scenarios/tools/stitch_scan.py"
+    },
+    "source": {
+     "type": "string"
+    }
+   }
   }
  }
 }

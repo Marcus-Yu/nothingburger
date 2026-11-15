@@ -186,7 +186,7 @@ svg.photo .roomlabel { font-size: .17px; } svg.photo .obstlabel { font-size: .15
     </section>
     <section class="card" id="walkcard" hidden><h2>Watch it work <em id="walknote"></em></h2>
       <div id="walk"><video id="walkvideo" controls muted playsinline preload="metadata"></video>
-        <div id="walknow"></div><a class="btn ghost" id="walktour" hidden target="_blank" rel="noopener" style="display:inline-block;margin:0 0 8px;text-decoration:none">Watch it in the real room (Matterport scan)</a><div id="walkchapters"></div><div class="hint" id="walkhint"></div></div>
+        <div id="walknow"></div><a class="btn ghost" id="walktour" hidden target="_blank" rel="noopener" style="display:inline-block;margin:0 0 8px;text-decoration:none">Watch it in the real room (Matterport scan)</a> <a class="btn ghost" id="walkroom" hidden target="_blank" rel="noopener" style="display:inline-block;margin:0 0 8px;text-decoration:none">Walk around it in 3D (real room mesh)</a><div id="walkchapters"></div><div class="hint" id="walkhint"></div></div>
     </section>
    </div>
     <section class="card" id="reqcard" hidden><h2>Requirements ledger <em id="reqnote"></em></h2><div class="rows" id="reqs"></div></section>
@@ -320,6 +320,7 @@ function drawWalk(S) {
     v.ontimeupdate = () => { let k = 0; w.chapters.forEach((c, i) => { if (v.currentTime >= c.t) k = i; });
       $("walknow").textContent = w.chapters[k] ? w.chapters[k].label : "";
       $("walkchapters").querySelectorAll(".chap").forEach((b, i) => b.classList.toggle("on", i === k)); }; }
+  $("walkroom").hidden = !(S.tour && S.world && S.world.scan); if (S.tour) $("walkroom").href = `room.html?run=${encodeURIComponent(run)}`;
   $("walktour").hidden = !S.tour; if (S.tour) $("walktour").href = `http://localhost:${location.port}/tour.html?run=${encodeURIComponent(run)}`;
   $("walknote").textContent = `${w.seconds} s`; $("walkhint").textContent = w.note || "";
 }

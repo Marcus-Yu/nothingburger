@@ -20,6 +20,7 @@ from urllib.parse import unquote, urlparse
 REPO = Path(__file__).resolve().parents[1]
 VIEWER = REPO / "web" / "viewer"
 RUNS = REPO / "runs"
+SCANS = REPO / "world" / "_scans"  # the real place's mesh per world, captured from its tour (tour.html?capture=1), not committed
 VENDOR = REPO / "web" / "_vendor" / "matterport"  # Matterport's SDK bundle, fetched by web/fetch_sdk.py, not committed
 TYPES = {".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json",
          ".jsonl": "application/x-ndjson", ".png": "image/png", ".svg": "image/svg+xml", ".xml": "text/xml", ".txt": "text/plain", ".mp4": "video/mp4"}
@@ -125,9 +126,24 @@ class Handler(BaseHTTPRequestHandler):
             return self._file(VENDOR, p[len("/mp/"):])
         if p.startswith("/runs/"):
             return self._file(RUNS, p[len("/runs/"):])
+        if p.startswith("/scans/"):  # only the stitched model, for room.html
+            return self._file(SCANS, p[len("/scans/"):]) if p.endswith("/room.glb") else self._send(404, b"not found", "text/plain")
         return self._file(VIEWER, p.lstrip("/"))
 
     def do_POST(self):
+        if urlparse(self.path).path == "/api/scan_put":  # one captured tile file from tour.html?capture=1
+            import re
+            from urllib.parse import parse_qs
+
+            qs = parse_qs(urlparse(self.path).query)
+            world, name = (qs.get("world") or [""])[0], (qs.get("name") or [""])[0]
+            size = int(self.headers.get("Content-Length") or 0)
+            if not re.fullmatch(r"[a-z0-9_]{1,40}", world) or not re.fullmatch(r"L\d+_\d+_\d+_\d+\.(pos|uv|idx|jpg)", name) or size > 40_000_000:
+                return self._json({"error": "bad tile name"}, 400)
+            raw = SCANS / world / "raw"
+            raw.mkdir(parents=True, exist_ok=True)
+            (raw / name).write_bytes(self.rfile.read(size))
+            return self._json({"ok": True})
         if urlparse(self.path).path != "/api/run":
             return self._send(404, b"not found", "text/plain")
         try:

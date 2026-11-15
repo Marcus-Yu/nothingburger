@@ -19,6 +19,14 @@ The building panel is a picture, not a diagram: with `--frames` the run renders 
 
 **In the real room.** When the world file has a `tour` (a Matterport model id and `to_model`, the 3 x 4 matrix from the world's frame to the scan's), the same run also writes `frames/tour_robot.glb` and `frames/tour_frames.bin`, and the panel links to `tour.html`. That page loads Matterport's SDK bundle from `web/_vendor/matterport` (`python web/fetch_sdk.py`; not committed), adds the robot to the scan's own scene and plays the plan inside the textured scan, with the viewpoint following the robot between the positions the scanner stood at. It needs `MATTERPORT_SDK_KEY` in `.env` and must be opened on `localhost` (the key is refused on `127.0.0.1`). Keys I J K L shift the robot 5 cm and U O turn it 1 degree, to line a traced world up with the scan; the offsets are kept in the address bar.
 
+**The real room as a mesh.** The tour only lets you stand where the scanner stood, and the robot is drawn over a photo. To get a room you can move around in, and to show the real room in the top view and the film, copy the mesh the tour displays:
+
+1. Open `http://localhost:8010/tour.html?run=runs/gallery/jrr&capture=1` and leave it for about four minutes. It flies the camera low over every room and saves each mesh tile and its texture to `world/_scans/<world id>/raw`.
+2. Run `python world/scenarios/tools/stitch_scan.py jrr`. It keeps the finest tile everywhere, moves the mesh into the world's frame, writes `world/_scans/jrr/` (pieces for the pictures, `room.glb` for the 3D page) and measures the alignment and the table tops into `world/scenarios/jrr.fit.json`.
+3. Run `python world/scenarios/tools/trace_jrr.py` so the world uses those measurements, then run the job again.
+
+With the mesh on disk, a world that names it (`scan` in `world.json`) is drawn with the real room in the top view and the film, and `room.html?run=...` plays the job inside it: drag to look around, scroll to move, and Enter VR on a headset. Without it everything falls back to drawn boxes. The mesh is for looks only; planning uses the world's `obstacles`. `world/_scans/` is not committed: the mesh is Matterport's, taken from the public tour for this demo, and is not theirs to hand on. The sanctioned source is the scan's MatterPak or splat from its owner.
+
 ## Kept runs
 
 `runs/gallery/` holds five finished runs, one per scenario in `world/scenarios/` (data centre, factory cell, senior apartment, clinic, pump house). They are listed first in the page's drop-down and replay without a model or a key, for example `http://127.0.0.1:8010/?run=runs/gallery/datacenter`. To make one again:
