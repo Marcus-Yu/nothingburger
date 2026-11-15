@@ -415,6 +415,8 @@ export function openAgentTrace({ agentBase, run, job, place: where = '', onClose
       case 'candidate': return ['cand', `${partsLine(e.parts)} — ${e.feasible ? 'passes' : `fails ${(e.failed || []).map((f) => f.check).join(', ')}`}`];
       case 'llm_start': return ['llm', `${e.model} · ${e.name} …`];
       case 'llm': return ['llm', `${e.model} · ${e.name} · ${e.seconds} s${e.error ? ` · ${e.error}` : ''}`];
+      case 'llm_tool': return ['llm', `workspace: ${e.tool} ${e.input?.path || e.input?.prefix || ''}${e.error ? ' · refused' : ''}`];
+      case 'llm_review': return ['warn', `checker sent the answer back (${e.revision}): ${(e.problems || [])[0] || ''}`];
       case 'standoff': return ['tool', `spot for ${S.tasks[e.task]?.short || e.task}: ${e.why || ''}`];
       case 'standoff_failed': return ['warn', `no spot for ${S.tasks[e.task]?.short || e.task}: ${e.reason || ''}`];
       case 'arm_path': return [e.ok ? 'tool' : 'warn', `arm motion at ${S.tasks[e.task]?.short || e.task}: ${e.ok ? 'ok' : e.why}`];

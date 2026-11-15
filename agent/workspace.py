@@ -194,7 +194,9 @@ GUIDE = """You have a workspace: a small file system, reached with the tools `ls
 - `run/` holds the run so far, written by code. It is read-only and is the only source of truth about the run: \
 read what you need from it instead of working from memory, and read a number again before you rely on it.
 - Everything else is yours. Files you wrote in an earlier step or an earlier run of this same job are still \
-there, so begin with `ls` and read `plan.md` and anything under `notes/` before you start.
+there, so begin with `ls` and read `plan.md` and anything under `notes/` before you start. They may describe an \
+earlier route, robot or task list: check anything you take from them against `run/` as it is now, and rewrite \
+a plan that no longer fits.
 - Work in the open. First write `plan.md`: the things you will do, one line each, as `- [ ]` items. Tick each \
 (`- [x]`) when it is done and add lines when you find more to do. Put what you work out under `notes/` \
 (an ordering you settled, a number and where it came from, something that looked wrong), in a few lines a \

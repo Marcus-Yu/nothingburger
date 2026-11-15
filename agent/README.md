@@ -40,7 +40,7 @@ Nothing outside `tools/` imports `composer`, `nav` or `motion` (a test checks it
 
 ## How the agent works
 
-This is a harness, not a free-running agent. Code owns the order of the steps, every number and every check; the model is called at two points (intake and the program) and whatever it returns is checked by code before it is used. It is not built on LangGraph or on the `deepagents` package, but it takes the same four ideas a deep agent rests on, and this section says where each one lives.
+This is a harness, not a free-running agent. Code owns the order of the steps, every number and every check; the model is called at two points (intake and the program) and whatever it returns is checked by code before it is used. It is not built on LangGraph or on the `deepagents` package, but it takes four of the five ideas a deep agent rests on (all but sub-agents), and this section says where each one lives.
 
 | Idea | Here |
 | :-- | :-- |
@@ -68,6 +68,8 @@ A long job does not fit in one prompt that the model then has to hold in its hea
 | `notes/...` | the model | what it worked out: an ordering, a number and where it came from |
 | `notes/checker_log.md` | code | every problem the checker found in an earlier answer for this job |
 
+Files from an earlier run can be out of date (answers can change the tasks, a robot fix changes the route), so the prompt tells the model to check them against `run/` before relying on them.
+
 The files live in memory (`state["workspace"] = {"key", "files"}`). Paths are relative; an absolute path, `..`, a hidden name or a write under `run/` is refused, and the refusal goes back to the model as the tool's error. A file holds at most 60,000 characters, the model at most 64 files, and one read returns 400 lines (it reads on with `offset`). The disk is touched only at the end of a run, when the model's own files are written to `<run folder>/workspace/`, and at the start, when they are loaded back. They are loaded only for the same building and the same job (`workspace.key_for`), so a rerun with `--answers`, a rerun after a failure and a rerun after a robot fix all start from the earlier plan and notes, and a different job in the same folder starts empty. The `run/` files are never saved: they are rebuilt from the state each time.
 
 `--no-workspace` (or `AGENT_NO_WORKSPACE`) sends the program step back to one request with the plan in the prompt.
@@ -90,6 +92,7 @@ In every loop the model proposes and code decides. A model answer that fails its
 
 ### Not here yet
 
+- The workspace loop has been run against a scripted stand-in for the model (`tests/test_workspace.py`), not yet against the live model.
 - Intake does not use the workspace: it is still one request. Its result reaches the program step as `run/intake.json`.
 - The design workflow in `design_flow/` (LangGraph) has no workspace and shares no state with this pipeline.
 - No sub-agents, and no model step chooses a fix in the robot-fix loop; that loop is rules.

@@ -248,7 +248,7 @@ def step(state: dict) -> dict:
                                    "The run so far is in the workspace:\n" + ws.ls("run/") + "\n\nYour own files from before:\n"
                                    + (ws.ls("") if ws.own() else "none yet") + "\n\nWrite the task program.",
                                    schema, tools=workspace.TOOLS, run_tool=ws.call,
-                                   review=lambda a: check(a.get("steps", []), plan), stats=stats, max_tokens=32000)
+                                   review=lambda a: check(a.get("steps", []), plan), stats=stats)
             else:
                 user = json.dumps({k: plan[k] for k in ("tasks", "ledger", "legs", "standoffs")}, indent=1)
                 out = llm.ask_json("program: sequence the primitives", SYSTEM, "The plan:\n" + user, schema)

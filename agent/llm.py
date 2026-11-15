@@ -64,6 +64,8 @@ def ask_json(name: str, system: str, user: str, schema: dict, *, effort: str = "
     - `review(answer) -> [problems]`: code checks the answer, and while it finds problems the model is shown
       them and answers again, at most `max_revisions` times. The last answer is returned either way, so the
       caller still runs its own check.
+    Requests are not streamed, so keep `max_tokens` at 16000 or under: the SDK refuses a larger non-streaming
+    request before sending it.
     `stats`, when given, is filled with {"turns", "tool_calls", "revisions", "open_problems"}."""
 
     @observe.span(name, "llm", outputs=_record)
