@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robots for buildings</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Robots for buildings</h1>
+  <label>Space
+    <select id="world"></select>
+  </label>
+</header>
+
+<main>
+  <section id="viewer">
+    <div class="tabs" role="tablist">
+      <button id="tab-inside" class="tab on" role="tab">Inside (Matterport)</button>
+      <button id="tab-outside" class="tab" role="tab">Outside (Vexcel)</button>
+    </div>
+    <iframe id="tour" title="3D tour of the space" allow="fullscreen; xr-spatial-tracking" allowfullscreen></iframe>
+    <model-viewer id="outside" class="hidden" camera-controls touch-action="pan-y" shadow-intensity="0"
+                  camera-orbit="25deg 42deg 34%" min-camera-orbit="auto 0deg 5%" max-camera-orbit="auto 85deg 120%"
+                  field-of-view="30deg" interaction-prompt="none" camera-target="0m 0m 0m"
+                  alt="The outside of the building from Vexcel aerial imagery">
+      <div slot="hotspot-target" class="pin" data-position="0m 22m 0m" data-normal="0m 1m 0m" id="outside-pin">This building</div>
+    </model-viewer>
+    <p id="world-note" class="note"></p>
+  </section>
+
+  <section id="flow">
+    <div class="card" id="job-card">
+      <h2><span class="n">1</span> The job</h2>
+      <label>Repeated tasks
+        <select id="tasks"></select>
+      </label>
+      <label>Or say it in your own words
+        <textarea id="job" rows="3" placeholder="Change the dead bulb over the kitchen table"></textarea>
+      </label>
+      <button id="create-plan">Create plan</button>
+    </div>
+
+    <div class="card hidden" id="plan-card">
+      <h2><span class="n">2</span> The plan</h2>
+      <p class="note" id="planner-note"></p>
+      <ol id="plan-steps"></ol>
+    </div>
+
+    <div class="card hidden" id="demo-card">
+      <h2><span class="n">3</span> Show it once</h2>
+      <p>Press <b>Ask the headset</b>, then put on the Quest. It switches to passthrough so you see the room you
+         are in, shows the task and counts down from 8. Do the task for real, wearing the gloves. To finish, pinch
+         thumb and middle finger together, or press Stop here.</p>
+      <p class="note" id="glove-note"></p>
+      <div id="demos"></div>
+    </div>
+
+    <div class="card hidden" id="robot-card">
+      <h2><span class="n">4</span> The robot</h2>
+      <p class="todo">Not wired in yet: the build agent's robot, the reason each part was picked and what it beat
+         will appear here (read from the run folder's <code>build.json</code> and <code>decisions.jsonl</code>).</p>
+    </div>
+
+    <div class="card hidden" id="watch-card">
+      <h2><span class="n">5</span> Watch it work</h2>
+      <p class="todo">Not wired in yet: the simulated run replayed here, or in the headset inside the scan.</p>
+    </div>
+
+    <div class="card hidden" id="parts-card">
+      <h2><span class="n">6</span> Parts that fit</h2>
+      <p>Measure the opening in the headset (Measure tool), or type its size here, and search the shops for parts that fit.</p>
+      <div class="row">
+        <input id="part-query" placeholder="window ac unit">
+        <input id="part-w" type="number" step="0.01" placeholder="width m">
+        <input id="part-h" type="number" step="0.01" placeholder="height m">
+        <button id="part-search">Search</button>
+      </div>
+      <ul id="parts"></ul>
+    </div>
+  </section>
+</main>
+<script src="https://static.matterport.com/showcase-sdk/latest.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

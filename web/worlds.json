@@ -1,0 +1,20 @@
+[
+  {
+    "id": "rabinowitz-hall",
+    "name": "Rabinowitz Hall foyer, Princeton",
+    "matterport": "2K7G7cdukZV",
+    "site": null,
+    "outside": "rabinowitz-aerial",
+    "outside_label": "Julis Romo Rabinowitz Building",
+    "note": "Inside: Matterport tour captured Friday by the CoStar team (web only: our API key cannot read this model). Outside: Vexcel aerial photo over extruded footprints, centred on the Julis Romo Rabinowitz Building (40.34912, -74.65559); the pin marks that point."
+  },
+  {
+    "id": "la-mirada",
+    "name": "5836 La Mirada Ave, Los Angeles",
+    "matterport": "zvKHR9DHNjJ",
+    "site": "la-mirada",
+    "outside": "la-mirada-aerial",
+    "outside_label": "5836 La Mirada Ave",
+    "note": "House from the hackathon set: Matterport mesh inside, Vexcel outside. Both load in the headset."
+  }
+]
