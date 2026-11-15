@@ -1,0 +1,46 @@
+{
+  "_about": "Which paths each local agent may change when two agents share this checkout. Paths are relative to the repo root; a trailing / means the whole folder. A path no lane lists is open to both (AGENTS.md stream rules still apply). Pick a lane with AGENT_LANE=<name>; see AGENTS.md, 'Two agents in one checkout'.",
+  "lanes": {
+    "backend": {
+      "about": "The Python design workflow (agent/) and every repo-level file: deps, docs, tooling, agent config",
+      "port": 8004,
+      "paths": [
+        "agent/",
+        "contracts/",
+        "evals/",
+        "docs/",
+        "scripts/",
+        "tools/",
+        ".claude/",
+        ".github/",
+        "pyproject.toml",
+        "uv.lock",
+        "README.md",
+        "AGENTS.md",
+        ".env.example",
+        ".gitignore",
+        ".board.local.example"
+      ]
+    },
+    "frontend": {
+      "about": "The Nothingburger site in frontend/ (plain HTML, CSS and JS, no build step), except frontend/robot-design/",
+      "port": 8000,
+      "paths": [
+        "frontend/"
+      ]
+    },
+    "robot-design": {
+      "about": "The Robot Design page in frontend/robot-design/, opened by the Design robot button",
+      "port": 8001,
+      "paths": [
+        "frontend/robot-design/"
+      ]
+    }
+  },
+  "interfaces": [
+    "agent/api.py",
+    "agent/schemas.py",
+    "frontend/backend.js",
+    "frontend/robot-design/robot-design.js"
+  ]
+}
