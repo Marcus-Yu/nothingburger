@@ -15,6 +15,8 @@ python3 -m http.server 8000
 
 Then open http://localhost:8000 (use `localhost`, not `127.0.0.1`: the Matterport Showcase SDK key only accepts `localhost`). Add `#studio` to the URL to jump straight into the studio.
 
+For the real design workflow (outline, demonstration, then the design and pathing pipeline), also start `uv run --env-file .env python -m agent.design_flow.serve` from the repo root (port 8020; `?agent=http://host:port` overrides it). With it running, **Design robot** in a scan space runs that workflow and ends in **Open Robot Design**; without it the panel uses the stand-in planner below.
+
 For the full flow, also start the Pathfinder backend from the repo (CORS is open, so the two ports talk):
 
 ```

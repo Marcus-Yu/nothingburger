@@ -3,6 +3,7 @@
 
     .venv/bin/python frontend/robot-design/data/export.py                       # jrr, from the pathing branch
     .venv/bin/python frontend/robot-design/data/export.py --ref HEAD --scenario clinic
+    .venv/bin/python frontend/robot-design/data/export.py --run runs/studio/<id>   # any local run folder
 
 Reads the run, the parts catalog and the planner from a git ref with `git archive`, so the
 working tree is never touched and nothing has to be merged first. The output is stamped with
@@ -103,7 +104,8 @@ def check_row(c: dict) -> dict:
 
 def run_files(run: Path) -> dict:
     ev = events(run / "events.jsonl")
-    intake, tasks = load(run / "intake.json"), load(run / "tasks.json")
+    intake = load(run / "intake.json") if (run / "intake.json").exists() else {}
+    tasks = load(run / "tasks.json")
     design, build = load(run / "design.json"), load(run / "build.json")
     funnel = next(e for e in ev if e["kind"] == "candidates")
     cands = [{"parts": e["parts"], "price_usd": e.get("price_usd"), "mass_kg": e.get("mass_kg"),
@@ -114,7 +116,7 @@ def run_files(run: Path) -> dict:
                   "checks": [check_row(c) for c in d.get("checks", [])]}
                  for d in events(run / "decisions.jsonl") if d.get("step") == "design"]
     return {
-        "job": intake.get("job"),
+        "job": intake.get("job") or next((e.get("job") for e in ev if e["kind"] == "run_start"), None),
         "tasks": [{k: t.get(k) for k in ("id", "skill", "anchor", "object", "carries", "deliver_to")} for t in tasks["tasks"]],
         "design": {"parts": design["parts"], "price_usd": design.get("price_usd"), "mass_kg": design.get("mass_kg"),
                    "checks": [check_row(c) for c in design.get("checks", [])]},
@@ -230,43 +232,58 @@ def search_view(call: dict) -> dict:
     return {"expanded": len(first), "bin_m": BIN_M, "explored": order, "dropped": branches}
 
 
+def snapshot(src: Path, run: Path, source: dict) -> dict:
+    """The page's snapshot of one run folder. `src` holds the nav planner and catalog to use."""
+    world, route = load(run / "world.json"), load(run / "route.json")
+    snap = {
+        "schema": "robot-design-snapshot/1",
+        "source": source,
+        "catalog": catalog(src),
+        **run_files(run),
+        "world": world_view(world),
+        "route": {"legs": [{k: leg.get(k) for k in ("from", "to", "carrying", "length_m", "waypoints", "standoff")} for leg in route["legs"]],
+                  "standoffs": [{k: s.get(k) for k in ("task", "pose", "covers")} for s in route.get("standoffs", [])],
+                  "door_clearances": route.get("door_clearances", []), "failures": route.get("failures", [])},
+    }
+    searches = replay(src, world, load(run / "build.json"), load(run / "requirements.json"), route)
+    for leg, s in zip(snap["route"]["legs"], searches):
+        leg["search"] = s
+    snap["route"]["search_note"] = ("Replayed with this commit's nav planner on the run's own inputs; "
+                                    "the replay matched the recorded route.json leg for leg.")
+    return snap
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ref", default=DEFAULT_REF)
     ap.add_argument("--scenario", default="jrr")
+    ap.add_argument("--run", type=Path, default=None,
+                    help="a run folder in this working tree; uses the working tree's nav and catalog instead of --ref")
     ap.add_argument("--out", type=Path, default=None)
     a = ap.parse_args()
-    sha = git("rev-parse", a.ref).decode().strip()
-    out = a.out or HERE / f"{a.scenario}.json"
 
-    with tempfile.TemporaryDirectory() as tmp:
-        src = Path(tmp)
-        unpack(a.ref, a.scenario, src)
-        run = src / "runs" / "gallery" / a.scenario
-        world, route = load(run / "world.json"), load(run / "route.json")
-        snap = {
-            "schema": "robot-design-snapshot/1",
-            "source": {"ref": a.ref, "commit": sha, "scenario": a.scenario, "run": f"runs/gallery/{a.scenario}"},
-            "catalog": catalog(src),
-            **run_files(run),
-            "world": world_view(world),
-            "route": {"legs": [{k: leg.get(k) for k in ("from", "to", "carrying", "length_m", "waypoints", "standoff")} for leg in route["legs"]],
-                      "standoffs": [{k: s.get(k) for k in ("task", "pose", "covers")} for s in route.get("standoffs", [])],
-                      "door_clearances": route.get("door_clearances", []), "failures": route.get("failures", [])},
-        }
-        searches = replay(src, world, load(run / "build.json"), load(run / "requirements.json"), route)
-        for leg, s in zip(snap["route"]["legs"], searches):
-            leg["search"] = s
-        snap["route"]["search_note"] = ("Replayed with this commit's nav planner on the run's own inputs; "
-                                        "the replay matched the recorded route.json leg for leg.")
+    if a.run:
+        run = a.run.resolve()
+        sha = git("rev-parse", "HEAD").decode().strip()
+        out = a.out or run / "snapshot.json"
+        snap = snapshot(ROOT, run, {"ref": "working tree", "commit": sha, "scenario": a.scenario, "run": str(run)})
+        ref = "the working tree"
+    else:
+        sha = git("rev-parse", a.ref).decode().strip()
+        out = a.out or HERE / f"{a.scenario}.json"
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp)
+            unpack(a.ref, a.scenario, src)
+            snap = snapshot(src, src / "runs" / "gallery" / a.scenario,
+                            {"ref": a.ref, "commit": sha, "scenario": a.scenario, "run": f"runs/gallery/{a.scenario}"})
+        ref = a.ref
 
     out.write_text(json.dumps(snap, separators=(",", ":")))
     legs = snap["route"]["legs"]
-    print(f"wrote {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB) from {a.ref} @ {sha[:7]}: "
+    print(f"wrote {out} ({out.stat().st_size // 1024} KB) from {ref} @ {sha[:7]}: "
           f"{len(snap['candidates'])} candidates, {len(legs)} legs, "
           f"{sum(l['search']['expanded'] for l in legs)} cells expanded, "
           f"{sum(len(l['search']['dropped']) for l in legs)} dropped branches")
-
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,7 @@
    Endpoints used: GET /worlds, GET /web-config, POST /plan,
    POST /demos/request, GET /demos/{id}/read, POST /demos/stop,
    GET /gloves, POST /parts/search, GET /parts/jobs/{id}.
+   And the design workflow (agent/design_flow/serve.py, port 8020): see `agent` below.
    ===================================================================== */
 
 const qs = new URLSearchParams(location.search);
@@ -50,6 +51,36 @@ async function call(path, options = {}, ms = 8000) {
 export const get = (path, ms) => call(path, {}, ms);
 export const post = (path, body, ms) =>
   call(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }, ms);
+
+/* ---------- the design workflow (robots-repo/agent/design_flow/serve.py) ----------
+   Outline (classify) -> demonstrations (capture) -> design and pathing (the pipeline).
+   ?agent=http://host:port overrides where it lives. */
+
+export const AGENT_BASE = (qs.get('agent') || 'http://localhost:8020').replace(/\/+$/, '');
+
+async function agentCall(path, options = {}, ms = 8000) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), ms);
+  let r;
+  try {
+    r = await fetch(AGENT_BASE + path, { ...options, signal: ctl.signal });
+  } catch (e) {
+    throw new Error(e.name === 'AbortError' ? 'the design workflow did not answer in time' : 'the design workflow is not running');
+  } finally {
+    clearTimeout(timer);
+  }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.detail || `HTTP ${r.status}`);
+  return j;
+}
+export const agent = {
+  health: () => agentCall('/health', {}, 1500),
+  start: (world, job) => agentCall('/sessions', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ world, job }) }),
+  session: (id) => agentCall(`/sessions/${encodeURIComponent(id)}`),
+  reply: (id, recordings) => agentCall(`/sessions/${encodeURIComponent(id)}/reply`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(recordings ? { recordings } : {}) }),
+  retry: (id) => agentCall(`/sessions/${encodeURIComponent(id)}/retry`, { method: 'POST' }),
+  snapshot: (run) => agentCall(`/${run}/snapshot.json`, {}, 20000),
+};
 
 /* ---------- spaces ---------- */
 

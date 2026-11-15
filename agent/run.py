@@ -36,6 +36,20 @@ def _write(path: Path, doc, compact: bool = False) -> None:
     path.write_text(json.dumps(doc, separators=(",", ":")) if compact else json.dumps(doc, indent=2) + "\n")
 
 
+# What a demonstrated motion (capture's motion.kind) shows, as a task skill.
+DEMO_SKILL = {"wipe": "wipe", "carry": "pick", "reach": "pick"}
+
+
+def _demo_task(state: dict):
+    """The task a demo belongs to when none is named: the first task whose skill the demo's motion shows,
+    else the first task."""
+    tasks = state["tasks"]
+    kind = ((state.get("demo") or {}).get("motion") or {}).get("kind")
+    skill = DEMO_SKILL.get(kind)
+    match = next((t["id"] for t in tasks if skill and t.get("skill") == skill), None)
+    return match or (tasks[0]["id"] if tasks else None)
+
+
 def pipeline(state: dict) -> dict:
     """intake -> pre-pass -> ledger -> design and compose -> pathing (skipped when no design is feasible)."""
     if "tasks" not in state:
@@ -44,7 +58,7 @@ def pipeline(state: dict) -> dict:
     top = viz.room_view(state["world"])  # the rooms from above, for the live view (None when frames are off)
     if top:
         observe.emit("room_view", **top)
-    tid = state.get("demo_task") or (state["tasks"][0]["id"] if state["tasks"] else None)
+    tid = state.get("demo_task") or _demo_task(state)
     for key in ("demo", "grip"):  # the demonstration files belong to one task
         if state.get(key) is not None:
             state[key + "s"] = {tid: state[key]}
@@ -230,7 +244,8 @@ def main(argv=None) -> int:
     ap.add_argument("--no-model", action="store_true", help="skip every model step; tasks come from --tasks, the program by rule")
     ap.add_argument("--demo")
     ap.add_argument("--grip")
-    ap.add_argument("--demo-task", help="the task id the demo and grip files belong to (default: the first task)")
+    ap.add_argument("--demo-task", help="the task id the demo and grip files belong to "
+                                        "(default: the first task whose skill the demo's motion shows, else the first task)")
     ap.add_argument("--radius", type=float, default=prepass.DEFAULT_RADIUS_M,
                     help="pre-pass disc radius in metres: half the narrowest base width in the catalog")
     ap.add_argument("--out", required=True)

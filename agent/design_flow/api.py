@@ -15,7 +15,10 @@ Step kinds and their data:
              "demos": [{"chore", "kind": "path" | "squeeze", "why", "recording"}]}
             reply with nothing to take the newest recordings for this chore from capture, or with
             {"demo": ..., "grip": ...} to pass them yourself; anything left out comes from capture
-    design  RobotDesign as a dict; the session is finished
+    design  what the designer returned; the session is finished. By default the design and pathing
+            pipeline's result (agent/design_flow/pipeline.py): {"kind": "pipeline", "run", "parts",
+            "price_usd", "mass_kg", "summary", "infeasible", "snapshot", ...}; with llm.make_designer()
+            a RobotDesign as a dict
 """
 
 import json
@@ -54,8 +57,9 @@ class DesignWorkflow:
         self.latest_recording = latest_recording
         self.graph = build_graph(**graph_options)
 
-    def start(self) -> Step:
-        return self._run({}, str(uuid.uuid4()))
+    def start(self, world: str | None = None) -> Step:
+        """`world` is the studio's space id; the design step designs and paths the robot in it."""
+        return self._run({"world": world} if world else {}, str(uuid.uuid4()))
 
     def reply(self, session_id: str, answer: Any = None) -> Step:
         waiting = self._waiting_for(session_id)

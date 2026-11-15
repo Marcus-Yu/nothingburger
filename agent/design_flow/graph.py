@@ -5,6 +5,7 @@
                          -> incomplete -> request_demo -> design
 
 A skill is complete when the skill store has its motion and force recordings; a demo adds them.
+The design step is the design and pathing pipeline (agent/design_flow/pipeline.py) by default.
 """
 
 from langchain_core.runnables import Runnable
@@ -20,6 +21,20 @@ from agent.design_flow.skills import SkillStore
 from agent.design_flow.state import WorkflowState
 
 
+def default_classifier(fallback: Runnable | None = None) -> Runnable:
+    """Snap first; then Claude Sonnet when ANTHROPIC_API_KEY is set, else `fallback`, else a polite refusal."""
+    import os
+
+    from agent.design_flow.fast import make_mixed_classifier
+
+    slow, label = fallback, "the stand-in keyword classifier"
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        from agent.design_flow.llm import make_classifier
+
+        slow, label = make_classifier(), "Claude Sonnet"
+    return make_mixed_classifier(slow, slow_label=label)
+
+
 def build_graph(
     classifier: Runnable | None = None,
     designer: Runnable | None = None,
@@ -30,16 +45,18 @@ def build_graph(
 
     A checkpointer is required: both pauses (task and demo) use interrupt().
     """
-    if classifier is None or designer is None:
-        from agent.design_flow.llm import make_classifier, make_designer  # only needs an API key when used
+    if classifier is None:  # SubQ Snap decides fast; Claude Sonnet takes what Snap can't settle (fast.py)
+        classifier = default_classifier()
+    can_plan = None
+    if designer is None:  # the design and pathing pipeline; llm.make_designer() is the one-call alternative
+        from agent.design_flow.pipeline import can_plan, make_pipeline_designer
 
-        classifier = classifier or make_classifier()
-        designer = designer or make_designer()
+        designer = make_pipeline_designer()
     store = store or SkillStore()
 
     graph = StateGraph(WorkflowState)
     graph.add_node("ask_task", ask_task)
-    graph.add_node("classify", make_classify(classifier, store))
+    graph.add_node("classify", make_classify(classifier, store, can_plan))
     graph.add_node("request_demo", make_request_demo(store))
     graph.add_node("design", make_design(designer, store))
 

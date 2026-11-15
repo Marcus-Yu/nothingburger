@@ -4,8 +4,10 @@
      4 the robot   5 watch it work   6 parts that fit
    Same steps and endpoints as robots-repo/web/app.js, in the studio's style.
    ===================================================================== */
-import { get, post, backend, onBackend, standInPlan, CATALOG, SLOT_NAMES, partLabel } from './backend.js';
+import { get, post, backend, onBackend, standInPlan, CATALOG, SLOT_NAMES, partLabel, agent, AGENT_BASE } from './backend.js';
 import { space, setView, onSpaceChange } from './space.js';
+import { openRobotDesign } from './robot-design/robot-design.js';
+import { openAgentTrace } from './agent-trace/agent-trace.js';
 
 const $ = (s) => document.querySelector(s);
 const panel = $('#flow');
@@ -65,6 +67,12 @@ export async function planJob(job) {
   current = { job, world, pending: true };
   panel.replaceChildren(head(s, 'Planning…', job), h('p.state.wait', h('i.spin'), ' Asking the planner'));
   showFlow();
+  if (s && s.kind === 'scan' && !/^\s*replace\b/i.test(job)) {   // "Replace …" jobs are the parts search, not a robot
+    let up = null;
+    try { up = await agent.health(); } catch { up = null; }
+    if (mine !== seq) return;
+    if (up) { agentFlow(job, s, mine, up); return; }
+  }
   let plan;
   try {
     plan = await post('/plan', { world, job });
@@ -278,6 +286,154 @@ function startWatch(plan, auto) {
     finish(msg) { if (watchUI && watchUI.plan === plan) { state.className = 'state ok'; state.textContent = `${msg} · in simulation`; } },
   };
   hooks.runSim(act, plan.job, ui, auto);
+}
+
+/* ---------- the design workflow: outline -> show it once -> design and pathing ----------
+   Marcus's graph reads the job and names the skill; the headset and gloves (capture) record
+   it; the design and pathing pipeline designs the robot and plans its route in this space.
+   Its run opens in the Robot Design page, whose Deploy opens the route view. */
+
+const PART_SLOTS = [['base', 'Base'], ['lift', 'Lift'], ['arm', 'Arm'], ['gripper', 'Gripper'], ['lidar', 'Lidar'], ['wrist_cam', 'Wrist camera'], ['ego_cam', 'Forward camera']];
+const pretty = (id) => String(id || '').replace(/_/g, ' ');
+
+async function agentFlow(job, s, mine, health) {
+  let view;
+  try {
+    view = await agent.start(s.id, job);
+  } catch (e) {
+    if (mine !== seq) return;
+    panel.replaceChildren(head(s, 'Couldn’t start', job), h('p.state.warn', e.message));
+    return;
+  }
+  current = { job, world: s.id, agent: view.session_id, health };
+  for (let last = ''; mine === seq; await sleep(1500)) {
+    try { view = await agent.session(current.agent); } catch (e) { view = { ...view, status: 'error', error: e.message }; }
+    if (mine !== seq) return;
+    const key = `${view.status}|${view.phase}|${view.error}`;
+    if (key !== last) { last = key; renderAgent(view, s, mine); }
+    if (view.status !== 'working') return;
+  }
+}
+
+function renderAgent(view, s, mine) {
+  const step = view.step || {};
+  const d = step.data || {};
+  const skill = d.skill || (view.assessment && view.assessment.skill) || (current.skill ?? '');
+  if (skill) current.skill = skill;
+  if (step.kind === 'demo') current.demos = d.demos;
+  const named = pretty(skill);
+  const title = step.kind === 'task' ? 'Not a job I can do' : skill ? named[0].toUpperCase() + named.slice(1) : 'Reading the job…';
+  const kids = [head(s, title, view.job || current.job)];
+
+  // 2 the outline
+  const outline = section(2, 'The outline');
+  outline.querySelector('header').append(current.health.standin ? tag('Stand-in', 'var(--ink-2)') : tag('Agent', 'var(--ok)'));
+  if (view.phase === 'classify' && view.status === 'working') outline.append(h('p.state.wait', h('i.spin'), ' Reading the job'));
+  else if (step.kind === 'task' && d.rejected) outline.append(h('p.state.warn', d.rejected.reason), h('p.txt', 'Try another job in the prompt bar.'));  else if (skill) outline.append(h('p.txt', `Skill: `, h('b', pretty(skill)), current.demos ? '. Not learned yet, so it needs a demonstration.' : '. Already learned from an earlier demonstration.'));
+  const by = (view.assessment && view.assessment.decided_by) || '';
+  if (by && view.phase !== 'classify') outline.append(h('p.note', `Decided by ${by}`));
+  kids.push(outline);
+
+  // 3 show it once
+  if (current.demos) {
+    const go = h('button.pill.dark.xs', { type: 'button' }, 'Use these takes → design the robot');
+    go.addEventListener('click', async () => {
+      go.disabled = true;
+      try { await agent.reply(current.agent); agentFlow.resume(s, mine); } catch (e) { go.disabled = false; alert(e.message); }
+    });
+    const waiting = step.kind === 'demo' && view.status !== 'working';
+    kids.push(section(3, 'Show it once',
+      h('p.txt', d.message || 'Recorded with the Quest and the pressure-sensor gloves.'),
+      current.demos.map(demoRow),
+      waiting ? h('div.row', go) : null));
+  }
+
+  // 4 the robot
+  const robot = section(4, 'The robot');
+  if (view.phase === 'design' && view.status === 'working') {
+    robot.append(h('p.state.wait', h('i.spin'), ` Designing the robot and planning its route in ${s.name}. This takes a few minutes.`));
+  } else if (view.status === 'done') {
+    robot.append(...robotResult(d, s));
+  }
+  if (view.status === 'error') {
+    const again = h('button.pill.ghost.xs', { type: 'button' }, step.kind === 'demo' ? 'Try again' : 'Retry');
+    again.addEventListener('click', async () => {
+      again.disabled = true;
+      try { await (step.kind === 'demo' ? agent.reply(current.agent) : agent.retry(current.agent)); agentFlow.resume(s, mine); }
+      catch (e) { again.disabled = false; alert(e.message); }
+    });
+    robot.append(h('p.state.warn', view.error), h('div.row', again));
+  }
+  if (view.run && view.phase === 'design' && view.status === 'working') {
+    robot.append(h('div.row', h('button.pill.ghost.xs', { type: 'button', onclick: () => openTrace(view, s) }, 'Watch the agent work →')));
+  }
+  if (step.kind !== 'task') kids.push(robot);
+  panel.replaceChildren(...kids);
+  syncTrace(view, s);
+}
+
+/* the agent trace page: opens by itself once per session when the design step starts */
+let traceUI = null;   // { sid, page }
+function openTrace(view, s) {
+  if (traceUI && traceUI.page.open) traceUI.page.close();
+  hideFlow();
+  const page = openAgentTrace({
+    agentBase: AGENT_BASE, run: view.run, job: view.job || current.job, place: s ? s.name : '',
+    onClose: () => { if (!document.querySelector('.rd')) showFlow(); },
+    onOpenDesign: (r) => { page.close(); openDesign(r); },
+  });
+  traceUI = { sid: view.session_id, page, auto: true };
+}
+function syncTrace(view, s) {
+  const mine = traceUI && traceUI.sid === view.session_id;
+  if (!mine && view.run && view.phase === 'design' && view.status === 'working') { openTrace(view, s); return; }
+  if (!mine || !traceUI.page.open) return;
+  if (view.status === 'done' && !traceUI.done) { traceUI.done = true; traceUI.page.finish(view.step.data); }
+  if (view.status === 'error' && !traceUI.done) { traceUI.done = true; traceUI.page.fail(view.error); }
+}
+
+/* keep polling an existing session after a reply or retry */
+agentFlow.resume = async (s, mine) => {
+  for (let last = ''; mine === seq; await sleep(1500)) {
+    let view;
+    try { view = await agent.session(current.agent); } catch (e) { return; }
+    if (mine !== seq) return;
+    const key = `${view.status}|${view.phase}|${view.error}`;
+    if (key !== last) { last = key; renderAgent(view, s, mine); }
+    if (view.status !== 'working') return;
+  }
+};
+
+async function openDesign(d) {
+  try {
+    const snap = await agent.snapshot(d.snapshot.replace(/\/snapshot\.json$/, ''));
+    hideFlow();
+    openRobotDesign({ snapshot: snap, onClose: () => showFlow() });
+  } catch (e) { alert(`Couldn’t load the run: ${e.message}`); }
+}
+
+function robotResult(d, s) {
+  if (d.kind !== 'pipeline') return [h('p.txt', 'The designer answered in a shape this panel doesn’t know.')];
+  const out = [];
+  const parts = d.parts || {};
+  out.push(h('dl.design', PART_SLOTS.filter(([k]) => parts[k]).map(([k, label]) => h('div', h('dt', label), h('dd', pretty(parts[k]))))));
+  const money = d.price_usd != null ? `$${Math.round(d.price_usd).toLocaleString()}` : null;
+  const mass = d.mass_kg != null ? `${Math.round(d.mass_kg * 10) / 10} kg` : null;
+  if (money || mass) out.push(h('p.txt', [money, mass].filter(Boolean).join(' · ')));
+  const route = (d.summary || []).find((l) => l.startsWith('route:'));
+  if (route) out.push(h('p.note', route.replace(/^route: /, 'Route: ').replace(/ > /g, ' → ')));
+  if (d.infeasible) out.push(h('p.state.warn', 'No robot in the catalog can do every task here, so there is no route.'), h('ul.plan-steps', (d.summary || []).slice(0, 6).map((l) => h('li', l))));
+  if (d.tasks_source && /^rule/.test(d.tasks_source)) out.push(h('p.note', 'Tasks: matched from your words to this space by rule (no model read the job).'));
+  if (!d.valid) out.push(h('p.state.warn', 'Some run files didn’t validate against the contracts.'));
+  if (d.snapshot) {
+    const open = h('button.pill.dark.xs', { type: 'button' }, 'Open Robot Design →');
+    open.addEventListener('click', async () => { open.disabled = true; await openDesign(d); open.disabled = false; });
+    out.push(h('div.row', open));
+  } else if (d.snapshot_error) {
+    out.push(h('p.state.warn', `The run finished but couldn’t be exported for the Robot Design page: ${d.snapshot_error}`));
+  }
+  out.push(h('p.note', `Run folder: ${d.run}`));
+  return out;
 }
 
 /* ---------- 6 parts that fit ---------- */

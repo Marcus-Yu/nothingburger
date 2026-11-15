@@ -8,6 +8,7 @@ Stand-ins replace the two Claude calls and capture; the graph, checkpointer and 
 import os
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from langchain_core.runnables import RunnableLambda
@@ -92,7 +93,7 @@ class DesignWorkflowTest(unittest.TestCase):
 
         self.assertEqual((step.kind, step.data), ("design", DESIGN.model_dump()))
         self.assertEqual(self.capture_calls, [("demo", "take out garbage"), ("grip", "take out garbage")])
-        self.assertEqual(self.design_requests, [{"task": "take out the garbage", "demo": BOTH}])
+        self.assertEqual(self.design_requests, [{"task": "take out the garbage", "demo": BOTH, "skill": "take_out_garbage"}])
         self.assertEqual(self.store.missing("take_out_garbage"), [])
 
     def test_recordings_in_the_reply_are_used_and_capture_fills_the_rest(self):
@@ -116,7 +117,7 @@ class DesignWorkflowTest(unittest.TestCase):
         step = self.ask("bin the trash please")  # different words, same skill
 
         self.assertEqual((step.kind, step.data), ("design", DESIGN.model_dump()))
-        self.assertEqual(self.design_requests, [{"task": "bin the trash please", "demo": BOTH}])
+        self.assertEqual(self.design_requests, [{"task": "bin the trash please", "demo": BOTH, "skill": "take_out_garbage"}])
         self.assertEqual(self.capture_calls, [])
 
     def test_skill_learned_in_one_session_is_complete_in_the_next(self):
@@ -209,6 +210,48 @@ class DesignWorkflowTest(unittest.TestCase):
         step = self.ask("take out the garbage")
         with self.assertRaises(SessionError):
             self.workflow.reply(step.session_id, "again")
+
+    def test_the_space_reaches_the_designer(self):
+        self.store.save("take_out_garbage", BOTH)
+        step = self.workflow.start(world="rabinowitz-hall")
+        self.workflow.reply(step.session_id, "take out the garbage")
+        self.assertEqual(self.design_requests[-1]["world"], "rabinowitz-hall")
+
+    def test_a_designer_that_returns_a_dict_is_stored_as_is(self):
+        result = {"kind": "pipeline", "run": "runs/studio/x"}
+        workflow = DesignWorkflow(latest_recording=self._latest, classifier=RunnableLambda(self._classify),
+                                  designer=RunnableLambda(lambda request: result), store=self.store)
+        self.store.save("take_out_garbage", BOTH)
+        step = workflow.reply(workflow.start().session_id, "take out the garbage")
+        self.assertEqual((step.kind, step.data), ("design", result))
+
+
+class PipelineDesignerTest(unittest.TestCase):
+    def test_the_session_id_reaches_the_pipeline_and_its_run_folder_is_registered(self):
+        from agent.design_flow import pipeline
+        seen = {}
+
+        def fake(request, session=None, **_):
+            seen["session"] = session
+            pipeline.ACTIVE[session] = "runs/studio/fake"
+            return {"kind": "pipeline"}
+
+        with tempfile.TemporaryDirectory() as tmp, unittest.mock.patch.object(pipeline, "run_pipeline", fake):
+            store = SkillStore(Path(tmp))
+            store.save("take_out_garbage", BOTH)
+            workflow = DesignWorkflow(latest_recording=lambda kind, chore: None,
+                                      classifier=RunnableLambda(lambda r: SCREENS[r["task"]]),
+                                      designer=pipeline.make_pipeline_designer(), store=store)
+            step = workflow.reply(workflow.start(world="rabinowitz-hall").session_id, "take out the garbage")
+        self.assertEqual(seen["session"], step.session_id)
+        self.assertEqual(pipeline.ACTIVE.pop(step.session_id), "runs/studio/fake")
+
+    def test_a_space_with_no_world_file_is_refused_before_anything_runs(self):
+        from agent.design_flow.pipeline import NoWorld, run_pipeline
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(NoWorld):
+                run_pipeline({"task": "wipe", "demo": {}, "world": "la-mirada"}, runs=Path(tmp))
+            self.assertEqual(list(Path(tmp).iterdir()), [])
 
 
 if __name__ == "__main__":

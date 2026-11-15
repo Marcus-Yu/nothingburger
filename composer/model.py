@@ -168,6 +168,49 @@ def compose_spec(parts: dict):
 _STOW: dict = {}      # (carrier key, width limit, height limit) -> {joint name: value}
 _ENVELOPE: dict = {}  # carrier key -> {(axis, height bin): [(distance, {joint name: value}), ...]}
 
+# The envelope belongs to the robot, not the job, so it is also kept on disk (catalog/_cache/envelopes/),
+# keyed by the carrier's catalog cards, this module's and parts.py's source, and the sampling settings: a
+# changed card or sampler is a new key. `python -m composer.warm` fills it for the whole catalog.
+ENVELOPE_CACHE = P.CATALOG_DIR / "_cache" / "envelopes"
+
+
+def _envelope_file(ck: tuple, seed: int, n: int, kind: str = "envelopes"):
+    import hashlib
+    import json as _json
+    from pathlib import Path as _Path
+
+    h = hashlib.sha256()
+    for f in (_Path(__file__), _Path(P.__file__)):
+        h.update(f.read_bytes())
+    p = dict(zip(("base", "lift", "arm", "gripper", "wrist_cam"), ck))
+    for slot in ("base", "lift", "arm", "gripper"):
+        try:
+            h.update(_json.dumps(P.card(slot, p[slot]), sort_keys=True).encode())
+        except KeyError:
+            h.update(str(p[slot]).encode())
+    h.update(repr((ck, seed, n, ENV_STEP)).encode())
+    return ENVELOPE_CACHE.parent / kind / f"{h.hexdigest()[:32]}.pkl"
+
+
+def _load_envelope(path):
+    import pickle
+    try:
+        return pickle.loads(path.read_bytes())
+    except (OSError, pickle.UnpicklingError, EOFError, ValueError):
+        return None
+
+
+def _save_envelope(path, table) -> None:
+    import os
+    import pickle
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(f".{os.getpid()}.tmp")
+        tmp.write_bytes(pickle.dumps(table))
+        os.replace(tmp, path)  # atomic: parallel workers never read half a file
+    except OSError:
+        pass
+
 
 class Robot:
     def __init__(self, parts: dict):
@@ -283,6 +326,11 @@ class Robot:
         ck = (P.carrier_key(self.parts), round(float(width_limit), 3), round(float(height_limit), 3))
         o = self.B["outline_m"]
         base_w, base_l = o["y"][1] - o["y"][0], o["x"][1] - o["x"][0]
+        disk = _envelope_file(ck[0], seed, n, kind=f"stow-{ck[1]}-{ck[2]}")
+        if ck not in _STOW:
+            cached = _load_envelope(disk)
+            if cached is not None:
+                _STOW[ck] = cached
         if ck not in _STOW:
             rng = np.random.default_rng(seed)
             cap = max(base_w, width_limit)
@@ -312,6 +360,7 @@ class Robot:
             if best is None:
                 raise RuntimeError(f"no stowed pose found for {self.parts}")
             _STOW[ck] = self.named(best[1])
+            _save_envelope(disk, _STOW[ck])
         named = _STOW[ck]
         self.set(self.vec(named))
         lo, hi = self.extents(self.is_robot)
@@ -350,6 +399,11 @@ class Robot:
         ck = P.carrier_key(self.parts)
         if ck in _ENVELOPE:
             return _ENVELOPE[ck]
+        disk = _envelope_file(ck, seed, n)
+        table = _load_envelope(disk)
+        if table is not None:
+            _ENVELOPE[ck] = table
+            return table
         rng = np.random.default_rng(seed)
         arm_idx = np.flatnonzero(~self.is_lift)
         lift_i = int(np.flatnonzero(self.is_lift)[0]) if self.is_lift.any() else None
@@ -414,6 +468,7 @@ class Robot:
         for v in table.values():
             v.sort(key=lambda t: t[0])
         _ENVELOPE[ck] = table
+        _save_envelope(disk, table)
         return table
 
     def envelope_rows(self) -> list:

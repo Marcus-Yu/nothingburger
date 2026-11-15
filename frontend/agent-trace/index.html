@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent trace · Nothingburger</title>
+<meta name="description" content="Preview of the agent trace page on its own: replays a finished studio run. ?run=runs/studio/<id>&speed=20&agent=http://localhost:8020">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800;900&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>html,body{margin:0;background:#F4EFE7}</style>
+</head>
+<body>
+<script type="module">
+  /* Preview only: the studio opens the page by itself while the design step runs. */
+  import { openAgentTrace } from './agent-trace.js';
+  const q = new URLSearchParams(location.search);
+  const run = q.get('run');
+  if (!run) document.body.textContent = 'Add ?run=runs/studio/<id> (a finished studio run).';
+  else openAgentTrace({
+    agentBase: (q.get('agent') || 'http://localhost:8020').replace(/\/+$/, ''), run,
+    job: q.get('job') || 'Wipe down the tables in the atrium', place: 'Rabinowitz Hall foyer, Princeton',
+    replay: Number(q.get('speed') || 20), onClose: () => location.reload(),
+  });
+</script>
+</body>
+</html>

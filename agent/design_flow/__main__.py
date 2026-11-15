@@ -1,6 +1,6 @@
 """Run the design workflow in the terminal, as a stand-in for the UI.
 
-    uv run --env-file .env python -m agent.design_flow      (needs ANTHROPIC_API_KEY in .env)
+    uv run --env-file .env python -m agent.design_flow [space id]     (needs ANTHROPIC_API_KEY in .env)
 """
 
 import json
@@ -30,14 +30,18 @@ def answer(step: Step):
 
 def main() -> None:
     workflow = DesignWorkflow()
-    step = workflow.start()
+    step = workflow.start(world=sys.argv[1] if len(sys.argv) > 1 else "rabinowitz-hall")
     while step.kind != "design":
         try:
             step = workflow.reply(step.session_id, answer(step))
         except (SessionError, OSError, json.JSONDecodeError) as e:
             print(f"\n{e}")  # the session is still waiting on the same step: ask again
-    print("\nProposed design (not yet run through the hard checks):")
-    print(json.dumps(step.data, indent=2))
+    if step.data.get("kind") == "pipeline":
+        print(f"\nDesigned and pathed: {step.data['run']}")
+        print("\n".join(step.data["summary"]))
+    else:
+        print("\nProposed design (not yet run through the hard checks):")
+        print(json.dumps(step.data, indent=2))
 
 
 def root_cause(error: BaseException) -> BaseException:

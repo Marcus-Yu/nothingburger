@@ -1,6 +1,6 @@
 """Structured outputs of the two LLM steps."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 
 from agent.design_flow.catalog import BasePart, GripperPart, ReachPart
 
@@ -11,6 +11,7 @@ class TaskAssessment(BaseModel):
     valid: bool = Field(description="True when a household robot could physically do this chore.")
     skill: str = Field(description="snake_case name of the chore, reusing a known skill's name when it is the same chore. Empty when invalid.")
     reason: str = Field(description="One or two sentences for the user: why it can't be done, or the chore restated.")
+    _decided_by: str = PrivateAttr(default="")  # which model settled it (fast.py); not part of the schema
 
 
 class BaseChoice(BaseModel):

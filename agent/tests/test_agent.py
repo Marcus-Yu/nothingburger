@@ -359,3 +359,11 @@ def test_a_failed_arm_path_goes_on_down_the_proposals_after_the_spares(monkeypat
     assert s["pose"] == [4.0, 0.0, 0.0] and s["reach_ok"] and s["tip_ratio"] == 5.0
     assert [r["pose"] for r in s["rejected"]] == [[2.0, 0.0, 0.0], [3.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
     assert out["trajectory"]["failures"] == [] and out["trajectory"]["tasks"][0]["standoff"] == [4.0, 0.0, 0.0]
+
+
+def test_a_demo_belongs_to_the_first_task_its_motion_shows():
+    from agent.run import _demo_task
+    tasks = [{"id": "t1", "skill": "pick"}, {"id": "t2", "skill": "wipe"}, {"id": "t3", "skill": "wipe"}]
+    assert _demo_task({"tasks": tasks, "demo": {"motion": {"kind": "wipe"}}}) == "t2"
+    assert _demo_task({"tasks": tasks, "demo": {"motion": {"kind": "twist"}}}) == "t1"
+    assert _demo_task({"tasks": tasks}) == "t1"

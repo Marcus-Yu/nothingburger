@@ -10,3 +10,5 @@ MUJOCO_LOG.TXT
 .claude/launch.json
 web/_vendor/
 .board.local
+catalog/_cache/
+runs/studio/
