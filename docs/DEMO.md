@@ -2,8 +2,10 @@
 
 One job, typed in the studio: **Wipe table C6 in the atrium**. The agent reads it, asks the headset for one wipe and one
 squeeze, designs the robot, plans where it stands and drives in Rabinowitz Hall, then opens the Robot Design
-page, the route view and the robot inside the scanned room in 3D. About **35 s** of generation once rehearsed
-with Claude reading the job (about 15 s without a Claude key, below).
+page, the route view and the robot inside the scanned room in 3D. About **95 s** of generation once rehearsed
+(measured 2026-11-15, after the catalog was repriced): the three cheapest robots that pass the checks cannot
+work at the table, so the design is redone three times (about 60 s of route planning in all), and Claude writes
+the program in about 25 s. Recorded: `docs/recordings/nothingburger-demo.mp4`.
 
 ## Once per machine (about 5 min, unattended)
 
@@ -42,7 +44,7 @@ matched to the hall's tables and items by rule (`agent/design_flow/jobs.py`).
 headset. That teaches the skill (its takes are kept in `agent/design_flow/skill_data/`) and caches every robot
 check for that job. The first run takes one to two minutes.
 
-## On stage (about 35 s with Claude, 15 s without)
+## On stage (about 95 s)
 
 1. Open http://localhost:8000/#studio. The space is Rabinowitz Hall.
 2. Type **Wipe table C6 in the atrium** and press **Design robot**. Name the table: with a Claude key, the
@@ -67,9 +69,9 @@ the request shows (`wipe table`).
 
 | Job | Result |
 | :-- | :-- |
-| Wipe a surface | one table: demo, then a robot in about 15 s rehearsed |
-| Wipe down the tables | both tables, about 25 s rehearsed |
-| Carry a container outside | the sample bottle, out the south door: about 10 s |
+| Wipe a surface | one table: demo, then a robot in about 95 s rehearsed |
+| Wipe down the tables | both tables (not timed since the repricing; longer than one table) |
+| Carry a container outside | the sample bottle, out the south door (about 10 s before the repricing; not timed since) |
 | Take out a trash bag | refused: no trash bag in the hall's world file (the sample bottle is) |
 | Change a light bulb | refused: no light fixture in the hall's world file |
 | Open a box, caretaker jobs | refused: not a skill the pipeline has yet |
