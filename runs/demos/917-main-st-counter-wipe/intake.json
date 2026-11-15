@@ -3,7 +3,7 @@
   "model": "claude-sonnet-5-5",
   "job": "Wipe the kitchen counter at 917 Main St unit 506",
   "answers": [],
-  "understood_as": "Wipe the kitchen counter in unit 506 at 917 Main St with a cloth.",
+  "understood_as": "Wipe the kitchen counter at 917 Main St unit 506 with a cloth.",
   "steps": [
     "Pick up the wiping cloth",
     "Wipe the counter surface in strokes"
@@ -12,7 +12,7 @@
     {
       "chore": "wipe counter",
       "kind": "path",
-      "why": "Shows the stroke pattern and pressing motion for wiping the counter."
+      "why": "Shows the robot the stroke motion and pressing used to wipe the counter with the cloth."
     },
     {
       "chore": "hold cloth",
@@ -21,7 +21,7 @@
     }
   ],
   "questions": [
-    "Two surfaces are located in the building (other_1_top_1 and other_1_top_2) and neither is labelled as the kitchen counter. Which one is the kitchen counter? I assumed the first, other_1_top_1, and the plan should be corrected if that is wrong."
+    "The scan lists two surfaces (other_1_top_1 and other_1_top_2) in one room, neither labelled as the kitchen counter. Which one is the kitchen counter, and should the other be wiped too? I assumed the first one only."
   ],
   "unmet": [],
   "proceeded_without_answers": true

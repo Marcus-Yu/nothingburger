@@ -3,29 +3,29 @@
   "model": "claude-sonnet-5-5",
   "job": "Bring the parcel at the kerb up the driveway to the front door",
   "answers": [],
-  "understood_as": "Pick up the small parcel at the kerb and carry it up the driveway to the front door.",
+  "understood_as": "Pick up the small parcel at the kerb and bring it up the driveway to the front door.",
   "steps": [
-    "Pick up the small parcel at the kerb",
-    "Carry it up the driveway toward the front door"
+    "Pick up the small parcel at the kerb.",
+    "Carrying it up the driveway and setting it down at the front door is not planned yet, because the planner cannot route to the front door."
   ],
   "demos": [
     {
       "chore": "pick up parcel",
       "kind": "path",
-      "why": "Shows how the hand reaches for and lifts a box standing on its long edge."
+      "why": "Shows how the hand approaches and lifts a small box standing on its long edge."
     },
     {
       "chore": "pick up parcel",
       "kind": "squeeze",
-      "why": "Shows how firmly to pinch the box so it does not slip or get crushed."
+      "why": "Shows how firmly to grip a cardboard box so it neither slips nor gets crushed."
     }
   ],
   "questions": [
-    "The front door is not a located spot in the building. Can someone mark where the front door is in the scan? Until then the robot can only take the parcel to the way out.",
-    "Is the parcel at the kerb the small 20 x 15 x 6 cm box, and roughly how heavy is it?"
+    "The front door is not a located spot in the building, so the robot cannot be sent to it. Can the front door be located or marked in the scan?",
+    "Is the parcel the small box (20 x 15 x 6 cm, about 0.6 kg)? If it is a different size or weight, please give the weight or add an object card for it."
   ],
   "unmet": [
-    "Putting the parcel down at the front door itself: the planner can only deliver to the way out, not to a specific door."
+    "Carrying the parcel up the driveway and putting it down at the front door is not covered, because the planner can only deliver to the way out."
   ],
   "proceeded_without_answers": true
 }

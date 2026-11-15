@@ -9,7 +9,7 @@
       "object": "trash_bag",
       "demo": "pick up trash bag",
       "carries": true,
-      "why": "The bag has to be lifted and then taken out of the building, which is the whole job.",
+      "why": "The bag is on the kitchen floor and has to be lifted and taken out of the building, which is the last step.",
       "deliver_to": "way_out"
     }
   ],

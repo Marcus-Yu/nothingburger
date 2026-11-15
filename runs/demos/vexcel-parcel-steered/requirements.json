@@ -8,9 +8,8 @@
       "anchor": "parcel",
       "object": "parcel_small",
       "demo": "pick up parcel",
-      "carries": true,
-      "why": "The parcel is the only located item and it has to be lifted and carried; the way out is the only place the planner can deliver to, so it stands in for the front door.",
-      "deliver_to": "way_out"
+      "carries": false,
+      "why": "The parcel is the located item at the kerb and the small parcel card matches it. It is not marked as carried, because the front door is not a place the planner can deliver to."
     }
   ],
   "corridors": [
@@ -25,47 +24,9 @@
       "step_m": 0.0,
       "changes_floor": false,
       "turns": []
-    },
-    {
-      "trip": "t1->way_out",
-      "rooms": [
-        "driveway",
-        "outside"
-      ],
-      "doorways": [
-        "d_front"
-      ],
-      "bottleneck": {
-        "doorway": "d_front",
-        "width_m": 0.9
-      },
-      "header_m": 2.05,
-      "step_m": 0.0,
-      "changes_floor": false,
-      "turns": []
     }
   ],
   "requirements": [
-    {
-      "id": "r_width",
-      "task": null,
-      "quantity": "base_width_max",
-      "value": 0.8,
-      "unit": "m",
-      "tolerance": 0.0,
-      "source": "scan",
-      "from": "d_front 0.9 m less 0.05 m a side"
-    },
-    {
-      "id": "r_header",
-      "task": null,
-      "quantity": "stowed_height_max",
-      "value": 2.0,
-      "unit": "m",
-      "tolerance": 0.0,
-      "source": "scan",
-      "from": "lowest header 2.05 m less 0.05 m"
-    },
     {
       "id": "r_step",
       "task": null,

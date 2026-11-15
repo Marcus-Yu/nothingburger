@@ -17,7 +17,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Longest leg at 20.8 m; the step limit is assumed 0.0, so check thresholds on the way.",
+      "note": "Longest leg at 20.8 m; the step limit is assumed 0.0 m, so check thresholds on the way.",
       "n": 0
     },
     {
@@ -44,9 +44,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_payload"
+        "r_t1_floor"
       ],
-      "note": "The 10 N press force is assumed, not measured, so watch the cloth contact.",
+      "note": "Press force of 10 N is assumed, not measured. Covers strokes 0-2.",
       "n": 2
     },
     {
@@ -104,9 +104,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_payload"
+        "r_t1_floor"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Press force of 10 N is assumed, not measured. Covers strokes 3-5.",
       "n": 6
     },
     {
@@ -164,9 +164,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_payload"
+        "r_t1_floor"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Press force of 10 N is assumed, not measured. Covers strokes 6-8.",
       "n": 10
     },
     {
@@ -224,9 +224,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_payload"
+        "r_t1_floor"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Press force of 10 N is assumed, not measured. Covers strokes 9-11.",
       "n": 14
     },
     {
@@ -255,10 +255,9 @@
         "r_width",
         "r_length",
         "r_header",
-        "r_step",
-        "r_t1_floor"
+        "r_step"
       ],
-      "note": "4.6 m move to the far side of the table. Free floor at the table edge is only 0.425 m.",
+      "note": "4.6 m move to the other side of the table, and the robot turns to face it.",
       "n": 16
     },
     {
@@ -272,7 +271,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Base now faces the opposite way (heading -1.5708).",
+      "note": "Reach targets come from the home demo plus the scan.",
       "n": 17
     },
     {
@@ -285,9 +284,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_payload"
+        "r_t1_floor"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Press force of 10 N is assumed, not measured. Covers strokes 12-14.",
       "n": 18
     },
     {
@@ -345,9 +344,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_payload"
+        "r_t1_floor"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Press force of 10 N is assumed, not measured. Covers strokes 15-17.",
       "n": 22
     },
     {
@@ -405,9 +404,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_payload"
+        "r_t1_floor"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Press force of 10 N is assumed, not measured. Covers strokes 18-20.",
       "n": 26
     },
     {
@@ -452,7 +451,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Final standoff; the approach is short at 19 s.",
+      "note": "Reach targets come from the home demo plus the scan.",
       "n": 29
     },
     {
@@ -465,9 +464,9 @@
       "turns": null,
       "requirements": [
         "r_t1_press",
-        "r_t1_payload"
+        "r_t1_floor"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Press force of 10 N is assumed, not measured. Covers strokes 21-23, the last of the 24.",
       "n": 30
     },
     {
@@ -498,17 +497,18 @@
         "r_header",
         "r_step"
       ],
-      "note": "Return to the dock, 20.1 m, with nothing carried.",
+      "note": "Return to the dock, 20.1 m, with the arm stowed under the header limit.",
       "n": 32
     }
   ],
   "planning": {
     "workspace": true,
     "files": [
+      "notes/order.md",
       "plan.md"
     ],
-    "tool_calls": 6,
-    "turns": 3,
+    "tool_calls": 8,
+    "turns": 4,
     "revisions": 0
   }
 }

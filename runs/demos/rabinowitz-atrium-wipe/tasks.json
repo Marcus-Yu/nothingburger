@@ -7,7 +7,7 @@
       "object": "cloth",
       "demo": "wipe table",
       "carries": false,
-      "why": "The job asks for table C6 to be wiped, and its top is a located surface in the atrium."
+      "why": "The job is to wipe table C6, and its top is the located surface anchor."
     }
   ]
 }

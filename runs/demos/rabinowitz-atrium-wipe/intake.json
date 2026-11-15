@@ -12,12 +12,12 @@
     {
       "chore": "wipe table",
       "kind": "path",
-      "why": "Shows the robot the wiping strokes to make across a tabletop."
+      "why": "Shows the robot the wiping strokes and how to press on the tabletop with the cloth."
     },
     {
-      "chore": "wipe table",
+      "chore": "hold cloth",
       "kind": "squeeze",
-      "why": "Shows how firmly to hold the cloth and press on the surface without it slipping."
+      "why": "Shows how firmly to pinch the cloth so it does not slip while pressing and wiping."
     }
   ],
   "questions": [],

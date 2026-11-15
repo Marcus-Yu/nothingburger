@@ -11,40 +11,7 @@
       ],
       "task_yaw_rad": 0.0,
       "reach_ok": true,
-      "tip_ratio": 2.34,
-      "spares": [
-        [
-          2.025,
-          -1.475,
-          3.1416
-        ],
-        [
-          2.075,
-          -1.475,
-          3.1416
-        ]
-      ],
-      "q": {
-        "lift": 0.0,
-        "arm/shoulder_pan_joint": 2.92233,
-        "arm/shoulder_lift_joint": 5.33493,
-        "arm/elbow_joint": 1.95885,
-        "arm/wrist_1_joint": -2.58138,
-        "arm/wrist_2_joint": -1.5708,
-        "arm/wrist_3_joint": 4.11826
-      },
-      "why": "all 1 targets reached, worst tip ratio 2.34"
-    },
-    {
-      "task": "t2",
-      "pose": [
-        1.975,
-        -1.475,
-        3.1416
-      ],
-      "task_yaw_rad": 0.0,
-      "reach_ok": true,
-      "tip_ratio": 1.52,
+      "tip_ratio": 1.53,
       "spares": [],
       "q": {
         "lift": 0.0,
@@ -55,7 +22,7 @@
         "arm/wrist_2_joint": -1.5708,
         "arm/wrist_3_joint": 4.11826
       },
-      "why": "all 12 targets reached, worst tip ratio 1.52",
+      "why": "all 12 targets reached, worst tip ratio 1.53",
       "covers_targets": [
         0,
         1,
@@ -251,21 +218,6 @@
     },
     {
       "from": "t1",
-      "to": "t2",
-      "carrying": false,
-      "length_m": 0.0,
-      "waypoints": [
-        [
-          1.975,
-          -1.475,
-          -3.1416
-        ]
-      ],
-      "footprint_ok": true,
-      "standoff": 1
-    },
-    {
-      "from": "t2",
       "to": "dock",
       "carrying": false,
       "length_m": 10.472,

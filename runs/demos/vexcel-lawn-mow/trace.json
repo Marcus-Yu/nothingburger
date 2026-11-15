@@ -9,27 +9,27 @@
     {
       "n": 1,
       "name": "composer.design",
-      "seconds": 3.56,
-      "summary": "go2+none+piper+piper_gripper $7039 17.84 kg"
+      "seconds": 2.3893,
+      "summary": "go2+none+piper+piper_gripper $755 17.84 kg"
     },
     {
       "n": 2,
       "name": "composer.candidates",
-      "seconds": 0.0052,
+      "seconds": 0.0031,
       "summary": "7140 candidates"
     },
     {
       "n": 3,
       "name": "composer.compose",
-      "seconds": 0.7644,
+      "seconds": 0.5371,
       "summary": "robot.xml 56141 chars; stowed 0.384 m wide, 0.568 m tall; 6 arm joints"
     },
     {
       "n": 4,
       "name": "nav.plan",
-      "seconds": 5.6423,
+      "seconds": 3.2902,
       "summary": "55 legs, 0 doors crossed, 0 failures"
     }
   ],
-  "seconds": 9.972
+  "seconds": 6.22
 }

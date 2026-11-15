@@ -10,7 +10,7 @@
     "wrist_cam": false,
     "ego_cam": "base_front"
   },
-  "price_usd": 66450,
+  "price_usd": 2400,
   "mass_kg": 101.71,
   "checks": [
     {
@@ -230,5 +230,5 @@
   ],
   "considered": 7140,
   "passed_arithmetic": 2216,
-  "composed_and_checked": 303
+  "composed_and_checked": 317
 }

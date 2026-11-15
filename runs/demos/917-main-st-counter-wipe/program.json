@@ -12,9 +12,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_step"
+        "r_step",
+        "r_t1_floor"
       ],
-      "note": "The scan found a maximum step of 0.0 m on this 10.5 m leg to the counter; the ledger has no width or header row.",
+      "note": "Step max is scanned as 0.0 m and free floor at the counter is 0.5 m from the edge, so check clearance on arrival.",
       "n": 0
     },
     {
@@ -26,39 +27,25 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach",
-        "r_t1_floor"
+        "r_t1_reach"
       ],
-      "note": "The reach target is assumed, not measured, so check the cloth position before going in.",
+      "note": "Reach targets come from the home demo plus the scan, so confirm the counter has not moved.",
       "n": 1
     },
     {
-      "primitive": "grasp",
+      "primitive": "wipe",
       "task": "t1",
       "leg": null,
       "standoff": 0,
       "force_n": null,
-      "press_n": null,
+      "press_n": 10.0,
       "turns": null,
       "requirements": [
+        "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The grip force is not established because the ledger has no force band for the cloth; the payload is 0.1 kg from the card.",
+      "note": "The 10 N press force is assumed, not measured, so check the contact on the first stroke. This standoff covers strokes 0-5 of 6.",
       "n": 2
-    },
-    {
-      "primitive": "lift",
-      "task": "t1",
-      "leg": null,
-      "standoff": 0,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t1_payload"
-      ],
-      "note": "The plan lifts 0.15 m; watch that the cloth does not slip.",
-      "n": 3
     },
     {
       "primitive": "retreat",
@@ -71,8 +58,8 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Retreat with the cloth held, ready for the wipe.",
-      "n": 4
+      "note": "Back off 0.1 m before driving the base.",
+      "n": 3
     },
     {
       "primitive": "move_base",
@@ -85,74 +72,17 @@
       "requirements": [
         "r_step"
       ],
-      "note": "This leg is 0 m, so the base stays at the same pose and only the arm task changes.",
-      "n": 5
-    },
-    {
-      "primitive": "approach",
-      "task": "t2",
-      "leg": null,
-      "standoff": 1,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach",
-        "r_t2_floor"
-      ],
-      "note": "The reach targets come from the home demo plus the scan; the standoff covers strokes 0-5 of 6.",
-      "n": 6
-    },
-    {
-      "primitive": "wipe",
-      "task": "t2",
-      "leg": null,
-      "standoff": 1,
-      "force_n": null,
-      "press_n": 10.0,
-      "turns": null,
-      "requirements": [
-        "r_t2_press",
-        "r_t2_payload",
-        "r_t2_reach"
-      ],
-      "note": "The 10 N press force is assumed and uncalibrated, so check the contact on the first stroke; the plan has 11 strokes.",
-      "n": 7
-    },
-    {
-      "primitive": "retreat",
-      "task": "t2",
-      "leg": null,
-      "standoff": 1,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach"
-      ],
-      "note": "Back off 0.1 m from the surface before the base moves.",
-      "n": 8
-    },
-    {
-      "primitive": "move_base",
-      "task": null,
-      "leg": 2,
-      "standoff": null,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_step"
-      ],
-      "note": "Return leg to the dock, 10.5 m, with the same step limit as the outbound leg.",
-      "n": 9
+      "note": "Return to the dock with the arm stowed. The cloth is not carried.",
+      "n": 4
     }
   ],
   "planning": {
     "workspace": true,
-    "files": [],
-    "tool_calls": 5,
-    "turns": 2,
+    "files": [
+      "plan.md"
+    ],
+    "tool_calls": 6,
+    "turns": 3,
     "revisions": 0
   }
 }

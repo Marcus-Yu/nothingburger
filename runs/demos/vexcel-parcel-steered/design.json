@@ -10,26 +10,23 @@
     "wrist_cam": true,
     "ego_cam": "base_front"
   },
-  "price_usd": 34600,
+  "price_usd": 1730,
   "mass_kg": 64.41,
   "checks": [
     {
       "check": "doorway",
       "task": null,
-      "status": "pass",
-      "value": 0.681,
-      "limit": 0.8,
+      "status": "not_assessable",
+      "value": 0.408,
       "unit": "m",
-      "requirements": [
-        "r_width"
-      ],
-      "why": "width of the whole robot with the arm stowed"
+      "requirements": [],
+      "why": "no base_width_max requirement in the ledger"
     },
     {
       "check": "turn",
       "task": null,
       "status": "pass",
-      "value": 0.448,
+      "value": 0.457,
       "unit": "m",
       "requirements": [],
       "why": "holonomic base: it moves sideways, so it need not turn in the hallway"
@@ -37,14 +34,11 @@
     {
       "check": "door header",
       "task": null,
-      "status": "pass",
-      "value": 0.803,
-      "limit": 2.0,
+      "status": "not_assessable",
+      "value": 1.556,
       "unit": "m",
-      "requirements": [
-        "r_header"
-      ],
-      "why": "height with the lift down and the arm stowed"
+      "requirements": [],
+      "why": "no stowed_height_max requirement in the ledger"
     },
     {
       "check": "steps",
@@ -185,6 +179,8 @@
     }
   ],
   "labels": [
+    "doorway not verified: building",
+    "door header not verified: building",
     "force not verified: t1"
   ],
   "considered": 6120,

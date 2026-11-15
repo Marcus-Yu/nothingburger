@@ -12,7 +12,7 @@
   },
   "robot_xml": "robot.xml",
   "mass_kg": 17.84,
-  "price_usd": 7039,
+  "price_usd": 755,
   "base": {
     "kind": "legged",
     "holonomic": true,

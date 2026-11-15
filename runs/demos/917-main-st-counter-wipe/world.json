@@ -26,7 +26,7 @@
         0.0
       ]
     ],
-    "note": "the world's X and Y are the model's, so this is the floor's height and the change from Z up to the tour's Y up (x, y, z to x, z, -y); not yet checked in the tour viewer"
+    "note": "the world's X and Y are the model's, so this is the floor's height and the change from Z up to the tour's Y up (x, y, z to x, z, -y), as the viewer's own scan positions confirm"
   },
   "floors": [
     {
@@ -12481,5 +12481,9 @@
         ]
       ]
     }
-  ]
+  ],
+  "scan": {
+    "dir": "world/_scans/917_main_st_unit_506_169f",
+    "source": "Matterport model 169F7nENMza, its MatterPak mesh, cut into pieces for the web app's pictures by world/scan.py (an export, not committed)"
+  }
 }

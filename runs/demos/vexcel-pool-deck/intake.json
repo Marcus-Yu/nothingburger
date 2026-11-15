@@ -3,25 +3,20 @@
   "model": "claude-sonnet-5-5",
   "job": "Wipe down the sun lounger at the end of the row",
   "answers": [],
-  "understood_as": "Wipe down the top surface of the sun lounger at the end of the row on the deck with a cloth.",
+  "understood_as": "Wipe down the top of the sun lounger at the end of the row on the deck with a cloth.",
   "steps": [
-    "Take the wiping cloth.",
-    "Wipe the lounger top in strokes, pressing on the surface."
+    "Go to the lounger top on the deck",
+    "Wipe the surface with the cloth in strokes"
   ],
   "demos": [
     {
       "chore": "wipe lounger",
       "kind": "path",
-      "why": "Shows the robot the wiping strokes across the lounger top on the real lounger."
-    },
-    {
-      "chore": "wipe lounger",
-      "kind": "squeeze",
-      "why": "Shows how firmly to hold the cloth and press so it neither slips nor drags."
+      "why": "Shows the robot the wiping strokes and how to press on the lounger surface."
     }
   ],
   "questions": [
-    "The building has only one located lounger top on the deck. Is that the lounger at the end of the row? If not, please have the correct lounger located."
+    "The building has only one lounger surface located (lounger_top). Please confirm it is the lounger at the end of the row; if not, the right one needs to be located first."
   ],
   "unmet": [],
   "proceeded_without_answers": true

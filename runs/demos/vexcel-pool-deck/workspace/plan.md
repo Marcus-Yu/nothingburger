@@ -1,2 +1,3 @@
 - [x] read run files
-- [x] order: legs 0-4 each followed by approach/wipe/retreat at standoff 0-4, then leg 5 home
+- [x] order: legs 0-5, standoffs 0-4 each approach/wipe/retreat after legs 0-4
+- [x] no grasp, no force band; press 10 N (assumed)

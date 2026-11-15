@@ -12,11 +12,9 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_width",
-        "r_header",
         "r_step"
       ],
-      "note": "Step limit is assumed 0.0 m, not measured, so check thresholds on the way to the parcel.",
+      "note": "Step limit of 0.0 m is assumed, not measured, so check the route for thresholds.",
       "n": 0
     },
     {
@@ -31,7 +29,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "The parcel is only 0.026 m from the floor edge, so go slowly on the final approach.",
+      "note": "The parcel is only 0.026 m from the edge of the free floor, so go slowly.",
       "n": 1
     },
     {
@@ -49,7 +47,7 @@
         "r_t1_force",
         "r_t1_opening"
       ],
-      "note": "The force band was measured in a home demo and has not been calibrated on this parcel.",
+      "note": "The force band was measured at home and has not been calibrated on this parcel. The gripper must open at least 0.07 m.",
       "n": 2
     },
     {
@@ -63,7 +61,7 @@
       "requirements": [
         "r_t1_payload"
       ],
-      "note": "The lift is 0.15 m and the payload limit is 0.6 kg from the card, so watch for slip.",
+      "note": "The lift is 0.15 m. The payload limit of 0.6 kg comes from the parcel card.",
       "n": 3
     },
     {
@@ -77,7 +75,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Retreat with the parcel held and keep clear of the floor edge.",
+      "note": "Retreat while holding the parcel. Stay clear of the nearby floor edge.",
       "n": 4
     },
     {
@@ -89,54 +87,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_width",
-        "r_header",
         "r_step"
       ],
-      "note": "The parcel is carried for 9.1 m, so check the grip and avoid sudden stops.",
+      "note": "Return to the dock. The task is not marked as carried and has no destination, so there is no place or release step.",
       "n": 5
-    },
-    {
-      "primitive": "place",
-      "task": "t1",
-      "leg": null,
-      "standoff": null,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t1_payload"
-      ],
-      "note": "The way out stands in for the front door, so set the parcel down gently.",
-      "n": 6
-    },
-    {
-      "primitive": "release",
-      "task": "t1",
-      "leg": null,
-      "standoff": null,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [],
-      "note": "Open the gripper only after the parcel is resting on the floor.",
-      "n": 7
-    },
-    {
-      "primitive": "move_base",
-      "task": null,
-      "leg": 2,
-      "standoff": null,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_width",
-        "r_header",
-        "r_step"
-      ],
-      "note": "The robot returns to the dock empty, with the arm stowed under the header limit.",
-      "n": 8
     }
   ],
   "planning": {

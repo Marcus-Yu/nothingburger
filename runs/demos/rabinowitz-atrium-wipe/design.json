@@ -10,7 +10,7 @@
     "wrist_cam": false,
     "ego_cam": "stage_front"
   },
-  "price_usd": 49450,
+  "price_usd": 2205,
   "mass_kg": 107.24,
   "checks": [
     {
@@ -447,7 +447,7 @@
   "labels": [
     "press not verified: t1"
   ],
-  "considered": 6540,
-  "passed_arithmetic": 2024,
-  "composed_and_checked": 264
+  "considered": 6240,
+  "passed_arithmetic": 1928,
+  "composed_and_checked": 250
 }

@@ -613,6 +613,40 @@
         1
       ],
       "source": "manual"
+    },
+    {
+      "id": "recycling_bin_by_entrance",
+      "room": "east_corridor",
+      "kind": "low_item",
+      "point": [
+        24.75,
+        13.0,
+        0.76
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "source": "manual",
+      "note": "the blue recycling bin to the right of the atrium entrance in the tour, placed by eye (about 0.3 m); the point is its rim"
+    },
+    {
+      "id": "corridor_lantern",
+      "room": "east_corridor",
+      "kind": "ceiling_fixture",
+      "point": [
+        25.9,
+        9.0,
+        2.6
+      ],
+      "normal": [
+        0,
+        0,
+        -1
+      ],
+      "source": "manual",
+      "note": "the hanging lantern in the corridor, placed by eye; height assumed"
     }
   ]
 }

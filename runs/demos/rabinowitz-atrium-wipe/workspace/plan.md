@@ -1,2 +1,2 @@
-- [x] read run files; 9 legs, standoffs 0-7 wipe t1, press 10N, no grasp
-- [x] emit move_base/approach/wipe/retreat per standoff, then leg 8
+- [x] read run files
+- [x] order: leg i -> standoff i (0-7): approach, wipe(10N), retreat; leg 8 return to dock

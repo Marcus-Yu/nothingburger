@@ -1,2 +1,2 @@
 - [x] read run files
-- [x] order: leg0, approach, grasp, lift, retreat, leg1, place, release, leg2
+- [x] order: move_base 0, approach, grasp, lift, retreat, move_base 1 (t1 not carried, no place/release)

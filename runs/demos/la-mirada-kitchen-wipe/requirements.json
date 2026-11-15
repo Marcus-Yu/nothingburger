@@ -7,9 +7,9 @@
       "skill": "wipe",
       "anchor": "kitchen_top_1",
       "object": "cloth",
-      "demo": "wipe table",
+      "demo": "wipe surface",
       "carries": false,
-      "why": "The kitchen table is the only surface located in the kitchen, so kitchen_top_1 is used for it."
+      "why": "The kitchen has one located surface, kitchen_top_1, which I am taking to be the table, and wiping it is the job."
     }
   ],
   "corridors": [

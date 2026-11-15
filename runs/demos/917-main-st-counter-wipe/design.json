@@ -7,11 +7,11 @@
     "gripper": "robotiq_2f85",
     "lidar": "rplidar_s2",
     "lidar_mount": "stage_rear",
-    "wrist_cam": true,
+    "wrist_cam": false,
     "ego_cam": "base_front"
   },
-  "price_usd": 67580,
-  "mass_kg": 103.19,
+  "price_usd": 2425,
+  "mass_kg": 103.11,
   "checks": [
     {
       "check": "doorway",
@@ -56,12 +56,11 @@
       "check": "base payload",
       "task": null,
       "status": "pass",
-      "value": 58.29,
+      "value": 58.21,
       "limit": 60.0,
       "unit": "kg",
       "requirements": [
-        "r_t1_payload",
-        "r_t2_payload"
+        "r_t1_payload"
       ],
       "why": "value is everything the base carries (lift, arm, gripper, sensors, heaviest object); limit is the base's rating"
     },
@@ -86,13 +85,6 @@
       "why": "share of the horizontal circle the lidar sees past the robot's own body, arm stowed, mount stage_rear"
     },
     {
-      "check": "wrist camera",
-      "task": null,
-      "status": "pass",
-      "requirements": [],
-      "why": "a grasp needs a close view; the ego camera's depth stops working under 0.3 m"
-    },
-    {
       "check": "ego camera",
       "task": null,
       "status": "pass",
@@ -104,33 +96,11 @@
       "task": "t1",
       "status": "pass",
       "value": 1.3,
-      "limit": 0.704,
+      "limit": 0.979,
       "unit": "m",
       "requirements": [
         "r_t1_reach",
         "r_t1_floor"
-      ],
-      "why": "target 0 at 1.06 m, tool down: the tool reaches 0.17 to 1.30 m from the base centre; the base centre can stand 0.70 m away or more (free floor 0.50 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
-      "target": 0,
-      "targets": [
-        {
-          "target": 0,
-          "status": "pass",
-          "needed_m": 0.704,
-          "reach_m": 1.3
-        }
-      ]
-    },
-    {
-      "check": "reach",
-      "task": "t2",
-      "status": "pass",
-      "value": 1.3,
-      "limit": 0.979,
-      "unit": "m",
-      "requirements": [
-        "r_t2_reach",
-        "r_t2_floor"
       ],
       "why": "target 1 at 1.06 m, tool down: the tool reaches 0.17 to 1.30 m from the base centre; the base centre can stand 0.98 m away or more (free floor 0.78 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 12 targets)",
       "target": 1,
@@ -213,78 +183,38 @@
       "check": "tip-over",
       "task": "t1",
       "status": "pass",
-      "value": 2.11,
-      "limit": 1.5,
-      "unit": "ratio",
-      "requirements": [
-        "r_t1_payload",
-        "r_t1_reach",
-        "r_t1_floor"
-      ],
-      "why": "worst case: reaching target 0 (0.75 m out at 1.06 m, the nearest the base can stand to it); payload 0.1 kg, press 0.0 N; static, against the support polygon"
-    },
-    {
-      "check": "tip-over",
-      "task": "t2",
-      "status": "pass",
       "value": 1.56,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
-        "r_t2_payload",
-        "r_t2_press",
-        "r_t2_reach",
-        "r_t2_floor"
+        "r_t1_payload",
+        "r_t1_press",
+        "r_t1_reach",
+        "r_t1_floor"
       ],
-      "why": "worst case: reaching target 6 (0.95 m out at 1.06 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 9 (0.85 m out at 1.06 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
     },
     {
       "check": "payload",
       "task": "t1",
       "status": "pass",
-      "value": 1.1,
+      "value": 1.0,
       "limit": 12.5,
       "unit": "kg",
       "requirements": [
         "r_t1_payload"
       ],
-      "why": "arm carries object 0.1 + gripper 0.9 + wrist camera 0.1 kg against its 12.5 kg rating; gripper rated 5.0 kg for the 0.1 kg object"
-    },
-    {
-      "check": "payload",
-      "task": "t2",
-      "status": "pass",
-      "value": 1.1,
-      "limit": 12.5,
-      "unit": "kg",
-      "requirements": [
-        "r_t2_payload"
-      ],
-      "why": "arm carries object 0.1 + gripper 0.9 + wrist camera 0.1 kg against its 12.5 kg rating; gripper rated 5.0 kg for the 0.1 kg object"
-    },
-    {
-      "check": "opening",
-      "task": "t1",
-      "status": "not_assessable",
-      "requirements": [],
-      "why": "no gripper_opening_min requirement in the ledger for this pick task"
-    },
-    {
-      "check": "force",
-      "task": "t1",
-      "status": "not_assessable",
-      "requirements": [],
-      "why": "no force_band requirement in the ledger for this pick task"
+      "why": "arm carries object 0.1 + gripper 0.9 + wrist camera 0.0 kg against its 12.5 kg rating; gripper rated 5.0 kg for the 0.1 kg object"
     },
     {
       "check": "press",
-      "task": "t2",
+      "task": "t1",
       "status": "not_assessable",
       "value": 122.6,
       "limit": 12.0,
       "unit": "N",
       "requirements": [
-        "r_t2_press"
+        "r_t1_press"
       ],
       "why": "press force is assumed"
     }
@@ -292,11 +222,9 @@
   "labels": [
     "doorway not verified: building",
     "door header not verified: building",
-    "opening not verified: t1",
-    "force not verified: t1",
-    "press not verified: t2"
+    "press not verified: t1"
   ],
   "considered": 7140,
-  "passed_arithmetic": 1108,
-  "composed_and_checked": 157
+  "passed_arithmetic": 2216,
+  "composed_and_checked": 324
 }

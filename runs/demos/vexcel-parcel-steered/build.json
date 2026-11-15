@@ -12,7 +12,7 @@
   },
   "robot_xml": "robot.xml",
   "mass_kg": 64.41,
-  "price_usd": 34600,
+  "price_usd": 1730,
   "base": {
     "kind": "wheeled",
     "holonomic": true,
@@ -58,17 +58,17 @@
     ]
   },
   "stowed": {
-    "width_m": 0.681,
-    "length_m": 0.448,
-    "height_m": 0.803,
+    "width_m": 0.408,
+    "length_m": 0.457,
+    "height_m": 1.556,
     "qpos": {
-      "arm/fr3_joint1": -1.52561,
-      "arm/fr3_joint2": 1.68875,
-      "arm/fr3_joint3": 0.13564,
-      "arm/fr3_joint4": -2.97453,
-      "arm/fr3_joint5": 0.25805,
-      "arm/fr3_joint6": 1.47716,
-      "arm/fr3_joint7": 0.1502
+      "arm/fr3_joint1": -2.6028,
+      "arm/fr3_joint2": -0.28,
+      "arm/fr3_joint3": -0.6687,
+      "arm/fr3_joint4": -0.11723,
+      "arm/fr3_joint5": 0.41907,
+      "arm/fr3_joint6": 1.30034,
+      "arm/fr3_joint7": -3.04688
     },
     "keyframe": "stowed"
   },

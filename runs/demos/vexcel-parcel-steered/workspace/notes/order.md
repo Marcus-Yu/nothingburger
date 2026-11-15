@@ -1,1 +1,1 @@
-Force band t1 8.83-9.6 N (demo:home). Parcel 0.026 m from floor edge. Leg1 arrives at way_out, place+release after it. Leg2 no arm work.
+t1 pick, carries=false. Force band 8.83-9.6 N (demo:home). Parcel only 0.026 m from free-floor edge. Legs 0 (to standoff 0), 1 (back to dock, no standoff).

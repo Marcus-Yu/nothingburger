@@ -10,18 +10,18 @@
   ],
   "demos": [
     {
-      "chore": "wipe table",
+      "chore": "wipe surface",
       "kind": "path",
-      "why": "Shows the robot the wiping strokes across the table top."
+      "why": "Shows the robot the strokes and pressure used to wipe a tabletop with the cloth."
     },
     {
-      "chore": "wipe table",
+      "chore": "hold cloth",
       "kind": "squeeze",
-      "why": "Shows how firmly to hold the cloth and press so it does not slip or lose contact."
+      "why": "Shows how firmly to pinch the cloth so it does not slip while pressing and wiping."
     }
   ],
   "questions": [
-    "Is kitchen_top_1 the kitchen table? It is the only surface located in the kitchen, so I assumed it is."
+    "The kitchen has only one located surface (kitchen_top_1). Is that the table you mean? If the table is a separate piece of furniture that has not been located, it needs to be marked in the scan first."
   ],
   "unmet": [],
   "proceeded_without_answers": true

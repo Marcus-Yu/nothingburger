@@ -5,23 +5,23 @@
   "answers": [],
   "understood_as": "Pick up the tied kitchen trash bag and carry it out of the building to the bins at the kerb.",
   "steps": [
-    "Pick up the tied trash bag in the kitchen by its knot using a hook hold",
-    "Carry it out of the building to the way out"
+    "Pick up the tied trash bag in the kitchen",
+    "Carry it out of the building"
   ],
   "demos": [
     {
       "chore": "pick up trash bag",
       "kind": "path",
-      "why": "Shows how the hand moves to hook the bag's knot, lift it and carry it clear of the floor."
+      "why": "Shows how the hand hooks and lifts the tied bag and carries it toward the way out."
     },
     {
-      "chore": "hook trash bag",
+      "chore": "hold trash bag",
       "kind": "squeeze",
-      "why": "Shows how firmly to hold the bag so it neither slips nor tears."
+      "why": "Shows how firmly to hold the bag handle or knot so it does not slip or tear."
     }
   ],
   "questions": [],
   "unmet": [
-    "The planner can only carry the bag to the way out of the building, so it cannot place it into the bins at the kerb itself."
+    "Putting the bag into the bins at the kerb: the planner can only carry it to the way out of the building, not to the bins outside."
   ]
 }
