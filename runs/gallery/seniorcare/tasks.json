@@ -7,7 +7,7 @@
       "object": "cloth",
       "demo": "wipe bedside table",
       "carries": false,
-      "why": "She asked for the bedside table to be wiped; doing it first leaves a clean surface for her things."
+      "why": "She asked for the bedside table to be wiped; doing it first leaves a clean surface to put things on."
     },
     {
       "id": "t2",
@@ -15,9 +15,8 @@
       "anchor": "remote_on_footstool",
       "object": "tv_remote",
       "demo": "pick up remote",
-      "carries": true,
-      "why": "The remote is on a low footstool she can no longer reach; it should end up somewhere she can reach.",
-      "deliver_to": "way_out"
+      "carries": false,
+      "why": "The remote is on a low footstool she can no longer reach."
     },
     {
       "id": "t3",
@@ -26,16 +25,16 @@
       "object": "hand_towel",
       "demo": "pick up towel",
       "carries": false,
-      "why": "The towel is on the low bath edge and she cannot bend down to get it."
+      "why": "The towel on the bath edge is too low for her to reach."
     },
     {
       "id": "t4",
       "skill": "pick",
       "anchor": "pill_organiser",
       "object": "pill_organiser",
-      "demo": "pick up pill organiser",
+      "demo": "fetch pill organiser",
       "carries": true,
-      "why": "She asked for the pill organiser to be fetched from the kitchen counter and brought to her.",
+      "why": "She asked for the pill organiser to be fetched from the kitchen counter, so it is picked up and carried to her; it stays in the home.",
       "deliver_to": "way_out"
     }
   ]

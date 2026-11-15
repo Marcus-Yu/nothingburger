@@ -1,0 +1,37 @@
+{
+  "id": "vx300s",
+  "slot": "arm",
+  "name": "Trossen ViperX 300 S (with its gripper)",
+  "model": "menagerie/trossen_vx300s/vx300s.xml",
+  "integrated_gripper": "vx300s_gripper",
+  "tool_frame": {
+    "body": "gripper_link",
+    "pos": [
+      0.1,
+      0.0,
+      0.0
+    ],
+    "quat": [
+      0.70711,
+      0.0,
+      0.70711,
+      0.0
+    ]
+  },
+  "finger_joints": [
+    "left_finger",
+    "right_finger"
+  ],
+  "payload_kg": 0.75,
+  "reach_m": 0.75,
+  "price_usd": 6100,
+  "src": "Trossen figures from memory (750 g, 750 mm); price assumed",
+  "confidence": {
+    "payload_kg": "unverified",
+    "reach_m": "unverified",
+    "price_usd": "assumed",
+    "mass_kg": "model",
+    "tool_frame": "measured from the model's finger meshes"
+  },
+  "notes": "Geometry, joint limits and mass: the MuJoCo Menagerie model (meshes derived from vendor CAD). reach_m and payload_kg are the rated figures; the composer measures the real envelope from the composed model. tool_frame is the tool point in the named body's frame; its z axis is the approach direction. finger_joints are left out of the arm's joints."
+}

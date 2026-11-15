@@ -2,26 +2,26 @@
   "source": "model",
   "model": "claude-opus-5-5",
   "job": "Collect today's water sample from the pump house: the bottle is on the sample shelf inside, past the kerb at the door. Bring it out to the gate.",
-  "understood_as": "Pick up today's 500 ml water sample bottle from the sample shelf in the pump room and carry it out of the building to the gate.",
+  "understood_as": "Pick up today's water sample bottle from the sample shelf in the pump room, past the kerb at the door, and carry it out to the gate.",
   "steps": [
-    "Enter the pump room, stepping over the kerb at the door.",
-    "Find the sample bottle on the sample shelf and grip it firmly without squeezing it.",
-    "Carry the bottle out past the kerb and leave the building by the way out, towards the gate."
+    "Go into the pump house, crossing the kerb at the door.",
+    "Pick up the water sample bottle from the sample shelf.",
+    "Carry it back out over the kerb and bring it to the gate."
   ],
   "demos": [
     {
       "chore": "pick sample bottle",
       "kind": "path",
-      "why": "Shows how a hand reaches into the shelf, lifts the bottle clear and carries it upright, so the robot copies the motion on the real shelf."
+      "why": "Shows how a hand reaches onto the sample shelf and lifts the bottle off it without knocking it over."
     },
     {
       "chore": "pick sample bottle",
       "kind": "squeeze",
-      "why": "Sets how hard to grip a full bottle so it does not slip out or get squeezed enough to spill or crack."
+      "why": "Sets how hard to grip a full, possibly wet bottle so it doesn't slip during the carry and isn't squeezed hard enough to crack or leak."
     }
   ],
   "questions": [
-    "The robot can only take the bottle as far as the building's way out; the gate itself has not been located in the scan. Could you add the gate as a mapped spot, or confirm that leaving the bottle at the pump house door is fine?",
-    "How high is the kerb at the pump house door? Its height decides whether the robot can step or roll over it while carrying the bottle."
+    "How high is the kerb at the pump house door? The robot has to be built to step over it with the bottle, so please measure it.",
+    "The plan can only deliver to the building's way out. Is the gate the same as the pump house exit, or is there a set spot at the gate where the bottle should be left?"
   ]
 }

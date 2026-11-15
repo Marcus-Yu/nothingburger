@@ -82,6 +82,15 @@ def compose_spec(parts: dict):
         c = [(o["x"][0] + o["x"][1]) / 2, (o["y"][0] + o["y"][1]) / 2, (o["z"][0] + o["z"][1]) / 2]
         h = [(o["x"][1] - o["x"][0]) / 2, (o["y"][1] - o["y"][0]) / 2, (o["z"][1] - o["z"][0]) / 2]
         base.add_geom(name="base_box", type=BOX, pos=c, size=h, mass=B["mass_kg"], rgba=[0, 0, 0, 0])
+        cs = B.get("casters")
+        if cs:  # the wheels: drawn, not simulated (the checks use the outline and the support rectangle)
+            spec.add_mesh(name="caster_mesh", file=str(P.asset(cs["mesh"]).resolve()), scale=[cs["mesh_scale"]] * 3)
+            for i, (x, y, yaw) in enumerate(cs["at"]):
+                q = np.zeros(4)
+                mujoco.mju_mulQuat(q, np.array([np.cos(np.radians(yaw) / 2), 0, 0, np.sin(np.radians(yaw) / 2)]),
+                                   np.array(cs["upright_quat"], dtype=float))
+                base.add_geom(name=f"base_caster_{i}", type=mujoco.mjtGeom.mjGEOM_MESH, meshname="caster_mesh", pos=[x, y, 0],
+                              quat=q, contype=0, conaffinity=0, mass=0, rgba=[0.16, 0.17, 0.19, 1])
     else:
         base.add_geom(name="base_dummy", type=mujoco.mjtGeom.mjGEOM_SPHERE, size=[0.001], pos=[0, 0, B["stand_m"]], mass=0,
                       contype=0, conaffinity=0, rgba=[0, 0, 0, 0])
@@ -103,8 +112,12 @@ def compose_spec(parts: dict):
     spec.attach(_child(A["model"]), prefix="arm/", site=mount)
     assembly.append({"part": parts["arm"], "onto": f"{parts['lift']}:stage" if stage is not None else f"{parts['base']}:top"})
     if A.get("integrated_gripper"):
-        ee = spec.site("arm/" + A["tool_site"])
-        hand, tool_pos, tool_quat = ee.parent, np.array(ee.pos), ee.quat
+        if "tool_frame" in A:  # a model with no tool site: the card gives the point on one of its bodies
+            tf = A["tool_frame"]
+            hand, tool_pos, tool_quat = spec.body("arm/" + tf["body"]), np.array(tf["pos"], dtype=float), tf["quat"]
+        else:
+            ee = spec.site("arm/" + A["tool_site"])
+            hand, tool_pos, tool_quat = ee.parent, np.array(ee.pos), ee.quat
         assembly.append({"part": parts["gripper"], "onto": f"{parts['arm']}:integrated"})
     else:
         flange = spec.site("arm/" + A["flange_site"])
@@ -172,7 +185,7 @@ class Robot:
         self.is_arm = np.array([n.startswith(("arm/", "grip/", "sens/wrist/")) for n in names])
         self.is_carrier = np.array([n in ("base_link", "lift_stage") or n.startswith("base/") for n in names])
         self.is_robot = np.array([n != "world" for n in names])
-        for skip in ("base_visual", "base_dummy"):
+        for skip in ("base_visual", "base_dummy", *(f"base_caster_{i}" for i in range(4))):
             if mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, skip) >= 0:
                 self.is_carrier[m.geom(skip).id] = False
                 self.is_robot[m.geom(skip).id] = False
@@ -180,9 +193,11 @@ class Robot:
         for jn, v in self.B.get("home", {}).items():
             self.q0[m.joint("base/" + jn).qposadr] = v
         # the joints that place the tool once the base is parked: the lift, then the arm (no fingers)
+        fingers = {"arm/" + n for n in P.card("arm", parts["arm"]).get("finger_joints", [])}
         self.free = [j for j in range(m.njnt)
                      if m.joint(j).name == "lift"
-                     or (m.joint(j).name.startswith("arm/") and "gripper" not in m.joint(j).name and "finger" not in m.joint(j).name)]
+                     or (m.joint(j).name.startswith("arm/") and m.joint(j).name not in fingers
+                         and "gripper" not in m.joint(j).name.lower() and "finger" not in m.joint(j).name.lower())]
         self.arm_joints = [m.joint(j).name for j in self.free]
         self.qadr = np.array([m.jnt_qposadr[j] for j in self.free])
         self.dadr = np.array([m.jnt_dofadr[j] for j in self.free])
@@ -324,9 +339,10 @@ class Robot:
         return None
 
     def envelope(self, seed: int = 0, n: int = 4000) -> dict:
-        """Where the tool can be with its approach axis pointing straight up, and straight down, with the base
-        parked: {(axis, height bin): [(distance from the base centre, joint values), ...]}, one entry per
-        ENV_STEP of distance. Built by sampling the composed model: draw joint values, turn the wrist until
+        """Where the tool can be with its approach axis pointing straight up, straight down, and level
+        ("side": pointing along the robot's +X, as into a shelf), with the base parked:
+        {(axis, height bin): [(distance from the base centre, joint values), ...]}, one entry per ENV_STEP of
+        distance. For "side" the distance is measured along the approach axis. Built by sampling the composed model: draw joint values, turn the wrist until
         the tool points up (or down), drop poses where the arm is below the floor or inside the base or
         lift, and record where the tool is. A pose valid at one lift height is taken as valid at every
         higher one (the arm only moves away from the base). Sampled, so the true envelope is a little
@@ -351,7 +367,11 @@ class Robot:
             if lo[2] < -0.005 or self.arm_hits_carrier():
                 return None
             p = self.d.site_xpos[self.tool]
-            dist, z = float(np.hypot(p[0], p[1])), float(p[2])
+            # sideways, what counts is how far the tool is past the base centre along its own approach axis:
+            # the base stands in front of the shelf or rack and the tool goes straight in
+            dist, z = float(p[0]) if axis == "side" else float(np.hypot(p[0], p[1])), float(p[2])
+            if dist <= 0:
+                return None
             s = float(q[lift_i]) if lift_i is not None else 0.0
             span = self.stroke - s
             for hb in range(int(np.ceil((z - ENV_STEP / 2) / ENV_STEP)), int(np.floor((z + span + ENV_STEP / 2) / ENV_STEP)) + 1):
@@ -365,7 +385,7 @@ class Robot:
                     cells[c] = (dist, qq)
             return q
 
-        for axis, a in (("up", np.array([0.0, 0, 1])), ("down", np.array([0.0, 0, -1]))):
+        for axis, a in (("up", np.array([0.0, 0, 1])), ("down", np.array([0.0, 0, -1])), ("side", np.array([1.0, 0, 0]))):
             kept = []
             for i in range(n):
                 if i % 3 == 0 and kept:
@@ -398,7 +418,7 @@ class Robot:
 
     def envelope_rows(self) -> list:
         rows = []
-        for (axis, hb), entries in sorted(self.envelope().items(), key=lambda kv: (kv[0][0] != "down", kv[0][1])):
+        for (axis, hb), entries in sorted(self.envelope().items(), key=lambda kv: (("down", "up", "side").index(kv[0][0]), kv[0][1])):
             rows.append({"height_m": round(hb * ENV_STEP, 3), "tool_axis": axis,
                          "min_distance_m": round(entries[0][0], 3), "max_distance_m": round(entries[-1][0], 3)})
         return rows

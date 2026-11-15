@@ -3,21 +3,21 @@
   "parts": {
     "base": "tidybot_arx5",
     "lift": "liftkit_500",
-    "arm": "lite6",
-    "gripper": "lite6_gripper",
+    "arm": "piper",
+    "gripper": "piper_gripper",
     "lidar": "rplidar_s2",
     "lidar_mount": "stage_rear",
     "wrist_cam": false,
     "ego_cam": "base_front"
   },
-  "price_usd": 14549,
-  "mass_kg": 75.85,
+  "price_usd": 14049,
+  "mass_kg": 70.33,
   "checks": [
     {
       "check": "doorway",
       "task": null,
       "status": "pass",
-      "value": 0.659,
+      "value": 0.741,
       "limit": 0.76,
       "unit": "m",
       "requirements": [
@@ -41,7 +41,7 @@
       "check": "door header",
       "task": null,
       "status": "pass",
-      "value": 1.239,
+      "value": 1.085,
       "limit": 2.05,
       "unit": "m",
       "requirements": [
@@ -65,7 +65,7 @@
       "check": "base payload",
       "task": null,
       "status": "pass",
-      "value": 30.95,
+      "value": 25.43,
       "limit": 60.0,
       "unit": "kg",
       "requirements": [
@@ -88,7 +88,7 @@
       "check": "lidar view",
       "task": null,
       "status": "pass",
-      "value": 0.84,
+      "value": 0.89,
       "limit": 0.75,
       "unit": "fraction",
       "requirements": [],
@@ -105,255 +105,255 @@
       "check": "reach",
       "task": "t1",
       "status": "pass",
-      "value": 0.353,
+      "value": 0.5,
       "limit": 0.279,
       "unit": "m",
       "requirements": [
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "why": "target 1 at 0.80 m, tool down: the tool reaches 0.14 to 0.35 m from the base centre; the base centre can stand 0.28 m away or more (free floor 0.07 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 40 targets)",
+      "why": "target 1 at 0.80 m, tool down: the tool reaches 0.12 to 0.50 m from the base centre; the base centre can stand 0.28 m away or more (free floor 0.07 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 40 targets)",
       "target": 1,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 1,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 2,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 3,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 4,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 5,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 6,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 7,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 8,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 9,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 10,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 11,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 12,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 13,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 14,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 15,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 16,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 17,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 18,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 19,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 20,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 21,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 22,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 23,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 24,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 25,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 26,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 27,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 28,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 29,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 30,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 31,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 32,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 33,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 34,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 35,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 36,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 37,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 38,
           "status": "pass",
           "needed_m": 0.279,
-          "reach_m": 0.353
+          "reach_m": 0.5
         },
         {
           "target": 39,
           "status": "pass",
           "needed_m": 0.259,
-          "reach_m": 0.353
+          "reach_m": 0.5
         }
       ]
     },
@@ -361,171 +361,171 @@
       "check": "reach",
       "task": "t2",
       "status": "pass",
-      "value": 0.4,
+      "value": 0.5,
       "limit": 0.28,
       "unit": "m",
       "requirements": [
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "why": "target 1 at 1.05 m, tool down: the tool reaches 0.00 to 0.40 m from the base centre; the base centre can stand 0.28 m away or more (free floor 0.08 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 26 targets)",
+      "why": "target 1 at 1.05 m, tool down: the tool reaches 0.00 to 0.50 m from the base centre; the base centre can stand 0.28 m away or more (free floor 0.08 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 26 targets)",
       "target": 1,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 1,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 2,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 3,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 4,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 5,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 6,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 7,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 8,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 9,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 10,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 11,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 12,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 13,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 14,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 15,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 16,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 17,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 18,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 19,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 20,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 21,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 22,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 23,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 24,
           "status": "pass",
           "needed_m": 0.24,
-          "reach_m": 0.4
+          "reach_m": 0.5
         },
         {
           "target": 25,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.4
+          "reach_m": 0.5
         }
       ]
     },
@@ -533,7 +533,7 @@
       "check": "tip-over",
       "task": "t1",
       "status": "pass",
-      "value": 31.56,
+      "value": 25.61,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -542,13 +542,13 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "why": "worst case: reaching target 0 (0.25 m out at 0.80 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 0 (0.30 m out at 0.80 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
     },
     {
       "check": "tip-over",
       "task": "t2",
       "status": "pass",
-      "value": 32.6,
+      "value": 25.61,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -557,37 +557,37 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "why": "worst case: reaching target 1 (0.25 m out at 1.05 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 1 (0.30 m out at 1.05 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
     },
     {
       "check": "payload",
       "task": "t1",
       "status": "pass",
       "value": 0.1,
-      "limit": 0.6,
+      "limit": 1.5,
       "unit": "kg",
       "requirements": [
         "r_t1_payload"
       ],
-      "why": "arm carries object 0.1 + gripper 0.0 + wrist camera 0.0 kg against its 0.6 kg rating; gripper rated 0.6 kg for the 0.1 kg object"
+      "why": "arm carries object 0.1 + gripper 0.0 + wrist camera 0.0 kg against its 1.5 kg rating; gripper rated 1.5 kg for the 0.1 kg object"
     },
     {
       "check": "payload",
       "task": "t2",
       "status": "pass",
       "value": 0.1,
-      "limit": 0.6,
+      "limit": 1.5,
       "unit": "kg",
       "requirements": [
         "r_t2_payload"
       ],
-      "why": "arm carries object 0.1 + gripper 0.0 + wrist camera 0.0 kg against its 0.6 kg rating; gripper rated 0.6 kg for the 0.1 kg object"
+      "why": "arm carries object 0.1 + gripper 0.0 + wrist camera 0.0 kg against its 1.5 kg rating; gripper rated 1.5 kg for the 0.1 kg object"
     },
     {
       "check": "press",
       "task": "t1",
       "status": "not_assessable",
-      "value": 5.9,
+      "value": 14.7,
       "limit": 12.0,
       "unit": "N",
       "requirements": [
@@ -599,7 +599,7 @@
       "check": "press",
       "task": "t2",
       "status": "not_assessable",
-      "value": 5.9,
+      "value": 14.7,
       "limit": 12.0,
       "unit": "N",
       "requirements": [
@@ -611,7 +611,7 @@
   "labels": [
     "press not verified: t1, t2"
   ],
-  "considered": 2550,
-  "passed_arithmetic": 792,
-  "composed_and_checked": 9
+  "considered": 7140,
+  "passed_arithmetic": 2216,
+  "composed_and_checked": 25
 }

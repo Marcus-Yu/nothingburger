@@ -84,8 +84,15 @@ table.slots td b { font-weight: 600; } table.slots td small { color: var(--muted
 
 #plan { padding: 6px 10px 10px; }
 #plan svg { width: 100%; height: auto; display: block; max-height: 58vh; }
+#plan svg.photo { max-height: 78vh; }
 .room { fill: var(--stage); stroke: var(--ink); stroke-width: .045; }
 .room.on { fill: var(--accent-soft); }
+svg.photo .room, svg.photo .room.on { fill: none; stroke: none; }
+svg.photo .obst { fill: none; stroke: none; }
+svg.photo .so { fill: none; stroke-width: .025; }
+svg.photo text { paint-order: stroke; stroke: var(--panel); stroke-width: .06px; stroke-linejoin: round; }
+svg.photo .route { stroke-width: .05; opacity: 1; filter: drop-shadow(0 0 .02px #000); }
+svg.photo .roomlabel { font-size: .17px; } svg.photo .obstlabel { font-size: .15px; fill: var(--ink); } svg.photo .dock { fill: none; } svg.photo .anchorlabel { font-size: .16px; } svg.photo .sonum { font-size: .2px; }
 .roomlabel { font-size: .2px; fill: var(--muted); }
 .obstlabel { font-size: .18px; fill: var(--muted); text-anchor: middle; }
 .door { stroke: var(--panel); stroke-width: .11; } .doormark { stroke: var(--accent); stroke-width: .05; }
@@ -191,8 +198,9 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;
 const STEPS = [["0 intake","Intake","words to tasks"],["1 building pre-pass","Building","what it demands"],["2 requirements ledger","Requirements","numbers with sources"],
   ["3-4 design and compose","Design","enumerate, check, rank"],["5 pathing","Pathing","standoffs, route, arm"],["5d program","Program","ordered primitives"]];
 const SLOTS = [["base","Base"],["lift","Lift"],["arm","Arm"],["gripper","Gripper"],["lidar","Lidar"],["wrist_cam","Wrist camera"],["ego_cam","Forward camera"]];
-const NAMES = {tidybot_arx5:"TidyBot++ base, small",tidybot_kinova:"TidyBot++ base, medium",tidybot_franka:"TidyBot++ base, large",go2:"Unitree Go2",spot:"Boston Dynamics Spot",
-  none:"none",liftkit_500:"Lift column, 0.5 m",liftkit_900:"Lift column, 0.9 m",liftkit_1400:"Lift column, 1.4 m",lite6:"UFACTORY Lite 6",xarm7:"UFACTORY xArm 7",ur5e:"Universal Robots UR5e",
+const NAMES = {tidybot_arx5:"Wheeled: TidyBot++ base, small",tidybot_kinova:"Wheeled: TidyBot++ base, medium",tidybot_franka:"Wheeled: TidyBot++ base, large",go2:"Legged: Unitree Go2",spot:"Legged: Boston Dynamics Spot",
+  none:"none",liftkit_500:"Lift column, 0.5 m",liftkit_900:"Lift column, 0.9 m",liftkit_1400:"Lift column, 1.4 m",lite6:"UFACTORY Lite 6",xarm7:"UFACTORY xArm 7",ur5e:"Universal Robots UR5e",piper:"AgileX PiPER",vx300s:"Trossen ViperX 300 S",z1:"Unitree Z1",fr3:"Franka Research 3",gen3:"Kinova Gen3",crx5ia:"FANUC CRX-5iA",ur10e:"Universal Robots UR10e",iiwa14:"KUKA LBR iiwa 14",
+  franka_hand:"Franka Hand",piper_gripper:"PiPER gripper (built in)",vx300s_gripper:"ViperX gripper (built in)",z1_gripper:"Z1 gripper (built in)",
   robotiq_2f85:"Robotiq 2F-85",xarm_gripper:"xArm gripper",lite6_gripper:"Lite 6 gripper",rplidar_s2:"RPLIDAR S2 (2D)",vlp16:"Velodyne VLP-16 (3D)",base_front:"on the base, front",stage_rear:"on the lift stage",stage_front:"on the lift stage"};
 const nm = k => NAMES[k] || k;
 const money = v => v == null ? "–" : "$" + Number(v).toLocaleString("en-US");
@@ -223,6 +231,7 @@ function reduce(upto) {
       case "tasks": S.tasks = e.tasks; S.intake = e.intake;
         cur = cur || "0 intake"; group("0 intake").items.push({cls: "say", t: e.t, html: `<b>${e.tasks.length} tasks</b>: ` + e.tasks.map(t => `${esc(t.id)} ${esc(t.skill.replace("_"," "))} at ${esc(t.anchor)}`).join("; ")
           + (e.intake && e.intake.source === "file" ? ` <small>(read from a file, no model)</small>` : "")}); cur = null; break;
+      case "room_view": S.roomView = e; break;
       case "building": S.demands = e.demands; S.corridors = e.corridors;
         group("1 building pre-pass").items.push({cls: "say", t: e.t, html: `Narrowest passage on any trip is <b>${e.demands.narrowest_m} m</b> at ${esc(e.demands.narrowest_doorway)}; lowest door header ${e.demands.lowest_header_m} m; tallest step ${e.demands.tallest_step_m} m; tightest turn ${e.demands.tightest_turn_m} m.`}); break;
       case "requirements": S.reqs = e.rows; S.conflicts = e.conflicts;
@@ -295,25 +304,30 @@ function drawPlan(S) {
   const w = S.world; if (!w) { $("plan").innerHTML = `<div class="hint">The floor plan appears when a run starts.</div>`; return; }
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   w.rooms.forEach(r => r.polygon.forEach(([x, y]) => { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }));
-  const pad = .75, Y = y => y1 - y + y0;  // flip so +Y is up
+  const pad = S.roomView ? .3 : .75, Y = y => y1 - y + y0;  // flip so +Y is up
   const onRooms = new Set(), tight = S.demands ? S.demands.narrowest_doorway : null;
   (S.corridors || []).forEach(c => (c.rooms || []).forEach(r => onRooms.add(r)));
   const pts = poly => poly.map(([x, y]) => `${x},${Y(y)}`).join(" ");
-  let h = `<svg viewBox="${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}" role="img" aria-label="Floor plan with the robot's route">`;
+  // with a rendered top view the picture is the room: the drawing on top keeps only labels, doors, the route and the stops
+  const rv = S.roomView, src = f => `/runs/${run.replace(/^runs\//, "")}/${f}`;
+  const layer = f => rv && f ? `<image href="${src(f)}" x="${rv.extent[0]}" y="${Y(rv.extent[3])}" width="${rv.extent[2] - rv.extent[0]}" height="${rv.extent[3] - rv.extent[1]}" preserveAspectRatio="none"/>` : "";
+  let h = `<svg class="${rv ? "photo" : ""}" viewBox="${x0 - pad} ${y0 - pad} ${x1 - x0 + 2 * pad} ${y1 - y0 + 2 * pad}" role="img" aria-label="The rooms from above with the robot's route">` + layer(rv && rv.frame);
   w.rooms.forEach(r => { const rx = Math.max(...r.polygon.map(p => p[0])), ty = Math.max(...r.polygon.map(p => p[1])), by = Math.min(...r.polygon.map(p => p[1])), hall = r.type === "hallway";
-    h += `<polygon class="room ${onRooms.has(r.id) ? "on" : ""}" points="${pts(r.polygon)}"/><text class="roomlabel" text-anchor="end" x="${rx - .12}" y="${hall ? Y(by) - .1 : Y(ty) + .27}">${esc(r.id)} · ${r.ceiling_m} m ceiling</text>`; });
+    h += `<polygon class="room ${onRooms.has(r.id) ? "on" : ""}" points="${pts(r.polygon)}"/><text class="roomlabel" text-anchor="end" x="${rx - .12}" y="${hall ? Y(by) - .1 : Y(ty) + .27}">${esc(r.id.replace(/_/g, " "))}${rv ? "" : ` · ${r.ceiling_m} m ceiling`}</text>`; });
   (w.obstacles || []).forEach(o => { const a = o.box.min, b = o.box.max, tall = (b[1] - a[1]) > (b[0] - a[0]) * 1.5, cx = (a[0] + b[0]) / 2, cy = Y((a[1] + b[1]) / 2);
     h += `<rect class="obst" x="${a[0]}" y="${Y(b[1])}" width="${b[0] - a[0]}" height="${b[1] - a[1]}"/><text class="obstlabel" x="${cx}" y="${cy + .05}" ${tall ? `transform="rotate(-90 ${cx} ${cy})"` : ""}>${esc(o.id)}</text>`; });
   w.doorways.forEach(d => { const [px, py] = d.position, [ax, ay] = d.along, k = d.width_m / 2, t = d.id === tight;
     h += `<line class="door" x1="${px - ax * k}" y1="${Y(py - ay * k)}" x2="${px + ax * k}" y2="${Y(py + ay * k)}"/><line class="doormark ${t ? "tight" : ""}" x1="${px - ax * k}" y1="${Y(py - ay * k)}" x2="${px + ax * k}" y2="${Y(py + ay * k)}" stroke-dasharray=".05 .05"/>`
       + `<text class="doorlabel ${t ? "tight" : ""}" x="${px + (ay ? (px <= x0 + .01 ? -.36 : .36) : 0)}" y="${Y(py) + (ax ? -.14 : .06)}">${d.width_m} m</text>`; });
   if (w.dock) h += `<circle class="dock" cx="${w.dock.pose[0]}" cy="${Y(w.dock.pose[1])}" r=".24"/><text class="obstlabel" x="${w.dock.pose[0]}" y="${Y(w.dock.pose[1]) - .3}">dock</text>`;
+  if (rv && S.design && S.design.top && !S.standoffs.length) h += layer(S.design.top);
+  if (rv) { const last = {}; S.standoffs.forEach(s => { last[s.task + "|" + s.pose.join(",")] = s.top; }); Object.values(last).forEach(f => { h += layer(f); }); }
   if (S.route) S.route.legs.forEach(l => { if (l.waypoints && l.waypoints.length > 1) h += `<polyline class="route ${l.carrying ? "carry" : ""}" points="${l.waypoints.map(p => `${p[0]},${Y(p[1])}`).join(" ")}"/>`; });
-  w.anchors.forEach(a => { h += `<rect class="anchor" x="${a.point[0] - .07}" y="${Y(a.point[1]) - .07}" width=".14" height=".14" transform="rotate(45 ${a.point[0]} ${Y(a.point[1])})"/><text class="anchorlabel" x="${a.point[0] + (a.point[0] > (x0 + x1) / 2 + 1 ? -.16 : .16)}" y="${Y(a.point[1]) - .14}" text-anchor="${a.point[0] > (x0 + x1) / 2 + 1 ? "end" : "start"}">${esc(a.id.replace(/_/g, " "))} · ${a.point[2]} m up</text>`; });
+  w.anchors.forEach(a => { h += `<rect class="anchor" x="${a.point[0] - .07}" y="${Y(a.point[1]) - .07}" width=".14" height=".14" transform="rotate(45 ${a.point[0]} ${Y(a.point[1])})"/><text class="anchorlabel" x="${a.point[0] + (a.point[0] > (x0 + x1) / 2 + 1 ? -.16 : .16)}" y="${Y(a.point[1]) - .14}" text-anchor="${a.point[0] > (x0 + x1) / 2 + 1 ? "end" : "start"}">${esc(a.id.replace(/_/g, " "))}${rv ? "" : ` · ${a.point[2]} m up`}</text>`; });
   S.standoffs.forEach((s, i) => { const [x, y, th] = s.pose, isNew = i === S.standoffs.length - 1 && !S.route;
     h += `<g style="transform-origin:${x}px ${Y(y)}px" class="${isNew ? "so new" : ""}"><circle class="so" cx="${x}" cy="${Y(y)}" r=".19"/><line class="sohead" x1="${x}" y1="${Y(y)}" x2="${x + Math.cos(th) * .19}" y2="${Y(y + Math.sin(th) * .19)}"/></g>`; });
   const seen = {}; S.standoffs.forEach(s => { if (seen[s.task]) return; seen[s.task] = 1; h += `<text class="sonum" x="${s.pose[0] - .33}" y="${Y(s.pose[1]) + .06}">${esc(s.task)}</text>`; });
-  h += `</svg><div class="legend"><span><i style="background:var(--accent)"></i>route</span><span><i style="background:var(--warn)"></i>carrying / target</span><span><i style="background:var(--bad)"></i>narrowest doorway</span><span><i style="background:var(--accent-soft);height:10px"></i>rooms on a trip</span></div>`;
+  h += `</svg><div class="legend"><span><i style="background:var(--accent)"></i>route</span><span><i style="background:var(--warn)"></i>carrying / target</span><span><i style="background:var(--bad)"></i>narrowest doorway</span>${rv ? "<span>rendered from the world file, seen from straight above; the robot is drawn at each stop in its reaching pose</span>" : '<span><i style="background:var(--accent-soft);height:10px"></i>rooms on a trip</span>'}</div>`;
   $("plan").innerHTML = h;
   $("plannote").textContent = S.route ? `${S.route.legs.length} legs, ${S.route.legs.reduce((a, l) => a + (l.length_m || 0), 0).toFixed(1)} m, ${S.standoffs.length} standoffs` : S.demands ? `narrowest passage ${S.demands.narrowest_m} m` : (w.id || "");
 }

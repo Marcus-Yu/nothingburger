@@ -250,7 +250,9 @@ def step(state: dict) -> dict:
             observe.emit("standoff", task=task["id"], skill=task["skill"], anchor=task["anchor"], pose=s["pose"], tip_ratio=s.get("tip_ratio"),
                          covers=s.get("covers"), why=s.get("why"),
                          frame=viz.render(state["robot_xml"], {**((build.get("stowed") or {}).get("qpos") or {}), **(s.get("q") or {})},
-                                          f"reach-{task['id']}", pose=s["pose"]))
+                                          f"reach-{task['id']}", pose=s["pose"]),
+                         top=viz.robot_top(state["world"], state["robot_xml"],
+                                           {**((build.get("stowed") or {}).get("qpos") or {}), **(s.get("q") or {})}, s["pose"], f"reach-{task['id']}"))
         for f in fails:
             observe.emit("standoff_failed", task=task["id"], skill=task["skill"], reason=f.get("reason"), notes=f.get("notes", [])[:4])
 

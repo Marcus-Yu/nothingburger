@@ -17,7 +17,7 @@ from pathlib import Path
 
 from . import observe
 from .nodes import design, intake, ledger, pathing, prepass, program
-from .tools import trace
+from .tools import trace, viz
 
 REPO = Path(__file__).resolve().parents[1]
 MAX_ROBOT_FIXES = 5  # the loop stops after this many redesigns
@@ -41,6 +41,9 @@ def pipeline(state: dict) -> dict:
     if "tasks" not in state:
         state = observe.node("0 intake", intake.step)(state)
     observe.emit("tasks", tasks=state["tasks"], intake=state.get("intake"))
+    top = viz.room_view(state["world"])  # the rooms from above, for the live view (None when frames are off)
+    if top:
+        observe.emit("room_view", **top)
     tid = state.get("demo_task") or (state["tasks"][0]["id"] if state["tasks"] else None)
     for key in ("demo", "grip"):  # the demonstration files belong to one task
         if state.get(key) is not None:

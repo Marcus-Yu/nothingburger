@@ -21,8 +21,8 @@ CAMERA = "d435i"
 # enumeration order inside a slot; cards not named here follow in file-name order
 ORDER = {"base": ["tidybot_arx5", "tidybot_kinova", "tidybot_franka", "go2", "spot"],
          "lift": ["none", "liftkit_500", "liftkit_900", "liftkit_1400"],
-         "arm": ["lite6", "xarm7", "ur5e"],
-         "gripper": ["robotiq_2f85", "xarm_gripper", "lite6_gripper"],
+         "arm": ["piper", "lite6", "vx300s", "xarm7", "z1", "fr3", "crx5ia", "gen3", "ur5e", "ur10e", "iiwa14"],
+         "gripper": ["robotiq_2f85", "xarm_gripper", "franka_hand", "lite6_gripper", "piper_gripper", "vx300s_gripper", "z1_gripper"],
          "lidar": ["none", "rplidar_s2", "vlp16"]}
 
 
@@ -137,12 +137,15 @@ def part_mass(parts: dict) -> float:
             + card("lidar", parts["lidar"])["mass_kg"] + n_cameras(parts) * model_mass(camera()["model"]))
 
 
-def _chain_length(rel: str, site: str) -> float:
-    """Sum of the link offsets from a model's root to one of its sites: no pose puts the site farther
-    from the root than this."""
+def _chain_length(rel: str, site: str | None = None, frame: dict | None = None) -> float:
+    """Sum of the link offsets from a model's root to one of its sites (or to a point `frame` =
+    {"body", "pos"} on one of its bodies): no pose puts that point farther from the root than this."""
     m = mujoco.MjModel.from_xml_path(str(asset(rel)))
-    sid = m.site(site).id
-    total, b = float(np.linalg.norm(m.site_pos[sid])), int(m.site_bodyid[sid])
+    if frame is not None:
+        total, b = float(np.linalg.norm(frame["pos"])), int(m.body(frame["body"]).id)
+    else:
+        sid = m.site(site).id
+        total, b = float(np.linalg.norm(m.site_pos[sid])), int(m.site_bodyid[sid])
     while b > 0:
         total += float(np.linalg.norm(m.body_pos[b]))
         b = int(m.body_parentid[b])
@@ -154,7 +157,7 @@ def arm_span(arm: str, gripper: str) -> float:
     """An upper bound on how far the tool point can be from the arm's mount, from the models' link lengths."""
     a, g = card("arm", arm), card("gripper", gripper)
     if a.get("integrated_gripper"):
-        return _chain_length(a["model"], a["tool_site"])
+        return _chain_length(a["model"], a.get("tool_site"), a.get("tool_frame"))
     tip = _chain_length(g["model"], g["tool_site"]) if "tool_site" in g else g["tool_offset_m"]
     return _chain_length(a["model"], a["flange_site"]) + tip
 

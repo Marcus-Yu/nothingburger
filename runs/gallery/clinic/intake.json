@@ -2,29 +2,28 @@
   "source": "model",
   "model": "claude-opus-5-5",
   "job": "Between patients, wipe down the high-touch ledges in the clinic: the corridor window sill and the ledge at the reception desk in the waiting room.",
-  "understood_as": "Between patients, wipe down two high-touch surfaces in the clinic: the corridor window sill and the reception desk ledge in the waiting room.",
+  "understood_as": "Between patients, wipe the corridor window sill and the reception-desk ledge in the waiting room with a cloth.",
   "steps": [
-    "Take a wiping cloth.",
-    "Wipe the window sill in the corridor.",
-    "Move to the waiting room and wipe the ledge at the reception desk.",
-    "Repeat after each patient."
+    "Take the wiping cloth.",
+    "Wipe the corridor window sill in pressing strokes.",
+    "Move to the waiting room and wipe the reception-desk ledge the same way.",
+    "Repeat this round between patients."
   ],
   "demos": [
     {
       "chore": "wipe ledge",
       "kind": "path",
-      "why": "Shows the stroke pattern and how hard to press the cloth along a narrow ledge or sill so the whole surface is covered."
+      "why": "Shows the stroke pattern and how firmly to press so the robot covers the whole ledge surface."
     },
     {
-      "chore": "hold cloth while wiping",
+      "chore": "wipe ledge",
       "kind": "squeeze",
-      "why": "Sets how firmly to grip the cloth so it does not slip or bunch up while it is dragged and pressed across the surface."
+      "why": "Shows how hard to hold the cloth so it does not slip out of the gripper while pressing and dragging."
     }
   ],
   "questions": [
-    "Where is the clean cloth kept? No location for it has been recorded, so the robot cannot fetch it yet. Please tell us where it is, or have the cloth placed with the robot before each round.",
-    "Should the cloth be damp or used with a disinfectant? The robot can only wipe with a cloth. It cannot spray or apply cleaning liquid, so someone would need to prepare the cloth.",
-    "How will the robot know a patient has left? There is no trigger for 'between patients' in the plan, so please say whether staff will start each round or whether it should run on a fixed schedule.",
-    "What should happen to the used cloth afterwards, for example a laundry bin or a waste bin? No drop-off point has been located for it."
+    "The robot can wipe with a plain cloth, but there is no disinfectant spray or wipe on its list. Should the cloth be pre-moistened with disinfectant by staff, or is a dry or damp cloth enough?",
+    "Where is the cloth kept, and who swaps in a clean one? Fetching or changing cloths is not a located fixture or a known step yet.",
+    "The plan has no way to know when a patient has left. Should staff start each round, or should it run on a fixed schedule?"
   ]
 }

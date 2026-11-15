@@ -1,0 +1,30 @@
+{
+  "id": "z1_gripper",
+  "slot": "gripper",
+  "name": "Unitree Z1 gripper (integrated)",
+  "integrated_in": "z1",
+  "mass_kg": 0.0,
+  "stroke_m": 0.08,
+  "force_n": [
+    0.0,
+    0.0
+  ],
+  "force_control": false,
+  "payload_kg": 3.0,
+  "hold": [
+    "pinch"
+  ],
+  "fits_arms": [
+    "z1"
+  ],
+  "price_usd": 0,
+  "src": "integrated in the z1 model; a rotary jaw, stroke assumed; treated as open/close only",
+  "confidence": {
+    "stroke_m": "model",
+    "payload_kg": "the arm's rating",
+    "mass_kg": "counted in the arm",
+    "hold": "assumed",
+    "force_control": "assumed"
+  },
+  "notes": "mass_kg is the figure the Payload check charges against the arm; the composed model uses the simulator model's own mass. force_n is the range of grip force it can hold. hold says how it carries an object. It comes inside the z1 arm model, so it has no model, mass or price of its own."
+}

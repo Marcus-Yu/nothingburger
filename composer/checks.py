@@ -27,6 +27,7 @@ QUANTITY = {"reach": "reach_targets", "payload": "payload", "opening": "gripper_
             "press": "press_force", "twist": "wrist_roll_turns"}
 ORDER = ["doorway", "turn", "door header", "steps", "base payload", "lidar present", "lidar view", "wrist camera",
          "ego camera", "reach", "tip-over", "payload", "opening", "force", "press", "twist"]
+SIDE_SIN = np.sin(np.radians(15.0))  # and as level ("side") within this of horizontal
 AXIS_COS = np.cos(np.radians(30.0))  # a target's tool axis counts as up or down within this of vertical
 
 
@@ -195,7 +196,7 @@ def arithmetic(parts: dict, L: Ledger) -> list:
 def _axis_name(a):
     a = np.asarray(a, dtype=float)
     z = a[2] / (np.linalg.norm(a) or 1.0)
-    return "up" if z > AXIS_COS else "down" if z < -AXIS_COS else None
+    return "up" if z > AXIS_COS else "down" if z < -AXIS_COS else "side" if abs(z) < SIDE_SIN else None
 
 
 def measured(parts: dict, L: Ledger) -> list:
@@ -248,6 +249,8 @@ def measured(parts: dict, L: Ledger) -> list:
         # reach: each target against the envelope of the composed model, with the base no closer than the free
         # floor allows for THAT target (its own edge_distance_m; the task's free_floor row when it has none).
         # Every target must be reachable from some legal standoff; they need not share one. No inverse kinematics here.
+        # A sampled pose must sit at or past the nearest legal distance: no slack, since pathing then has to
+        # find that pose by inverse kinematics and a near miss here becomes a redesign there.
         poses, worst, per_target = [], None, []  # worst: (status rank, margin, result)
         for i, g in enumerate(targets):
             h, axis = float(g["point"][2]), _axis_name(g.get("tool_axis", [0, 0, -1]))
@@ -258,10 +261,10 @@ def measured(parts: dict, L: Ledger) -> list:
             if axis is None:
                 per_target.append({"target": i, "status": "not_assessable", "needed_m": _r(d_min)})
                 cand = (1, 0.0, _res("reach", tid, "not_assessable", reqs=reach_ids,
-                                     why=f"target {i}: the envelope is tabulated only for the tool pointing up or down; standoff search (inverse kinematics) decides"))
+                                     why=f"target {i}: the envelope is tabulated only for the tool pointing up, down or level; standoff search (inverse kinematics) decides"))
             else:
                 entries = robot.envelope_at(axis, h)
-                usable = [e for e in (entries or []) if e[0] >= d_min - M.ENV_STEP]
+                usable = [e for e in (entries or []) if e[0] >= d_min]
                 far = _r(entries[-1][0]) if entries else 0.0
                 per_target.append({"target": i, "status": _pf(bool(usable)), "needed_m": _r(d_min), "reach_m": far})
                 if not entries:

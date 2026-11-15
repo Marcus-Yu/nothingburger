@@ -114,36 +114,44 @@
     {
       "check": "reach",
       "task": "t1",
-      "status": "not_assessable",
+      "status": "pass",
+      "value": 1.25,
+      "limit": 0.211,
+      "unit": "m",
       "requirements": [
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "why": "target 0: the envelope is tabulated only for the tool pointing up or down; standoff search (inverse kinematics) decides",
+      "why": "target 0 at 1.85 m, tool side: the tool reaches 0.00 to 1.25 m from the base centre; the base centre can stand 0.21 m away or more (free floor 0.01 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
       "target": 0,
       "targets": [
         {
           "target": 0,
-          "status": "not_assessable",
-          "needed_m": 0.211
+          "status": "pass",
+          "needed_m": 0.211,
+          "reach_m": 1.25
         }
       ]
     },
     {
       "check": "reach",
       "task": "t2",
-      "status": "not_assessable",
+      "status": "pass",
+      "value": 0.912,
+      "limit": 0.0,
+      "unit": "m",
       "requirements": [
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "why": "target 0: the envelope is tabulated only for the tool pointing up or down; standoff search (inverse kinematics) decides",
+      "why": "target 0 at 0.50 m, tool side: the tool reaches 0.01 to 0.91 m from the base centre; the base centre can stand 0.00 m away or more (free floor 0.00 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
       "target": 0,
       "targets": [
         {
           "target": 0,
-          "status": "not_assessable",
-          "needed_m": 0.0
+          "status": "pass",
+          "needed_m": 0.0,
+          "reach_m": 0.912
         }
       ]
     },
@@ -151,7 +159,7 @@
       "check": "tip-over",
       "task": "t1",
       "status": "pass",
-      "value": 9.76,
+      "value": 3.77,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -159,13 +167,13 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "why": "worst case: stowed, carrying; payload 0.75 kg, press 0.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 0 (0.25 m out at 1.85 m, the nearest the base can stand to it); payload 0.75 kg, press 0.0 N; static, against the support polygon"
     },
     {
       "check": "tip-over",
       "task": "t2",
       "status": "pass",
-      "value": 9.76,
+      "value": 9.68,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -173,7 +181,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "why": "worst case: stowed, carrying; payload 0.75 kg, press 0.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 0 (0.01 m out at 0.50 m, the nearest the base can stand to it); payload 0.75 kg, press 0.0 N; static, against the support polygon"
     },
     {
       "check": "payload",
@@ -237,10 +245,9 @@
     }
   ],
   "labels": [
-    "reach not verified: t1, t2",
     "force not verified: t1, t2"
   ],
-  "considered": 1410,
-  "passed_arithmetic": 144,
-  "composed_and_checked": 7
+  "considered": 7140,
+  "passed_arithmetic": 901,
+  "composed_and_checked": 80
 }

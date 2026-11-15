@@ -232,8 +232,10 @@ def test_full_run_contents(example_run):
     design, route, traj = load(out / "design.json"), load(out / "route.json"), load(out / "trajectory.json")
     assert design["parts"] is not None and design["price_usd"] > 0
     decisions = [json.loads(line) for line in (out / "decisions.jsonl").read_text().splitlines()]
-    assert [d["slot"] for d in decisions] == list(design["parts"])
-    assert all(d["chosen"] == design["parts"][d["slot"]] and d["price_usd"] == design["price_usd"] for d in decisions)
+    slots = [d for d in decisions if d["slot"] != "loop"]  # a redesign adds a "loop" entry per robot fix
+    assert [d["slot"] for d in slots] == list(design["parts"])
+    assert all(d["chosen"] == design["parts"][d["slot"]] and d["price_usd"] == design["price_usd"] for d in slots)
+    assert len(decisions) - len(slots) <= run.MAX_ROBOT_FIXES
     # the bulb and the bag each get a standoff that passes reach, and an arm path
     for tid in ("t1", "t3"):
         (s,) = [s for s in route["standoffs"] if s["task"] == tid]

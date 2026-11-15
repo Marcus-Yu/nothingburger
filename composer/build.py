@@ -62,7 +62,7 @@ def build(robot: M.Robot, stow: dict) -> dict:
         "reach_envelope": robot.envelope_rows(),
         "reach_envelope_note": (
             "One row per height (above the floor) and tool_axis. tool_axis 'down': the tool's approach axis points "
-            "straight down; 'up': straight up. min/max_distance_m: horizontal distance from the base centre to the "
+            "straight down; 'up': straight up; 'side': level, along the robot's +X. min/max_distance_m: horizontal distance from the base centre to the "
             f"tool, over the lift's travel, base parked. Sampled from the composed model on a {M.ENV_STEP} m grid; "
             "poses with the arm in the floor, the base or the lift are left out."),
         "joints": joints,

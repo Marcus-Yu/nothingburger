@@ -7,18 +7,18 @@
       "skill": "wipe",
       "anchor": "table_top",
       "object": "cloth",
-      "demo": "wipe fixture table",
+      "demo": "wipe coolant off table",
       "carries": false,
-      "why": "Clears the coolant from the fixture table as asked, and is done first so the housing is lifted from a clean, less slippery table."
+      "why": "Cleaning the coolant off the fixture table comes first, so the part is lifted off a clean, less slippery surface."
     },
     {
       "id": "t2",
       "skill": "pick",
       "anchor": "finished_part",
       "object": "machined_part",
-      "demo": "lift housing",
+      "demo": "lift housing off table",
       "carries": true,
-      "why": "Takes the finished housing off the table and carries it toward the roller door. The weight you gave (3.5 kg) is used.",
+      "why": "The finished housing has to be taken off the table and carried out by the roller door. Carrying it out is the last step, and the weight given is about 3.5 kg.",
       "deliver_to": "way_out",
       "object_mass_kg": 3.5
     }

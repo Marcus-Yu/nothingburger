@@ -16,7 +16,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Drive dock to the t1 standoff (7.4 m); the 0.15 m step limit is assumed, not scanned, so watch for thresholds.",
+      "note": "Dock to the shelf standoff (7.4 m); the 0.15 m step limit is assumed rather than scanned, so watch for thresholds.",
       "n": 0
     },
     {
@@ -31,7 +31,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "The bottle pose is assumed and only 0.126 m of free floor is past the edge, so confirm the bottle position before descending.",
+      "note": "The bottle pose at 0.84 m is assumed, not scanned, and only 0.126 m of free floor sits at the edge, so confirm the target before descending.",
       "n": 1
     },
     {
@@ -43,9 +43,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_opening"
+        "r_t1_opening",
+        "r_t1_payload"
       ],
-      "note": "Grip force is not established because the ledger has no force band; the 0.08 m opening is from the card.",
+      "note": "Grip force is not established because the ledger has no force band; the gripper needs at least 0.08 m of opening and must hold 0.55 kg.",
       "n": 2
     },
     {
@@ -59,7 +60,7 @@
       "requirements": [
         "r_t1_payload"
       ],
-      "note": "The 0.15 m lift assumes the card's 0.55 kg because no weight was stated, so check for slip if the bottle is heavier.",
+      "note": "Lift 0.15 m clear of the shelf; with an unverified grip, check that the bottle has not slipped.",
       "n": 3
     },
     {
@@ -73,12 +74,12 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Retreat while holding the bottle; keep clear of the shelf edge 0.126 m away.",
+      "note": "Retreat to stow while holding the bottle, and check the stowed height with payload stays under the 2.0 m header.",
       "n": 4
     },
     {
       "primitive": "move_base",
-      "task": "t1",
+      "task": null,
       "leg": 1,
       "standoff": null,
       "force_n": null,
@@ -87,10 +88,9 @@
       "requirements": [
         "r_width",
         "r_header",
-        "r_step",
-        "r_t1_payload"
+        "r_step"
       ],
-      "note": "Carry the bottle 9.0 m to the way out; an ungauged grip could drop it over the assumed step limit.",
+      "note": "Carry the bottle 9.0 m to the way out; drive gently over the assumed 0.15 m step to avoid spilling or dropping it.",
       "n": 5
     },
     {
@@ -104,7 +104,7 @@
       "requirements": [
         "r_t1_payload"
       ],
-      "note": "Set the bottle down at the way out on a flat, clear surface.",
+      "note": "Set the bottle down at the gate; there is no placement pose in the plan, so confirm a stable flat surface.",
       "n": 6
     },
     {
@@ -115,10 +115,8 @@
       "force_n": null,
       "press_n": null,
       "turns": null,
-      "requirements": [
-        "r_t1_opening"
-      ],
-      "note": "Open the gripper only after the bottle is confirmed resting upright.",
+      "requirements": [],
+      "note": "Open the gripper only after the bottle is resting upright.",
       "n": 7
     },
     {
@@ -134,7 +132,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Return 1.6 m to the dock with an empty gripper.",
+      "note": "Return empty 1.6 m to the dock.",
       "n": 8
     }
   ]

@@ -1,0 +1,36 @@
+{
+  "id": "z1",
+  "slot": "arm",
+  "name": "Unitree Z1 (with its gripper)",
+  "model": "menagerie/unitree_z1/z1_gripper.xml",
+  "integrated_gripper": "z1_gripper",
+  "tool_frame": {
+    "body": "link06",
+    "pos": [
+      0.17,
+      0.0,
+      0.0
+    ],
+    "quat": [
+      0.70711,
+      0.0,
+      0.70711,
+      0.0
+    ]
+  },
+  "finger_joints": [
+    "jointGripper"
+  ],
+  "payload_kg": 3.0,
+  "reach_m": 0.74,
+  "price_usd": 16000,
+  "src": "Unitree Z1 Pro figures from memory (3 kg, 740 mm); price assumed",
+  "confidence": {
+    "payload_kg": "unverified",
+    "reach_m": "unverified",
+    "price_usd": "assumed",
+    "mass_kg": "model",
+    "tool_frame": "measured from the model's finger meshes"
+  },
+  "notes": "Geometry, joint limits and mass: the MuJoCo Menagerie model (meshes derived from vendor CAD). reach_m and payload_kg are the rated figures; the composer measures the real envelope from the composed model. tool_frame is the tool point in the named body's frame; its z axis is the approach direction. finger_joints are left out of the arm's joints."
+}

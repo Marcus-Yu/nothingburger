@@ -49,11 +49,14 @@ def designed(requirements):
 
 def test_candidates_are_every_valid_combination():
     cands = api.candidates()
-    assert len(cands) == 2550
+    assert len(cands) == 7140  # 5 bases x 4 lifts x 14 arm-and-gripper pairs x the sensor sets
     assert all(list(c) == ["base", "lift", "arm", "gripper", "lidar", "lidar_mount", "wrist_cam", "ego_cam"] for c in cands)
     assert GOOD in cands and BAD in cands
     assert not any(c["lift"] == "none" and (c["ego_cam"] == "stage_front" or c["lidar_mount"] == "stage_rear") for c in cands)
     assert all((c["arm"] == "lite6") == (c["gripper"] == "lite6_gripper") for c in cands)
+    assert all((c["arm"] == a) == (c["gripper"] == g) for c in cands
+               for a, g in (("piper", "piper_gripper"), ("vx300s", "vx300s_gripper"), ("z1", "z1_gripper")))
+    assert {c["gripper"] for c in cands if c["arm"] == "fr3"} == {"robotiq_2f85", "franka_hand"}
 
 
 @pytest.mark.parametrize("parts", [GOOD, LEGGED], ids=["wheeled", "legged"])
@@ -78,7 +81,7 @@ def test_compose_loads_in_mujoco_and_build_fits_the_contract(parts):
     assert all(has(mujoco.mjtObj.mjOBJ_SITE, s["site"]) for s in build["sensors"])
     assert has(mujoco.mjtObj.mjOBJ_KEY, build["stowed"]["keyframe"])
     assert build["base"]["inscribed_radius_m"] < build["base"]["circumscribed_radius_m"]
-    assert {r["tool_axis"] for r in build["reach_envelope"]} == {"up", "down"}
+    assert {r["tool_axis"] for r in build["reach_envelope"]} == {"up", "down", "side"}
     assert all(0 <= r["min_distance_m"] <= r["max_distance_m"] for r in build["reach_envelope"])
     # the stowed keyframe reproduces the stowed height
     data = mujoco.MjData(model)
@@ -141,7 +144,7 @@ def test_step_needs_a_climbing_base_and_a_3d_lidar(requirements):
 
 def test_design_picks_the_cheapest_feasible(requirements, designed):
     jsonschema.validate(designed, schema("design"))
-    assert designed["parts"] is not None and designed["considered"] == 2550
+    assert designed["parts"] is not None and designed["considered"] == 7140
     assert {k: designed["parts"][k] for k in ("base", "lift", "arm", "gripper", "lidar", "wrist_cam")} == {
         "base": "tidybot_arx5", "lift": "liftkit_500", "arm": "xarm7", "gripper": "xarm_gripper", "lidar": "rplidar_s2",
         "wrist_cam": True}
@@ -202,7 +205,7 @@ def test_reach_is_checked_per_target_on_a_deep_counter(requirements):
     # a longer arm reaches the far ends, and tip-over is then taken at each target's own distance
     long_arm = api.check({**GOOD, "arm": "ur5e"}, deep_counter(requirements, per_target=True))
     assert by(long_arm, "reach")["status"] == "pass" and by(long_arm, "reach")["target"] in (1, 2)
-    assert by(long_arm, "tip-over")["status"] == "pass" and "0.7" in by(long_arm, "tip-over")["why"]
+    assert by(long_arm, "tip-over")["status"] == "pass" and "0.80 m out" in by(long_arm, "tip-over")["why"]
     # design agrees: with the per-target numbers the cheapest robot is no longer the xarm7
     assert api.design(deep_counter(requirements, per_target=False))["parts"]["arm"] == "xarm7"
     picked = api.design(deep_counter(requirements, per_target=True))

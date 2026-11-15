@@ -18,7 +18,12 @@
   ],
   "fits_arms": [
     "xarm7",
-    "ur5e"
+    "ur5e",
+    "fr3",
+    "gen3",
+    "crx5ia",
+    "ur10e",
+    "iiwa14"
   ],
   "price_usd": 4900,
   "src": "Robotiq figures from memory, unverified; price assumed",
@@ -30,5 +35,5 @@
     "price_usd": "assumed",
     "hold": "assumed"
   },
-  "notes": "mass_kg is the figure the Payload check charges against the arm; the composed model uses the simulator model's own mass. force_n is the range of grip force it can hold. hold says how it carries an object."
+  "notes": "mass_kg is the figure the Payload check charges against the arm; the composed model uses the simulator model's own mass. force_n is the range of grip force it can hold. hold says how it carries an object. fits_arms: arms with an ISO 9409-1-50 flange or a vendor adapter kit (assumed for all but the UR arms)."
 }

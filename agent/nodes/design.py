@@ -77,7 +77,9 @@ def step(state: dict) -> dict:
         observe.emit("design", parts=design["parts"], price_usd=design["price_usd"], mass_kg=design["mass_kg"],
                      stowed=b["stowed"] | {"qpos": None}, labels=design.get("labels", []),
                      checks=[{k: c.get(k) for k in ("check", "task", "status", "value", "limit", "unit", "why")} for c in design["checks"]],
-                     frame=viz.render(made["robot_xml"], b["stowed"]["qpos"], "design-stowed"))
+                     frame=viz.render(made["robot_xml"], b["stowed"]["qpos"], "design-stowed"),
+                     top=viz.robot_top(state["world"], made["robot_xml"], b["stowed"]["qpos"], state["world"]["dock"]["pose"], "dock")
+                     if state.get("world", {}).get("dock") else None)
     else:
         observe.emit("infeasible", **(design.get("infeasible") or {}))
     return out

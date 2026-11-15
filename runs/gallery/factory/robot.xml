@@ -11,28 +11,21 @@
 
   <default>
     <default class="arm/main">
-      <default class="arm/ur5e">
+      <default class="arm/crx5ia">
         <material shininess="0.25"/>
-        <joint range="-6.28319 6.28319" armature="0.1" axis="0 1 0"/>
+        <joint armature="0.1" damping="2" frictionloss="0.1"/>
         <site size="0.001 0.005 0.005" group="4" rgba="0.5 0.5 0.5 0.3"/>
-        <general ctrlrange="-6.2831 6.2831" forcerange="-150 150" biastype="affine" gainprm="2000" biasprm="0 -2000 -400"/>
-        <default class="arm/size3">
-          <default class="arm/size3_limited">
-            <joint range="-3.1415 3.1415"/>
-            <general ctrlrange="-3.1415 3.1415"/>
-          </default>
-        </default>
-        <default class="arm/size1">
-          <general forcerange="-28 28" gainprm="500" biasprm="0 -500 -100"/>
+        <general forcerange="-160 160" input="pos" biastype="affine" gainprm="400" biasprm="0 -400 -40"/>
+        <default class="arm/wrist">
+          <joint armature="0.02" frictionloss="0.02"/>
+          <general forcerange="-40 40" gainprm="200" biasprm="0 -200 -8"/>
         </default>
         <default class="arm/visual">
           <geom type="mesh" contype="0" conaffinity="0" group="2"/>
         </default>
         <default class="arm/collision">
-          <geom type="capsule" group="3"/>
-          <default class="arm/eef_collision">
-            <geom type="cylinder"/>
-          </default>
+          <mesh scale="0.001 0.001 0.001"/>
+          <geom type="mesh" group="3"/>
         </default>
       </default>
     </default>
@@ -92,10 +85,14 @@
   </default>
 
   <asset>
-    <material name="arm/black" class="arm/ur5e" rgba="0.033 0.033 0.033 1"/>
-    <material name="arm/jointgray" class="arm/ur5e" rgba="0.278 0.278 0.278 1"/>
-    <material name="arm/linkgray" class="arm/ur5e" rgba="0.82 0.82 0.82 1"/>
-    <material name="arm/urblue" class="arm/ur5e" rgba="0.49 0.678 0.8 1"/>
+    <material name="arm/white" class="arm/crx5ia"/>
+    <material name="arm/green" class="arm/crx5ia" rgba="0.122 0.749 0.122 1"/>
+    <material name="arm/light_gray" class="arm/crx5ia" rgba="0.8 0.8 0.8 1"/>
+    <material name="arm/gray" class="arm/crx5ia" rgba="0.698 0.698 0.698 1"/>
+    <material name="arm/dark_gray" class="arm/crx5ia" rgba="0.502 0.502 0.502 1"/>
+    <material name="arm/charcoal" class="arm/crx5ia" rgba="0.278 0.278 0.278 1"/>
+    <material name="arm/black" class="arm/crx5ia" rgba="0.102 0.102 0.102 1"/>
+    <material name="arm/red" class="arm/crx5ia" rgba="1 0 0 1"/>
     <material name="grip/metal" rgba="0.58 0.58 0.58 1"/>
     <material name="grip/silicone" rgba="0.1882 0.1882 0.1882 1"/>
     <material name="grip/gray" rgba="0.4627 0.4627 0.4627 1"/>
@@ -114,27 +111,32 @@
     <material name="sens/wrist/IR_Rim" class="sens/wrist/d435i" rgba="0.799102 0.806952 0.799103 1"/>
     <material name="sens/wrist/Metal_Casing" class="sens/wrist/d435i"/>
     <material name="sens/wrist/RGB_Pupil" class="sens/wrist/d435i" rgba="0.08714 0.002866 0.009346 1"/>
-    <mesh name="base_mesh" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/parts/base/arx5_mm.stl" scale="0.001 0.001 0.001"/>
-    <mesh name="arm/base_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/base_0.obj"/>
-    <mesh name="arm/base_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/base_1.obj"/>
-    <mesh name="arm/shoulder_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/shoulder_0.obj"/>
-    <mesh name="arm/shoulder_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/shoulder_1.obj"/>
-    <mesh name="arm/shoulder_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/shoulder_2.obj"/>
-    <mesh name="arm/upperarm_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/upperarm_0.obj"/>
-    <mesh name="arm/upperarm_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/upperarm_1.obj"/>
-    <mesh name="arm/upperarm_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/upperarm_2.obj"/>
-    <mesh name="arm/upperarm_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/upperarm_3.obj"/>
-    <mesh name="arm/forearm_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/forearm_0.obj"/>
-    <mesh name="arm/forearm_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/forearm_1.obj"/>
-    <mesh name="arm/forearm_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/forearm_2.obj"/>
-    <mesh name="arm/forearm_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/forearm_3.obj"/>
-    <mesh name="arm/wrist1_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/wrist1_0.obj"/>
-    <mesh name="arm/wrist1_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/wrist1_1.obj"/>
-    <mesh name="arm/wrist1_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/wrist1_2.obj"/>
-    <mesh name="arm/wrist2_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/wrist2_0.obj"/>
-    <mesh name="arm/wrist2_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/wrist2_1.obj"/>
-    <mesh name="arm/wrist2_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/wrist2_2.obj"/>
-    <mesh name="arm/wrist3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/universal_robots_ur5e/assets/wrist3.obj"/>
+    <mesh name="base_mesh" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/parts/base/kinova_mm.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="caster_mesh" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/parts/base/caster_mm.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="arm/base_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/base_0.obj"/>
+    <mesh name="arm/base_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/base_1.obj"/>
+    <mesh name="arm/base_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/base_2.obj"/>
+    <mesh name="arm/base_3" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/base_3.obj"/>
+    <mesh name="arm/base_4" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/base_4.obj"/>
+    <mesh name="arm/j1_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j1_0.obj"/>
+    <mesh name="arm/j1_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j1_1.obj"/>
+    <mesh name="arm/j2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j2.obj"/>
+    <mesh name="arm/j3_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j3_0.obj"/>
+    <mesh name="arm/j3_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j3_1.obj"/>
+    <mesh name="arm/j4_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j4_0.obj"/>
+    <mesh name="arm/j4_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j4_1.obj"/>
+    <mesh name="arm/j4_2" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j4_2.obj"/>
+    <mesh name="arm/j5_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j5_0.obj"/>
+    <mesh name="arm/j5_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j5_1.obj"/>
+    <mesh name="arm/j6_0" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j6_0.obj"/>
+    <mesh name="arm/j6_1" content_type="model/obj" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j6_1.obj"/>
+    <mesh name="arm/base_collision" class="arm/collision" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/base_collision.stl"/>
+    <mesh name="arm/j1_collision" class="arm/collision" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j1_collision.stl"/>
+    <mesh name="arm/j2_collision" class="arm/collision" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j2_collision.stl"/>
+    <mesh name="arm/j3_collision" class="arm/collision" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j3_collision.stl"/>
+    <mesh name="arm/j4_collision" class="arm/collision" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j4_collision.stl"/>
+    <mesh name="arm/j5_collision" class="arm/collision" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j5_collision.stl"/>
+    <mesh name="arm/j6_collision" class="arm/collision" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/fanuc_crx5ia/assets/j6_collision.stl"/>
     <mesh name="grip/base_mount" class="grip/2f85" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/robotiq_2f85/assets/base_mount.stl"/>
     <mesh name="grip/base" class="grip/2f85" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/robotiq_2f85/assets/base.stl"/>
     <mesh name="grip/driver" class="grip/2f85" content_type="model/stl" file="/Users/shaoming/Documents/GitHub/robots/.claude/worktrees/workflow-design-pathing-b05d8f/catalog/_assets/menagerie/robotiq_2f85/assets/driver.stl"/>
@@ -170,67 +172,66 @@
       <joint name="joint_x" type="slide" axis="1 0 0"/>
       <joint name="joint_y" type="slide" axis="0 1 0"/>
       <joint name="joint_th"/>
-      <geom name="base_visual" pos="2.25514e-17 -1.68051e-18 -2.33147e-15" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" rgba="0.6 0.62 0.65 1" mass="0" mesh="base_mesh"/>
-      <geom name="base_box" size="0.224 0.204 0.152" pos="0 0 0.233" type="box" rgba="0 0 0 0" mass="45"/>
-      <geom name="lift_outer" size="0.1 0.09 0.3625" pos="0 0 0.7475" type="box" rgba="0.25 0.3 0.38 1" mass="14.46"/>
-      <site name="ego_mount" pos="0.194 0.09 0.415" quat="0.5 0.5 0.5 0.5"/>
-      <site name="ego" pos="0.194 0.09 0.415"/>
-      <body name="lift_stage" pos="0 0 0.385">
-        <joint name="lift" type="slide" range="0 0.9"/>
-        <geom name="lift_inner" size="0.07 0.06 0.3575" pos="0 0 0.3625" type="box" contype="0" conaffinity="0" rgba="0.7 0.72 0.75 1" mass="9.64"/>
-        <site name="arm_mount" pos="0 0 0.725"/>
-        <frame pos="0 0 0.725">
-          <body name="arm/base" childclass="arm/ur5e" quat="0 0 0 -1">
-            <inertial pos="0 0 0" mass="4" diaginertia="0.00443333 0.00443333 0.0072"/>
-            <geom class="arm/visual" pos="3.72917e-18 1.12285e-18 -5.82867e-16" quat="1 0 0 0" material="arm/black" mesh="arm/base_0"/>
-            <geom class="arm/visual" pos="-5.55177e-19 9.76205e-19 -2.91434e-16" quat="1 0 0 0" material="arm/jointgray" mesh="arm/base_1"/>
-            <body name="arm/shoulder_link" pos="0 0 0.163">
-              <inertial pos="0 0 0" mass="3.7" diaginertia="0.0102675 0.0102675 0.00666"/>
-              <joint name="arm/shoulder_pan_joint" class="arm/size3" axis="0 0 1"/>
-              <geom class="arm/visual" pos="2.19551e-18 4.85723e-17 -2.77556e-16" quat="1 0 0 0" material="arm/urblue" mesh="arm/shoulder_0"/>
-              <geom class="arm/visual" quat="1 0 0 0" material="arm/black" mesh="arm/shoulder_1"/>
-              <geom class="arm/visual" quat="1 0 0 0" material="arm/jointgray" mesh="arm/shoulder_2"/>
-              <geom class="arm/collision" size="0.06 0.06" pos="0 0 -0.04"/>
-              <body name="arm/upper_arm_link" pos="0 0.138 0" quat="0.707107 0 0.707107 0">
-                <inertial pos="0 0 0.2125" mass="8.393" diaginertia="0.133886 0.133886 0.0151074"/>
-                <joint name="arm/shoulder_lift_joint" class="arm/size3"/>
-                <geom class="arm/visual" quat="1 0 0 0" material="arm/linkgray" mesh="arm/upperarm_0"/>
-                <geom class="arm/visual" material="arm/black" mesh="arm/upperarm_1"/>
-                <geom class="arm/visual" pos="-1.95834e-18 6.245e-17 -6.66134e-16" quat="1 0 0 0" material="arm/jointgray" mesh="arm/upperarm_2"/>
-                <geom class="arm/visual" pos="-1.37219e-18 -9.71445e-17 -4.71845e-16" quat="1 0 0 0" material="arm/urblue" mesh="arm/upperarm_3"/>
-                <geom class="arm/collision" size="0.06 0.06" pos="0 -0.04 0" quat="0.707107 0.707107 0 0"/>
-                <geom class="arm/collision" size="0.05 0.2" pos="0 0 0.2"/>
-                <body name="arm/forearm_link" pos="0 -0.131 0.425">
-                  <inertial pos="0 0 0.196" mass="2.275" diaginertia="0.0311796 0.0311796 0.004095"/>
-                  <joint name="arm/elbow_joint" class="arm/size3_limited"/>
-                  <geom class="arm/visual" pos="-8.31786e-18 1.249e-16 -1.22125e-15" quat="1 0 0 0" material="arm/urblue" mesh="arm/forearm_0"/>
-                  <geom class="arm/visual" pos="6.77626e-20 1.13841e-18 -5.55112e-16" quat="1 0 0 0" material="arm/linkgray" mesh="arm/forearm_1"/>
-                  <geom class="arm/visual" material="arm/black" mesh="arm/forearm_2"/>
-                  <geom class="arm/visual" pos="-4.11658e-19 -3.1225e-17 -4.44089e-16" quat="1 0 0 0" material="arm/jointgray" mesh="arm/forearm_3"/>
-                  <geom class="arm/collision" size="0.055 0.06" pos="0 0.08 0" quat="0.707107 0.707107 0 0"/>
-                  <geom class="arm/collision" size="0.038 0.19" pos="0 0 0.2"/>
-                  <body name="arm/wrist_1_link" pos="0 0 0.392" quat="0.707107 0 0.707107 0">
-                    <inertial pos="0 0.127 0" mass="1.219" diaginertia="0.0025599 0.0025599 0.0021942"/>
-                    <joint name="arm/wrist_1_joint" class="arm/size1"/>
-                    <geom class="arm/visual" pos="1.27055e-18 -1.22125e-15 -4.78784e-16" quat="1 0 0 0" material="arm/black" mesh="arm/wrist1_0"/>
-                    <geom class="arm/visual" pos="4.87891e-19 -5.82867e-16 1.73472e-16" quat="1 0 0 0" material="arm/urblue" mesh="arm/wrist1_1"/>
-                    <geom class="arm/visual" pos="-7.24594e-18 -6.52256e-16 -7.11237e-17" quat="1 0 0 0" material="arm/jointgray" mesh="arm/wrist1_2"/>
-                    <geom class="arm/collision" size="0.04 0.07" pos="0 0.05 0" quat="0.707107 0.707107 0 0"/>
-                    <body name="arm/wrist_2_link" pos="0 0.127 0">
-                      <inertial pos="0 0 0.1" mass="1.219" diaginertia="0.0025599 0.0025599 0.0021942"/>
-                      <joint name="arm/wrist_2_joint" class="arm/size1" axis="0 0 1"/>
-                      <geom class="arm/visual" pos="2.08709e-18 -1.52656e-16 -3.05311e-16" quat="1 0 0 0" material="arm/black" mesh="arm/wrist2_0"/>
-                      <geom class="arm/visual" pos="5.66496e-18 1.04083e-16 -2.77556e-16" quat="1 0 0 0" material="arm/urblue" mesh="arm/wrist2_1"/>
-                      <geom class="arm/visual" pos="-3.37532e-18 -1.249e-16 -7.35523e-16" quat="1 0 0 0" material="arm/jointgray" mesh="arm/wrist2_2"/>
-                      <geom class="arm/collision" size="0.04 0.06" pos="0 0 0.04"/>
-                      <geom class="arm/collision" size="0.04 0.04" pos="0 0.02 0.1" quat="0.707107 0.707107 0 0"/>
-                      <body name="arm/wrist_3_link" pos="0 0 0.1">
-                        <inertial pos="0 0.0771683 0" quat="0.707107 0 0 0.707107" mass="0.1889" diaginertia="0.000132134 9.90863e-05 9.90863e-05"/>
-                        <joint name="arm/wrist_3_joint" class="arm/size1"/>
-                        <geom class="arm/visual" quat="1 0 0 0" material="arm/linkgray" mesh="arm/wrist3"/>
-                        <geom class="arm/eef_collision" size="0.04 0.02" pos="0 0.08 0" quat="0.707107 0.707107 0 0"/>
-                        <site name="arm/attachment_site" pos="0 0.1 0" quat="-0.707107 0.707107 0 0"/>
-                        <frame pos="0 0.1 0" quat="-0.707107 0.707107 0 0">
+      <geom name="base_visual" pos="3.55618e-17 1.64799e-17 -1.80411e-15" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" rgba="0.6 0.62 0.65 1" mass="0" mesh="base_mesh"/>
+      <geom name="base_box" size="0.274 0.254 0.158" pos="0 0 0.237" type="box" rgba="0 0 0 0" mass="60"/>
+      <geom name="base_caster_0" pos="0.175 0.165 0" quat="0.707107 0.707107 0 0" type="mesh" contype="0" conaffinity="0" rgba="0.16 0.17 0.19 1" mass="0" mesh="caster_mesh"/>
+      <geom name="base_caster_1" pos="-0.175 0.165 0" quat="0.5 0.5 0.5 0.5" type="mesh" contype="0" conaffinity="0" rgba="0.16 0.17 0.19 1" mass="0" mesh="caster_mesh"/>
+      <geom name="base_caster_2" pos="-0.175 -0.165 0" quat="0 0 0.707107 0.707107" type="mesh" contype="0" conaffinity="0" rgba="0.16 0.17 0.19 1" mass="0" mesh="caster_mesh"/>
+      <geom name="base_caster_3" pos="0.175 -0.165 0" quat="0.5 0.5 -0.5 -0.5" type="mesh" contype="0" conaffinity="0" rgba="0.16 0.17 0.19 1" mass="0" mesh="caster_mesh"/>
+      <geom name="lift_outer" size="0.1 0.09 0.2625" pos="0 0 0.6575" type="box" rgba="0.25 0.3 0.38 1" mass="13.62"/>
+      <body name="lift_stage" pos="0 0 0.395">
+        <joint name="lift" type="slide" range="0 0.5"/>
+        <geom name="lift_inner" size="0.07 0.06 0.2575" pos="0 0 0.2625" type="box" contype="0" conaffinity="0" rgba="0.7 0.72 0.75 1" mass="9.08"/>
+        <site name="arm_mount" pos="0 0 0.525"/>
+        <site name="ego_mount" pos="0.14 0 0.495" quat="0.5 0.5 0.5 0.5"/>
+        <site name="ego" pos="0.14 0 0.495"/>
+        <frame pos="0 0 0.525">
+          <body name="arm/base_link" childclass="arm/crx5ia">
+            <inertial pos="-0.02329 -0.00113 0.04668" quat="0.0449243 0.766245 0.0103763 0.640893" mass="2.695" diaginertia="0.0100092 0.00872988 0.00387875"/>
+            <geom class="arm/visual" pos="4.02456e-16 4.51028e-17 -1.07553e-16" quat="1 0 0 0" material="arm/gray" mesh="arm/base_0"/>
+            <geom class="arm/visual" pos="1.16226e-16 -2.49366e-18 -2.46331e-16" quat="1 0 0 0" material="arm/charcoal" mesh="arm/base_1"/>
+            <geom class="arm/visual" pos="1.13798e-15 4.59702e-17 -2.87964e-16" quat="1 0 0 0" material="arm/black" mesh="arm/base_2"/>
+            <geom class="arm/visual" material="arm/dark_gray" mesh="arm/base_3"/>
+            <geom class="arm/visual" material="arm/light_gray" mesh="arm/base_4"/>
+            <geom class="arm/collision" pos="1.56125e-16 5.59042e-20 -2.498e-16" quat="1 0 0 0" mesh="arm/base_collision"/>
+            <body name="arm/J1_link" pos="0 0 0.185" gravcomp="1">
+              <inertial pos="-0.00223 -0.04084 -0.03" quat="0.457393 0.889238 -0.00217275 -0.00652995" mass="5.173" diaginertia="0.027101 0.0236098 0.0117026"/>
+              <joint name="arm/J1" range="-3.49066 3.49066"/>
+              <geom class="arm/visual" pos="0 0 -0.185" quat="1 0 0 0" material="arm/white" mesh="arm/j1_0"/>
+              <geom class="arm/visual" pos="0 0 -0.185" quat="1 0 0 0" material="arm/green" mesh="arm/j1_1"/>
+              <geom class="arm/collision" pos="0 0 -0.185" quat="0.707107 0 0 -0.707107" mesh="arm/j1_collision"/>
+              <body name="arm/J2_link" gravcomp="1">
+                <inertial pos="0.00013 -0.14378 0.18566" quat="0.999163 0.0407935 -0.000442901 -0.00311892" mass="5.014" diaginertia="0.183168 0.179784 0.0122821"/>
+                <joint name="arm/J2" range="-3.13985 3.13985" axis="0 1 0"/>
+                <geom class="arm/visual" pos="0 0 -0.185" material="arm/white" mesh="arm/j2"/>
+                <geom class="arm/collision" pos="0 0 -0.185" quat="0.707107 0 0 -0.707107" mesh="arm/j2_collision"/>
+                <body name="arm/J3_link" pos="0 0 0.41" gravcomp="1">
+                  <inertial pos="0.0303 -0.01286 -0.0002" quat="0.540227 0.625239 0.332213 0.454824" mass="3.133" diaginertia="0.00911124 0.00908195 0.00522878"/>
+                  <joint name="arm/J3" range="-1.18682 4.32842" axis="0 -1 0"/>
+                  <geom class="arm/visual" pos="0 0 -0.595" quat="1 0 0 0" material="arm/white" mesh="arm/j3_0"/>
+                  <geom class="arm/visual" pos="0 0 -0.595" material="arm/green" mesh="arm/j3_1"/>
+                  <geom class="arm/collision" pos="0 0 -0.595" quat="0.707107 0 0 -0.707107" mesh="arm/j3_collision"/>
+                  <body name="arm/J4_link" gravcomp="1">
+                    <inertial pos="0.28287 0.00109 0.00019" quat="-0.122803 0.6999 -0.100028 0.696459" mass="3.508" diaginertia="0.0537928 0.0537804 0.00322269"/>
+                    <joint name="arm/J4" class="arm/wrist" range="-3.31613 3.31613" axis="-1 0 0"/>
+                    <geom class="arm/visual" pos="0 0 -0.595" quat="1 0 0 0" material="arm/white" mesh="arm/j4_0"/>
+                    <geom class="arm/visual" pos="0 0 -0.595" quat="1 0 0 0" material="arm/black" mesh="arm/j4_1"/>
+                    <geom class="arm/visual" pos="0 0 -0.595" quat="1 0 0 0" material="arm/red" mesh="arm/j4_2"/>
+                    <geom class="arm/collision" pos="0 0 -0.595" quat="0.707107 0 0 -0.707107" mesh="arm/j4_collision"/>
+                    <body name="arm/J5_link" pos="0.43 0 0" gravcomp="1">
+                      <inertial pos="0.01442 -0.09491 0.00164" quat="0.602561 0.44724 -0.578307 0.32009" mass="2.434" diaginertia="0.00732803 0.00673403 0.00332064"/>
+                      <joint name="arm/J5" class="arm/wrist" range="-3.13985 3.13985" axis="0 -1 0"/>
+                      <geom class="arm/visual" pos="-0.43 0 -0.595" quat="1 0 0 0" material="arm/white" mesh="arm/j5_0"/>
+                      <geom class="arm/visual" pos="-0.43 0 -0.595" material="arm/green" mesh="arm/j5_1"/>
+                      <geom class="arm/collision" pos="-0.43 0 -0.595" quat="0.707107 0 0 -0.707107" mesh="arm/j5_collision"/>
+                      <body name="arm/J6_link" pos="0 -0.13 0" gravcomp="1">
+                        <inertial pos="0.10028 0.00052 2e-05" quat="0.703951 0.707615 0.04425 0.0421385" mass="1.272" diaginertia="0.0014412 0.00139978 0.00135335"/>
+                        <joint name="arm/J6" class="arm/wrist" range="-3.92699 3.92699" axis="-1 0 0"/>
+                        <geom class="arm/visual" pos="-0.43 0.13 -0.595" quat="1 0 0 0" material="arm/gray" mesh="arm/j6_0"/>
+                        <geom class="arm/visual" pos="-0.43 0.13 -0.595" quat="1 0 0 0" material="arm/black" mesh="arm/j6_1"/>
+                        <geom class="arm/collision" pos="-4.57967e-16 -5.63785e-18 -2.4564e-20" quat="1 0 0 0" mesh="arm/j6_collision"/>
+                        <site name="arm/attachment_site" pos="0.145 0 0" quat="0.707107 0 0.707107 0"/>
+                        <frame pos="0.145 0 0" quat="0.707107 0 0.707107 0">
                           <body name="grip/base_mount" childclass="grip/2f85">
                             <geom class="grip/visual" quat="1 0 0 0" material="grip/black" mesh="grip/base_mount"/>
                             <geom class="grip/collision" quat="1 0 0 0" mesh="grip/base_mount"/>
@@ -333,29 +334,32 @@
             </body>
           </body>
         </frame>
-        <body name="sens/lidar" pos="-0.17 0 0.745">
-          <geom name="sens/lidar_body" size="0.0385 0.02" type="cylinder" contype="0" conaffinity="0" rgba="0.85 0.3 0.1 1" mass="0.19"/>
-          <site name="lidar"/>
-        </body>
+        <frame pos="0.14 0 0.495" quat="0.5 0.5 0.5 0.5">
+          <body name="sens/ego/d435i" childclass="sens/ego/d435i">
+            <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Lens" mesh="sens/ego/d435i_0"/>
+            <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Emitter_Lens" mesh="sens/ego/d435i_1"/>
+            <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Rim" mesh="sens/ego/d435i_2"/>
+            <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Lens" mesh="sens/ego/d435i_3"/>
+            <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/Cameras_Gray" mesh="sens/ego/d435i_4"/>
+            <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/Black_Acrylic" mesh="sens/ego/d435i_5"/>
+            <geom class="sens/ego/visual" pos="-2.91434e-16 -6.09864e-20 4.68375e-17" quat="1 0 0 0" mass="0" material="sens/ego/Black_Acrylic" mesh="sens/ego/d435i_6"/>
+            <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/RGB_Pupil" mesh="sens/ego/d435i_7"/>
+            <geom class="sens/ego/visual" quat="1 0 0 0" mass="0.072" material="sens/ego/Metal_Casing" mesh="sens/ego/d435i_8"/>
+            <geom class="sens/ego/collision" size="0.00968864 0.0334784" pos="0.00145113 -0.000319327 -0.0135412" quat="0.029024 0.708312 0.0275527 0.704764" type="capsule" mass="0"/>
+          </body>
+        </frame>
       </body>
-      <frame pos="0.194 0.09 0.415" quat="0.5 0.5 0.5 0.5">
-        <body name="sens/ego/d435i" childclass="sens/ego/d435i">
-          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Lens" mesh="sens/ego/d435i_0"/>
-          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Emitter_Lens" mesh="sens/ego/d435i_1"/>
-          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Rim" mesh="sens/ego/d435i_2"/>
-          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/IR_Lens" mesh="sens/ego/d435i_3"/>
-          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/Cameras_Gray" mesh="sens/ego/d435i_4"/>
-          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/Black_Acrylic" mesh="sens/ego/d435i_5"/>
-          <geom class="sens/ego/visual" pos="-2.91434e-16 -6.09864e-20 4.68375e-17" quat="1 0 0 0" mass="0" material="sens/ego/Black_Acrylic" mesh="sens/ego/d435i_6"/>
-          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0" material="sens/ego/RGB_Pupil" mesh="sens/ego/d435i_7"/>
-          <geom class="sens/ego/visual" quat="1 0 0 0" mass="0.072" material="sens/ego/Metal_Casing" mesh="sens/ego/d435i_8"/>
-          <geom class="sens/ego/collision" size="0.00968864 0.0334784" pos="0.00145113 -0.000319327 -0.0135412" quat="0.029024 0.708312 0.0275527 0.704764" type="capsule" mass="0"/>
-        </body>
-      </frame>
+      <body name="sens/lidar" pos="0.214 0 0.425">
+        <geom name="sens/lidar_body" size="0.0385 0.02" type="cylinder" contype="0" conaffinity="0" rgba="0.85 0.3 0.1 1" mass="0.19"/>
+        <site name="lidar"/>
+      </body>
     </body>
   </worldbody>
 
   <contact>
+    <exclude body1="arm/base_link" body2="arm/J1_link"/>
+    <exclude body1="arm/base_link" body2="arm/J2_link"/>
+    <exclude body1="arm/J2_link" body2="arm/J4_link"/>
     <exclude body1="grip/base" body2="grip/left_driver"/>
     <exclude body1="grip/base" body2="grip/right_driver"/>
     <exclude body1="grip/base" body2="grip/left_spring_link"/>
@@ -378,16 +382,16 @@
   </equality>
 
   <actuator>
-    <general name="arm/shoulder_pan" class="arm/size3" joint="arm/shoulder_pan_joint"/>
-    <general name="arm/shoulder_lift" class="arm/size3" joint="arm/shoulder_lift_joint"/>
-    <general name="arm/elbow" class="arm/size3_limited" joint="arm/elbow_joint"/>
-    <general name="arm/wrist_1" class="arm/size1" joint="arm/wrist_1_joint"/>
-    <general name="arm/wrist_2" class="arm/size1" joint="arm/wrist_2_joint"/>
-    <general name="arm/wrist_3" class="arm/size1" joint="arm/wrist_3_joint"/>
+    <general name="arm/J1" class="arm/crx5ia" joint="arm/J1" ctrlrange="-3.49066 3.49066"/>
+    <general name="arm/J2" class="arm/crx5ia" joint="arm/J2" ctrlrange="-3.13985 3.13985"/>
+    <general name="arm/J3" class="arm/crx5ia" joint="arm/J3" ctrlrange="-1.18682 4.32842"/>
+    <general name="arm/J4" class="arm/wrist" joint="arm/J4" ctrlrange="-3.31613 3.31613"/>
+    <general name="arm/J5" class="arm/wrist" joint="arm/J5" ctrlrange="-3.13985 3.13985"/>
+    <general name="arm/J6" class="arm/wrist" joint="arm/J6" ctrlrange="-3.92699 3.92699"/>
     <general name="grip/fingers_actuator" class="grip/2f85" tendon="grip/split" ctrlrange="0 255" forcerange="-5 5" gainprm="0.313725" biasprm="0 -100 -10"/>
   </actuator>
 
   <keyframe>
-    <key name="stowed" qpos="0 0 0 0 5.0672 2.30324 -1.09689 -0.08986 -2.25992 -2.89924 0 0 0 0 0 0 0 0" ctrl="5.0672 2.30324 -1.09689 -0.08986 -2.25992 -2.89924 0"/>
+    <key name="stowed" qpos="0 0 0 0 -1.55725 -1.87418 3.10267 -2.21436 0.62318 0.17055 0 0 0 0 0 0 0 0" ctrl="-1.55725 -1.87418 3.10267 -2.21436 0.62318 0.17055 0"/>
   </keyframe>
 </mujoco>

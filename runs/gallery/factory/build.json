@@ -1,686 +1,842 @@
 {
   "schema": "build/1",
   "parts": {
-    "base": "tidybot_arx5",
-    "lift": "liftkit_900",
-    "arm": "ur5e",
+    "base": "tidybot_kinova",
+    "lift": "liftkit_500",
+    "arm": "crx5ia",
     "gripper": "robotiq_2f85",
     "lidar": "rplidar_s2",
-    "lidar_mount": "stage_rear",
+    "lidar_mount": "base_front",
     "wrist_cam": true,
-    "ego_cam": "base_front"
+    "ego_cam": "stage_front"
   },
   "robot_xml": "robot.xml",
-  "mass_kg": 91.48,
-  "price_usd": 52580,
+  "mass_kg": 107.32,
+  "price_usd": 49800,
   "base": {
     "kind": "wheeled",
     "holonomic": true,
     "step_max_m": 0.015,
-    "payload_kg": 60.0,
+    "payload_kg": 80.0,
     "footprint": [
       [
-        -0.224,
-        -0.204
+        -0.274,
+        -0.254
       ],
       [
-        0.224,
-        -0.204
+        0.274,
+        -0.254
       ],
       [
-        0.224,
-        0.204
+        0.274,
+        0.254
       ],
       [
-        -0.224,
-        0.204
+        -0.274,
+        0.254
       ]
     ],
-    "inscribed_radius_m": 0.204,
-    "circumscribed_radius_m": 0.303,
+    "inscribed_radius_m": 0.254,
+    "circumscribed_radius_m": 0.374,
     "support": [
       [
-        -0.154,
-        -0.134
+        -0.204,
+        -0.184
       ],
       [
-        0.154,
-        -0.134
+        0.204,
+        -0.184
       ],
       [
-        0.154,
-        0.134
+        0.204,
+        0.184
       ],
       [
-        -0.154,
-        0.134
+        -0.204,
+        0.184
       ]
     ]
   },
   "stowed": {
-    "width_m": 0.623,
-    "length_m": 0.458,
-    "height_m": 1.372,
+    "width_m": 0.753,
+    "length_m": 0.548,
+    "height_m": 1.218,
     "qpos": {
       "lift": 0.0,
-      "arm/shoulder_pan_joint": 5.0672,
-      "arm/shoulder_lift_joint": 2.30324,
-      "arm/elbow_joint": -1.09689,
-      "arm/wrist_1_joint": -0.08986,
-      "arm/wrist_2_joint": -2.25992,
-      "arm/wrist_3_joint": -2.89924
+      "arm/J1": -1.55725,
+      "arm/J2": -1.87418,
+      "arm/J3": 3.10267,
+      "arm/J4": -2.21436,
+      "arm/J5": 0.62318,
+      "arm/J6": 0.17055
     },
     "keyframe": "stowed"
   },
   "reach_envelope": [
     {
+      "height_m": 0.1,
+      "tool_axis": "down",
+      "min_distance_m": 0.411,
+      "max_distance_m": 0.489
+    },
+    {
+      "height_m": 0.15,
+      "tool_axis": "down",
+      "min_distance_m": 0.381,
+      "max_distance_m": 0.504
+    },
+    {
+      "height_m": 0.2,
+      "tool_axis": "down",
+      "min_distance_m": 0.381,
+      "max_distance_m": 0.552
+    },
+    {
+      "height_m": 0.25,
+      "tool_axis": "down",
+      "min_distance_m": 0.381,
+      "max_distance_m": 0.651
+    },
+    {
       "height_m": 0.3,
       "tool_axis": "down",
-      "min_distance_m": 0.274,
-      "max_distance_m": 0.453
+      "min_distance_m": 0.354,
+      "max_distance_m": 0.651
     },
     {
       "height_m": 0.35,
       "tool_axis": "down",
-      "min_distance_m": 0.234,
-      "max_distance_m": 0.55
+      "min_distance_m": 0.284,
+      "max_distance_m": 0.701
     },
     {
       "height_m": 0.4,
       "tool_axis": "down",
-      "min_distance_m": 0.153,
-      "max_distance_m": 0.624
+      "min_distance_m": 0.199,
+      "max_distance_m": 0.701
     },
     {
       "height_m": 0.45,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.657
+      "min_distance_m": 0.199,
+      "max_distance_m": 0.753
     },
     {
       "height_m": 0.5,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.716
+      "min_distance_m": 0.191,
+      "max_distance_m": 0.753
     },
     {
       "height_m": 0.55,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.756
+      "min_distance_m": 0.177,
+      "max_distance_m": 0.806
     },
     {
       "height_m": 0.6,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.803
+      "min_distance_m": 0.189,
+      "max_distance_m": 0.802
     },
     {
       "height_m": 0.65,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.803
+      "min_distance_m": 0.185,
+      "max_distance_m": 0.802
     },
     {
       "height_m": 0.7,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.85
+      "min_distance_m": 0.175,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 0.75,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.85
+      "min_distance_m": 0.157,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 0.8,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.85
+      "min_distance_m": 0.157,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 0.85,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.901
+      "min_distance_m": 0.157,
+      "max_distance_m": 0.8
     },
     {
       "height_m": 0.9,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.901
+      "min_distance_m": 0.131,
+      "max_distance_m": 0.8
     },
     {
       "height_m": 0.95,
       "tool_axis": "down",
-      "min_distance_m": 0.149,
-      "max_distance_m": 0.901
+      "min_distance_m": 0.035,
+      "max_distance_m": 0.8
     },
     {
       "height_m": 1.0,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.901
+      "min_distance_m": 0.035,
+      "max_distance_m": 0.8
     },
     {
       "height_m": 1.05,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.901
+      "min_distance_m": 0.035,
+      "max_distance_m": 0.8
     },
     {
       "height_m": 1.1,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.901
+      "min_distance_m": 0.035,
+      "max_distance_m": 0.8
     },
     {
       "height_m": 1.15,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.901
+      "min_distance_m": 0.035,
+      "max_distance_m": 0.8
     },
     {
       "height_m": 1.2,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.901
+      "min_distance_m": 0.035,
+      "max_distance_m": 0.8
     },
     {
       "height_m": 1.25,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.027,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 1.3,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.12,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 1.35,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.12,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 1.4,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.12,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 1.45,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.12,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 1.5,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.12,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 1.55,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.123,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 1.6,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.018,
+      "max_distance_m": 0.801
     },
     {
       "height_m": 1.65,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.752
     },
     {
       "height_m": 1.7,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.753
     },
     {
       "height_m": 1.75,
       "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.8,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.85,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.9,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.95,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.0,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.05,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.1,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.15,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.2,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.851
-    },
-    {
-      "height_m": 2.25,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.851
-    },
-    {
-      "height_m": 2.3,
-      "tool_axis": "down",
-      "min_distance_m": 0.126,
-      "max_distance_m": 0.801
-    },
-    {
-      "height_m": 2.35,
-      "tool_axis": "down",
-      "min_distance_m": 0.129,
-      "max_distance_m": 0.801
-    },
-    {
-      "height_m": 2.4,
-      "tool_axis": "down",
-      "min_distance_m": 0.129,
-      "max_distance_m": 0.751
-    },
-    {
-      "height_m": 2.45,
-      "tool_axis": "down",
-      "min_distance_m": 0.128,
-      "max_distance_m": 0.751
-    },
-    {
-      "height_m": 2.5,
-      "tool_axis": "down",
-      "min_distance_m": 0.128,
-      "max_distance_m": 0.7
-    },
-    {
-      "height_m": 2.55,
-      "tool_axis": "down",
-      "min_distance_m": 0.128,
-      "max_distance_m": 0.651
-    },
-    {
-      "height_m": 2.6,
-      "tool_axis": "down",
-      "min_distance_m": 0.128,
-      "max_distance_m": 0.6
-    },
-    {
-      "height_m": 2.65,
-      "tool_axis": "down",
-      "min_distance_m": 0.128,
-      "max_distance_m": 0.504
-    },
-    {
-      "height_m": 2.7,
-      "tool_axis": "down",
-      "min_distance_m": 0.128,
-      "max_distance_m": 0.401
-    },
-    {
-      "height_m": 2.75,
-      "tool_axis": "down",
-      "min_distance_m": 0.135,
-      "max_distance_m": 0.25
-    },
-    {
-      "height_m": 0.75,
-      "tool_axis": "up",
-      "min_distance_m": 0.256,
-      "max_distance_m": 0.256
-    },
-    {
-      "height_m": 0.8,
-      "tool_axis": "up",
-      "min_distance_m": 0.146,
-      "max_distance_m": 0.301
-    },
-    {
-      "height_m": 0.85,
-      "tool_axis": "up",
-      "min_distance_m": 0.146,
-      "max_distance_m": 0.602
-    },
-    {
-      "height_m": 0.9,
-      "tool_axis": "up",
-      "min_distance_m": 0.146,
-      "max_distance_m": 0.653
-    },
-    {
-      "height_m": 0.95,
-      "tool_axis": "up",
-      "min_distance_m": 0.146,
-      "max_distance_m": 0.714
-    },
-    {
-      "height_m": 1.0,
-      "tool_axis": "up",
-      "min_distance_m": 0.145,
-      "max_distance_m": 0.702
-    },
-    {
-      "height_m": 1.05,
-      "tool_axis": "up",
-      "min_distance_m": 0.145,
-      "max_distance_m": 0.759
-    },
-    {
-      "height_m": 1.1,
-      "tool_axis": "up",
-      "min_distance_m": 0.145,
-      "max_distance_m": 0.801
-    },
-    {
-      "height_m": 1.15,
-      "tool_axis": "up",
-      "min_distance_m": 0.145,
-      "max_distance_m": 0.801
-    },
-    {
-      "height_m": 1.2,
-      "tool_axis": "up",
-      "min_distance_m": 0.145,
-      "max_distance_m": 0.853
-    },
-    {
-      "height_m": 1.25,
-      "tool_axis": "up",
-      "min_distance_m": 0.145,
-      "max_distance_m": 0.851
-    },
-    {
-      "height_m": 1.3,
-      "tool_axis": "up",
-      "min_distance_m": 0.145,
-      "max_distance_m": 0.851
-    },
-    {
-      "height_m": 1.35,
-      "tool_axis": "up",
-      "min_distance_m": 0.14,
-      "max_distance_m": 0.902
-    },
-    {
-      "height_m": 1.4,
-      "tool_axis": "up",
-      "min_distance_m": 0.131,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.45,
-      "tool_axis": "up",
-      "min_distance_m": 0.131,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.5,
-      "tool_axis": "up",
-      "min_distance_m": 0.13,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.55,
-      "tool_axis": "up",
-      "min_distance_m": 0.127,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.6,
-      "tool_axis": "up",
-      "min_distance_m": 0.127,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.65,
-      "tool_axis": "up",
-      "min_distance_m": 0.127,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.7,
-      "tool_axis": "up",
-      "min_distance_m": 0.127,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.75,
-      "tool_axis": "up",
-      "min_distance_m": 0.127,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.8,
-      "tool_axis": "up",
-      "min_distance_m": 0.127,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.85,
-      "tool_axis": "up",
-      "min_distance_m": 0.127,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.9,
-      "tool_axis": "up",
-      "min_distance_m": 0.127,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 1.95,
-      "tool_axis": "up",
-      "min_distance_m": 0.125,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.0,
-      "tool_axis": "up",
-      "min_distance_m": 0.125,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.05,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.1,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.15,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.2,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.25,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.3,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.35,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.4,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.45,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.5,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.55,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.9
-    },
-    {
-      "height_m": 2.6,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.901
-    },
-    {
-      "height_m": 2.65,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.851
-    },
-    {
-      "height_m": 2.7,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.851
-    },
-    {
-      "height_m": 2.75,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.851
-    },
-    {
-      "height_m": 2.8,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.8
-    },
-    {
-      "height_m": 2.85,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.8
-    },
-    {
-      "height_m": 2.9,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.75
-    },
-    {
-      "height_m": 2.95,
-      "tool_axis": "up",
-      "min_distance_m": 0.124,
-      "max_distance_m": 0.75
-    },
-    {
-      "height_m": 3.0,
-      "tool_axis": "up",
-      "min_distance_m": 0.129,
+      "min_distance_m": 0.007,
       "max_distance_m": 0.701
     },
     {
-      "height_m": 3.05,
-      "tool_axis": "up",
-      "min_distance_m": 0.131,
-      "max_distance_m": 0.653
+      "height_m": 1.8,
+      "tool_axis": "down",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.701
     },
     {
-      "height_m": 3.1,
-      "tool_axis": "up",
-      "min_distance_m": 0.131,
-      "max_distance_m": 0.608
+      "height_m": 1.85,
+      "tool_axis": "down",
+      "min_distance_m": 0.003,
+      "max_distance_m": 0.65
     },
     {
-      "height_m": 3.15,
-      "tool_axis": "up",
-      "min_distance_m": 0.131,
-      "max_distance_m": 0.501
+      "height_m": 1.9,
+      "tool_axis": "down",
+      "min_distance_m": 0.003,
+      "max_distance_m": 0.607
     },
     {
-      "height_m": 3.2,
-      "tool_axis": "up",
-      "min_distance_m": 0.131,
+      "height_m": 1.95,
+      "tool_axis": "down",
+      "min_distance_m": 0.003,
+      "max_distance_m": 0.554
+    },
+    {
+      "height_m": 2.0,
+      "tool_axis": "down",
+      "min_distance_m": 0.003,
+      "max_distance_m": 0.503
+    },
+    {
+      "height_m": 2.05,
+      "tool_axis": "down",
+      "min_distance_m": 0.003,
       "max_distance_m": 0.401
     },
     {
-      "height_m": 3.25,
+      "height_m": 2.1,
+      "tool_axis": "down",
+      "min_distance_m": 0.003,
+      "max_distance_m": 0.352
+    },
+    {
+      "height_m": 2.15,
+      "tool_axis": "down",
+      "min_distance_m": 0.003,
+      "max_distance_m": 0.255
+    },
+    {
+      "height_m": 0.7,
       "tool_axis": "up",
-      "min_distance_m": 0.134,
-      "max_distance_m": 0.256
+      "min_distance_m": 0.443,
+      "max_distance_m": 0.453
+    },
+    {
+      "height_m": 0.75,
+      "tool_axis": "up",
+      "min_distance_m": 0.209,
+      "max_distance_m": 0.453
+    },
+    {
+      "height_m": 0.8,
+      "tool_axis": "up",
+      "min_distance_m": 0.182,
+      "max_distance_m": 0.607
+    },
+    {
+      "height_m": 0.85,
+      "tool_axis": "up",
+      "min_distance_m": 0.182,
+      "max_distance_m": 0.651
+    },
+    {
+      "height_m": 0.9,
+      "tool_axis": "up",
+      "min_distance_m": 0.182,
+      "max_distance_m": 0.651
+    },
+    {
+      "height_m": 0.95,
+      "tool_axis": "up",
+      "min_distance_m": 0.182,
+      "max_distance_m": 0.702
+    },
+    {
+      "height_m": 1.0,
+      "tool_axis": "up",
+      "min_distance_m": 0.18,
+      "max_distance_m": 0.751
+    },
+    {
+      "height_m": 1.05,
+      "tool_axis": "up",
+      "min_distance_m": 0.18,
+      "max_distance_m": 0.751
+    },
+    {
+      "height_m": 1.1,
+      "tool_axis": "up",
+      "min_distance_m": 0.18,
+      "max_distance_m": 0.751
+    },
+    {
+      "height_m": 1.15,
+      "tool_axis": "up",
+      "min_distance_m": 0.18,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.2,
+      "tool_axis": "up",
+      "min_distance_m": 0.187,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.25,
+      "tool_axis": "up",
+      "min_distance_m": 0.133,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.3,
+      "tool_axis": "up",
+      "min_distance_m": 0.082,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.35,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.4,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.45,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.5,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.55,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.6,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.65,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.8
+    },
+    {
+      "height_m": 1.7,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.801
+    },
+    {
+      "height_m": 1.75,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.801
+    },
+    {
+      "height_m": 1.8,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.801
+    },
+    {
+      "height_m": 1.85,
+      "tool_axis": "up",
+      "min_distance_m": 0.012,
+      "max_distance_m": 0.801
+    },
+    {
+      "height_m": 1.9,
+      "tool_axis": "up",
+      "min_distance_m": 0.117,
+      "max_distance_m": 0.801
+    },
+    {
+      "height_m": 1.95,
+      "tool_axis": "up",
+      "min_distance_m": 0.117,
+      "max_distance_m": 0.801
+    },
+    {
+      "height_m": 2.0,
+      "tool_axis": "up",
+      "min_distance_m": 0.117,
+      "max_distance_m": 0.801
+    },
+    {
+      "height_m": 2.05,
+      "tool_axis": "up",
+      "min_distance_m": 0.117,
+      "max_distance_m": 0.801
+    },
+    {
+      "height_m": 2.1,
+      "tool_axis": "up",
+      "min_distance_m": 0.116,
+      "max_distance_m": 0.801
+    },
+    {
+      "height_m": 2.15,
+      "tool_axis": "up",
+      "min_distance_m": 0.091,
+      "max_distance_m": 0.802
+    },
+    {
+      "height_m": 2.2,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.802
+    },
+    {
+      "height_m": 2.25,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.751
+    },
+    {
+      "height_m": 2.3,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.751
+    },
+    {
+      "height_m": 2.35,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.701
+    },
+    {
+      "height_m": 2.4,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.701
+    },
+    {
+      "height_m": 2.45,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.65
+    },
+    {
+      "height_m": 2.5,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.602
+    },
+    {
+      "height_m": 2.55,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.552
+    },
+    {
+      "height_m": 2.6,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.5
+    },
+    {
+      "height_m": 2.65,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.4
+    },
+    {
+      "height_m": 2.7,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.302
+    },
+    {
+      "height_m": 2.75,
+      "tool_axis": "up",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.2
+    },
+    {
+      "height_m": 0.35,
+      "tool_axis": "side",
+      "min_distance_m": 0.63,
+      "max_distance_m": 0.666
+    },
+    {
+      "height_m": 0.4,
+      "tool_axis": "side",
+      "min_distance_m": 0.628,
+      "max_distance_m": 0.752
+    },
+    {
+      "height_m": 0.45,
+      "tool_axis": "side",
+      "min_distance_m": 0.03,
+      "max_distance_m": 0.752
+    },
+    {
+      "height_m": 0.5,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 0.808
+    },
+    {
+      "height_m": 0.55,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 0.955
+    },
+    {
+      "height_m": 0.6,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 0.955
+    },
+    {
+      "height_m": 0.65,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.006
+    },
+    {
+      "height_m": 0.7,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.006
+    },
+    {
+      "height_m": 0.75,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.052
+    },
+    {
+      "height_m": 0.8,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.051
+    },
+    {
+      "height_m": 0.85,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.05
+    },
+    {
+      "height_m": 0.9,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.106
+    },
+    {
+      "height_m": 0.95,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.101
+    },
+    {
+      "height_m": 1.0,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.101
+    },
+    {
+      "height_m": 1.05,
+      "tool_axis": "side",
+      "min_distance_m": 0.003,
+      "max_distance_m": 1.101
+    },
+    {
+      "height_m": 1.1,
+      "tool_axis": "side",
+      "min_distance_m": 0.003,
+      "max_distance_m": 1.101
+    },
+    {
+      "height_m": 1.15,
+      "tool_axis": "side",
+      "min_distance_m": 0.003,
+      "max_distance_m": 1.101
+    },
+    {
+      "height_m": 1.2,
+      "tool_axis": "side",
+      "min_distance_m": 0.003,
+      "max_distance_m": 1.101
+    },
+    {
+      "height_m": 1.25,
+      "tool_axis": "side",
+      "min_distance_m": 0.003,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.3,
+      "tool_axis": "side",
+      "min_distance_m": 0.003,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.35,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.4,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.45,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.5,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.55,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.6,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.65,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.7,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.75,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.8,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.85,
+      "tool_axis": "side",
+      "min_distance_m": 0.0,
+      "max_distance_m": 1.1
+    },
+    {
+      "height_m": 1.9,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.051
+    },
+    {
+      "height_m": 1.95,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.051
+    },
+    {
+      "height_m": 2.0,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.051
+    },
+    {
+      "height_m": 2.05,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 1.002
+    },
+    {
+      "height_m": 2.1,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 0.958
+    },
+    {
+      "height_m": 2.15,
+      "tool_axis": "side",
+      "min_distance_m": 0.001,
+      "max_distance_m": 0.911
+    },
+    {
+      "height_m": 2.2,
+      "tool_axis": "side",
+      "min_distance_m": 0.004,
+      "max_distance_m": 0.853
+    },
+    {
+      "height_m": 2.25,
+      "tool_axis": "side",
+      "min_distance_m": 0.007,
+      "max_distance_m": 0.805
+    },
+    {
+      "height_m": 2.3,
+      "tool_axis": "side",
+      "min_distance_m": 0.008,
+      "max_distance_m": 0.756
+    },
+    {
+      "height_m": 2.35,
+      "tool_axis": "side",
+      "min_distance_m": 0.008,
+      "max_distance_m": 0.715
+    },
+    {
+      "height_m": 2.4,
+      "tool_axis": "side",
+      "min_distance_m": 0.008,
+      "max_distance_m": 0.651
+    },
+    {
+      "height_m": 2.45,
+      "tool_axis": "side",
+      "min_distance_m": 0.116,
+      "max_distance_m": 0.521
     }
   ],
-  "reach_envelope_note": "One row per height (above the floor) and tool_axis. tool_axis 'down': the tool's approach axis points straight down; 'up': straight up. min/max_distance_m: horizontal distance from the base centre to the tool, over the lift's travel, base parked. Sampled from the composed model on a 0.05 m grid; poses with the arm in the floor, the base or the lift are left out.",
+  "reach_envelope_note": "One row per height (above the floor) and tool_axis. tool_axis 'down': the tool's approach axis points straight down; 'up': straight up; 'side': level, along the robot's +X. min/max_distance_m: horizontal distance from the base centre to the tool, over the lift's travel, base parked. Sampled from the composed model on a 0.05 m grid; poses with the arm in the floor, the base or the lift are left out.",
   "joints": [
     {
       "name": "joint_x",
@@ -702,55 +858,55 @@
       "type": "slide",
       "range": [
         0.0,
-        0.9
+        0.5
       ]
     },
     {
-      "name": "arm/shoulder_pan_joint",
+      "name": "arm/J1",
       "type": "hinge",
       "range": [
-        -6.2832,
-        6.2832
+        -3.4907,
+        3.4907
       ]
     },
     {
-      "name": "arm/shoulder_lift_joint",
+      "name": "arm/J2",
       "type": "hinge",
       "range": [
-        -6.2832,
-        6.2832
+        -3.1398,
+        3.1398
       ]
     },
     {
-      "name": "arm/elbow_joint",
+      "name": "arm/J3",
       "type": "hinge",
       "range": [
-        -3.1415,
-        3.1415
+        -1.1868,
+        4.3284
       ]
     },
     {
-      "name": "arm/wrist_1_joint",
+      "name": "arm/J4",
       "type": "hinge",
       "range": [
-        -6.2832,
-        6.2832
+        -3.3161,
+        3.3161
       ]
     },
     {
-      "name": "arm/wrist_2_joint",
+      "name": "arm/J5",
       "type": "hinge",
       "range": [
-        -6.2832,
-        6.2832
+        -3.1398,
+        3.1398
       ]
     },
     {
-      "name": "arm/wrist_3_joint",
+      "name": "arm/J6",
       "type": "hinge",
       "range": [
-        -6.2832,
-        6.2832
+        -3.927,
+        3.927
       ]
     },
     {
@@ -820,16 +976,16 @@
   ],
   "arm_joints": [
     "lift",
-    "arm/shoulder_pan_joint",
-    "arm/shoulder_lift_joint",
-    "arm/elbow_joint",
-    "arm/wrist_1_joint",
-    "arm/wrist_2_joint",
-    "arm/wrist_3_joint"
+    "arm/J1",
+    "arm/J2",
+    "arm/J3",
+    "arm/J4",
+    "arm/J5",
+    "arm/J6"
   ],
   "wrist_roll": {
-    "joint": "arm/wrist_3_joint",
-    "turns": 2.0
+    "joint": "arm/J6",
+    "turns": 1.25
   },
   "tool_site": "tool",
   "sensors": [
@@ -837,14 +993,14 @@
       "kind": "lidar",
       "part": "rplidar_s2",
       "site": "lidar",
-      "mount": "stage_rear",
+      "mount": "base_front",
       "dim": "2d"
     },
     {
       "kind": "depth_camera",
       "part": "d435i",
       "site": "ego",
-      "mount": "base_front"
+      "mount": "stage_front"
     },
     {
       "kind": "depth_camera",
@@ -856,33 +1012,33 @@
   "assembly": [
     {
       "step": 1,
-      "part": "tidybot_arx5",
+      "part": "tidybot_kinova",
       "onto": "floor"
     },
     {
       "step": 2,
-      "part": "liftkit_900",
-      "onto": "tidybot_arx5:top"
+      "part": "liftkit_500",
+      "onto": "tidybot_kinova:top"
     },
     {
       "step": 3,
-      "part": "ur5e",
-      "onto": "liftkit_900:stage"
+      "part": "crx5ia",
+      "onto": "liftkit_500:stage"
     },
     {
       "step": 4,
       "part": "robotiq_2f85",
-      "onto": "ur5e:flange"
+      "onto": "crx5ia:flange"
     },
     {
       "step": 5,
       "part": "rplidar_s2",
-      "onto": "liftkit_900:stage_rear"
+      "onto": "tidybot_kinova:front"
     },
     {
       "step": 6,
       "part": "d435i",
-      "onto": "tidybot_arx5:front",
+      "onto": "liftkit_500:stage_front",
       "as": "ego camera"
     },
     {

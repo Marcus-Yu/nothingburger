@@ -2,22 +2,22 @@
   "schema": "design/1",
   "parts": {
     "base": "tidybot_arx5",
-    "lift": "liftkit_500",
-    "arm": "ur5e",
-    "gripper": "xarm_gripper",
+    "lift": "none",
+    "arm": "fr3",
+    "gripper": "franka_hand",
     "lidar": "rplidar_s2",
-    "lidar_mount": "stage_rear",
+    "lidar_mount": "base_front",
     "wrist_cam": true,
     "ego_cam": "base_front"
   },
-  "price_usd": 48800,
-  "mass_kg": 89.78,
+  "price_usd": 34600,
+  "mass_kg": 64.41,
   "checks": [
     {
       "check": "doorway",
       "task": null,
       "status": "pass",
-      "value": 0.456,
+      "value": 0.51,
       "limit": 0.51,
       "unit": "m",
       "requirements": [
@@ -29,7 +29,7 @@
       "check": "turn",
       "task": null,
       "status": "pass",
-      "value": 0.457,
+      "value": 0.462,
       "limit": 0.9,
       "unit": "m",
       "requirements": [
@@ -41,7 +41,7 @@
       "check": "door header",
       "task": null,
       "status": "pass",
-      "value": 1.561,
+      "value": 1.101,
       "limit": 1.98,
       "unit": "m",
       "requirements": [
@@ -65,7 +65,7 @@
       "check": "base payload",
       "task": null,
       "status": "pass",
-      "value": 45.08,
+      "value": 19.71,
       "limit": 60.0,
       "unit": "kg",
       "requirements": [
@@ -90,11 +90,11 @@
       "check": "lidar view",
       "task": null,
       "status": "pass",
-      "value": 0.83,
+      "value": 0.76,
       "limit": 0.75,
       "unit": "fraction",
       "requirements": [],
-      "why": "share of the horizontal circle the lidar sees past the robot's own body, arm stowed, mount stage_rear"
+      "why": "share of the horizontal circle the lidar sees past the robot's own body, arm stowed, mount base_front"
     },
     {
       "check": "wrist camera",
@@ -118,51 +118,51 @@
       "check": "reach",
       "task": "t1",
       "status": "pass",
-      "value": 0.901,
+      "value": 0.801,
       "limit": 0.633,
       "unit": "m",
       "requirements": [
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "why": "target 4 at 0.60 m, tool down: the tool reaches 0.13 to 0.90 m from the base centre; the base centre can stand 0.63 m away or more (free floor 0.43 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 6 targets)",
+      "why": "target 4 at 0.60 m, tool down: the tool reaches 0.10 to 0.80 m from the base centre; the base centre can stand 0.63 m away or more (free floor 0.43 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand (the tightest of 6 targets)",
       "target": 4,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.338,
-          "reach_m": 0.901
+          "reach_m": 0.801
         },
         {
           "target": 1,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.901
+          "reach_m": 0.801
         },
         {
           "target": 2,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.901
+          "reach_m": 0.801
         },
         {
           "target": 3,
           "status": "pass",
           "needed_m": 0.485,
-          "reach_m": 0.901
+          "reach_m": 0.801
         },
         {
           "target": 4,
           "status": "pass",
           "needed_m": 0.633,
-          "reach_m": 0.901
+          "reach_m": 0.801
         },
         {
           "target": 5,
           "status": "pass",
           "needed_m": 0.28,
-          "reach_m": 0.901
+          "reach_m": 0.801
         }
       ]
     },
@@ -170,21 +170,21 @@
       "check": "reach",
       "task": "t2",
       "status": "pass",
-      "value": 0.85,
+      "value": 0.75,
       "limit": 0.33,
       "unit": "m",
       "requirements": [
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "why": "target 0 at 0.34 m, tool down: the tool reaches 0.15 to 0.85 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "why": "target 0 at 0.34 m, tool down: the tool reaches 0.25 to 0.75 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
       "target": 0,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.33,
-          "reach_m": 0.85
+          "reach_m": 0.75
         }
       ]
     },
@@ -192,21 +192,21 @@
       "check": "reach",
       "task": "t3",
       "status": "pass",
-      "value": 0.901,
+      "value": 0.8,
       "limit": 0.33,
       "unit": "m",
       "requirements": [
         "r_t3_reach",
         "r_t3_floor"
       ],
-      "why": "target 0 at 0.54 m, tool down: the tool reaches 0.13 to 0.90 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "why": "target 0 at 0.54 m, tool down: the tool reaches 0.11 to 0.80 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
       "target": 0,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.33,
-          "reach_m": 0.901
+          "reach_m": 0.8
         }
       ]
     },
@@ -214,21 +214,21 @@
       "check": "reach",
       "task": "t4",
       "status": "pass",
-      "value": 0.9,
+      "value": 0.653,
       "limit": 0.33,
       "unit": "m",
       "requirements": [
         "r_t4_reach",
         "r_t4_floor"
       ],
-      "why": "target 0 at 0.95 m, tool down: the tool reaches 0.12 to 0.90 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
+      "why": "target 0 at 0.95 m, tool down: the tool reaches 0.06 to 0.65 m from the base centre; the base centre can stand 0.33 m away or more (free floor 0.13 m from this target + half the base). value is the farthest reach at that height, limit the nearest the base can stand",
       "target": 0,
       "targets": [
         {
           "target": 0,
           "status": "pass",
           "needed_m": 0.33,
-          "reach_m": 0.9
+          "reach_m": 0.653
         }
       ]
     },
@@ -236,7 +236,7 @@
       "check": "tip-over",
       "task": "t1",
       "status": "pass",
-      "value": 3.59,
+      "value": 2.45,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -245,13 +245,13 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "why": "worst case: reaching target 4 (0.60 m out at 0.60 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 4 (0.66 m out at 0.60 m, the nearest the base can stand to it); payload 0.1 kg, press 10.0 N; static, against the support polygon"
     },
     {
       "check": "tip-over",
       "task": "t2",
       "status": "pass",
-      "value": 7.35,
+      "value": 5.74,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -259,13 +259,13 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "why": "worst case: reaching target 0 (0.30 m out at 0.34 m, the nearest the base can stand to it); payload 0.15 kg, press 0.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 0 (0.36 m out at 0.34 m, the nearest the base can stand to it); payload 0.15 kg, press 0.0 N; static, against the support polygon"
     },
     {
       "check": "tip-over",
       "task": "t3",
       "status": "pass",
-      "value": 4.85,
+      "value": 16.89,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -273,13 +273,13 @@
         "r_t3_reach",
         "r_t3_floor"
       ],
-      "why": "worst case: reaching target 0 (0.30 m out at 0.54 m, the nearest the base can stand to it); payload 0.3 kg, press 0.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 0 (0.35 m out at 0.54 m, the nearest the base can stand to it); payload 0.3 kg, press 0.0 N; static, against the support polygon"
     },
     {
       "check": "tip-over",
       "task": "t4",
       "status": "pass",
-      "value": 16.22,
+      "value": 10.55,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -287,61 +287,61 @@
         "r_t4_reach",
         "r_t4_floor"
       ],
-      "why": "worst case: reaching target 0 (0.30 m out at 0.95 m, the nearest the base can stand to it); payload 0.25 kg, press 0.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 0 (0.36 m out at 0.95 m, the nearest the base can stand to it); payload 0.25 kg, press 0.0 N; static, against the support polygon"
     },
     {
       "check": "payload",
       "task": "t1",
       "status": "pass",
-      "value": 1.0,
-      "limit": 5.0,
+      "value": 0.93,
+      "limit": 3.0,
       "unit": "kg",
       "requirements": [
         "r_t1_payload"
       ],
-      "why": "arm carries object 0.1 + gripper 0.8 + wrist camera 0.1 kg against its 5.0 kg rating; gripper rated 1.5 kg for the 0.1 kg object"
+      "why": "arm carries object 0.1 + gripper 0.73 + wrist camera 0.1 kg against its 3.0 kg rating; gripper rated 3.0 kg for the 0.1 kg object"
     },
     {
       "check": "payload",
       "task": "t2",
       "status": "pass",
-      "value": 1.05,
-      "limit": 5.0,
+      "value": 0.98,
+      "limit": 3.0,
       "unit": "kg",
       "requirements": [
         "r_t2_payload"
       ],
-      "why": "arm carries object 0.15 + gripper 0.8 + wrist camera 0.1 kg against its 5.0 kg rating; gripper rated 1.5 kg for the 0.15 kg object"
+      "why": "arm carries object 0.15 + gripper 0.73 + wrist camera 0.1 kg against its 3.0 kg rating; gripper rated 3.0 kg for the 0.15 kg object"
     },
     {
       "check": "payload",
       "task": "t3",
       "status": "pass",
-      "value": 1.2,
-      "limit": 5.0,
+      "value": 1.13,
+      "limit": 3.0,
       "unit": "kg",
       "requirements": [
         "r_t3_payload"
       ],
-      "why": "arm carries object 0.3 + gripper 0.8 + wrist camera 0.1 kg against its 5.0 kg rating; gripper rated 1.5 kg for the 0.3 kg object"
+      "why": "arm carries object 0.3 + gripper 0.73 + wrist camera 0.1 kg against its 3.0 kg rating; gripper rated 3.0 kg for the 0.3 kg object"
     },
     {
       "check": "payload",
       "task": "t4",
       "status": "pass",
-      "value": 1.15,
-      "limit": 5.0,
+      "value": 1.08,
+      "limit": 3.0,
       "unit": "kg",
       "requirements": [
         "r_t4_payload"
       ],
-      "why": "arm carries object 0.25 + gripper 0.8 + wrist camera 0.1 kg against its 5.0 kg rating; gripper rated 1.5 kg for the 0.25 kg object"
+      "why": "arm carries object 0.25 + gripper 0.73 + wrist camera 0.1 kg against its 3.0 kg rating; gripper rated 3.0 kg for the 0.25 kg object"
     },
     {
       "check": "opening",
       "task": "t2",
       "status": "pass",
-      "value": 0.086,
+      "value": 0.08,
       "limit": 0.055,
       "unit": "m",
       "requirements": [
@@ -352,7 +352,7 @@
       "check": "opening",
       "task": "t3",
       "status": "pass",
-      "value": 0.086,
+      "value": 0.08,
       "limit": 0.07,
       "unit": "m",
       "requirements": [
@@ -363,7 +363,7 @@
       "check": "opening",
       "task": "t4",
       "status": "pass",
-      "value": 0.086,
+      "value": 0.08,
       "limit": 0.07,
       "unit": "m",
       "requirements": [
@@ -395,7 +395,7 @@
       "check": "press",
       "task": "t1",
       "status": "not_assessable",
-      "value": 49.1,
+      "value": 29.4,
       "limit": 12.0,
       "unit": "N",
       "requirements": [
@@ -408,7 +408,7 @@
     "force not verified: t2, t3, t4",
     "press not verified: t1"
   ],
-  "considered": 2010,
-  "passed_arithmetic": 240,
-  "composed_and_checked": 15
+  "considered": 7020,
+  "passed_arithmetic": 1008,
+  "composed_and_checked": 58
 }

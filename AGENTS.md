@@ -60,7 +60,7 @@ Every argument and return value is a plain dict or list in the shape of the matc
 | Call | Returns |
 | :-- | :-- |
 | `composer.api.candidates()` | list of `parts` dicts (the eight keys in `design.json`'s `parts`), every valid combination in `catalog/` |
-| `composer.api.check(candidate, requirements)` | `{"parts", "feasible": bool, "price_usd", "mass_kg", "checks": [check, ...], "labels": [...]}`; each check as in `contracts/check.schema.json`. Reach here is the envelope check from the part cards, not inverse kinematics |
+| `composer.api.check(candidate, requirements)` | `{"parts", "feasible": bool, "price_usd", "mass_kg", "checks": [check, ...], "labels": [...]}`; each check as in `contracts/check.schema.json`. Reach here is the envelope check on the composed model (tool pointing up, down or level), not inverse kinematics |
 | `composer.api.design(requirements)` | a `design.json` dict: the cheapest feasible candidate, or `{"schema": "design/1", "parts": null, "infeasible": {"binding_checks": [...]}, ...}` |
 | `composer.api.compose(design)` | `{"robot_xml": str, "build": dict}`; `robot_xml` is MJCF with absolute mesh paths, `build` is `build.json` |
 | `nav.api.corridors(world, tasks)` | `{"corridors": [...], "demands": {"narrowest_m", "narrowest_doorway", "lowest_header_m", "tallest_step_m", "tightest_turn_m", "changes_floor"}}`; corridors as in `requirements.json` |

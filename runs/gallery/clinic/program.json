@@ -17,7 +17,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Dock to sill run of 3.3 m; the 0.0 m step limit is assumed, not scanned, so stop at any threshold.",
+      "note": "Dock to corridor sill, 3.3 m; the zero step limit is assumed, not scanned, so watch thresholds.",
       "n": 0
     },
     {
@@ -32,7 +32,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Only 0.066 m of free floor at the sill, so confirm the base pose before the arm moves.",
+      "note": "Only 0.066 m of free floor at the sill edge, so check base clearance before the arm moves.",
       "n": 1
     },
     {
@@ -47,7 +47,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured; watch for cloth slip on this single end stroke.",
+      "note": "The 10 N press force is assumed, not measured on this sill.",
       "n": 2
     },
     {
@@ -61,7 +61,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Arm must be fully clear of the sill before the base shifts.",
+      "note": "Stow the arm fully before the 0.45 m shuffle.",
       "n": 3
     },
     {
@@ -78,7 +78,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Short 0.16 m shift along the sill close to the wall edge.",
+      "note": "0.45 m shuffle along the sill; keep the base parallel to the wall.",
       "n": 4
     },
     {
@@ -93,7 +93,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets are assumed; verify the cloth meets the sill top.",
+      "note": "Reach targets are assumed poses, so watch for a missed sill edge.",
       "n": 5
     },
     {
@@ -108,7 +108,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed; check the sill surface for damage after the strokes.",
+      "note": "The 10 N press force is assumed and uncalibrated.",
       "n": 6
     },
     {
@@ -122,7 +122,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Clear the sill before the 0.3 m shift.",
+      "note": "Stow the arm before the base moves.",
       "n": 7
     },
     {
@@ -139,7 +139,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.3 m shift along the sill with tight floor clearance.",
+      "note": "0.45 m shuffle along the sill.",
       "n": 8
     },
     {
@@ -154,7 +154,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Confirm the base stayed within the 0.066 m free floor margin.",
+      "note": "Floor margin is tight at 0.066 m, so confirm the base did not drift toward the wall.",
       "n": 9
     },
     {
@@ -183,7 +183,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Clear the sill before the base moves.",
+      "note": "Stow the arm before the base moves.",
       "n": 11
     },
     {
@@ -200,7 +200,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.3 m shift along the sill.",
+      "note": "0.45 m shuffle along the sill.",
       "n": 12
     },
     {
@@ -215,7 +215,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets are assumed; watch for contact with the window frame.",
+      "note": "Reach targets are assumed poses, so verify cloth contact on the first stroke.",
       "n": 13
     },
     {
@@ -230,7 +230,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "The 10 N press force is assumed and uncalibrated.",
       "n": 14
     },
     {
@@ -244,7 +244,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Clear the sill before the base moves.",
+      "note": "Stow the arm before the base moves.",
       "n": 15
     },
     {
@@ -261,7 +261,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.3 m shift along the sill.",
+      "note": "0.45 m shuffle along the sill.",
       "n": 16
     },
     {
@@ -276,7 +276,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Confirm the base pose against the 0.066 m floor margin.",
+      "note": "Floor margin is tight at 0.066 m.",
       "n": 17
     },
     {
@@ -305,7 +305,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Clear the sill before the base moves.",
+      "note": "Stow the arm before the base moves.",
       "n": 19
     },
     {
@@ -322,7 +322,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.3 m shift along the sill.",
+      "note": "0.45 m shuffle along the sill.",
       "n": 20
     },
     {
@@ -337,7 +337,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Reach targets are assumed; verify the cloth meets the sill top.",
+      "note": "Reach targets are assumed poses.",
       "n": 21
     },
     {
@@ -352,7 +352,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "The 10 N press force is assumed and uncalibrated.",
       "n": 22
     },
     {
@@ -366,7 +366,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Clear the sill before the base moves.",
+      "note": "Stow the arm before the base moves.",
       "n": 23
     },
     {
@@ -383,7 +383,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.3 m shift along the sill.",
+      "note": "Last 0.45 m shuffle on the sill.",
       "n": 24
     },
     {
@@ -398,7 +398,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "note": "Confirm the base pose against the 0.066 m floor margin.",
+      "note": "This is the end of the sill, so check that the reach stays on the surface.",
       "n": 25
     },
     {
@@ -413,7 +413,7 @@
         "r_t1_press",
         "r_t1_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "Final 3 strokes at an assumed 10 N; confirm the sill is fully covered.",
       "n": 26
     },
     {
@@ -427,7 +427,7 @@
       "requirements": [
         "r_t1_reach"
       ],
-      "note": "Clear the sill before the base moves.",
+      "note": "Stow fully before the long transit.",
       "n": 27
     },
     {
@@ -444,51 +444,51 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.3 m shift along the sill.",
+      "note": "7.3 m transit to the reception ledge through doorways; check the 0.76 m width and 2.05 m header.",
       "n": 28
     },
     {
       "primitive": "approach",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 7,
       "force_n": null,
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach",
-        "r_t1_floor"
+        "r_t2_reach",
+        "r_t2_floor"
       ],
-      "note": "Reach targets are assumed; watch for contact with the window frame.",
+      "note": "Only 0.056 m of free floor at the ledge, so check base clearance first.",
       "n": 29
     },
     {
       "primitive": "wipe",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 7,
       "force_n": null,
       "press_n": 10.0,
       "turns": null,
       "requirements": [
-        "r_t1_press",
-        "r_t1_payload"
+        "r_t2_press",
+        "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "The 10 N press force is assumed, not measured on this ledge.",
       "n": 30
     },
     {
       "primitive": "retreat",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 7,
       "force_n": null,
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach"
+        "r_t2_reach"
       ],
-      "note": "Clear the sill before the base moves.",
+      "note": "The retreat is long at 8.4 s, so wait for full stow before moving.",
       "n": 31
     },
     {
@@ -505,51 +505,51 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.3 m shift along the sill.",
+      "note": "0.45 m shuffle along the desk ledge; waiting-room visitors may be nearby.",
       "n": 32
     },
     {
       "primitive": "approach",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 8,
       "force_n": null,
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach",
-        "r_t1_floor"
+        "r_t2_reach",
+        "r_t2_floor"
       ],
-      "note": "Confirm the base pose against the 0.066 m floor margin.",
+      "note": "Floor margin is tight at 0.056 m.",
       "n": 33
     },
     {
       "primitive": "wipe",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 8,
       "force_n": null,
       "press_n": 10.0,
       "turns": null,
       "requirements": [
-        "r_t1_press",
-        "r_t1_payload"
+        "r_t2_press",
+        "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured.",
+      "note": "The 10 N press force is assumed and uncalibrated.",
       "n": 34
     },
     {
       "primitive": "retreat",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 8,
       "force_n": null,
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach"
+        "r_t2_reach"
       ],
-      "note": "Clear the sill before the base moves.",
+      "note": "Stow the arm before the base moves.",
       "n": 35
     },
     {
@@ -566,51 +566,51 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.3 m shift along the sill.",
+      "note": "0.45 m shuffle along the ledge.",
       "n": 36
     },
     {
       "primitive": "approach",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 9,
       "force_n": null,
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach",
-        "r_t1_floor"
+        "r_t2_reach",
+        "r_t2_floor"
       ],
-      "note": "Reach targets are assumed; verify the cloth meets the sill top.",
+      "note": "Reach targets are assumed poses.",
       "n": 37
     },
     {
       "primitive": "wipe",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 9,
       "force_n": null,
       "press_n": 10.0,
       "turns": null,
       "requirements": [
-        "r_t1_press",
-        "r_t1_payload"
+        "r_t2_press",
+        "r_t2_payload"
       ],
       "note": "The 10 N press force is assumed, not measured.",
       "n": 38
     },
     {
       "primitive": "retreat",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 9,
       "force_n": null,
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach"
+        "r_t2_reach"
       ],
-      "note": "Clear the sill before the base moves.",
+      "note": "Stow the arm before the base moves.",
       "n": 39
     },
     {
@@ -627,51 +627,51 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.3 m shift to the far end of the sill.",
+      "note": "0.45 m shuffle along the ledge.",
       "n": 40
     },
     {
       "primitive": "approach",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 10,
       "force_n": null,
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach",
-        "r_t1_floor"
+        "r_t2_reach",
+        "r_t2_floor"
       ],
-      "note": "This is the end stroke at the sill corner; watch for contact with the side wall.",
+      "note": "Floor margin is tight at 0.056 m.",
       "n": 41
     },
     {
       "primitive": "wipe",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 10,
       "force_n": null,
       "press_n": 10.0,
       "turns": null,
       "requirements": [
-        "r_t1_press",
-        "r_t1_payload"
+        "r_t2_press",
+        "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed; this final stroke completes 20 of 20.",
+      "note": "The 10 N press force is assumed and uncalibrated.",
       "n": 42
     },
     {
       "primitive": "retreat",
-      "task": "t1",
+      "task": "t2",
       "leg": null,
       "standoff": 10,
       "force_n": null,
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach"
+        "r_t2_reach"
       ],
-      "note": "Stow the arm fully before the long transit to reception.",
+      "note": "Stow the arm before the base moves.",
       "n": 43
     },
     {
@@ -688,7 +688,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "The 7.5 m transit to the waiting room passes doorways checked against the 0.76 m width and 2.05 m header limits.",
+      "note": "Last 0.45 m shuffle on the ledge.",
       "n": 44
     },
     {
@@ -703,7 +703,7 @@
         "r_t2_reach",
         "r_t2_floor"
       ],
-      "note": "Only 0.056 m of free floor at the desk, so confirm the base pose before the arm moves.",
+      "note": "This is the end of the ledge, so check that the reach stays on the surface.",
       "n": 45
     },
     {
@@ -718,7 +718,7 @@
         "r_t2_press",
         "r_t2_payload"
       ],
-      "note": "The 10 N press force is assumed, not measured, so check the ledge finish.",
+      "note": "Single final stroke at an assumed 10 N.",
       "n": 46
     },
     {
@@ -732,7 +732,7 @@
       "requirements": [
         "r_t2_reach"
       ],
-      "note": "Clear the ledge before the 0.45 m shift.",
+      "note": "Stow fully before returning to dock.",
       "n": 47
     },
     {
@@ -749,252 +749,8 @@
         "r_header",
         "r_step"
       ],
-      "note": "0.45 m shift along the desk with tight floor clearance.",
+      "note": "5.9 m return to dock; the zero step limit is assumed, not scanned.",
       "n": 48
-    },
-    {
-      "primitive": "approach",
-      "task": "t2",
-      "leg": null,
-      "standoff": 12,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach",
-        "r_t2_floor"
-      ],
-      "note": "Reach targets are assumed; verify the cloth meets the ledge top.",
-      "n": 49
-    },
-    {
-      "primitive": "wipe",
-      "task": "t2",
-      "leg": null,
-      "standoff": 12,
-      "force_n": null,
-      "press_n": 10.0,
-      "turns": null,
-      "requirements": [
-        "r_t2_press",
-        "r_t2_payload"
-      ],
-      "note": "The 10 N press force is assumed, not measured.",
-      "n": 50
-    },
-    {
-      "primitive": "retreat",
-      "task": "t2",
-      "leg": null,
-      "standoff": 12,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach"
-      ],
-      "note": "Clear the ledge before the base moves.",
-      "n": 51
-    },
-    {
-      "primitive": "move_base",
-      "task": null,
-      "leg": 13,
-      "standoff": null,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_width",
-        "r_length",
-        "r_header",
-        "r_step"
-      ],
-      "note": "0.45 m shift along the desk.",
-      "n": 52
-    },
-    {
-      "primitive": "approach",
-      "task": "t2",
-      "leg": null,
-      "standoff": 13,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach",
-        "r_t2_floor"
-      ],
-      "note": "Confirm the base pose against the 0.056 m floor margin.",
-      "n": 53
-    },
-    {
-      "primitive": "wipe",
-      "task": "t2",
-      "leg": null,
-      "standoff": 13,
-      "force_n": null,
-      "press_n": 10.0,
-      "turns": null,
-      "requirements": [
-        "r_t2_press",
-        "r_t2_payload"
-      ],
-      "note": "The 10 N press force is assumed, not measured.",
-      "n": 54
-    },
-    {
-      "primitive": "retreat",
-      "task": "t2",
-      "leg": null,
-      "standoff": 13,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach"
-      ],
-      "note": "Clear the ledge before the base moves.",
-      "n": 55
-    },
-    {
-      "primitive": "move_base",
-      "task": null,
-      "leg": 14,
-      "standoff": null,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_width",
-        "r_length",
-        "r_header",
-        "r_step"
-      ],
-      "note": "0.45 m shift along the desk.",
-      "n": 56
-    },
-    {
-      "primitive": "approach",
-      "task": "t2",
-      "leg": null,
-      "standoff": 14,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach",
-        "r_t2_floor"
-      ],
-      "note": "Reach targets are assumed; watch for items left on the ledge.",
-      "n": 57
-    },
-    {
-      "primitive": "wipe",
-      "task": "t2",
-      "leg": null,
-      "standoff": 14,
-      "force_n": null,
-      "press_n": 10.0,
-      "turns": null,
-      "requirements": [
-        "r_t2_press",
-        "r_t2_payload"
-      ],
-      "note": "The 10 N press force is assumed, not measured.",
-      "n": 58
-    },
-    {
-      "primitive": "retreat",
-      "task": "t2",
-      "leg": null,
-      "standoff": 14,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach"
-      ],
-      "note": "Clear the ledge before the base moves.",
-      "n": 59
-    },
-    {
-      "primitive": "move_base",
-      "task": null,
-      "leg": 15,
-      "standoff": null,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_width",
-        "r_length",
-        "r_header",
-        "r_step"
-      ],
-      "note": "0.35 m shift with a heading change to face the ledge end.",
-      "n": 60
-    },
-    {
-      "primitive": "approach",
-      "task": "t2",
-      "leg": null,
-      "standoff": 15,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach",
-        "r_t2_floor"
-      ],
-      "note": "The heading differs from earlier standoffs, so confirm the base pose against the 0.056 m margin.",
-      "n": 61
-    },
-    {
-      "primitive": "wipe",
-      "task": "t2",
-      "leg": null,
-      "standoff": 15,
-      "force_n": null,
-      "press_n": 10.0,
-      "turns": null,
-      "requirements": [
-        "r_t2_press",
-        "r_t2_payload"
-      ],
-      "note": "The 10 N press force is assumed; this final stroke completes 13 of 13.",
-      "n": 62
-    },
-    {
-      "primitive": "retreat",
-      "task": "t2",
-      "leg": null,
-      "standoff": 15,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_t2_reach"
-      ],
-      "note": "Stow the arm fully before the return to dock.",
-      "n": 63
-    },
-    {
-      "primitive": "move_base",
-      "task": null,
-      "leg": 16,
-      "standoff": null,
-      "force_n": null,
-      "press_n": null,
-      "turns": null,
-      "requirements": [
-        "r_width",
-        "r_length",
-        "r_header",
-        "r_step"
-      ],
-      "note": "5.9 m return to dock; the step limit is assumed, so watch thresholds.",
-      "n": 64
     }
   ]
 }

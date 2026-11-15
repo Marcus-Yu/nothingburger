@@ -45,7 +45,40 @@
     "step_max_m": "assumed",
     "price_usd": "assumed",
     "support_inset_m": "assumed",
-    "holonomic": "design: four powered casters"
+    "holonomic": "design: four powered casters",
+    "casters": "cad (mesh); positions measured from the base mesh's corner plates"
   },
-  "notes": "Mesh: STEP from github.com/jimmyyhwu/tidybot2-resources, meshed with gmsh (catalog/fetch_assets.py). support_inset_m: the wheel contacts are taken to sit this far inside the outline. Mount 'top' takes a lift or an arm; 'front' takes a lidar or the ego camera."
+  "notes": "Mesh: STEP from github.com/jimmyyhwu/tidybot2-resources, meshed with gmsh (catalog/fetch_assets.py). support_inset_m: the wheel contacts are taken to sit this far inside the outline. Mount 'top' takes a lift or an arm; 'front' takes a lidar or the ego camera. casters: the TidyBot++ powered caster module (STEP from the same repository, tessellated with OpenCascade), drawn at the four corner plates as [x, y, yaw in degrees]; they are for looks only: no mass, no collision, and the checks still use outline_m and support_inset_m.",
+  "casters": {
+    "mesh": "parts/base/caster_mm.stl",
+    "mesh_scale": 0.001,
+    "upright_quat": [
+      0.70711,
+      0.70711,
+      0.0,
+      0.0
+    ],
+    "at": [
+      [
+        0.125,
+        0.115,
+        0
+      ],
+      [
+        -0.125,
+        0.115,
+        90
+      ],
+      [
+        -0.125,
+        -0.115,
+        180
+      ],
+      [
+        0.125,
+        -0.115,
+        -90
+      ]
+    ]
+  }
 }

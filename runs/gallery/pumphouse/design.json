@@ -132,7 +132,7 @@
       "check": "tip-over",
       "task": "t1",
       "status": "pass",
-      "value": 41.76,
+      "value": 12.08,
       "limit": 1.5,
       "unit": "ratio",
       "requirements": [
@@ -140,7 +140,7 @@
         "r_t1_reach",
         "r_t1_floor"
       ],
-      "why": "worst case: reaching target 0 (0.35 m out at 0.84 m, the nearest the base can stand to it); payload 0.55 kg, press 0.0 N; static, against the support polygon"
+      "why": "worst case: reaching target 0 (0.41 m out at 0.84 m, the nearest the base can stand to it); payload 0.55 kg, press 0.0 N; static, against the support polygon"
     },
     {
       "check": "payload",
@@ -176,7 +176,7 @@
   "labels": [
     "force not verified: t1"
   ],
-  "considered": 2550,
-  "passed_arithmetic": 2,
-  "composed_and_checked": 1
+  "considered": 7140,
+  "passed_arithmetic": 5,
+  "composed_and_checked": 2
 }
