@@ -9,6 +9,15 @@ PYTHONPATH=. python -m agent.run --world contracts/world.example.json --tasks ag
 
 It writes `world.json`, `tasks.json`, `demo.json` and `grip.json` (when given), `requirements.json`, `design.json`, `decisions.jsonl`, `robot.xml`, `build.json`, `route.json`, `trajectory.json` and `trace.json`, validates the folder with `contracts/validate.py`, and prints the design, each task's standoff and whether its arm path was built, every `not_assessable` check, and every failure. The exit code is 0 when every file fits its schema. A task that cannot be done is recorded and printed; it does not change the exit code. Tests: `PYTHONPATH=. python -m pytest agent -q`.
 
+## Questions stop the run
+
+With `--job`, intake may have questions for the person (a drop-off place nobody located, an object with no card). The run then stops before anything is designed: it writes `world.json`, `tasks.json` and `intake.json` (with `questions`), emits `awaiting_answers` and a `run_end` with `waiting: true`, prints the questions and exits with code 3. To go on, run the same command again with one of:
+
+- `--answers answers.json`, a list of `{"question", "answer"}`. Intake reads the job again with the answers and may ask something new, which stops the run again.
+- `--proceed`. The questions stay in `intake.json` with `proceeded_without_answers: true`.
+
+`intake.json` also has `unmet`: what the person asked for, in the job or in an answer, that the tasks do not do. The planner can only carry an object to the way out, so "put it on the bedside table" lands here, not in a task. The demonstration requests do not stop the run yet.
+
 ## Files
 
 | File | Holds |

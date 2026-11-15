@@ -55,10 +55,37 @@ def list_runs() -> list:
     return sorted(out, key=lambda r: (not r["run"].startswith("runs/gallery/"), -r["modified"]))
 
 
-def start_run(job: str | None, use_model: bool) -> str:
+def prior_run(rel: str) -> dict | None:
+    """What a new run takes over from an earlier one: its job, its world file and the answers given so far.
+    None when `rel` is not a run folder under runs/ with a job in words."""
+    folder = (REPO / rel).resolve()
+    if RUNS.resolve() not in folder.parents or not (folder / "intake.json").is_file() or not (folder / "world.json").is_file():
+        return None
+    intake = json.loads((folder / "intake.json").read_text())
+    if not intake.get("job"):
+        return None
+    return {"job": intake["job"], "world": str((folder / "world.json").relative_to(REPO)), "answers": intake.get("answers", [])}
+
+
+def start_run(job: str | None, use_model: bool, resume: dict | None = None, answers: list | None = None, proceed: bool = False) -> str:
+    """Start the agent in a new folder under runs/scratch. With `resume` (from prior_run) the new run has the
+    earlier run's job and world, and its answers plus `answers`; `proceed` goes on past open questions."""
     name = time.strftime("web-%Y%m%d-%H%M%S")
     out = RUNS / "scratch" / name
     out.mkdir(parents=True, exist_ok=True)
+    if resume:
+        cmd = [sys.executable, "-m", "agent.run", "--world", resume["world"], "--job", resume["job"], "--frames",
+               "--out", str(out.relative_to(REPO))]
+        given = resume["answers"] + [{"question": str(a.get("question", ""))[:1000], "answer": str(a.get("answer", ""))[:2000]}
+                                     for a in answers or [] if str(a.get("answer", "")).strip()]
+        if given:
+            (out / "answers.json").write_text(json.dumps(given, indent=2))
+            cmd += ["--answers", str((out / "answers.json").relative_to(REPO))]
+        if proceed:
+            cmd += ["--proceed"]
+        env = {**os.environ, "PYTHONPATH": str(REPO)}
+        subprocess.Popen(cmd, cwd=REPO, env=env, stdout=open(out / "log.txt", "w"), stderr=subprocess.STDOUT)
+        return str(out.relative_to(REPO))
     cmd = [sys.executable, "-m", "agent.run", "--world", "contracts/world.example.json", "--demo", "contracts/demo.example.json",
            "--grip", "contracts/grip.example.json", "--frames", "--out", str(out.relative_to(REPO))]
     if job and use_model:
@@ -150,6 +177,12 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(int(self.headers.get("Content-Length") or 0)) or b"{}")
         except json.JSONDecodeError:
             return self._json({"error": "bad JSON"}, 400)
+        if body.get("resume"):  # answers to an earlier run's questions, or "go on without them"
+            prior = prior_run(str(body["resume"]))
+            if prior is None:
+                return self._json({"error": "no such run to continue"}, 400)
+            answers = body.get("answers") if isinstance(body.get("answers"), list) else []
+            return self._json({"run": start_run(None, True, resume=prior, answers=answers, proceed=bool(body.get("proceed")))})
         job = (body.get("job") or "").strip()[:1000] or None
         return self._json({"run": start_run(job, bool(body.get("model", True)))})
 
