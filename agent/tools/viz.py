@@ -158,7 +158,7 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True):
         root, listing = scan
         seen = {}
         for i, t in enumerate(listing["tiles"]):
-            if top and t["part"] != "lo":  # from above, only what is below head height, or the upper floors hide the room
+            if top and t["part"] != "lo" or t.get("layer") == "bare":  # from above, only what is below head height, or the upper floors hide the room; never the floor meant for when the furniture is hidden
                 continue
             if t["texture"] not in seen:
                 spec.add_texture(name=f"scan_t{i}", type=mujoco.mjtTexture.mjTEXTURE_2D, file=str(root / t["texture"]))

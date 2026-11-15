@@ -33,6 +33,7 @@ EDGE_M = 0.30          # nothing is cleared within this of a room's outline: a b
 SHARD_M2 = 0.30        # a loose piece smaller than this is dropped
 FLOOR_CELL = 0.01      # the floor picture: fine enough to show boards, since repairs are painted from it
 LIGHT_CELL = 0.12      # the grid the light is read on
+BARE = 10               # the shadow-free floor under the tables is made of squares this many floor cells a side
 UNDER = 20             # the floor underlay is made of squares this many floor cells a side
 HOLE_M2 = 3.0          # a gap in the floor up to this size is closed; larger ones are shafts and voids
 EXPOSURE = 1.10
@@ -116,7 +117,7 @@ def _area(tri):
 def remove_clutter(tiles: dict, images: dict, tables: dict, keep_boxes: list, rooms: list, lo, hi, h) -> tuple[dict, dict]:
     """Drop the triangles of things standing about and replace tables too dark or too torn to show.
     `tables` is {id: {"min", "max", "top_m"}}; `keep_boxes` are other obstacles' boxes [(min xyz, max xyz)], kept
-    whole. `rooms` are [(min xy, max xy)]: only inside them is anything cleared. Past a room's walls the scan is
+    whole. Each tile gets `furn`, marking its triangles that are furniture. `rooms` are [(min xy, max xy)]: only inside them is anything cleared. Past a room's walls the scan is
     left exactly as captured (someone on a bench in a wall niche stays, whole), because cutting a thing out of a
     wall leaves a hole in its shape and nothing behind it. Adds tiles (and their pictures) for replaced tables. Returns (counts for the report,
     {table id: its cloth's colour as scanned})."""
@@ -164,12 +165,15 @@ def remove_clutter(tiles: dict, images: dict, tables: dict, keep_boxes: list, ro
         indoors = np.zeros(len(c), bool)
         for rl, rh in rooms:
             indoors |= np.all((c[:, :2] > np.array(rl) + EDGE_M) & (c[:, :2] < np.array(rh) - EDGE_M), 1)
-        keep = ~indoors | floor | (zmax >= HEAD) | (wall[ij[:, 0], ij[:, 1]] & under)
-        for bl, bh in keep_boxes:  # kept, but not spared the shard test below: a stair is one piece, a broken glass rail is splinters
-            keep |= np.all((c >= np.array(bl) - [0, 0, 0.1]) & (c <= np.array(bh) + [0, 0, 0.3]), 1)
+        # the building itself: floor, what is overhead, walls and pillars, and the tall obstacles (kept, but not spared
+        # the shard test below: a stair is one piece, a broken glass rail is splinters)
+        fabric = floor | (zmax >= HEAD) | (wall[ij[:, 0], ij[:, 1]] & under)
+        for bl, bh in keep_boxes:
+            fabric |= np.all((c >= np.array(bl) - [0, 0, 0.1]) & (c <= np.array(bh) + [0, 0, 0.3]), 1)
+        keep = ~indoors | fabric
         colour, area = tri_colour(t, images[k]), _area(tri)
         cloth = is_cloth(colour)
-        t["floor"], t["base"], t["parts"] = floor, keep, {}
+        t["floor"], t["base"], t["fabric"], t["parts"] = floor, keep, fabric, {}
         for tid, f in tables.items():
             top, side = _table_parts(c, zmax, f, cloth)
             if top.any() or side.any():
@@ -211,7 +215,7 @@ def remove_clutter(tiles: dict, images: dict, tables: dict, keep_boxes: list, ro
             w = np.column_stack([cr + q * scale, t["w"][:, 2] + fr["top_m"] - fd["top_m"]])
             n = int((top | side).sum())
             added[f"{k}@{tid}"] = {"lod": t["lod"], "w": w, "uv": t["uv"], "idx": t["idx"][top | side], "floor": np.zeros(n, bool), "base": np.ones(n, bool),
-                                   "parts": {}, "safe": top[top | side]}
+                                   "fabric": np.zeros(n, bool), "parts": {}, "safe": top[top | side], "furn": np.ones(n, bool)}
             images[f"{k}@{tid}"] = images[k]
         cloth_rgb[tid] = cloth_rgb[donor]
 
@@ -223,11 +227,17 @@ def remove_clutter(tiles: dict, images: dict, tables: dict, keep_boxes: list, ro
                 keep |= top | side
                 safe |= top
         t["safe"] = (safe | t["floor"])[keep]
+        # Furniture, for a viewer that can hide it: the tables, and whatever else is kept without being part of the
+        # building (a bench, or someone sitting, past a room's outline).
+        furn = ~t["fabric"]
+        for top, side in t["parts"].values():
+            furn |= top | side
+        t["furn"] = furn[keep]
         t["idx"] = t["idx"][keep]
         after += int(keep.sum())
     tiles.update(added)
     for t in tiles.values():
-        for key in ("floor", "base", "parts"):
+        for key in ("floor", "base", "fabric", "parts"):
             t.pop(key, None)
     # loose shards: join the tiles' corners where they coincide, then drop every small piece that is not floor or a table top
     allv = np.concatenate([t["w"] for t in tiles.values()])
@@ -247,7 +257,7 @@ def remove_clutter(tiles: dict, images: dict, tables: dict, keep_boxes: list, ro
     at = 0
     for t in tiles.values():
         m = len(t["idx"])
-        t["idx"] = t["idx"][~small[at:at + m]]
+        t["idx"], t["furn"] = t["idx"][~small[at:at + m]], t["furn"][~small[at:at + m]]
         t.pop("safe")
         at += m
     report = {"triangles": before, "after_clutter": after, "after_shards": int((~small).sum()), "wall_cells": int(wall.sum()),
@@ -289,7 +299,8 @@ def _flatten(img, valid, goal, sigma, limit):
 
 def relight_and_patch(tiles: dict, images: dict, rooms: list, tables: dict, cloth_rgb: dict, lo, hi, h, voids=()) -> tuple[list, dict]:
     """Evens the baked light in `images` ({tile: uint8 array [H, W, 3]}, changed in place) and returns the patch
-    pieces [(name, vertices, uv, faces, image)]: the floor's underlay, and a plain sheet inside each table.
+    pieces [(name, vertices, uv, faces, image)]: the floor's underlay, the same floor without the tables' shadows
+    (patch_bare, for when the furniture is hidden), and a plain sheet inside each table.
     `rooms` are [(min xy, max xy)] in the world's frame: inside one, the floor is brought to one colour.
     `cloth_rgb` is each table's cloth colour as scanned. `voids` are boxes [(min, max)] where the floor really is
     open (a stairwell), so a gap there is left.
@@ -467,6 +478,19 @@ def relight_and_patch(tiles: dict, images: dict, rooms: list, tables: dict, clot
     base = np.arange(len(ii))[:, None] * 4
     faces = np.concatenate([base + [0, 1, 2], base + [0, 2, 3]])
     pieces = [("patch_floor", quads.reshape(-1, 3), uvq.reshape(-1, 2), faces, np.ascontiguousarray(picture.transpose(1, 0, 2)[::-1]))]
+
+    # The same floor without the tables' shadows, where they fall: for a viewer that hides the furniture, which lays it
+    # just over the floor. In squares of BARE cells.
+    bare = np.clip(lit * (1 - mend[..., None]) + copy * mend[..., None], 0, 255).astype(np.uint8)
+    bb = (shape[0] // BARE, shape[1] // BARE)
+    ii, jj = np.nonzero((shade < 0.985)[:bb[0] * BARE, :bb[1] * BARE].reshape(bb[0], BARE, bb[1], BARE).any((1, 3)))
+    side_m = BARE * FLOOR_CELL
+    x0, y0 = lo[0] + ii * side_m, lo[1] + jj * side_m
+    z = -_above(h, np.stack([x0 + side_m / 2, y0 + side_m / 2, np.zeros(len(ii))], 1), lo) + 0.012
+    quads = np.stack([np.stack([x0, y0, z], 1), np.stack([x0 + side_m, y0, z], 1), np.stack([x0 + side_m, y0 + side_m, z], 1), np.stack([x0, y0 + side_m, z], 1)], 1)
+    uvq = np.stack([(quads[..., 0] - lo[0]) / (shape[0] * FLOOR_CELL), (quads[..., 1] - lo[1]) / (shape[1] * FLOOR_CELL)], -1)
+    base = np.arange(len(ii))[:, None] * 4
+    pieces.append(("patch_bare", quads.reshape(-1, 3), uvq.reshape(-1, 2), np.concatenate([base + [0, 1, 2], base + [0, 2, 3]]), np.ascontiguousarray(bare.transpose(1, 0, 2)[::-1])))
 
     # Inside each table, a plain sheet in that table's own cloth colour: a top just under the scanned one and sides
     # just inside it, seen only through the gaps where a chair or a laptop was cut away. Thin legs, as the scanned

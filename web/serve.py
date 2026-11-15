@@ -153,8 +153,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._file(VENDOR, p[len("/mp/"):])
         if p.startswith("/runs/"):
             return self._file(RUNS, p[len("/runs/"):])
-        if p.startswith("/scans/"):  # only the stitched model, for room.html
-            return self._file(SCANS, p[len("/scans/"):]) if p.endswith("/room.glb") else self._send(404, b"not found", "text/plain")
+        if p.startswith("/scans/"):  # only the stitched model and its listing (levels, layers), for room.html
+            return self._file(SCANS, p[len("/scans/"):]) if p.endswith(("/room.glb", "/scan.json")) else self._send(404, b"not found", "text/plain")
         return self._file(VIEWER, p.lstrip("/"))
 
     def do_POST(self):

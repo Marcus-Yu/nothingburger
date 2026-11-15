@@ -4,35 +4,97 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Robot in the room</title>
 <style>
-  html, body { margin: 0; height: 100%; background: #111; color: #eee; font: 14px/1.4 -apple-system, "Segoe UI", Inter, sans-serif; overflow: hidden; }
-  canvas { position: fixed; inset: 0; display: block; }
-  #bar { position: fixed; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
-         background: rgba(15, 16, 15, .86); border: 1px solid #333; border-radius: 12px; padding: 8px 10px; }
-  #bar button, #bar select { font: inherit; color: #eee; background: #262925; border: 1px solid #3a3d38; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-  #bar button.on { border-color: #6cc3cc; color: #6cc3cc; }
-  #seek { flex: 1 1 200px; accent-color: #6cc3cc; }
+  :root { --ink: #eee; --dim: #9a988f; --panel: rgba(15, 16, 15, .86); --edge: #3a3d38; --fill: #262925; --accent: #6cc3cc; }
+  html, body { margin: 0; height: 100%; background: #111; color: var(--ink); font: 14px/1.4 -apple-system, "Segoe UI", Inter, sans-serif; overflow: hidden; }
+  canvas { position: fixed; inset: 0; display: block; touch-action: none; }
+  button, select { font: inherit; color: var(--ink); background: var(--fill); border: 1px solid var(--edge); border-radius: 8px; cursor: pointer; }
+  button:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* the scan's maker, top left of the model: its own logo file, from its SDK bundle */
+  #brand { position: fixed; left: 16px; top: 14px; display: block; line-height: 0; color: #fff; text-decoration: none; filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .65)); }
+  #brand img { height: 22px; width: auto; display: block; }
+  #brand span { font: 600 18px/22px -apple-system, "Segoe UI", Inter, sans-serif; letter-spacing: .01em; }
+
+  /* everything along the bottom: the six view buttons on the left, then the playback bar */
+  #hud { position: fixed; left: 12px; right: 12px; bottom: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; pointer-events: none; }
+  #hud > * { pointer-events: auto; }
+  #tools { display: flex; gap: 6px; background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 6px; position: relative; }
+  #tools button { width: 38px; height: 38px; padding: 0; display: grid; place-items: center; border-radius: 9px; position: relative; }
+  #tools svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  #tools button[aria-checked="true"], #tools button[aria-pressed="true"], #tools button[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); background: #1d2a2b; }
+  #tools .sep { width: 1px; background: #333; margin: 4px 2px; }
+  #floor b { position: absolute; right: 3px; bottom: 1px; font: 600 10px/1 -apple-system, "Segoe UI", sans-serif; color: var(--accent); }
+  #tools svg [hidden] { display: none; }
+  #tools > button::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%); white-space: nowrap; background: #0e0f0e; border: 1px solid #333;
+                         border-radius: 6px; padding: 3px 8px; font-size: 12px; color: var(--ink); opacity: 0; pointer-events: none; transition: opacity .12s; }
+  #tools > button:hover::after, #tools > button:focus-visible::after { opacity: 1; }
+  #m-dollhouse::after { left: 0; transform: none; }
+  #floors { position: absolute; left: 0; bottom: calc(100% + 8px); min-width: 190px; background: var(--panel); border: 1px solid #333; border-radius: 10px; padding: 6px; display: grid; gap: 4px; }
+  #floors[hidden] { display: none; }
+  #floors button { width: 100%; height: auto; padding: 7px 10px; display: flex; justify-content: space-between; gap: 12px; text-align: left; }
+  #floors button small { color: var(--dim); }
+  #floors button[aria-checked="true"] { border-color: var(--accent); color: var(--accent); }
+
+  #bar { align-self: stretch; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--panel); border: 1px solid #333; border-radius: 12px; padding: 8px 10px; }
+  #bar button, #bar select { padding: 6px 10px; }
+  #bar button.on { border-color: var(--accent); color: var(--accent); }
+  #seek { flex: 1 1 200px; accent-color: var(--accent); }
   #now { flex: 1 1 100%; font-weight: 600; min-height: 1.3em; }
-  #msg { flex: 1 1 100%; color: #9a988f; font-size: 12px; }
-  #time { font-variant-numeric: tabular-nums; color: #9a988f; }
+  #msg { flex: 1 1 100%; color: var(--dim); font-size: 12px; }
+  #time { font-variant-numeric: tabular-nums; color: var(--dim); }
+
+  /* measurements: a label over each dimension line */
+  #tags { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+  #tags span { position: absolute; left: 0; top: 0; white-space: nowrap; font: 600 11px/1.2 -apple-system, "Segoe UI", sans-serif; font-variant-numeric: tabular-nums; color: #06181a;
+               background: rgba(140, 222, 232, .94); border-radius: 4px; padding: 2px 5px; will-change: transform; }
+  #tags span.door { background: rgba(255, 214, 120, .95); color: #231a00; }
 </style>
-<div id="bar">
-  <div id="now">Loading the room</div>
-  <button id="play">Play</button>
-  <input id="seek" type="range" min="0" max="1" value="0" step="1" aria-label="Position in the job">
-  <span id="time">0:00</span>
-  <select id="speed" aria-label="Speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
-  <select id="chapter" aria-label="Jump to a step"></select>
-  <button id="follow" class="on" title="Keep the view centred on the robot">Follow</button>
-  <button id="eye" title="Stand next to the robot at eye height">Stand by it</button>
-  <button id="above" title="Look down on the robot from under the ceiling">From above</button>
-  <button id="vr" hidden title="Stand in the room in a headset">Enter VR</button>
-  <div id="msg"></div>
+
+<a id="brand" target="_blank" rel="noopener" title="Scanned with Matterport: open the tour"><img src="/mp/images/matterport-logo-white-r.svg" alt="Matterport"></a>
+<div id="tags" aria-hidden="true"></div>
+<div id="hud">
+  <div id="tools">
+    <div id="floors" role="radiogroup" aria-label="Floor" hidden></div>
+    <button id="m-dollhouse" role="radio" aria-checked="false" aria-label="View dollhouse" data-tip="View dollhouse">
+      <svg viewBox="0 0 24 24"><path d="M12 3 3.5 7.5v9L12 21l8.5-4.5v-9z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></svg></button>
+    <button id="m-floorplan" role="radio" aria-checked="false" aria-label="View floorplan" data-tip="View floorplan">
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="1"/><path d="M3.5 11h7M10.5 4.5V8M10.5 14.5v5M14.5 19.5v-6h6"/></svg></button>
+    <button id="m-explore" role="radio" aria-checked="true" aria-label="Explore 3D space" data-tip="Explore 3D space">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="4.6" r="2.1"/><path d="M12 7.5v6.5M8 10.5l4-2 4 2M12 14l-3 6.5M12 14l3 6.5"/></svg></button>
+    <span class="sep" aria-hidden="true"></span>
+    <button id="floor" aria-haspopup="true" aria-expanded="false" aria-label="Choose the floor" data-tip="Choose the floor">
+      <svg viewBox="0 0 24 24"><path d="m12 3.5 8.5 4.2L12 12 3.5 7.7z"/><path d="m3.5 12 8.5 4.3 8.5-4.3M3.5 16.2l8.5 4.3 8.5-4.3"/></svg><b></b></button>
+    <button id="measure" aria-pressed="false" aria-label="Measurements" data-tip="Measurements">
+      <svg viewBox="0 0 24 24"><path d="m3.5 16.5 13-13 4 4-13 13z"/><path d="m7 13 1.7 1.7M9.8 10.2l1.7 1.7M12.6 7.4l1.7 1.7"/></svg></button>
+    <button id="furniture" aria-pressed="false" aria-label="Hide furniture" data-tip="Hide furniture">
+      <svg viewBox="0 0 24 24"><path d="M6.5 11V7.5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2V11"/><path d="M4 12.5a1.7 1.7 0 0 1 3.4 0V15h9.2v-2.5a1.7 1.7 0 0 1 3.4 0v5H4zM6 17.5V20M18 17.5V20"/><path class="slash" d="M3.5 3.5 20.5 20.5" hidden/></svg></button>
+  </div>
+  <div id="bar">
+    <div id="now">Loading the room</div>
+    <button id="play">Play</button>
+    <input id="seek" type="range" min="0" max="1" value="0" step="1" aria-label="Position in the job">
+    <span id="time">0:00</span>
+    <select id="speed" aria-label="Speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+    <select id="chapter" aria-label="Jump to a step"></select>
+    <button id="follow" class="on" title="In Explore, walk along with the robot and keep it in view">Follow</button>
+    <button id="vr" hidden title="Stand in the room in a headset">Enter VR</button>
+    <div id="msg"></div>
+  </div>
 </div>
+
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }</script>
 <script type="module">
-// The planned job played inside a mesh of the real room, seen from anywhere inside it: drag to look around, scroll to move in
-// and out. The room is world/_scans/<world>/room.glb (stitched from the place's Matterport tour, not committed);
-// the robot and its motion are the run's frames/tour_robot.glb and tour_frames.bin. Positions are played back, not simulated.
+// The planned job played inside a mesh of the real room. Three ways to look at it, one at a time:
+//   Explore 3D space  first person at eye height on one floor: drag to look, W A S D or the arrows to walk, click the floor to go there
+//   Dollhouse         the building from outside, every floor or one: walls facing you are not drawn, and the rest of the
+//                     walls are thin from far off and fill in as you move in
+//   Floorplan         one floor from straight above, cut off above head height and below the floor
+// plus a floor chooser, dimension lines (doorways, walls, the gaps between tables) and a switch that hides the furniture.
+//
+// The room is world/_scans/<world>/room.glb with its listing scan.json (levels; furniture pieces are named ..._furn), both
+// written by world/scenarios/tools/stitch_scan.py and not committed. The robot and its motion are the run's
+// frames/tour_robot.glb and tour_frames.bin. Positions are played back, not simulated.
+// Frames: the plan's is metres with Z up (X east, Y north); three.js has Y up, so a plan point (X, Y, Z) is drawn at (X, Z, -Y).
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -40,17 +102,67 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 const $ = id => document.getElementById(id), q = new URLSearchParams(location.search);
 const run = (q.get("run") || "runs/gallery/jrr").replace(/^runs\//, ""), base = `/runs/${run}/`;
 const say = t => { $("msg").textContent = t; };
-let meta, frames, bodies = [], frame = 0, playing = false, follow = true, rooms = [];
+const EYE = 1.6, WALL_GAP = 0.35, WALK_MPS = 2.4, CELL = 0.25;
+const HINT = {
+  explore: "Drag to look, W A S D or the arrow keys to walk, click the floor to go there. The view stays inside the rooms.",
+  dollhouse: "Drag to turn, scroll to move in and out, right-drag to slide. Walls facing you are left out; the others fill in as you move closer.",
+  floorplan: "One floor from straight above, cut off above head height. Drag to slide, scroll to zoom.",
+};
+let meta, frames, bodies = [], frame = 0, playing = false, follow = true;
+let rooms = [], levels = [{ id: null, name: "Floor", z: 0 }], roomMeshes = [], furnMeshes = [], bareMeshes = [], robot = null, tourWorld = null;
+const state = { mode: "explore", level: 0, all: false, measure: false, furniture: true };
+const fp = { x: 0, z: 0, yaw: 0, pitch: -0.12, goal: null };        // explore: where you stand and look
+const plan = { x: 0, z: 0, half: 10 };                              // floorplan: centre and half the view's height, in metres
+const span = { centre: new THREE.Vector3(), radius: 20 };           // the scan's extent, for framing
 
-const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
-renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.xr.enabled = true; document.body.prepend(renderer.domElement);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.xr.enabled = true; renderer.localClippingEnabled = true;
+document.body.prepend(renderer.domElement);
+const canvas = renderer.domElement;
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0xcfc8bd);  // where the scan has nothing: the building's own stone tone, so a gap in a wall does not glare
-const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 200);
-const rig = new THREE.Group(); rig.add(camera); scene.add(rig);  // in a headset the rig is where you stand
-const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.maxPolarAngle = Math.PI * 0.495; controls.minDistance = 0.6; controls.maxDistance = 14; controls.enablePan = false;
+const persp = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 600);
+const ortho = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 600);
+ortho.up.set(0, 0, -1);                                             // north up the screen
+let camera = persp;
+const rig = new THREE.Group(); rig.add(persp); scene.add(rig);     // in a headset the rig is where you stand
+const orbit = new OrbitControls(persp, canvas); orbit.enableDamping = true; orbit.enabled = false; orbit.maxPolarAngle = 1.5; orbit.minPolarAngle = 0.05;
 scene.add(new THREE.HemisphereLight(0xffffff, 0x9a8f80, 1.6)); const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(3, 8, 2); scene.add(sun);
-const world = new THREE.Group(); world.rotation.x = -Math.PI / 2; scene.add(world);  // the plan's frame has Z up; three.js has Y up
-addEventListener("resize", () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+const world = new THREE.Group(); world.rotation.x = -Math.PI / 2; scene.add(world);
+
+/* ---------- the room's materials: one switch for the walls' fade, one pair of cutting planes ---------- */
+
+const wallFade = { value: 1 };   // how solid an upright surface is: 1 in a room, less from far off in the dollhouse
+const cut = [new THREE.Plane(new THREE.Vector3(0, 1, 0), 1e4), new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e4)];  // keep what is between two heights
+function roomMaterial(map) {
+  const m = new THREE.MeshBasicMaterial({ map, side: THREE.DoubleSide, clippingPlanes: cut });  // unlit: the scan's colours already hold the room's light
+  m.onBeforeCompile = sh => {    // a surface's uprightness, from its normal (the mesh's own frame has Z up), scales its opacity
+    sh.uniforms.uWall = wallFade;
+    sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying float vUpright;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvUpright = 1.0 - abs(normal.z);");
+    sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\nuniform float uWall;\nvarying float vUpright;")
+      .replace("#include <map_fragment>", "#include <map_fragment>\ndiffuseColor.a *= mix(1.0, uWall, smoothstep(0.45, 0.8, vUpright));");
+  };
+  return m;
+}
+function dressRoom() {           // per mode: which faces are drawn, whether opacity is in play, where the scan is cut
+  const doll = state.mode === "dollhouse";
+  for (const o of roomMeshes) {
+    const side = doll ? THREE.FrontSide : THREE.DoubleSide;     // from outside, a wall's back is not drawn, so you see in
+    if (o.material.side !== side || o.material.alphaHash !== doll) { o.material.side = side; o.material.alphaHash = doll; o.material.alphaToCoverage = doll; o.material.needsUpdate = true; }  // thinned through the antialiasing samples: no sorting, little grain
+  }
+  const lv = levels[state.level], above = levels[state.level + 1];
+  let low = -1e4, high = 1e4;
+  if (state.mode === "floorplan") { low = lv.z - 0.4; high = lv.z + 2.2; }
+  else if (doll && !state.all) { low = lv.z - 0.4; high = above ? above.z - 0.38 : 1e4; }
+  cut[0].constant = -low; cut[1].constant = high;
+  furnMeshes.forEach(o => { o.visible = state.furniture; });
+  bareMeshes.forEach(o => { o.visible = !state.furniture; });   // the tables' shadows go with the tables
+  if (robot) robot.visible = state.all || state.level === 0;    // the robot works on the world's own floor
+  if (!doll) wallFade.value = 1;
+}
+
+/* ---------- the robot's playback ---------- */
 
 const robotAt = () => { const o = Math.floor(frame) * bodies.length * 7; return new THREE.Vector3(frames[o], frames[o + 2], -frames[o + 1]); };
 function show(i) {
@@ -60,70 +172,312 @@ function show(i) {
   let c = 0; meta.chapters.forEach((ch, n) => { if (t >= ch.t) c = n; });
   $("now").textContent = meta.chapters[c] ? meta.chapters[c].label : ""; if ($("chapter").selectedIndex !== c) $("chapter").selectedIndex = c;
 }
-// The viewpoint stays inside the scanned rooms and under their ceilings: outside them there is nothing but the backs of walls.
-// Rooms are the world file's outlines (X east, Y north, in metres); on screen x = X and z = -Y.
-const WALL_GAP = 0.35, TOP = 5.5, LOW_TOP = 2.3, OVERHANG = 2.5;
-function inRooms(x, z) {  // the nearest point to (x, z) that is inside a room, a little off its walls
+
+/* ---------- where you may stand ---------- */
+
+// On a floor the world file describes, inside its rooms (their outlines; X east, Y north; on screen x = X, z = -Y), a little
+// off the walls. On a floor it does not (one the scan only caught part of), on the scanned floor itself.
+const roomsOn = lv => rooms.filter(r => r.floor === lv.id || lv.id === null);
+const walkable = new Map();      // level index -> { x0, z0, nx, nz, ok } cells with scanned floor under them
+function floorCells(i) {
+  if (walkable.has(i)) return walkable.get(i);
+  const lv = levels[i], pts = [];
+  for (const o of roomMeshes) {
+    if (furnMeshes.includes(o)) continue;
+    const p = o.geometry.attributes.position, n = o.geometry.attributes.normal;
+    for (let k = 0; k < p.count; k++) if (n.getZ(k) > 0.9 && Math.abs(p.getZ(k) - lv.z) < 0.3) pts.push(p.getX(k), -p.getY(k));
+  }
+  let x0 = Infinity, z0 = Infinity, x1 = -Infinity, z1 = -Infinity;
+  for (let k = 0; k < pts.length; k += 2) { x0 = Math.min(x0, pts[k]); x1 = Math.max(x1, pts[k]); z0 = Math.min(z0, pts[k + 1]); z1 = Math.max(z1, pts[k + 1]); }
+  const nx = Math.max(1, Math.ceil((x1 - x0) / CELL) + 1), nz = Math.max(1, Math.ceil((z1 - z0) / CELL) + 1), seen = new Uint8Array(nx * nz), ok = new Uint8Array(nx * nz);
+  for (let k = 0; k < pts.length; k += 2) seen[Math.floor((pts[k] - x0) / CELL) * nz + Math.floor((pts[k + 1] - z0) / CELL)] = 1;
+  for (let a = 1; a < nx - 1; a++) for (let b = 1; b < nz - 1; b++) {   // floor here and on every side: not at an edge
+    let all = 1; for (let da = -1; da <= 1; da++) for (let db = -1; db <= 1; db++) all &= seen[(a + da) * nz + b + db];
+    ok[a * nz + b] = all;
+  }
+  const g = { x0, z0, nx, nz, ok }; walkable.set(i, g); return g;
+}
+function standAt(x, z, i = state.level) {   // the nearest place to (x, z) you may stand on level i
+  const rs = roomsOn(levels[i]);
+  if (rs.length) {
+    let best = null;
+    for (const r of rs) { const cx = Math.min(Math.max(x, r.x0 + WALL_GAP), r.x1 - WALL_GAP), cz = Math.min(Math.max(z, r.z0 + WALL_GAP), r.z1 - WALL_GAP), d = Math.hypot(cx - x, cz - z);
+      if (!best || d < best.d) best = { x: cx, z: cz, d }; }
+    return best;
+  }
+  const g = floorCells(i), a = Math.floor((x - g.x0) / CELL), b = Math.floor((z - g.z0) / CELL);
   let best = null;
-  for (const r of rooms) { const cx = Math.min(Math.max(x, r.x0 + WALL_GAP), r.x1 - WALL_GAP), cz = Math.min(Math.max(z, r.z0 + WALL_GAP), r.z1 - WALL_GAP), d = Math.hypot(cx - x, cz - z);
-    // high up only in the open middle of a tall room: near its walls the floor above overhangs, and the scan there is torn
-    const off = Math.min(cx - r.x0, r.x1 - cx, cz - r.z0, r.z1 - cz), top = r.top > TOP && off > OVERHANG ? TOP : LOW_TOP;
-    if (!best || d < best.d) best = { x: cx, z: cz, d, top }; }
-  return best;
+  for (let r = 0; r < 40 && !best; r++) for (let da = -r; da <= r; da++) for (let db = -r; db <= r; db++) {
+    if (Math.max(Math.abs(da), Math.abs(db)) !== r) continue;
+    const A = a + da, B = b + db; if (A < 0 || B < 0 || A >= g.nx || B >= g.nz || !g.ok[A * g.nz + B]) continue;
+    const cx = r ? g.x0 + (A + 0.5) * CELL : x, cz = r ? g.z0 + (B + 0.5) * CELL : z, d = Math.hypot(cx - x, cz - z);
+    if (!best || d < best.d) best = { x: cx, z: cz, d };
+  }
+  return best || { x, z, d: 0 };
 }
-function keepInside() {
-  if (!rooms.length) return;
-  const p = camera.position, at = inRooms(p.x, p.z); p.x = at.x; p.z = at.z; p.y = Math.min(Math.max(p.y, 0.35), at.top);
+
+/* ---------- the three views ---------- */
+
+function standBy(dist = 2.6) {   // explore: stand `dist` from the robot, on the side you are now, facing it
+  const p = robotAt(); let dx = fp.x - p.x, dz = fp.z - p.z; const d = Math.hypot(dx, dz) || 1; dx /= d; dz /= d;
+  const at = standAt(p.x + dx * dist, p.z + dz * dist, 0); fp.x = at.x; fp.z = at.z; fp.goal = null;
+  fp.yaw = Math.atan2(fp.x - p.x, fp.z - p.z); fp.pitch = -0.22;
 }
-function view(dist, height) {  // put the camera `dist` from the robot at `height`, on the side it is now
-  const p = robotAt(), d = camera.position.clone().sub(controls.target).setY(0); if (d.lengthSq() < 1e-6) d.set(1, 0, 1);
-  d.setLength(dist); controls.target.set(p.x, 0.8, p.z); camera.position.set(p.x + d.x, height, p.z + d.z);
+function placePlan() {
+  const aspect = innerWidth / innerHeight;
+  ortho.left = -plan.half * aspect; ortho.right = plan.half * aspect; ortho.top = plan.half; ortho.bottom = -plan.half; ortho.updateProjectionMatrix();
+  ortho.position.set(plan.x, 300, plan.z); ortho.lookAt(plan.x, 0, plan.z);
 }
+function setMode(mode) {
+  if (renderer.xr.isPresenting) return;
+  let note = "";
+  if (mode === "explore" && levels[state.level].partial) {   // a floor the scan only caught from below is rough close up: it is shown from outside and from above, not walked
+    note = `${levels[state.level].name} is only partly scanned, so you are back on ${levels[0].name}. `; state.level = 0;
+  }
+  const was = state.mode; state.mode = mode;
+  state.all = mode === "dollhouse" && (was !== "dollhouse" || state.all);   // the dollhouse opens on every floor; the floor chooser narrows it
+  const lv = levels[state.level], rs = roomsOn(lv);
+  if (mode === "explore") {
+    camera = persp; orbit.enabled = false;
+    if (was !== "explore") { const from = was === "floorplan" ? plan : { x: orbit.target.x, z: orbit.target.z }; const at = standAt(from.x, from.z); fp.x = at.x; fp.z = at.z; fp.goal = null;
+      if (follow && state.level === 0 && bodies.length) standBy(); }
+  } else if (mode === "dollhouse") {
+    camera = persp; orbit.enabled = true;
+    if (was !== "dollhouse") {   // the whole building, from the south-east and above
+      orbit.target.set(span.centre.x, lv.z + 1, span.centre.z);
+      const d = span.radius * 1.9; persp.position.set(orbit.target.x + d * 0.42, orbit.target.y + d * 0.62, orbit.target.z + d * 0.66);
+    }
+    orbit.minDistance = 3; orbit.maxDistance = span.radius * 4; orbit.update();
+  } else {
+    camera = ortho; orbit.enabled = false;
+    if (was !== "floorplan") {
+      const xs = rs.length ? [Math.min(...rs.map(r => r.x0)), Math.max(...rs.map(r => r.x1))] : [span.centre.x - span.radius * 0.7, span.centre.x + span.radius * 0.7];
+      const zs = rs.length ? [Math.min(...rs.map(r => r.z0)), Math.max(...rs.map(r => r.z1))] : [span.centre.z - span.radius * 0.7, span.centre.z + span.radius * 0.7];
+      plan.x = (xs[0] + xs[1]) / 2; plan.z = (zs[0] + zs[1]) / 2;
+      plan.half = Math.max((zs[1] - zs[0]) / 2, (xs[1] - xs[0]) / 2 / (innerWidth / innerHeight)) * 1.3 + 1;
+      plan.z += plan.half * 0.16;   // the buttons and the playback bar cover the bottom of the screen: frame the floor in what is left
+    }
+    placePlan();
+  }
+  dressRoom(); paint(); say(note + HINT[mode]);
+}
+function setLevel(i, all = false) {
+  state.level = i; state.all = all;
+  if (all && state.mode !== "dollhouse") return setMode("dollhouse");
+  if (state.mode === "explore" && levels[i].partial) {       // see setMode: a partly scanned floor is not walked
+    setMode("floorplan"); return say(`${levels[i].name} is only partly scanned (what the scanner saw from below), so it is shown from above. The world file has no measurements for it.`);
+  }
+  if (state.mode === "explore") { const at = standAt(fp.x, fp.z); fp.x = at.x; fp.z = at.z; fp.goal = null; }
+  if (state.mode === "dollhouse") orbit.target.setY(levels[i].z + 1);
+  dressRoom(); paint();
+  const lv = levels[i];
+  say(all ? "Every floor the scan has." : lv.partial ? `${lv.name}: only the part the scan caught from below. The world file does not describe it, so there are no measurements here.` : HINT[state.mode]);
+}
+function paint() {               // the buttons' states
+  for (const m of ["dollhouse", "floorplan", "explore"]) $("m-" + m).setAttribute("aria-checked", String(state.mode === m));
+  $("measure").setAttribute("aria-pressed", String(state.measure));
+  $("furniture").setAttribute("aria-pressed", String(!state.furniture));
+  $("furniture").dataset.tip = state.furniture ? "Hide furniture" : "Show furniture"; $("furniture").setAttribute("aria-label", $("furniture").dataset.tip);
+  $("furniture").querySelector(".slash").toggleAttribute("hidden", state.furniture);
+  $("floor").querySelector("b").textContent = state.all ? "All" : (levels[state.level].name.match(/\d+/) || [state.level + 1])[0];
+  $("floors").innerHTML = [`<button role="radio" aria-checked="${state.all}" data-level="all">All floors<small>dollhouse</small></button>`]
+    .concat(levels.map((lv, i) => `<button role="radio" aria-checked="${!state.all && state.level === i}" data-level="${i}">${lv.name}<small>${lv.partial ? "partly scanned" : ""}</small></button>`).reverse()).join("");
+  measures.lines.visible = showMeasures();
+}
+
+/* ---------- measurements ---------- */
+
+// Lengths the world file holds, drawn on the floor: each doorway's clear width (and height), each wall of each room, and the
+// gaps between tables and from a table to the wall beside it. A length traced by eye is marked with ≈; the tables were
+// measured on the scan. All of it belongs to the world's own floor.
+const measures = { items: [], lines: new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x6cc3cc, depthTest: false, transparent: true })) };
+measures.lines.renderOrder = 5; measures.lines.frustumCulled = false; measures.lines.visible = false; scene.add(measures.lines);
+const showMeasures = () => state.measure && (state.all || state.level === 0);
+function buildMeasures(w) {
+  const z0 = (w.floors && w.floors[0] ? w.floors[0].z : 0) + 0.06, items = [], P = (X, Y, h = z0) => new THREE.Vector3(X, h, -Y);
+  const m = v => `${v.toFixed(2)} m`;
+  for (const d of w.doorways || []) {
+    const [ux, uy] = d.along || [1, 0], hw = d.width_m / 2, [X, Y] = d.position, tr = d.source === "manual" ? "≈ " : "";
+    items.push({ a: P(X - ux * hw, Y - uy * hw), b: P(X + ux * hw, Y + uy * hw), kind: "door", rank: 0, text: `${tr}${m(d.width_m)} wide${d.header_m ? ` · ${m(d.header_m)} high` : ""}` });
+  }
+  for (const r of w.rooms || []) {
+    const p = r.polygon, cx = p.reduce((s, v) => s + v[0], 0) / p.length, cy = p.reduce((s, v) => s + v[1], 0) / p.length, tr = r.source === "manual" ? "≈ " : "";
+    p.forEach((a, i) => { const b = p[(i + 1) % p.length], len = Math.hypot(b[0] - a[0], b[1] - a[1]); if (len < 0.5) return;
+      const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, k = 0.3 / (Math.hypot(cx - mx, cy - my) || 1), ox = (cx - mx) * k, oy = (cy - my) * k;   // a little inside the wall
+      items.push({ a: P(a[0] + ox, a[1] + oy), b: P(b[0] + ox, b[1] + oy), kind: "wall", rank: 1, text: `${tr}${m(len)}` }); });
+  }
+  const boxes = (w.obstacles || []).filter(o => /table/.test(o.id)).map(o => ({ x0: o.box.min[0], y0: o.box.min[1], x1: o.box.max[0], y1: o.box.max[1] }));
+  const clear = (x0, y0, x1, y1, skip) => !boxes.some((c, k) => !skip.includes(k) && c.x0 < x1 - 0.02 && c.x1 > x0 + 0.02 && c.y0 < y1 - 0.02 && c.y1 > y0 + 0.02);
+  boxes.forEach((a, i) => boxes.forEach((b, j) => {
+    if (j <= i) return;
+    for (const [lo, hi, s0, s1, flip] of [["x0", "x1", "y0", "y1", false], ["y0", "y1", "x0", "x1", true]]) {   // side by side along X, then along Y
+      const [l, r] = a[lo] < b[lo] ? [a, b] : [b, a], gap = r[lo] - l[hi], o0 = Math.max(a[s0], b[s0]), o1 = Math.min(a[s1], b[s1]);
+      if (gap < 0.25 || gap > 3.2 || o1 - o0 < 0.3) continue;
+      if (!(flip ? clear(o0, l[hi], o1, r[lo], [i, j]) : clear(l[hi], o0, r[lo], o1, [i, j]))) continue;
+      const mid = (o0 + o1) / 2;
+      items.push(flip ? { a: P(mid, l[hi]), b: P(mid, r[lo]), kind: "gap", rank: 2, text: m(gap) } : { a: P(l[hi], mid), b: P(r[lo], mid), kind: "gap", rank: 2, text: m(gap) });
+    }
+  }));
+  for (const r of w.rooms || []) {   // a table to the wall beside it
+    const xs = r.polygon.map(p => p[0]), ys = r.polygon.map(p => p[1]), R = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }, tr = r.source === "manual" ? "≈ " : "";
+    boxes.forEach((t, i) => {
+      const mx = (t.x0 + t.x1) / 2, my = (t.y0 + t.y1) / 2; if (mx < R.x0 || mx > R.x1 || my < R.y0 || my > R.y1) return;
+      for (const [g, a, b, ok] of [[t.x0 - R.x0, [R.x0, my], [t.x0, my], clear(R.x0, t.y0, t.x0, t.y1, [i])], [R.x1 - t.x1, [t.x1, my], [R.x1, my], clear(t.x1, t.y0, R.x1, t.y1, [i])],
+                                   [t.y0 - R.y0, [mx, R.y0], [mx, t.y0], clear(t.x0, R.y0, t.x1, t.y0, [i])], [R.y1 - t.y1, [mx, t.y1], [mx, R.y1], clear(t.x0, t.y1, t.x1, R.y1, [i])]])
+        if (ok && g > 0.25 && g < 2.6) items.push({ a: P(...a), b: P(...b), kind: "gap", rank: 3, text: `${tr}${m(g)}` });
+    });
+  }
+  const pts = [];
+  for (const it of items) {   // the line and a tick across each end
+    const dir = it.b.clone().sub(it.a).normalize(), t = new THREE.Vector3(-dir.z, 0, dir.x).multiplyScalar(0.12);
+    pts.push(it.a, it.b, it.a.clone().add(t), it.a.clone().sub(t), it.b.clone().add(t), it.b.clone().sub(t));
+    it.mid = it.a.clone().add(it.b).multiplyScalar(0.5);
+    it.el = document.createElement("span"); it.el.textContent = it.text; it.el.className = it.kind; it.el.hidden = true; $("tags").append(it.el);
+  }
+  measures.items = items.sort((a, b) => a.rank - b.rank); measures.lines.geometry.setFromPoints(pts);
+}
+const v3 = new THREE.Vector3();
+function placeTags() {           // each label over its line; the more important first, and none on top of another
+  const on = showMeasures() && !renderer.xr.isPresenting, taken = [], W = innerWidth, H = innerHeight;
+  const reach = state.mode === "explore" ? 11 : Infinity, eye = camera.position;
+  for (const it of measures.items) {
+    let vis = on && !(it.kind === "gap" && !state.furniture) && eye.distanceTo(it.mid) < reach;
+    if (vis) {
+      v3.copy(it.mid).project(camera); const x = (v3.x * 0.5 + 0.5) * W, y = (-v3.y * 0.5 + 0.5) * H, w = it.text.length * 6.4 + 12, h = 18;
+      vis = v3.z < 1 && v3.z > -1 && x > 0 && x < W && y > 0 && y < H - 40 && !taken.some(t => Math.abs(t.x - x) < (t.w + w) / 2 + 3 && Math.abs(t.y - y) < h + 2);
+      if (vis) { taken.push({ x, y, w }); it.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%)`; }
+    }
+    if (it.el.hidden === vis) it.el.hidden = !vis;
+  }
+}
+
+/* ---------- loading ---------- */
 
 (async () => {
   const events = (await (await fetch(base + "events.jsonl")).text()).split("\n").filter(Boolean).map(l => JSON.parse(l));
   meta = events.filter(e => e.kind === "tour").pop();
   if (!meta) return say("This run has no robot export: rerun it with --frames --walkthrough");
-  const w = await (await fetch(base + "world.json")).json();
+  const w = await (await fetch(base + "world.json")).json(); tourWorld = w;
   rooms = w.rooms.map(r => { const xs = r.polygon.map(p => p[0]), ys = r.polygon.map(p => p[1]);
-    return { x0: Math.min(...xs), x1: Math.max(...xs), z0: -Math.max(...ys), z1: -Math.min(...ys), top: r.ceiling_m || 3 }; });
+    return { floor: r.floor, x0: Math.min(...xs), x1: Math.max(...xs), z0: -Math.max(...ys), z1: -Math.min(...ys) }; });
+  levels = (w.floors && w.floors.length ? w.floors : [{ id: null, z: 0 }]).map(f => ({ id: f.id, name: /^f\d+$/.test(f.id || "") ? `Floor ${f.id.slice(1)}` : f.id || "Floor", z: f.z }));
+  if (w.tour && w.tour.matterport) $("brand").href = `https://my.matterport.com/show/?m=${encodeURIComponent(w.tour.matterport)}`;
   frames = new Float32Array(await (await fetch(base + meta.frames)).arrayBuffer());
   $("seek").max = meta.n - 1;
   $("chapter").innerHTML = meta.chapters.map((c, i) => `<option value="${i}">${c.label.replace(/</g, "&lt;")}</option>`).join("");
   const load = url => new Promise((res, rej) => new GLTFLoader().load(url, g => res(g.scene), undefined, rej));
-  const robot = await load(base + meta.glb); world.add(robot);
+  robot = await load(base + meta.glb); world.add(robot);
   bodies = Array.from({ length: meta.bodies }, (_, i) => robot.getObjectByName(`body${i}`));
-  show(0); camera.position.set(robotAt().x + 3, 2.2, robotAt().z + 3); view(4.5, 2.4);
+  show(0);
+  const p0 = robotAt(); fp.x = p0.x + 2; fp.z = p0.z + 2; span.centre.copy(p0); buildMeasures(w);
+  setMode("explore"); standBy();
   say("Loading the room");
   try {
-    const room = await load(`/scans/${w.id}/room.glb`);
-    room.traverse(o => { if (o.isMesh) { const m = o.material; o.material = new THREE.MeshBasicMaterial({ map: m.map, side: THREE.DoubleSide }); m.dispose(); } });  // the scan's colours already hold the room's light
-    world.add(room); say("The real room, from its Matterport scan. Drag to look around, scroll to move in and out; the view stays inside the rooms. The motion is the plan played back, not a simulation.");
+    const [room, listing] = await Promise.all([load(`/scans/${w.id}/room.glb`), fetch(`/scans/${w.id}/scan.json`).then(r => r.ok ? r.json() : null).catch(() => null)]);
+    if (listing && listing.levels && listing.levels.length) levels = listing.levels;
+    room.traverse(o => { if (!o.isMesh) return;
+      const old = o.material; o.geometry.computeVertexNormals(); o.material = roomMaterial(old.map); old.dispose();
+      const name = /_(furn|bare)$/.test(o.name) ? o.name : o.parent.name;
+      if (/_bare$/.test(name)) { o.material.polygonOffset = true; o.material.polygonOffsetFactor = -2; o.material.polygonOffsetUnits = -2; bareMeshes.push(o); return; }   // the floor to show in the furniture's place
+      roomMeshes.push(o); if (/_furn$/.test(name)) furnMeshes.push(o); });
+    world.add(room);
+    const box = new THREE.Box3().setFromObject(room); box.getCenter(span.centre); span.radius = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2;
+    setMode("explore");
   } catch (e) { say("This world has no room mesh on this machine (world/_scans is not committed): see web/README.md for how to capture it"); }
   if (navigator.xr && await navigator.xr.isSessionSupported("immersive-vr").catch(() => false)) $("vr").hidden = false;
 })().catch(e => say("Could not start: " + (e && e.message || e)));
+$("brand").querySelector("img").onerror = e => { const s = document.createElement("span"); s.textContent = "Matterport"; e.target.replaceWith(s); };  // the SDK bundle is not on this machine
 
-window.room = { camera, controls, robotAt };  // for checking the view from the console
+/* ---------- every frame ---------- */
+
+const keys = new Set();
 let last = performance.now();
 renderer.setAnimationLoop(now => {
-  const dt = Math.min(now - last, 100); last = now;
-  if (playing && bodies.length) { const before = robotAt(); show(frame + dt / 1000 * meta.fps * (+$("speed").value));
-    if (follow) { const d = robotAt().sub(before); controls.target.add(d); camera.position.add(d); if (renderer.xr.isPresenting) rig.position.add(d); }
-    if (frame >= meta.n - 1) { playing = false; $("play").textContent = "Play"; } }
-  if (!renderer.xr.isPresenting) controls.update();
-  if (!renderer.xr.isPresenting) keepInside();
+  const dt = Math.min(now - last, 100) / 1000; last = now;
+  const vr = renderer.xr.isPresenting;
+  if (playing && bodies.length) {
+    const before = robotAt(); show(frame + dt * meta.fps * (+$("speed").value)); const d = robotAt().sub(before);
+    if (follow) {     // walk along with the robot (the dollhouse and the floorplan stay on the building)
+      if (vr) rig.position.add(d);
+      else if (state.mode === "explore" && state.level === 0) { const at = standAt(fp.x + d.x, fp.z + d.z); fp.x = at.x; fp.z = at.z; const p = robotAt(), want = Math.atan2(fp.x - p.x, fp.z - p.z);
+        fp.yaw += Math.atan2(Math.sin(want - fp.yaw), Math.cos(want - fp.yaw)) * Math.min(1, dt * 3); }
+    }
+    if (frame >= meta.n - 1) { playing = false; $("play").textContent = "Play"; }
+  }
+  if (!vr) {
+    if (state.mode === "explore") {
+      const turn = (keys.has("q") ? 1 : 0) - (keys.has("e") ? 1 : 0), fwd = (keys.has("w") || keys.has("arrowup") ? 1 : 0) - (keys.has("s") || keys.has("arrowdown") ? 1 : 0);
+      const side = (keys.has("d") ? 1 : 0) - (keys.has("a") ? 1 : 0), spin = (keys.has("arrowleft") ? 1 : 0) - (keys.has("arrowright") ? 1 : 0);
+      fp.yaw += (turn + spin) * 1.7 * dt;
+      if (fwd || side) { fp.goal = null; const s = Math.sin(fp.yaw), c = Math.cos(fp.yaw), step = WALK_MPS * dt; const at = standAt(fp.x + (-s * fwd + c * side) * step, fp.z + (-c * fwd - s * side) * step); fp.x = at.x; fp.z = at.z; }
+      else if (fp.goal) { const dx = fp.goal.x - fp.x, dz = fp.goal.z - fp.z, d = Math.hypot(dx, dz), step = Math.min(d, Math.max(WALK_MPS * 2.2, d * 3) * dt);
+        if (d < 0.03) fp.goal = null; else { fp.x += dx / d * step; fp.z += dz / d * step; } }
+      persp.position.set(fp.x, levels[state.level].z + EYE, fp.z); persp.rotation.set(fp.pitch, fp.yaw, 0, "YXZ");
+    } else if (state.mode === "dollhouse") {
+      orbit.update();
+      const d = persp.position.distanceTo(orbit.target), near = span.radius * 0.45, far = span.radius * 1.5;   // thin from far off, solid close in
+      wallFade.value = THREE.MathUtils.clamp(1 - (d - near) / (far - near), 0, 1) * 0.94 + 0.06;
+    } else placePlan();
+  }
   renderer.render(scene, camera);
+  placeTags();
 });
 
+/* ---------- pointer and keys ---------- */
+
+let drag = null;
+canvas.addEventListener("pointerdown", e => { if (state.mode === "dollhouse") return; drag = { x: e.clientX, y: e.clientY, moved: 0 }; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener("pointermove", e => {
+  if (!drag) return;
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY; drag.moved += Math.abs(dx) + Math.abs(dy);
+  if (state.mode === "explore") { fp.yaw += dx * 0.0042; fp.pitch = THREE.MathUtils.clamp(fp.pitch + dy * 0.0042, -1.2, 1.2); }
+  else { const k = 2 * plan.half / innerHeight; plan.x -= dx * k; plan.z -= dy * k; }
+});
+const ray = new THREE.Raycaster();
+canvas.addEventListener("pointerup", e => {
+  const d = drag; drag = null;
+  if (!d || d.moved > 5 || state.mode !== "explore") return;         // a click, not a drag: walk to the spot on the floor
+  ray.setFromCamera(new THREE.Vector2(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), persp);
+  const hit = ray.intersectObjects(roomMeshes.filter(o => o.visible), false)[0], lv = levels[state.level];
+  if (hit && Math.abs(hit.point.y - lv.z) < 0.35) fp.goal = standAt(hit.point.x, hit.point.z);
+});
+canvas.addEventListener("pointercancel", () => { drag = null; });
+canvas.addEventListener("wheel", e => {
+  if (state.mode === "explore") { const step = -Math.sign(e.deltaY) * 0.6, at = standAt(fp.x - Math.sin(fp.yaw) * step, fp.z - Math.cos(fp.yaw) * step); fp.x = at.x; fp.z = at.z; fp.goal = null; e.preventDefault(); }
+  else if (state.mode === "floorplan") { plan.half = THREE.MathUtils.clamp(plan.half * Math.exp(e.deltaY * 0.0012), 1.5, span.radius * 2.5); e.preventDefault(); }
+}, { passive: false });
+addEventListener("keydown", e => { if (e.target.closest?.("input, select, textarea") || e.metaKey || e.ctrlKey) return; const k = e.key.toLowerCase();
+  if (["w", "a", "s", "d", "q", "e", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) { keys.add(k); if (k.startsWith("arrow")) e.preventDefault();
+    if (!e.repeat && state.mode === "explore") {   // a tap is a step (or a small turn); holding the key walks on from there
+      const f = (k === "w" || k === "arrowup") - (k === "s" || k === "arrowdown"), sd = (k === "d") - (k === "a"), s = Math.sin(fp.yaw), c = Math.cos(fp.yaw);
+      if (f || sd) { const at = standAt(fp.x + (-s * f + c * sd) * 0.3, fp.z + (-c * f - s * sd) * 0.3); fp.x = at.x; fp.z = at.z; fp.goal = null; }
+      else fp.yaw += ((k === "q" || k === "arrowleft") - (k === "e" || k === "arrowright")) * 0.09;
+    } }
+  if (k === "escape") { $("floors").hidden = true; $("floor").setAttribute("aria-expanded", "false"); } });
+addEventListener("keyup", e => keys.delete(e.key.toLowerCase()));
+addEventListener("blur", () => keys.clear());
+addEventListener("resize", () => { persp.aspect = innerWidth / innerHeight; persp.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); if (state.mode === "floorplan") placePlan(); });
+
+/* ---------- buttons ---------- */
+
+for (const m of ["dollhouse", "floorplan", "explore"]) $("m-" + m).onclick = () => setMode(m);
+$("floor").onclick = () => { const open = $("floors").hidden; $("floors").hidden = !open; $("floor").setAttribute("aria-expanded", String(open)); };
+$("floors").onclick = e => { const b = e.target.closest("button"); if (!b) return; $("floors").hidden = true; $("floor").setAttribute("aria-expanded", "false");
+  if (b.dataset.level === "all") setLevel(state.level, true); else setLevel(+b.dataset.level); };
+$("measure").onclick = () => { state.measure = !state.measure; paint();
+  if (state.measure) say(state.all || state.level === 0 ? "Doorways, walls and the gaps between tables. ≈ marks a length traced by eye; the tables were measured on the scan." : "The world file has no measurements for this floor."); };
+$("furniture").onclick = () => { state.furniture = !state.furniture; dressRoom(); paint(); say(state.furniture ? HINT[state.mode] : "Furniture hidden: the tables, and what stands outside the rooms. Chairs and people inside the rooms were already taken out of the scan."); };
 $("play").onclick = () => { if (!bodies.length) return; if (frame >= meta.n - 1) show(0); playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; };
-$("seek").oninput = e => { if (bodies.length) { show(+e.target.value); if (follow) view(camera.position.distanceTo(controls.target), camera.position.y); } };
-$("chapter").onchange = e => { if (bodies.length) { show(meta.chapters[+e.target.value].t * meta.fps + 1); if (follow) view(camera.position.distanceTo(controls.target), camera.position.y); } };
-$("follow").onclick = () => { follow = !follow; $("follow").classList.toggle("on", follow); };
-$("eye").onclick = () => bodies.length && view(2.2, 1.6);
-$("above").onclick = () => bodies.length && view(2.5, TOP);
+const jump = i => { if (!bodies.length) return; show(i); if (follow && state.mode === "explore" && state.level === 0) standBy(); };
+$("seek").oninput = e => jump(+e.target.value);
+$("chapter").onchange = e => jump(meta.chapters[+e.target.value].t * meta.fps + 1);
+$("follow").onclick = () => { follow = !follow; $("follow").classList.toggle("on", follow); if (follow) jump(frame); };
 $("vr").onclick = async () => {  // stand two metres from the robot, on the floor
+  setLevel(0); setMode("explore");
   const s = await navigator.xr.requestSession("immersive-vr", { optionalFeatures: ["local-floor"] }); renderer.xr.setReferenceSpaceType("local-floor"); await renderer.xr.setSession(s);
-  const p = robotAt(); camera.position.set(0, 0, 0); const at = inRooms(p.x + 2, p.z); rig.position.set(at.x, 0, at.z); s.addEventListener("end", () => { rig.position.set(0, 0, 0); view(4.5, 2.4); });
+  const p = robotAt(), at = standAt(p.x + 2, p.z, 0); persp.position.set(0, 0, 0); persp.rotation.set(0, 0, 0); rig.position.set(at.x, levels[0].z, at.z);
+  s.addEventListener("end", () => { rig.position.set(0, 0, 0); standBy(); });
 };
+window.room = { state, fp, plan, orbit, levels: () => levels, setMode, setLevel, robotAt, get camera() { return camera; }, counts: () => ({ room: roomMeshes.length, furniture: furnMeshes.length, measures: measures.items.length }) };  // for checking from the console
 </script>
 </html>
