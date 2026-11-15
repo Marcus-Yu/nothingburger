@@ -141,6 +141,16 @@ def _scan(world: dict):
         return None
 
 
+def _too_small(obj) -> bool:
+    """A mesh file with fewer than four corners: MuJoCo refuses one, and one triangle of scan is not missed."""
+    try:
+        if obj.stat().st_size > 2000:
+            return False
+        return sum(1 for line in obj.read_text().splitlines() if line.startswith("v ")) < 4
+    except OSError:
+        return True
+
+
 def _ground(world: dict):
     """(PNG path, [x0, y0, x1, y1]) of the aerial photo the world lies on (`ground` in world.json: an image
     in the repo and the square of the world's frame it covers, north up), or None. MuJoCo reads PNG, so a
@@ -212,6 +222,7 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True, trails: tup
     spec.visual.headlight.diffuse = [0.16, 0.16, 0.16]
     spec.visual.headlight.specular = [0, 0, 0]
     spec.visual.quality.shadowsize = 4096
+    spec.visual.map.znear = 0.001  # the near clipping plane is a fraction of the scene's size, and a whole building is large: by default anything within a metre of the camera is cut away
     wb = spec.worldbody
     x0, y0, x1, y1 = top_extent(world)
     wb.add_light(pos=[(x0 + x1) / 2 - 2.0, (y0 + y1) / 2 - 1.5, 7.0], dir=[0.25, 0.2, -1.0], diffuse=[0.42, 0.42, 0.40], specular=[0, 0, 0],
@@ -229,6 +240,8 @@ def _top_scene(world: dict, robot_xml: str | None, top: bool = True, trails: tup
         seen = {}
         for i, t in enumerate(listing["tiles"]):
             if top and t["part"] != "lo":  # from above, only what is below head height, or the upper floors hide the room
+                continue
+            if t.get("layer") == "bare" or _too_small(root / t["mesh"]):  # the floor shown when furniture is hidden; a sliver the simulator will not load
                 continue
             if t["texture"] not in seen:
                 spec.add_texture(name=f"scan_t{i}", type=mujoco.mjtTexture.mjTEXTURE_2D, file=str(root / t["texture"]))
@@ -490,6 +503,101 @@ def _prop_tracks(robot_xml: str, build: dict, frames) -> dict:
 TRAIL_TILE_M = 0.5  # a coverage pass is drawn as tiles this long, each shown once the robot has been over it
 
 
+GRIP_OPEN_FRAMES = 12  # the fingers take this many film frames to close or open
+GRIP_ON_BOTTLE = 0.25  # how far closed the fingers are on the bottle: its 7 cm in a gripper that opens to 8.5 cm or a little more
+_grips = {}
+
+
+def _grip_poses(robot_xml: str, build: dict):
+    """The gripper's finger joints from open to closed: [(how closed, 0 to 1, {joint: value})], or None when the
+    model has no gripper drive. Found by driving the gripper's own actuator in the simulator with everything else
+    held still, so a linkage's joints come out consistent with each other; cached per robot."""
+    key = hash(robot_xml)
+    if key in _grips:
+        return _grips[key]
+    _grips[key] = None
+    try:
+        m = mujoco.MjModel.from_xml_string(robot_xml)
+        d = mujoco.MjData(m)
+        planned = set(build.get("arm_joints") or [])  # the arm and lift; the fingers are the hand's other joints
+        fingers = [j for j in range(m.njnt) if (name := mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j) or "") not in planned
+                   and name.startswith(("grip/", "arm/")) and m.jnt_type[j] in (2, 3)]
+        finger_dofs = {int(m.jnt_dofadr[j]) for j in fingers}
+        drives = []
+        for a in range(m.nu):  # an actuator on something the plan does not move is the gripper's
+            kind, target = m.actuator_trntype[a], m.actuator_trnid[a][0]
+            if kind == mujoco.mjtTrn.mjTRN_JOINT and target in fingers:
+                drives.append(a)
+            elif kind == mujoco.mjtTrn.mjTRN_TENDON:
+                wraps = range(m.tendon_adr[target], m.tendon_adr[target] + m.tendon_num[target])
+                if any(m.wrap_type[w] == mujoco.mjtWrap.mjWRAP_JOINT and m.wrap_objid[w] in fingers for w in wraps):
+                    drives.append(a)
+        if not drives or not fingers:
+            return None
+        m.opt.gravity[:] = 0
+        m.opt.disableflags |= int(mujoco.mjtDisableBit.mjDSBL_CONTACT)
+        for dof in range(m.nv):  # everything but the fingers is held where it is
+            if dof not in finger_dofs:
+                m.dof_damping[dof] = 1e6
+        for name, v in ((build.get("stowed") or {}).get("qpos") or {}).items():
+            j = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, name)
+            if j >= 0:
+                d.qpos[m.jnt_qposadr[j]] = v
+        for a in range(m.nu):
+            if a not in drives and m.actuator_trntype[a] == mujoco.mjtTrn.mjTRN_JOINT:
+                d.ctrl[a] = d.qpos[m.jnt_qposadr[m.actuator_trnid[a][0]]]
+        site = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_SITE, build.get("tool_site") or "tool")
+        hand = sorted({int(m.jnt_bodyid[j]) for j in fingers})
+        steps = []
+        for f in np.linspace(0, 1, 9):
+            for a in drives:
+                lo, hi = m.actuator_ctrlrange[a]
+                d.ctrl[a] = lo + f * (hi - lo)
+            for _ in range(int(0.6 / m.opt.timestep)):
+                mujoco.mj_step(m, d)
+            axis = d.site_xmat[site].reshape(3, 3)[:, 2]
+            off = d.xpos[hand] - d.site_xpos[site]
+            spread = float(np.linalg.norm(off - np.outer(off @ axis, axis), axis=1).mean())  # how far the fingers stand off the tool's axis
+            steps.append((spread, {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j): float(d.qpos[m.jnt_qposadr[j]]) for j in fingers}))
+        if not np.all(np.isfinite([s for s, _ in steps])) or abs(steps[0][0] - steps[-1][0]) < 1e-4:
+            return None
+        if steps[0][0] < steps[-1][0]:  # this drive's low end is the closed one
+            steps.reverse()
+        wide, shut = steps[0][0], steps[-1][0]
+        _grips[key] = [((wide - s) / (wide - shut), q) for s, q in steps]
+    except Exception:
+        _grips[key] = None
+    return _grips[key]
+
+
+def _gripped(robot_xml: str, build: dict, frames) -> list:
+    """The film's frames with the gripper's fingers added: open, closed on the cloth from the first stroke to the
+    last, and closed on a picked thing from the moment the plan closes on it (as far as the thing's width lets
+    them). Drawn for the viewer; the plan records only "open" and "close"."""
+    poses = _grip_poses(robot_xml, build)
+    kinds = [f[2] for f in frames]
+    wipes = [i for i, k in enumerate(kinds) if k == "wipe"]
+    grasp = next((i for i, k in enumerate(kinds) if k == "carry"), None)
+    if not poses or (not wipes and grasp is None):
+        return frames
+    want = np.zeros(len(frames))
+    if wipes:
+        want[wipes[0]:wipes[-1] + 1] = 0.9
+    if grasp is not None:
+        want[grasp:] = GRIP_ON_BOTTLE
+    kernel = np.ones(GRIP_OPEN_FRAMES) / GRIP_OPEN_FRAMES
+    want = np.convolve(np.pad(want, (GRIP_OPEN_FRAMES, GRIP_OPEN_FRAMES), mode="edge"), kernel, mode="same")[GRIP_OPEN_FRAMES:-GRIP_OPEN_FRAMES]
+    levels = np.array([c for c, _ in poses])
+    order = np.argsort(levels)
+    names = list(poses[0][1])
+    table = np.array([[poses[k][1][n] for n in names] for k in order])
+    out = []
+    for (pose, q, what), c in zip(frames, want):
+        fingers = {n: float(np.interp(c, levels[order], table[:, k])) for k, n in enumerate(names)}
+        out.append((pose, {**q, **fingers}, what))
+    return out
+
+
 def _trail(route: dict, tasks, frames, chapters) -> tuple:
     """The ground a coverage pattern has been over, as tiles for the film: ((x, y, yaw, half length, half width,
     first frame shown), ...) in the order they appear. A pass is every odd-to-even waypoint leg of a navigate
@@ -581,6 +689,7 @@ def walkthrough(world: dict, robot_xml: str, build: dict, route: dict, trajector
         if not shutil.which("ffmpeg"):
             raise RuntimeError("ffmpeg is not installed")
         frames, chapters = _timeline(build, route, trajectory)
+        frames = _gripped(robot_xml, build, frames)
         if not frames:
             raise RuntimeError("the route has no legs")
         trail = _trail(route, tasks, frames, chapters)
@@ -711,6 +820,7 @@ def tour_export(robot_xml: str, build: dict, route: dict, trajectory: dict) -> d
                 scene.add_geometry(mesh, node_name=f"{name}_g{i}", geom_name=f"{name}_g{i}", parent_node_name=name)
             bodies.append(b)
         frames, chapters = _timeline(build, route, trajectory)
+        frames = _gripped(robot_xml, build, frames)
         tracks = _prop_tracks(robot_xml, build, frames)
         for k, prop_name in enumerate(tracks):  # each handled thing goes in as one more body, after the robot's
             name, prop = f"body{len(bodies) + k}", PROPS[prop_name]

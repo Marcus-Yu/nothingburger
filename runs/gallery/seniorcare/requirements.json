@@ -4,21 +4,21 @@
   "tasks": [
     {
       "id": "t1",
-      "skill": "wipe",
-      "anchor": "bedside_top",
-      "object": "cloth",
-      "demo": "wipe bedside table",
-      "carries": false,
-      "why": "You asked for her bedside table to be wiped. It comes first so the table is clean before anything is brought to it."
-    },
-    {
-      "id": "t2",
       "skill": "pick",
       "anchor": "remote_on_footstool",
       "object": "tv_remote",
       "demo": "pick up remote",
       "carries": false,
-      "why": "The remote is on the low footstool, which she can no longer reach."
+      "why": "She cannot bend down to reach the remote on the low footstool."
+    },
+    {
+      "id": "t2",
+      "skill": "wipe",
+      "anchor": "bedside_top",
+      "object": "cloth",
+      "demo": "wipe bedside table",
+      "carries": false,
+      "why": "The job asks for her bedside table to be wiped, and it is in the same room as the remote."
     },
     {
       "id": "t3",
@@ -27,7 +27,7 @@
       "object": "hand_towel",
       "demo": "pick up towel",
       "carries": false,
-      "why": "The towel on the bath edge is too low for her to pick up."
+      "why": "The towel on the bath edge is too low for her to reach."
     },
     {
       "id": "t4",
@@ -36,7 +36,7 @@
       "object": "pill_organiser",
       "demo": "pick up pill organiser",
       "carries": false,
-      "why": "You asked for her pill organiser to be fetched from the kitchen counter."
+      "why": "The job asks for her pill organiser to be fetched from the kitchen counter."
     }
   ],
   "corridors": [
@@ -185,6 +185,75 @@
       "value": [
         {
           "point": [
+            2.4,
+            2.5,
+            0.34
+          ],
+          "tool_axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "held_axes": [
+            "position",
+            "tool_axis"
+          ],
+          "edge_distance_m": 0.126,
+          "side": [
+            -0.0767,
+            -0.9971
+          ]
+        }
+      ],
+      "unit": "pose",
+      "tolerance": 0.01,
+      "source": "assumed",
+      "anchor": "remote_on_footstool",
+      "yaw_free": true
+    },
+    {
+      "id": "r_t1_floor",
+      "task": "t1",
+      "quantity": "free_floor",
+      "value": {
+        "edge_distance_m": 0.126,
+        "side": [
+          -0.0767,
+          -0.9971
+        ]
+      },
+      "unit": "m",
+      "tolerance": 0.05,
+      "source": "scan",
+      "disc_radius_m": 0.2
+    },
+    {
+      "id": "r_t1_opening",
+      "task": "t1",
+      "quantity": "gripper_opening_min",
+      "value": 0.055,
+      "unit": "m",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "tv_remote width 0.045 m plus 0.01 m"
+    },
+    {
+      "id": "r_t1_payload",
+      "task": "t1",
+      "quantity": "payload",
+      "value": 0.15,
+      "unit": "kg",
+      "tolerance": 0.0,
+      "source": "card",
+      "from": "tv_remote card"
+    },
+    {
+      "id": "r_t2_reach",
+      "task": "t2",
+      "quantity": "reach_targets",
+      "value": [
+        {
+          "point": [
             1.85,
             4.0,
             0.6
@@ -319,8 +388,8 @@
       "from": "strokes regenerated over bedside_top's extent inset 0.05 m, lanes 0.15 m apart; targets 2k and 2k+1 are the ends of stroke k"
     },
     {
-      "id": "r_t1_floor",
-      "task": "t1",
+      "id": "r_t2_floor",
+      "task": "t2",
       "quantity": "free_floor",
       "value": {
         "edge_distance_m": 0.276,
@@ -335,8 +404,8 @@
       "disc_radius_m": 0.2
     },
     {
-      "id": "r_t1_payload",
-      "task": "t1",
+      "id": "r_t2_payload",
+      "task": "t2",
       "quantity": "payload",
       "value": 0.1,
       "unit": "kg",
@@ -345,82 +414,13 @@
       "from": "cloth card"
     },
     {
-      "id": "r_t1_press",
-      "task": "t1",
+      "id": "r_t2_press",
+      "task": "t2",
       "quantity": "press_force",
       "value": 10.0,
       "unit": "N",
       "tolerance": 2.0,
       "source": "assumed"
-    },
-    {
-      "id": "r_t2_reach",
-      "task": "t2",
-      "quantity": "reach_targets",
-      "value": [
-        {
-          "point": [
-            2.4,
-            2.5,
-            0.34
-          ],
-          "tool_axis": [
-            0.0,
-            0.0,
-            -1.0
-          ],
-          "held_axes": [
-            "position",
-            "tool_axis"
-          ],
-          "edge_distance_m": 0.126,
-          "side": [
-            -0.0767,
-            -0.9971
-          ]
-        }
-      ],
-      "unit": "pose",
-      "tolerance": 0.01,
-      "source": "assumed",
-      "anchor": "remote_on_footstool",
-      "yaw_free": true
-    },
-    {
-      "id": "r_t2_floor",
-      "task": "t2",
-      "quantity": "free_floor",
-      "value": {
-        "edge_distance_m": 0.126,
-        "side": [
-          -0.0767,
-          -0.9971
-        ]
-      },
-      "unit": "m",
-      "tolerance": 0.05,
-      "source": "scan",
-      "disc_radius_m": 0.2
-    },
-    {
-      "id": "r_t2_opening",
-      "task": "t2",
-      "quantity": "gripper_opening_min",
-      "value": 0.055,
-      "unit": "m",
-      "tolerance": 0.0,
-      "source": "card",
-      "from": "tv_remote width 0.045 m plus 0.01 m"
-    },
-    {
-      "id": "r_t2_payload",
-      "task": "t2",
-      "quantity": "payload",
-      "value": 0.15,
-      "unit": "kg",
-      "tolerance": 0.0,
-      "source": "card",
-      "from": "tv_remote card"
     },
     {
       "id": "r_t3_reach",

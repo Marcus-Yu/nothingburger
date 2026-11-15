@@ -98,6 +98,7 @@ function view(dist, height) {  // put the camera `dist` from the robot at `heigh
   try {
     const room = await load(`/scans/${w.id}/room.glb`);
     room.traverse(o => { if (o.isMesh) { const m = o.material; o.material = new THREE.MeshBasicMaterial({ map: m.map, side: THREE.DoubleSide }); m.dispose(); } });  // the scan's colours already hold the room's light
+    room.traverse(o => { if (/_bare$/.test(o.name)) o.visible = false; });  // a floor meant for when the furniture is hidden: this page always shows the furniture
     world.add(room); say("The real room, from its Matterport scan. Drag to look around, scroll to move in and out; the view stays inside the rooms. The motion is the plan played back, not a simulation.");
   } catch (e) { say("This world has no room mesh on this machine (world/_scans is not committed): see web/README.md for how to capture it"); }
   if (navigator.xr && await navigator.xr.isSessionSupported("immersive-vr").catch(() => false)) $("vr").hidden = false;

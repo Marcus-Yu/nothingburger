@@ -3,405 +3,405 @@
     {
       "n": 0,
       "name": "nav.corridors",
-      "seconds": 0.0009,
+      "seconds": 0.0003,
       "summary": "4 corridors; narrowest 0.61 m at d_bath; header 2.03 m; step 0.0 m; turn 1.0 m"
     },
     {
       "n": 1,
       "name": "nav.free_floor",
-      "seconds": 0.0246,
-      "summary": "edge 0.276 m, side [-0.0526, -0.9986]"
+      "seconds": 0.0158,
+      "summary": "edge 0.126 m, side [-0.0767, -0.9971]"
     },
     {
       "n": 2,
       "name": "nav.free_floor",
-      "seconds": 0.0178,
-      "summary": "edge 0.126 m, side [-0.0767, -0.9971]"
+      "seconds": 0.0109,
+      "summary": "edge 0.276 m, side [-0.0526, -0.9986]"
     },
     {
       "n": 3,
       "name": "nav.free_floor",
-      "seconds": 0.0193,
+      "seconds": 0.0102,
       "summary": "edge 0.126 m, side [-0.0767, -0.9971]"
     },
     {
       "n": 4,
       "name": "nav.free_floor",
-      "seconds": 0.0147,
+      "seconds": 0.0106,
       "summary": "edge 0.126 m, side [-0.9971, -0.0767]"
     },
     {
       "n": 5,
       "name": "nav.free_floor",
-      "seconds": 0.0168,
+      "seconds": 0.0075,
       "summary": "edge 0.134 m, side [0.2249, -0.9744]"
     },
     {
       "n": 6,
       "name": "nav.free_floor",
-      "seconds": 0.015,
+      "seconds": 0.0116,
       "summary": "edge 0.076 m, side [0.9959, -0.0905]"
     },
     {
       "n": 7,
       "name": "nav.free_floor",
-      "seconds": 0.0143,
+      "seconds": 0.013,
       "summary": "edge 0.076 m, side [0.9959, -0.0905]"
     },
     {
       "n": 8,
       "name": "nav.free_floor",
-      "seconds": 0.0236,
+      "seconds": 0.0102,
       "summary": "edge 0.281 m, side [0.156, -0.9878]"
     },
     {
       "n": 9,
       "name": "nav.free_floor",
-      "seconds": 0.0158,
+      "seconds": 0.0106,
       "summary": "edge 0.429 m, side [0.1191, -0.9929]"
     },
     {
       "n": 10,
       "name": "nav.free_floor",
-      "seconds": 0.0146,
+      "seconds": 0.0127,
       "summary": "edge 0.076 m, side [0.9959, -0.0905]"
     },
     {
       "n": 11,
       "name": "composer.design",
-      "seconds": 352.9585,
+      "seconds": 194.1004,
       "summary": "tidybot_arx5+liftkit_500+ur5e+xarm_gripper $48800 89.78 kg"
     },
     {
       "n": 12,
       "name": "composer.compose",
-      "seconds": 0.7238,
+      "seconds": 2.2105,
       "summary": "robot.xml 62160 chars; stowed 0.489 m wide, 0.568 m tall; 6 arm joints"
     },
     {
       "n": 13,
       "name": "composer.compose",
-      "seconds": 0.9622,
+      "seconds": 1.2424,
       "summary": "robot.xml 46847 chars; stowed 0.504 m wide, 0.617 m tall; 6 arm joints"
     },
     {
       "n": 14,
       "name": "composer.compose",
-      "seconds": 0.6567,
+      "seconds": 2.4576,
       "summary": "robot.xml 46854 chars; stowed 0.508 m wide, 0.627 m tall; 6 arm joints"
     },
     {
       "n": 15,
       "name": "composer.compose",
-      "seconds": 0.5141,
+      "seconds": 2.2597,
       "summary": "robot.xml 46856 chars; stowed 0.508 m wide, 0.766 m tall; 6 arm joints"
     },
     {
       "n": 16,
       "name": "composer.compose",
-      "seconds": 0.4735,
+      "seconds": 0.7523,
       "summary": "robot.xml 43137 chars; stowed 0.384 m wide, 0.593 m tall; 6 arm joints"
     },
     {
       "n": 17,
       "name": "composer.compose",
-      "seconds": 0.3579,
+      "seconds": 0.557,
       "summary": "robot.xml 27850 chars; stowed 0.506 m wide, 0.597 m tall; 6 arm joints"
     },
     {
       "n": 18,
       "name": "composer.compose",
-      "seconds": 0.6935,
+      "seconds": 0.4944,
       "summary": "robot.xml 27853 chars; stowed 0.509 m wide, 0.632 m tall; 6 arm joints"
     },
     {
       "n": 19,
       "name": "composer.compose",
-      "seconds": 0.6848,
+      "seconds": 0.4749,
       "summary": "robot.xml 27861 chars; stowed 0.508 m wide, 0.733 m tall; 6 arm joints"
     },
     {
       "n": 20,
       "name": "composer.compose",
-      "seconds": 0.683,
+      "seconds": 0.5689,
       "summary": "robot.xml 47554 chars; stowed 0.502 m wide, 1.085 m tall; 7 arm joints"
     },
     {
       "n": 21,
       "name": "composer.compose",
-      "seconds": 0.4184,
+      "seconds": 0.4555,
       "summary": "robot.xml 47554 chars; stowed 0.502 m wide, 1.285 m tall; 7 arm joints"
     },
     {
       "n": 22,
       "name": "composer.compose",
-      "seconds": 0.5212,
+      "seconds": 0.6055,
       "summary": "robot.xml 47527 chars; stowed 0.508 m wide, 1.152 m tall; 7 arm joints"
     },
     {
       "n": 23,
       "name": "composer.compose",
-      "seconds": 0.49,
+      "seconds": 0.3536,
       "summary": "robot.xml 47559 chars; stowed 0.508 m wide, 1.234 m tall; 7 arm joints"
     },
     {
       "n": 24,
       "name": "composer.candidates",
-      "seconds": 0.0044,
+      "seconds": 0.0047,
       "summary": "7140 candidates"
     },
     {
       "n": 25,
       "name": "composer.compose",
-      "seconds": 0.4889,
+      "seconds": 0.5219,
       "summary": "robot.xml 33126 chars; stowed 0.456 m wide, 1.561 m tall; 7 arm joints"
     },
     {
       "n": 26,
       "name": "nav.propose",
-      "seconds": 0.0134,
-      "summary": "36 poses, first [2.65, 4.15, 3.1416]"
+      "seconds": 0.026,
+      "summary": "36 poses, first [2.4, 2.05, 1.5708]"
     },
     {
       "n": 27,
       "name": "motion.reachable",
-      "seconds": 0.2405,
-      "summary": "ok=True tip 3.26 missed []"
+      "seconds": 0.2594,
+      "summary": "ok=True tip 5.46 missed []"
     },
     {
       "n": 28,
       "name": "motion.reachable",
-      "seconds": 0.0087,
-      "summary": "ok=True tip 3.47 missed []"
+      "seconds": 0.0071,
+      "summary": "ok=True tip 4.92 missed []"
     },
     {
       "n": 29,
       "name": "motion.reachable",
-      "seconds": 0.0099,
-      "summary": "ok=True tip 3.24 missed []"
+      "seconds": 0.0056,
+      "summary": "ok=True tip 4.92 missed []"
     },
     {
       "n": 30,
       "name": "motion.reachable",
-      "seconds": 0.0044,
-      "summary": "ok=True tip 3.06 missed []"
+      "seconds": 0.006,
+      "summary": "ok=True tip 4.93 missed []"
     },
     {
       "n": 31,
       "name": "motion.reachable",
-      "seconds": 0.008,
-      "summary": "ok=True tip 3.07 missed []"
+      "seconds": 0.0059,
+      "summary": "ok=True tip 4.5 missed []"
     },
     {
       "n": 32,
       "name": "motion.reachable",
-      "seconds": 0.0072,
-      "summary": "ok=True tip 3.09 missed []"
+      "seconds": 0.0057,
+      "summary": "ok=True tip 4.5 missed []"
     },
     {
       "n": 33,
       "name": "motion.reachable",
-      "seconds": 0.0818,
-      "summary": "ok=False tip 2.99 missed [0, 4]"
+      "seconds": 0.0056,
+      "summary": "ok=True tip 4.5 missed []"
     },
     {
       "n": 34,
       "name": "motion.reachable",
-      "seconds": 0.0107,
-      "summary": "ok=True tip 3.05 missed []"
+      "seconds": 0.0057,
+      "summary": "ok=True tip 4.5 missed []"
     },
     {
       "n": 35,
       "name": "nav.propose",
-      "seconds": 0.0157,
-      "summary": "36 poses, first [2.4, 2.05, 1.5708]"
+      "seconds": 0.0151,
+      "summary": "36 poses, first [2.65, 4.15, 3.1416]"
     },
     {
       "n": 36,
       "name": "motion.reachable",
-      "seconds": 0.0052,
-      "summary": "ok=True tip 5.46 missed []"
+      "seconds": 0.006,
+      "summary": "ok=True tip 3.26 missed []"
     },
     {
       "n": 37,
       "name": "motion.reachable",
-      "seconds": 0.0044,
-      "summary": "ok=True tip 4.92 missed []"
+      "seconds": 0.0109,
+      "summary": "ok=True tip 3.47 missed []"
     },
     {
       "n": 38,
       "name": "motion.reachable",
-      "seconds": 0.0042,
-      "summary": "ok=True tip 4.92 missed []"
+      "seconds": 0.0113,
+      "summary": "ok=True tip 3.24 missed []"
     },
     {
       "n": 39,
       "name": "motion.reachable",
-      "seconds": 0.0043,
-      "summary": "ok=True tip 4.93 missed []"
+      "seconds": 0.0053,
+      "summary": "ok=True tip 3.06 missed []"
     },
     {
       "n": 40,
       "name": "motion.reachable",
-      "seconds": 0.0038,
-      "summary": "ok=True tip 4.5 missed []"
+      "seconds": 0.0115,
+      "summary": "ok=True tip 3.07 missed []"
     },
     {
       "n": 41,
       "name": "motion.reachable",
-      "seconds": 0.0042,
-      "summary": "ok=True tip 4.5 missed []"
+      "seconds": 0.0073,
+      "summary": "ok=True tip 3.09 missed []"
     },
     {
       "n": 42,
       "name": "motion.reachable",
-      "seconds": 0.0038,
-      "summary": "ok=True tip 4.5 missed []"
+      "seconds": 0.0826,
+      "summary": "ok=False tip 2.99 missed [0, 4]"
     },
     {
       "n": 43,
       "name": "motion.reachable",
-      "seconds": 0.0042,
-      "summary": "ok=True tip 4.5 missed []"
+      "seconds": 0.0098,
+      "summary": "ok=True tip 3.05 missed []"
     },
     {
       "n": 44,
       "name": "nav.propose",
-      "seconds": 0.0109,
+      "seconds": 0.0139,
       "summary": "36 poses, first [6.6, 2.25, 1.5708]"
     },
     {
       "n": 45,
       "name": "motion.reachable",
-      "seconds": 0.0046,
+      "seconds": 0.0061,
       "summary": "ok=True tip 5.49 missed []"
     },
     {
       "n": 46,
       "name": "motion.reachable",
-      "seconds": 0.0033,
+      "seconds": 0.0046,
       "summary": "ok=True tip 4.98 missed []"
     },
     {
       "n": 47,
       "name": "motion.reachable",
-      "seconds": 0.0038,
+      "seconds": 0.0039,
       "summary": "ok=True tip 4.98 missed []"
     },
     {
       "n": 48,
       "name": "motion.reachable",
-      "seconds": 0.0035,
+      "seconds": 0.0045,
       "summary": "ok=True tip 4.98 missed []"
     },
     {
       "n": 49,
       "name": "motion.reachable",
-      "seconds": 0.0032,
+      "seconds": 0.0037,
       "summary": "ok=True tip 4.53 missed []"
     },
     {
       "n": 50,
       "name": "motion.reachable",
-      "seconds": 0.0031,
+      "seconds": 0.0047,
       "summary": "ok=True tip 4.53 missed []"
     },
     {
       "n": 51,
       "name": "motion.reachable",
-      "seconds": 0.0031,
+      "seconds": 0.0042,
       "summary": "ok=True tip 4.53 missed []"
     },
     {
       "n": 52,
       "name": "motion.reachable",
-      "seconds": 0.0032,
+      "seconds": 0.0038,
       "summary": "ok=True tip 4.13 missed []"
     },
     {
       "n": 53,
       "name": "nav.propose",
-      "seconds": 0.0156,
+      "seconds": 0.0174,
       "summary": "36 poses, first [5.05, 2.4, -0.0]"
     },
     {
       "n": 54,
       "name": "motion.reachable",
-      "seconds": 0.0059,
+      "seconds": 0.0045,
       "summary": "ok=True tip 11.94 missed []"
     },
     {
       "n": 55,
       "name": "motion.reachable",
-      "seconds": 0.0036,
+      "seconds": 0.0042,
       "summary": "ok=True tip 9.2 missed []"
     },
     {
       "n": 56,
       "name": "motion.reachable",
-      "seconds": 0.0042,
+      "seconds": 0.0039,
       "summary": "ok=True tip 9.2 missed []"
     },
     {
       "n": 57,
       "name": "motion.reachable",
-      "seconds": 0.0035,
+      "seconds": 0.0041,
       "summary": "ok=True tip 9.2 missed []"
     },
     {
       "n": 58,
       "name": "motion.reachable",
-      "seconds": 0.0044,
+      "seconds": 0.0034,
       "summary": "ok=True tip 7.48 missed []"
     },
     {
       "n": 59,
       "name": "motion.reachable",
-      "seconds": 0.003,
+      "seconds": 0.0043,
       "summary": "ok=True tip 7.47 missed []"
     },
     {
       "n": 60,
       "name": "motion.reachable",
-      "seconds": 0.004,
+      "seconds": 0.0033,
       "summary": "ok=True tip 7.48 missed []"
     },
     {
       "n": 61,
       "name": "motion.reachable",
-      "seconds": 0.0027,
+      "seconds": 0.0031,
       "summary": "ok=True tip 6.26 missed []"
     },
     {
       "n": 62,
       "name": "nav.plan",
-      "seconds": 0.2146,
+      "seconds": 0.2393,
       "summary": "5 legs, 3 doors crossed, 0 failures"
     },
     {
       "n": 63,
       "name": "motion.retarget",
-      "seconds": 0.0819,
-      "summary": "t1: 3 segments, 712 samples, max error 0.0005 m"
+      "seconds": 0.0314,
+      "summary": "t1: 3 segments, 445 samples, max error 0.0 m"
     },
     {
       "n": 64,
       "name": "motion.retarget",
-      "seconds": 0.0298,
-      "summary": "t2: 3 segments, 445 samples, max error 0.0 m"
+      "seconds": 0.084,
+      "summary": "t2: 3 segments, 712 samples, max error 0.0005 m"
     },
     {
       "n": 65,
       "name": "motion.retarget",
-      "seconds": 0.039,
+      "seconds": 0.0372,
       "summary": "t3: 3 segments, 399 samples, max error 0.0 m"
     },
     {
       "n": 66,
       "name": "motion.retarget",
-      "seconds": 0.0312,
+      "seconds": 0.0287,
       "summary": "t4: 3 segments, 373 samples, max error 0.0 m"
     }
   ],
-  "seconds": 361.725
+  "seconds": 208.178
 }

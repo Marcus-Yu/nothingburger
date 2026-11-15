@@ -13,10 +13,11 @@
       "turns": null,
       "requirements": [
         "r_width",
+        "r_length",
         "r_header",
         "r_step"
       ],
-      "note": "Dock to t1 (5.683 m); the zero step limit is assumed, not scanned, so watch for thresholds.",
+      "note": "Drive 5.68 m from the dock to standoff 0 at row A with the arm stowed; the 0.0 m step limit is assumed, not taken from the scan, so watch for floor-tile lips.",
       "n": 0
     },
     {
@@ -29,9 +30,10 @@
       "turns": null,
       "requirements": [
         "r_t1_reach",
-        "r_t1_floor"
+        "r_t1_floor",
+        "r_t1_opening"
       ],
-      "note": "The reach pose for the high bay is assumed, and the free floor edge is only 7 mm from the standoff, so check base placement before the arm moves.",
+      "note": "The reach target at U40 (1.85 m high) is assumed rather than measured, and there is only 0.007 m of free floor, so confirm the bay on the wrist camera before going in.",
       "n": 1
     },
     {
@@ -46,7 +48,7 @@
         "r_t1_opening",
         "r_t1_payload"
       ],
-      "note": "Grip force is not established because the ledger has no force band for t1, so the sled could slip or be crushed.",
+      "note": "Grip force is not established because the ledger has no force band for this sled, so check the grip on the caddy handle by hand before trusting it.",
       "n": 2
     },
     {
@@ -58,9 +60,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_payload"
+        "r_t1_payload",
+        "r_t1_reach"
       ],
-      "note": "The planned 0.15 m pull is based on the 0.75 kg card payload; watch for the sled binding on its rails.",
+      "note": "Pull the 0.75 kg sled 0.15 m as planned; if the caddy latch is still engaged the pull will stall.",
       "n": 3
     },
     {
@@ -72,9 +75,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_reach"
+        "r_t1_reach",
+        "r_t1_floor"
       ],
-      "note": "t1 is not carried and no set-down is planned, so the gripper still holds this sled when it reaches t2; confirm where it goes.",
+      "note": "The robot is still holding the first sled and nobody has said where it goes, so the gripper will open at the start of the t2 approach and drop it near row B unless someone takes it.",
       "n": 4
     },
     {
@@ -87,10 +91,11 @@
       "turns": null,
       "requirements": [
         "r_width",
+        "r_length",
         "r_header",
         "r_step"
       ],
-      "note": "Short 1.449 m hop from t1 to t2 along the row.",
+      "note": "Short 1.45 m drive to standoff 1 at row B while still holding the first sled; the step limit is assumed.",
       "n": 5
     },
     {
@@ -103,9 +108,10 @@
       "turns": null,
       "requirements": [
         "r_t2_reach",
-        "r_t2_floor"
+        "r_t2_floor",
+        "r_t2_opening"
       ],
-      "note": "The reach pose is assumed and the floor side vector is [0,0] with zero edge distance, so verify the standoff clearance on site.",
+      "note": "The gripper opens at the start of this approach, which releases any sled still held from t1; the U10 target at 0.5 m is assumed rather than measured.",
       "n": 6
     },
     {
@@ -120,7 +126,7 @@
         "r_t2_opening",
         "r_t2_payload"
       ],
-      "note": "Grip force is not established because the ledger has no force band for t2, and this sled must stay held for the whole carry out.",
+      "note": "Grip force is not established because the ledger has no force band, and this sled has to stay held for the whole 8.3 m carry.",
       "n": 7
     },
     {
@@ -132,9 +138,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t2_payload"
+        "r_t2_payload",
+        "r_t2_reach"
       ],
-      "note": "The planned 0.15 m pull is based on the 0.75 kg card payload, which is a card value and not weighed.",
+      "note": "Pull the 0.75 kg sled 0.15 m out of bay U10 and check that it has fully cleared the rails.",
       "n": 8
     },
     {
@@ -146,14 +153,15 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t2_reach"
+        "r_t2_reach",
+        "r_t2_floor"
       ],
-      "note": "Retreat while keeping hold of the sled for the carry.",
+      "note": "Retreat holding the sled, and make sure the arm is stowed before driving so the robot stays inside the 0.81 m width and 2.05 m header limits.",
       "n": 9
     },
     {
       "primitive": "move_base",
-      "task": "t2",
+      "task": null,
       "leg": 2,
       "standoff": null,
       "force_n": null,
@@ -161,10 +169,11 @@
       "turns": null,
       "requirements": [
         "r_width",
+        "r_length",
         "r_header",
         "r_step"
       ],
-      "note": "The 8.282 m carry is done with an uncalibrated grip, so the sled could drop on turns or bumps.",
+      "note": "8.28 m carry to the way out with the sled held at an unverified grip force, so stop if it slips.",
       "n": 10
     },
     {
@@ -178,7 +187,7 @@
       "requirements": [
         "r_t2_payload"
       ],
-      "note": "Set the sled down at the way out; no drop-off pose is specified, so confirm the surface is clear.",
+      "note": "The sled is set down at the way out, not on the staging bench, because the bench has not been located in the scan.",
       "n": 11
     },
     {
@@ -189,10 +198,8 @@
       "force_n": null,
       "press_n": null,
       "turns": null,
-      "requirements": [
-        "r_t2_opening"
-      ],
-      "note": "Open the gripper only after the sled is resting on the surface.",
+      "requirements": [],
+      "note": "Check that the sled is resting securely before opening the gripper, and have someone move it to the staging bench.",
       "n": 12
     },
     {
@@ -205,11 +212,22 @@
       "turns": null,
       "requirements": [
         "r_width",
+        "r_length",
         "r_header",
         "r_step"
       ],
-      "note": "Return 1.6 m from the way out to the dock with nothing in hand.",
+      "note": "1.6 m return to the dock with the arm stowed and nothing held.",
       "n": 13
     }
-  ]
+  ],
+  "planning": {
+    "workspace": true,
+    "files": [
+      "notes/order.md",
+      "plan.md"
+    ],
+    "tool_calls": 9,
+    "turns": 4,
+    "revisions": 0
+  }
 }

@@ -3,30 +3,30 @@
   "model": "claude-opus-5-5",
   "job": "Collect today's water sample from the pump house: the bottle is on the sample shelf inside, past the kerb at the door. Bring it out to the gate.",
   "answers": [],
-  "understood_as": "Pick up today's water sample bottle from the sample shelf in the pump room, crossing the kerb at the door, and carry it out of the pump house to the gate.",
+  "understood_as": "Pick up today's 500 ml water sample bottle from the sample shelf in the pump room, past the kerb at the door, and carry it out of the pump house to the gate.",
   "steps": [
-    "Go into the pump house, over the kerb at the door.",
-    "Pick up the water sample bottle from the sample shelf.",
-    "Carry the bottle back over the kerb and out of the pump house."
+    "Enter the pump house, crossing the kerb at the door.",
+    "Pick the water sample bottle off the sample shelf.",
+    "Carry it back over the kerb and out of the building."
   ],
   "demos": [
     {
       "chore": "pick sample bottle",
       "kind": "path",
-      "why": "Shows how a hand reaches the bottle on the sample shelf and lifts it clear without knocking anything over."
+      "why": "Shows how a hand reaches onto the sample shelf and lifts the bottle off cleanly without knocking anything over."
     },
     {
       "chore": "grip sample bottle",
       "kind": "squeeze",
-      "why": "Shows how firmly to hold the bottle so it does not slip or get squeezed and spill while being carried over the kerb."
+      "why": "Sets a grip firm enough that the full bottle does not slip but gentle enough not to crack or squeeze it."
     }
   ],
   "questions": [
-    "How high is the kerb at the pump house door? The robot has to cross it twice, once each way, so we need the height to design for it.",
-    "The robot can bring the bottle as far as the pump house door but cannot yet be sent to the gate. Is leaving it just outside the door all right, or will someone take it from there to the gate?"
+    "The robot can bring the bottle out through the pump house door, but the gate itself has not been located. Is leaving it just outside the door all right, or can someone mark where the gate is?",
+    "How high is the kerb at the pump house door? The robot will need to cross it on the way in and again while carrying the bottle."
   ],
   "unmet": [
-    "Delivering the bottle to the gate: the planner can only take it out of the building to the way out, not on to a specific spot such as the gate."
+    "Taking the bottle all the way to the gate: the tasks only bring it out of the building, because the gate is not a located place the planner can route to yet."
   ],
   "proceeded_without_answers": true
 }

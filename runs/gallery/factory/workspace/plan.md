@@ -1,0 +1,4 @@
+- [x] ls workspace; no prior notes, no checker_log
+- [x] read tasks, requirements, legs, standoffs, design, intake
+- [x] settle order in notes/order.md
+- [x] check draft against rules, emit JSON

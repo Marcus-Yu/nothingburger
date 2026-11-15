@@ -16,7 +16,7 @@
         "r_header",
         "r_step"
       ],
-      "note": "Drive 7.4 m from dock to the shelf standoff; the 0.15 m step limit is assumed, not scanned, so watch thresholds.",
+      "note": "Leg 0 goes from the dock to standoff 0 and crosses the door kerb, whose height is unmeasured: the 0.15 m step limit is an assumption.",
       "n": 0
     },
     {
@@ -29,9 +29,10 @@
       "turns": null,
       "requirements": [
         "r_t1_reach",
-        "r_t1_floor"
+        "r_t1_floor",
+        "r_t1_opening"
       ],
-      "note": "The bottle pose at 0.84 m is assumed, not measured, and the free-floor edge is only 0.126 m away, so verify the target before descending.",
+      "note": "The gripper opens on the approach, and the bottle position (8.6, 3.9, 0.84) is assumed rather than scanned, so check it with the wrist camera.",
       "n": 1
     },
     {
@@ -43,9 +44,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_opening"
+        "r_t1_opening",
+        "r_t1_payload"
       ],
-      "note": "Grip force is not established because the ledger has no force band for the bottle, so confirm a safe squeeze before running.",
+      "note": "The grip force is not established because the ledger has no force band for the bottle, so watch for slipping or crushing.",
       "n": 2
     },
     {
@@ -57,9 +59,10 @@
       "press_n": null,
       "turns": null,
       "requirements": [
-        "r_t1_payload"
+        "r_t1_payload",
+        "r_t1_reach"
       ],
-      "note": "Lift 0.15 m with a 0.55 kg card-rated payload; check for slip since the grip force is unverified.",
+      "note": "Lifts the 0.55 kg bottle 0.15 m off the shelf, and the payload weight comes from the card, not a weighing.",
       "n": 3
     },
     {
@@ -73,12 +76,12 @@
       "requirements": [
         "r_t1_floor"
       ],
-      "note": "Retreat while holding the bottle and keep the arm clear of the shelf edge 0.126 m away.",
+      "note": "Brings the arm back with the bottle held, and the grip is unverified, so check the bottle is still secure before driving.",
       "n": 4
     },
     {
       "primitive": "move_base",
-      "task": "t1",
+      "task": null,
       "leg": 1,
       "standoff": null,
       "force_n": null,
@@ -87,10 +90,9 @@
       "requirements": [
         "r_width",
         "r_header",
-        "r_step",
-        "r_t1_payload"
+        "r_step"
       ],
-      "note": "Carry the bottle 9.0 m to the way out; an unscanned step could jolt the payload loose.",
+      "note": "The robot carries the bottle back over the kerb, whose height is unmeasured, and a jolt with an uncalibrated grip could drop it.",
       "n": 5
     },
     {
@@ -104,7 +106,7 @@
       "requirements": [
         "r_t1_payload"
       ],
-      "note": "Set the bottle down on a level surface at the way out before opening the gripper.",
+      "note": "The bottle is set down just outside the pump house door, not at the gate, because the gate has not been located.",
       "n": 6
     },
     {
@@ -115,10 +117,8 @@
       "force_n": null,
       "press_n": null,
       "turns": null,
-      "requirements": [
-        "r_t1_opening"
-      ],
-      "note": "Open the gripper fully, at least 0.08 m, so the bottle is not tipped on withdrawal.",
+      "requirements": [],
+      "note": "Open the gripper only after the bottle is standing steady on the ground.",
       "n": 7
     },
     {
@@ -134,8 +134,18 @@
         "r_header",
         "r_step"
       ],
-      "note": "Return 1.6 m to the dock with an empty gripper.",
+      "note": "An empty 1.6 m drive from the way out back to the dock.",
       "n": 8
     }
-  ]
+  ],
+  "planning": {
+    "workspace": true,
+    "files": [
+      "notes/order.md",
+      "plan.md"
+    ],
+    "tool_calls": 9,
+    "turns": 4,
+    "revisions": 0
+  }
 }
