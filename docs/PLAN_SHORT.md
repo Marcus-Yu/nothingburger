@@ -8,7 +8,7 @@ A compiler from a building and a maintenance job to a robot. Pick a real buildin
 
 ## [Who it is for](PLAN_REVISED.md#task-and-who-it-is-for)
 
-Landlords and other people who maintain property. The robot's shape must fit the building. The demo shows three jobs where grip force matters: taking out a trash bag, changing a light bulb and wiping a surface. They were chosen because we can demonstrate them this weekend; the method carries over to jobs such as filter changes and plumbing. Forces come from a demonstration at home with force gloves, which need calibrating first; a simulated force is never reported as a fact about a real building.
+Landlords and other people who maintain property. The robot's shape must fit the building. The demo shows three jobs where grip force matters: taking out a trash bag, changing a light bulb (then inspecting the empty socket) and wiping a surface. They were chosen because we can demonstrate them this weekend; the method carries over to jobs such as filter changes and plumbing. Forces come from a demonstration at home with force gloves, which need calibrating first; a simulated force is never reported as a fact about a real building.
 
 ## [Tools](PLAN_REVISED.md#tools-we-have)
 
@@ -59,5 +59,5 @@ The two buildings, calibrating the gloves, stream C's workload, and a cost compa
 - [Parts catalog](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=9): base, reach and gripper cards. The checks are code and the model never overrides them.
 - [Observability](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=11): one trace per run, a decision record per choice.
 - [Folders and owners](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=14): three streams; the live rules are in [`AGENTS.md`](../AGENTS.md).
-- [Contracts](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=16): the run-folder files. These will change and have not been re-agreed yet.
+- [Contracts](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=16): the run-folder files. Replaced by the draft schemas in [`contracts/`](../contracts/README.md).
 - [Risks](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=20) and [sources](Agents%20That%20Build%20and%20Deploy%20Robots%20Refined%20Concept%20and%20Build%20Plan.pdf#page=21).

@@ -1,0 +1,26 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "A",
+      "module": "agent.constraints"
+    }
+  },
+  "constraints": [
+    {
+      "constraint_id": "c-1",
+      "iteration": 1,
+      "origin": "nav",
+      "reason": "Iteration 1's 0.66 m base did not fit the 0.71 m bedroom doorway with the 0.05 m inflation on each side.",
+      "field": "/design_spec/base/max_width_m",
+      "op": "<=",
+      "value": 0.61,
+      "evidence": {
+        "path": "iterations/1/route.json",
+        "pointer": "/failure"
+      }
+    }
+  ]
+}

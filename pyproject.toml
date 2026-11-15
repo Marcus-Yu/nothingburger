@@ -11,3 +11,8 @@ dependencies = [
   "langgraph", # TODO pin
   "langsmith", # TODO pin
 ]
+
+[dependency-groups]
+dev = [
+  "jsonschema>=4.18", # contracts/validate.py; 4.18+ has referencing
+]

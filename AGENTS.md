@@ -9,7 +9,7 @@ Three people, three streams, one folder owner each. Read this file at the start 
 
 | Stream | Label | Owner | Scope |
 | :-- | :-- | :-- | :-- |
-| A. Brain and proof | `stream:A-brain` | Person 1 (`@HANDLE_1`, lead) | `agent/`, `contracts/`, `evals/`, `docs/`, `tools/board/`, root files |
+| A. Brain and proof | `stream:A-brain` | Person 1 (`@HANDLE_1`, lead) | `agent/`, `contracts/`, `evals/`, `docs/`, `tools/board/`, `tools/report/`, root files |
 | B. Body and physics | `stream:B-body` | Person 2 (`@HANDLE_2`) | `catalog/`, `composer/`, `motion/`, `sim/` |
 | C. World, capture and UI | `stream:C-world` | Person 3 (`@HANDLE_3`) | `world/`, `capture/`, `nav/`, `web/` |
 
@@ -49,16 +49,18 @@ Setup for your agent: see `README.md`, "Hook your agent up to the board".
 
 ## Contracts
 
-Fourteen files in a run folder are the whole interface between streams. Schemas live in `contracts/`, each with a hand-written example. Freeze them in the first two hours.
+Sixteen files in a run folder are the whole interface between streams. Schemas live in `contracts/`, each with an example in `contracts/examples/`; check with `python contracts/validate.py`. Freeze them in the first two hours.
 
 | File | Written by | Read by |
 | :-- | :-- | :-- |
 | `world.json` | C (world) | A, B, C |
 | `demo.json` | C (capture) | A, B |
 | `grip.json` | C (capture) | A, B |
-| `requirements.json` | A | A, B |
+| `calibration.json` | C (capture) | A, B, C |
+| `requirements.json` | A | A, B, C |
 | `design.json` | A | B, C |
 | `decisions.jsonl` | A | C |
+| `constraints.json` | A | A, B |
 | `robot.xml` | B (composer) | B |
 | `build.json` | B (composer) | C |
 | `route.json` | C (nav) | A, B, C |

@@ -1,0 +1,228 @@
+{
+  "header": {
+    "schema_version": "0.1",
+    "run_id": "example-unit-a-bulb",
+    "created_at": "2026-11-14T15:00:00Z",
+    "producer": {
+      "stream": "C",
+      "module": "capture.calibrate"
+    }
+  },
+  "calibration_id": "glove-r1-cal-20261114",
+  "glove_id": "glove-r1",
+  "method": "kitchen_scale",
+  "performed_at": "2026-11-14T13:00:00Z",
+  "scale_resolution_N": 0.0098,
+  "sensors": [
+    {
+      "sensor_id": "r-thumb",
+      "points": [
+        {
+          "raw": 410,
+          "force_N": 0.49,
+          "mass_g": 50
+        },
+        {
+          "raw": 980,
+          "force_N": 0.981,
+          "mass_g": 100
+        },
+        {
+          "raw": 1820,
+          "force_N": 1.962,
+          "mass_g": 200
+        },
+        {
+          "raw": 3050,
+          "force_N": 4.905,
+          "mass_g": 500
+        },
+        {
+          "raw": 3480,
+          "force_N": 7.848,
+          "mass_g": 800
+        }
+      ],
+      "model": {
+        "kind": "piecewise_linear",
+        "params": {
+          "knots": [
+            [
+              0,
+              0.0
+            ],
+            [
+              410,
+              0.49
+            ],
+            [
+              980,
+              0.981
+            ],
+            [
+              1820,
+              1.962
+            ],
+            [
+              3050,
+              4.905
+            ],
+            [
+              3480,
+              7.848
+            ]
+          ]
+        }
+      },
+      "valid_raw_range": [
+        0,
+        3480
+      ],
+      "valid_force_range_N": [
+        0,
+        7.848
+      ],
+      "rmse_N": 0.0
+    },
+    {
+      "sensor_id": "r-index",
+      "points": [
+        {
+          "raw": 520,
+          "force_N": 0.49,
+          "mass_g": 50
+        },
+        {
+          "raw": 1150,
+          "force_N": 0.981,
+          "mass_g": 100
+        },
+        {
+          "raw": 2050,
+          "force_N": 1.962,
+          "mass_g": 200
+        },
+        {
+          "raw": 3240,
+          "force_N": 4.905,
+          "mass_g": 500
+        },
+        {
+          "raw": 3560,
+          "force_N": 7.848,
+          "mass_g": 800
+        }
+      ],
+      "model": {
+        "kind": "piecewise_linear",
+        "params": {
+          "knots": [
+            [
+              0,
+              0.0
+            ],
+            [
+              520,
+              0.49
+            ],
+            [
+              1150,
+              0.981
+            ],
+            [
+              2050,
+              1.962
+            ],
+            [
+              3240,
+              4.905
+            ],
+            [
+              3560,
+              7.848
+            ]
+          ]
+        }
+      },
+      "valid_raw_range": [
+        0,
+        3560
+      ],
+      "valid_force_range_N": [
+        0,
+        7.848
+      ],
+      "rmse_N": 0.0
+    },
+    {
+      "sensor_id": "r-middle",
+      "points": [
+        {
+          "raw": 450,
+          "force_N": 0.49,
+          "mass_g": 50
+        },
+        {
+          "raw": 1010,
+          "force_N": 0.981,
+          "mass_g": 100
+        },
+        {
+          "raw": 1900,
+          "force_N": 1.962,
+          "mass_g": 200
+        },
+        {
+          "raw": 3110,
+          "force_N": 4.905,
+          "mass_g": 500
+        },
+        {
+          "raw": 3500,
+          "force_N": 7.848,
+          "mass_g": 800
+        }
+      ],
+      "model": {
+        "kind": "piecewise_linear",
+        "params": {
+          "knots": [
+            [
+              0,
+              0.0
+            ],
+            [
+              450,
+              0.49
+            ],
+            [
+              1010,
+              0.981
+            ],
+            [
+              1900,
+              1.962
+            ],
+            [
+              3110,
+              4.905
+            ],
+            [
+              3500,
+              7.848
+            ]
+          ]
+        }
+      },
+      "valid_raw_range": [
+        0,
+        3500
+      ],
+      "valid_force_range_N": [
+        0,
+        7.848
+      ],
+      "rmse_N": 0.0
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 # robots
 
 Agents that build and deploy robots: a compiler from a job (a home scan, a chore in plain words, one or two VR demos) to a robot, a task program, a simulated MuJoCo run and a decision record.
-Demo chore: replace a dead bulb in a pendant lamp. Plan: [`docs/`](docs/).
+Demo jobs: take out a trash bag, change a light bulb and inspect the socket, wipe a surface. Plan: [`docs/PLAN_REVISED.md`](docs/PLAN_REVISED.md). Run-file contracts: [`contracts/`](contracts/README.md).
 
 Three streams, one owner each (see [`AGENTS.md`](AGENTS.md)): **A** Brain and proof, **B** Body and physics, **C** World, capture and UI.
 
