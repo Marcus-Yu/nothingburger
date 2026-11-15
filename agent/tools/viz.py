@@ -59,10 +59,10 @@ def render(robot_xml: str, qpos: dict | None, label: str, *, pose=None, size: in
 
 TOP_PX = 1100          # the top view is a square image this many pixels a side
 WALL_H, WALL_T = 1.1, 0.07   # walls are drawn cut off at this height so the camera sees into the rooms
-FLOORS = {"hallway": (0.74, 0.72, 0.68), "kitchen": (0.80, 0.78, 0.72), "bathroom": (0.78, 0.83, 0.85), "bedroom": (0.72, 0.62, 0.50),
+FLOORS = {"atrium": (0.80, 0.68, 0.50), "hallway": (0.74, 0.72, 0.68), "kitchen": (0.80, 0.78, 0.72), "bathroom": (0.78, 0.83, 0.85), "bedroom": (0.72, 0.62, 0.50),
           "living_room": (0.70, 0.60, 0.48), "server_hall": (0.62, 0.65, 0.68), "workshop": (0.60, 0.61, 0.60),
           "plant_room": (0.58, 0.60, 0.58), "yard": (0.50, 0.56, 0.46), "waiting_room": (0.76, 0.74, 0.70)}
-FURNITURE = (("rack", (0.16, 0.17, 0.20)), ("bed", (0.55, 0.66, 0.80)), ("sofa", (0.45, 0.52, 0.47)), ("chair", (0.45, 0.52, 0.47)),
+FURNITURE = (("cloth_table", (0.93, 0.56, 0.13)), ("stairs", (0.62, 0.63, 0.64)), ("rail", (0.75, 0.82, 0.85)), ("rack", (0.16, 0.17, 0.20)), ("bed", (0.55, 0.66, 0.80)), ("sofa", (0.45, 0.52, 0.47)), ("chair", (0.45, 0.52, 0.47)),
              ("counter", (0.86, 0.85, 0.82)), ("vanity", (0.90, 0.90, 0.88)), ("bath", (0.93, 0.94, 0.95)), ("cnc", (0.30, 0.42, 0.52)),
              ("pump", (0.25, 0.45, 0.40)), ("pallet", (0.66, 0.52, 0.36)), ("shelf", (0.55, 0.57, 0.60)), ("sill", (0.92, 0.91, 0.88)),
              ("ledge", (0.80, 0.70, 0.55)), ("table", (0.62, 0.47, 0.33)), ("stool", (0.62, 0.47, 0.33)))

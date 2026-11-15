@@ -1,0 +1,590 @@
+{
+  "schema": "world/1",
+  "id": "jrr",
+  "frame": "metres, Z up, right handed; origin at the south-west corner of floor 2's outline in the tour's floor plan, +X east across the picture, +Y up the picture",
+  "source": "traced by eye from the public Matterport tour 2K7G7cdukZV (Princeton, Julis Romo Rabinowitz Building, floor 2), not read from the scan: outlines and tables measured on the tour's floor-plan view and scaled by the tour's own figure for the floor (92 ft 1 in by 75 ft 2 in). Only the atrium and the east corridor are traced; the corridor ring, chairs and people are left out; heights are assumed",
+  "mesh": null,
+  "floors": [
+    {
+      "id": "f2",
+      "z": 0.0
+    }
+  ],
+  "rooms": [
+    {
+      "id": "atrium",
+      "type": "atrium",
+      "floor": "f2",
+      "polygon": [
+        [
+          7.65,
+          5.02
+        ],
+        [
+          24.44,
+          5.02
+        ],
+        [
+          24.44,
+          17.33
+        ],
+        [
+          7.65,
+          17.33
+        ]
+      ],
+      "ceiling_m": 9.0,
+      "source": "manual",
+      "width_m": 12.31
+    },
+    {
+      "id": "east_corridor",
+      "type": "hallway",
+      "floor": "f2",
+      "polygon": [
+        [
+          24.44,
+          0.0
+        ],
+        [
+          27.38,
+          0.0
+        ],
+        [
+          27.38,
+          23.04
+        ],
+        [
+          24.44,
+          23.04
+        ]
+      ],
+      "ceiling_m": 3.0,
+      "source": "manual",
+      "width_m": 2.94
+    }
+  ],
+  "doorways": [
+    {
+      "id": "d_south",
+      "rooms": [
+        "outside",
+        "east_corridor"
+      ],
+      "position": [
+        25.91,
+        0.0
+      ],
+      "along": [
+        1,
+        0
+      ],
+      "width_m": 1.8,
+      "header_m": 2.1,
+      "step_m": 0.0,
+      "source": "manual"
+    },
+    {
+      "id": "d_atrium",
+      "rooms": [
+        "east_corridor",
+        "atrium"
+      ],
+      "position": [
+        24.44,
+        11.4
+      ],
+      "along": [
+        0,
+        1
+      ],
+      "width_m": 2.4,
+      "header_m": 3.0,
+      "step_m": 0.0,
+      "source": "manual"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "cloth_table_n1",
+      "room": "atrium",
+      "box": {
+        "min": [
+          11.32,
+          14.19,
+          0.0
+        ],
+        "max": [
+          13.21,
+          15.12,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_n2",
+      "room": "atrium",
+      "box": {
+        "min": [
+          13.82,
+          14.14,
+          0.0
+        ],
+        "max": [
+          15.69,
+          15.12,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_n3",
+      "room": "atrium",
+      "box": {
+        "min": [
+          16.1,
+          14.09,
+          0.0
+        ],
+        "max": [
+          17.94,
+          14.95,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_w1",
+      "room": "atrium",
+      "box": {
+        "min": [
+          8.58,
+          13.31,
+          0.0
+        ],
+        "max": [
+          9.41,
+          15.27,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_w2",
+      "room": "atrium",
+      "box": {
+        "min": [
+          8.58,
+          11.15,
+          0.0
+        ],
+        "max": [
+          9.41,
+          12.99,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_w3",
+      "room": "atrium",
+      "box": {
+        "min": [
+          8.58,
+          8.7,
+          0.0
+        ],
+        "max": [
+          9.41,
+          10.54,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_w4",
+      "room": "atrium",
+      "box": {
+        "min": [
+          8.58,
+          6.54,
+          0.0
+        ],
+        "max": [
+          9.41,
+          8.41,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_c1",
+      "room": "atrium",
+      "box": {
+        "min": [
+          11.52,
+          11.64,
+          0.0
+        ],
+        "max": [
+          13.41,
+          12.57,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_c2",
+      "room": "atrium",
+      "box": {
+        "min": [
+          14.02,
+          11.52,
+          0.0
+        ],
+        "max": [
+          15.93,
+          12.38,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_c3",
+      "room": "atrium",
+      "box": {
+        "min": [
+          17.45,
+          10.66,
+          0.0
+        ],
+        "max": [
+          18.19,
+          12.57,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_c4",
+      "room": "atrium",
+      "box": {
+        "min": [
+          17.45,
+          8.82,
+          0.0
+        ],
+        "max": [
+          18.19,
+          10.54,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_c5",
+      "room": "atrium",
+      "box": {
+        "min": [
+          11.52,
+          8.9,
+          0.0
+        ],
+        "max": [
+          13.41,
+          9.85,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_c6",
+      "room": "atrium",
+      "box": {
+        "min": [
+          13.95,
+          9.12,
+          0.0
+        ],
+        "max": [
+          15.78,
+          9.93,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_s1",
+      "room": "atrium",
+      "box": {
+        "min": [
+          9.73,
+          5.83,
+          0.0
+        ],
+        "max": [
+          11.64,
+          6.69,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_s2",
+      "room": "atrium",
+      "box": {
+        "min": [
+          11.99,
+          5.88,
+          0.0
+        ],
+        "max": [
+          13.85,
+          6.74,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_s3",
+      "room": "atrium",
+      "box": {
+        "min": [
+          14.34,
+          5.88,
+          0.0
+        ],
+        "max": [
+          16.23,
+          6.79,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_s4",
+      "room": "atrium",
+      "box": {
+        "min": [
+          16.91,
+          6.0,
+          0.0
+        ],
+        "max": [
+          18.8,
+          6.86,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_e1",
+      "room": "atrium",
+      "box": {
+        "min": [
+          20.88,
+          14.83,
+          0.0
+        ],
+        "max": [
+          21.81,
+          16.67,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_e2",
+      "room": "atrium",
+      "box": {
+        "min": [
+          22.97,
+          12.38,
+          0.0
+        ],
+        "max": [
+          23.82,
+          14.22,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_e3",
+      "room": "atrium",
+      "box": {
+        "min": [
+          22.97,
+          8.7,
+          0.0
+        ],
+        "max": [
+          23.82,
+          10.54,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "cloth_table_e4",
+      "room": "atrium",
+      "box": {
+        "min": [
+          20.76,
+          6.25,
+          0.0
+        ],
+        "max": [
+          21.74,
+          8.01,
+          0.74
+        ]
+      }
+    },
+    {
+      "id": "stairs",
+      "room": "atrium",
+      "box": {
+        "min": [
+          13.28,
+          15.69,
+          0.0
+        ],
+        "max": [
+          18.68,
+          17.33,
+          2.0
+        ]
+      }
+    },
+    {
+      "id": "av_corner",
+      "room": "atrium",
+      "box": {
+        "min": [
+          7.65,
+          15.81,
+          0.0
+        ],
+        "max": [
+          13.04,
+          17.33,
+          1.2
+        ]
+      }
+    },
+    {
+      "id": "floor_opening_rail",
+      "room": "atrium",
+      "box": {
+        "min": [
+          22.48,
+          5.02,
+          0.0
+        ],
+        "max": [
+          24.44,
+          8.7,
+          1.1
+        ]
+      }
+    }
+  ],
+  "dock": {
+    "room": "east_corridor",
+    "pose": [
+      25.91,
+      2.0,
+      1.5708
+    ]
+  },
+  "way_out": {
+    "doorway": "d_south"
+  },
+  "anchors": [
+    {
+      "id": "table_c6_top",
+      "room": "atrium",
+      "kind": "surface",
+      "point": [
+        14.86,
+        9.52,
+        0.74
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "source": "manual",
+      "extent": [
+        [
+          13.95,
+          9.12
+        ],
+        [
+          15.78,
+          9.12
+        ],
+        [
+          15.78,
+          9.93
+        ],
+        [
+          13.95,
+          9.93
+        ]
+      ]
+    },
+    {
+      "id": "table_s3_top",
+      "room": "atrium",
+      "kind": "surface",
+      "point": [
+        15.29,
+        6.33,
+        0.74
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "source": "manual",
+      "extent": [
+        [
+          14.34,
+          5.88
+        ],
+        [
+          16.23,
+          5.88
+        ],
+        [
+          16.23,
+          6.79
+        ],
+        [
+          14.34,
+          6.79
+        ]
+      ]
+    },
+    {
+      "id": "bottle_on_table_e2",
+      "room": "atrium",
+      "kind": "low_item",
+      "point": [
+        23.12,
+        13.3,
+        0.84
+      ],
+      "normal": [
+        0,
+        0,
+        1
+      ],
+      "source": "manual"
+    }
+  ]
+}

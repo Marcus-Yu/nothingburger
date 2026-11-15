@@ -1,0 +1,32 @@
+{
+  "tasks": [
+    {
+      "id": "t1",
+      "skill": "wipe",
+      "anchor": "table_c6_top",
+      "object": "cloth",
+      "demo": "wipe table",
+      "carries": false,
+      "why": "The job asks to wipe the table in the middle of the atrium. I took table C6 to be that table."
+    },
+    {
+      "id": "t2",
+      "skill": "wipe",
+      "anchor": "table_s3_top",
+      "object": "cloth",
+      "demo": "wipe table",
+      "carries": false,
+      "why": "The job asks to wipe the table in the south row, which is table S3."
+    },
+    {
+      "id": "t3",
+      "skill": "pick",
+      "anchor": "bottle_on_table_e2",
+      "object": "sample_bottle",
+      "demo": "pick up bottle",
+      "carries": true,
+      "why": "The bottle left on the east-corridor table has to be picked up and taken out of the building, so this comes last.",
+      "deliver_to": "way_out"
+    }
+  ]
+}

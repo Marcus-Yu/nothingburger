@@ -1,0 +1,582 @@
+{
+  "schema": "program/1",
+  "source": "model",
+  "model": "claude-opus-5-5",
+  "steps": [
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 0,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "Longest unloaded leg (21.57 m); the step limit of 0.0 m is assumed, not scanned, so watch for thresholds.",
+      "n": 0
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Reach targets for t1 are assumed, and the table edge is 0.395 m from the base side.",
+      "n": 1
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_reach",
+        "r_t1_payload"
+      ],
+      "note": "The 10 N press is assumed, not measured; covers strokes 0-3 of 12.",
+      "n": 2
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 0,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Clear the arm from the table before shuffling 0.6 m.",
+      "n": 3
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 1,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "0.6 m shuffle along table C6; keep the arm stowed.",
+      "n": 4
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Reach targets for t1 are assumed, not verified on site.",
+      "n": 5
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_reach",
+        "r_t1_payload"
+      ],
+      "note": "The 10 N press is assumed; covers strokes 4-7 of 12.",
+      "n": 6
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 1,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Retract fully before moving the base.",
+      "n": 7
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 2,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "0.6 m shuffle to the last C6 standoff.",
+      "n": 8
+    },
+    {
+      "primitive": "approach",
+      "task": "t1",
+      "leg": null,
+      "standoff": 2,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_reach",
+        "r_t1_floor"
+      ],
+      "note": "Reach targets for t1 are assumed, not verified on site.",
+      "n": 9
+    },
+    {
+      "primitive": "wipe",
+      "task": "t1",
+      "leg": null,
+      "standoff": 2,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t1_press",
+        "r_t1_reach",
+        "r_t1_payload"
+      ],
+      "note": "The 10 N press is assumed; covers strokes 8-11 of 12.",
+      "n": 10
+    },
+    {
+      "primitive": "retreat",
+      "task": "t1",
+      "leg": null,
+      "standoff": 2,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t1_floor"
+      ],
+      "note": "Table C6 is complete only if all three standoffs succeeded.",
+      "n": 11
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 3,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "4.9 m to table S3; the step limit is assumed at 0.0 m.",
+      "n": 12
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 3,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "The trajectory for this standoff is missing or failed, so expect this arm plan to fail.",
+      "n": 13
+    },
+    {
+      "primitive": "wipe",
+      "task": "t2",
+      "leg": null,
+      "standoff": 3,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t2_press",
+        "r_t2_reach",
+        "r_t2_payload"
+      ],
+      "note": "There is no valid trajectory here, so strokes 0-2 of S3 may go unwiped; the 10 N press is assumed.",
+      "n": 14
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 3,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "The retreat segment is 0 s, so it was never planned and needs checking before running.",
+      "n": 15
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 4,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "0.45 m shuffle along S3; confirm the arm is stowed after the unplanned retreat.",
+      "n": 16
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 4,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "Reach targets for t2 are assumed, and the table edge is 0.445 m away.",
+      "n": 17
+    },
+    {
+      "primitive": "wipe",
+      "task": "t2",
+      "leg": null,
+      "standoff": 4,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t2_press",
+        "r_t2_reach",
+        "r_t2_payload"
+      ],
+      "note": "The 10 N press is assumed; covers strokes 3-5 of 12.",
+      "n": 18
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 4,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "Retract before moving the base.",
+      "n": 19
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 5,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "0.45 m shuffle along S3.",
+      "n": 20
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 5,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "The trajectory for this standoff is missing or failed, so expect this arm plan to fail.",
+      "n": 21
+    },
+    {
+      "primitive": "wipe",
+      "task": "t2",
+      "leg": null,
+      "standoff": 5,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t2_press",
+        "r_t2_reach",
+        "r_t2_payload"
+      ],
+      "note": "There is no valid trajectory here, so strokes 6-8 of S3 may go unwiped; the 10 N press is assumed.",
+      "n": 22
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 5,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "The retreat segment is 0 s, so it was never planned and needs checking before running.",
+      "n": 23
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 6,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "1.96 m reposition to the far end of S3; confirm the arm is stowed first.",
+      "n": 24
+    },
+    {
+      "primitive": "approach",
+      "task": "t2",
+      "leg": null,
+      "standoff": 6,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_reach",
+        "r_t2_floor"
+      ],
+      "note": "Reach targets for t2 are assumed, not verified on site.",
+      "n": 25
+    },
+    {
+      "primitive": "wipe",
+      "task": "t2",
+      "leg": null,
+      "standoff": 6,
+      "force_n": null,
+      "press_n": 10.0,
+      "turns": null,
+      "requirements": [
+        "r_t2_press",
+        "r_t2_reach",
+        "r_t2_payload"
+      ],
+      "note": "The 10 N press is assumed; covers strokes 9-11 of 12.",
+      "n": 26
+    },
+    {
+      "primitive": "retreat",
+      "task": "t2",
+      "leg": null,
+      "standoff": 6,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t2_floor"
+      ],
+      "note": "Table S3 is likely only partly wiped because of the two failed standoffs.",
+      "n": 27
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 7,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "9.7 m to the east-corridor table E2.",
+      "n": 28
+    },
+    {
+      "primitive": "approach",
+      "task": "t3",
+      "leg": null,
+      "standoff": 7,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t3_reach",
+        "r_t3_floor",
+        "r_t3_opening"
+      ],
+      "note": "The gripper opens at the start, and the bottle is only 0.146 m from the table edge.",
+      "n": 29
+    },
+    {
+      "primitive": "grasp",
+      "task": "t3",
+      "leg": null,
+      "standoff": 7,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t3_reach",
+        "r_t3_opening",
+        "r_t3_payload"
+      ],
+      "note": "Grip force is not established because the ledger has no force band for the 0.55 kg bottle.",
+      "n": 30
+    },
+    {
+      "primitive": "lift",
+      "task": "t3",
+      "leg": null,
+      "standoff": 7,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t3_payload"
+      ],
+      "note": "Lift 0.15 m and check the bottle is not slipping, given the unestablished grip force.",
+      "n": 31
+    },
+    {
+      "primitive": "retreat",
+      "task": "t3",
+      "leg": null,
+      "standoff": 7,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t3_floor",
+        "r_t3_payload"
+      ],
+      "note": "Retreat while holding the bottle, and keep it inside the stowed height.",
+      "n": 32
+    },
+    {
+      "primitive": "move_base",
+      "task": "t3",
+      "leg": 8,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step",
+        "r_t3_payload"
+      ],
+      "note": "15.3 m carrying the bottle; drive gently because the grip force is unverified.",
+      "n": 33
+    },
+    {
+      "primitive": "place",
+      "task": "t3",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t3_payload"
+      ],
+      "note": "The way_out drop pose has no planned arm trajectory, so confirm a clear surface.",
+      "n": 34
+    },
+    {
+      "primitive": "release",
+      "task": "t3",
+      "leg": null,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_t3_opening"
+      ],
+      "note": "Open the gripper only once the bottle is resting stably.",
+      "n": 35
+    },
+    {
+      "primitive": "move_base",
+      "task": null,
+      "leg": 9,
+      "standoff": null,
+      "force_n": null,
+      "press_n": null,
+      "turns": null,
+      "requirements": [
+        "r_width",
+        "r_length",
+        "r_header",
+        "r_step"
+      ],
+      "note": "2.6 m unloaded return to the dock.",
+      "n": 36
+    }
+  ]
+}
